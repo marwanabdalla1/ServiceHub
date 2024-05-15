@@ -6,7 +6,17 @@ module.exports = {
     "./node_modules/@nextui-org/theme/dist/components/[object Object].js"
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+      customBlue: '#1e40af', // Define your custom color
+      customGreen: '#10b981', // Another custom color
+      customBlack: '#2B2E4A',
+      customGray: {
+        light: '#f7fafc',
+        DEFAULT: '#cbd5e1',
+        dark: '#1a202c',
+      },
+    },},
   },
   plugins: [nextui()],
 }
