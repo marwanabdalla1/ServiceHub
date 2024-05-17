@@ -2,7 +2,7 @@ import { CgProfile } from "react-icons/cg";
 import { IoSettingsOutline, IoNotificationsOutline } from "react-icons/io5";
 import { CiSearch, CiMenuBurger } from "react-icons/ci";
 import { FiFilter } from "react-icons/fi";
-import BlackButton from "./buttons/blackbutton";
+import BlackButton from "./inputs/blackbutton";
 
 const Navbar = () => {
   return (

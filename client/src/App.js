@@ -1,11 +1,9 @@
 import React from 'react';
 import NavigationBar from './components/Navbar';
+import FilterPage from './Pages/FilterPage';
 function App() {
   return (
-    <div className="text-center">
-      <NavigationBar/>
-     
-    </div>
+    <FilterPage/>
   );
 }
 
