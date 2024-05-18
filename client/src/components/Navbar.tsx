@@ -40,7 +40,7 @@ const Navbar = () => {
 
     {/* Right Section: Provide Service Button and Icons */}
     <div className="flex items-center space-x-4 m-4">
-      <BlackButton className="py-2" text="Provide a Service" />
+      <BlackButton className="py-2" text="Provide a Service" onClick={()=> console.log('Black button pressed')} />
       <CiMenuBurger className="h-6 w-6" />
       <IoNotificationsOutline className="h-6 w-6" />
       <CgProfile className="h-6 w-6" />

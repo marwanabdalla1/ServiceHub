@@ -1,0 +1,21 @@
+  {
+    "compilerOptions": {
+      "target": "es5", // Specify ECMAScript target version (ES5, ES6/ES2015, etc.)
+      "lib": ["dom", "dom.iterable", "esnext"], // Specify library files to include in the compilation
+      "allowJs": true, // Allow JavaScript files to be compiled
+      "skipLibCheck": true, // Skip type checking of all declaration files (*.d.ts)
+      "esModuleInterop": true, // Emit additional JavaScript to ease support for importing CommonJS modules
+      "allowSyntheticDefaultImports": true, // Allow default imports from modules with no default export
+      "strict": true, // Enable all strict type-checking options
+      "forceConsistentCasingInFileNames": true, // Disallow inconsistently-cased references to the same file
+      "noFallthroughCasesInSwitch": true, // Report errors for fallthrough cases in switch statements
+      "module": "esnext", // Specify module code generation (e.g., CommonJS, AMD, UMD, System, ES6)
+      "moduleResolution": "node", // Specify module resolution strategy (node for Node.js)
+      "resolveJsonModule": true, // Include modules imported with .json extension
+      "isolatedModules": true, // Ensure each file can be safely transpiled without relying on other imports
+      "noEmit": true, // Disable emitting files from a compilation
+      "jsx": "react-jsx" // Specify JSX code generation (react, preserve, react-native, react-jsx)
+    },
+    "include": ["src"], // Specify the root folder where TypeScript should look for files to compile
+    "exclude": ["node_modules", "build"] // Exclude specific files and folders from compilation
+  }
