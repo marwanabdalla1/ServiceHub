@@ -5,22 +5,33 @@ import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
+import { User } from '../models/User';
 
-export default function MediaCard() {
+
+export default function MediaCard({ user } : {user : User} ) {
   return (
-    <Card sx={{ maxWidth: 345 }}>
+    <div className='border margin-4'>
+       <Card sx={{ maxWidth: 345 }}>
       <CardMedia
         sx={{ height: 140 }}
         image="/static/images/cards/contemplative-reptile.jpg"
-        title="green iguana"
+        title="Service Image"
       />
       <CardContent>
         <Typography gutterBottom variant="h5" component="div">
-          Lizard
+          {user.firstName} {user.lastName}
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Lizards are a widespread group of squamate reptiles, with over 6,000
-          species, ranging across all continents except Antarctica
+          Service Type: {user.service.serviceType}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Rating: {user.service.rating}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Hourly Rate: ${user.service.hourlyRating}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Licensed: {user.service.isLicensed ? "Yes" : "No"}
         </Typography>
       </CardContent>
       <CardActions>
@@ -28,5 +39,7 @@ export default function MediaCard() {
         <Button size="small">Learn More</Button>
       </CardActions>
     </Card>
+    </div>
+   
   );
 }
