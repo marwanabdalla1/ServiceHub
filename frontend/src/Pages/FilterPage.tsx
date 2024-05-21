@@ -7,7 +7,7 @@ import {users, User} from '../models/User';
 function FilterPage() {
   return (
     <div>
-      <NavigationBar />
+      {/* <NavigationBar /> */}
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-screen-lg w-full mx-auto '>
       {users.map((user : User) => (
         <MediaCard key={user.userId} user={user} />

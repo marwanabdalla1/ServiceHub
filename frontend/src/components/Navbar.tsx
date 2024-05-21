@@ -3,6 +3,8 @@ import { IoSettingsOutline, IoNotificationsOutline } from "react-icons/io5";
 import { CiSearch, CiMenuBurger } from "react-icons/ci";
 import { FiFilter } from "react-icons/fi";
 import BlackButton from "./inputs/blackbutton";
+import { Link } from "react-router-dom";
+
 
 const Navbar = () => {
   return (
@@ -10,9 +12,9 @@ const Navbar = () => {
   <div className="flex justify-between items-center h-full">
     {/* Left Section: Logo and Explore */}
     <div className="flex items-center space-x-4">
-      <a href="/" className="flex items-center">
+      <Link to="/" className="flex items-center">
         <img src="/images/logo.png" alt="Logo" className="md:h-32 md:mr-2" />
-      </a>
+      </Link>
       <div className="relative">
         <button className="text-customBlack font-semibold text-sm">EXPLORE</button>
         {/* Dropdown content */}
@@ -43,7 +45,9 @@ const Navbar = () => {
       <BlackButton className="py-2" text="Provide a Service" onClick={()=> console.log('Black button pressed')} />
       <CiMenuBurger className="h-6 w-6" />
       <IoNotificationsOutline className="h-6 w-6" />
+      <Link to="/profile" className="text-current">
       <CgProfile className="h-6 w-6" />
+      </Link>
       <div className="h-6 w-0.5 bg-gray-800"></div>
       <IoSettingsOutline className="h-6 w-6" />
     </div>
