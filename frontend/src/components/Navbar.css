@@ -1,0 +1,50 @@
+.modal-content {
+    padding: 5px;
+    width: 100%;
+    max-width: 500px;
+  }
+  
+  .columnHeader {
+    color: gray;
+    font-weight: bold;
+    white-space: nowrap;
+  }
+  .emptyColumnHeader {
+    color: white;
+    font-weight: bold;
+    white-space: nowrap;
+  }
+
+  .modalTitle {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+
+  .lineItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .ServiceDescriptionElement {
+    font-size: 12px;
+    flex: 1;
+    margin-right: 20px;
+    max-width: 250px;
+    white-space: nowrap; /* Prevent text from wrapping */
+    overflow: hidden; /* Hide any overflow */
+    text-overflow: ellipsis; /* Add ellipsis (...) to indicate truncated text */
+  }
+  
+  .PublishDateElement {
+    font-size: 12px;
+    flex: 1;
+    margin-right: 20px;
+  }
+  
+  .ViewButtons {
+    flex:1;
+    margin-right: 20px;
+    
+  }
