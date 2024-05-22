@@ -5,6 +5,7 @@ import ProfilePage from './Pages/ProfilePage';
 import SignInPage from './Pages/LoginPage';
 import SignUpPage from './Pages/SignUpPage';
 import NavigationBar from './components/Navbar';
+import HomePage from './Pages/HomePage';
 import ReviewPage from "./Pages/CustomerReviewPage";
 
 function App() {
@@ -23,6 +24,7 @@ function MainRoutes() {
         <>
             {showNavBar && <NavigationBar/>}
             <Routes>
+                <Route path="/" element={<HomePage/>} />
                 <Route path="/customer_review" element={<ReviewPage/>}/>
                 <Route path="/login" element={<SignInPage/>}/>
                 <Route path="/signup" element={<SignUpPage/>}/>
