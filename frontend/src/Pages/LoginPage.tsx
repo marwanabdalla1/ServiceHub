@@ -8,7 +8,7 @@
  */
 
 import * as React from 'react';
-import { PropsWithChildren } from 'react';
+import {PropsWithChildren} from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -21,7 +21,8 @@ import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
+import {createTheme, ThemeProvider} from '@mui/material/styles';
+import {blue} from "@mui/material/colors";
 
 function Copyright(props: PropsWithChildren<{}>) {
     return (
@@ -36,9 +37,13 @@ function Copyright(props: PropsWithChildren<{}>) {
     );
 }
 
-// TODO remove, this demo shouldn't need to reset the theme.
-
-const defaultTheme = createTheme();
+const defaultTheme = createTheme({
+    palette: {
+        primary: {
+            main: blue[300], // set primary color to blue 300
+        },
+    },
+});
 
 export default function SignIn() {
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -53,7 +58,7 @@ export default function SignIn() {
     return (
         <ThemeProvider theme={defaultTheme}>
             <Container component="main" maxWidth="xs">
-                <CssBaseline />
+                <CssBaseline/>
                 <Box
                     sx={{
                         marginTop: 8,
@@ -62,13 +67,13 @@ export default function SignIn() {
                         alignItems: 'center',
                     }}
                 >
-                    <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-                        <LockOutlinedIcon />
+                    <Avatar sx={{bgcolor: 'primary.main'}}>
+                        <img src="/images/logo_short.png" alt="Logo" className="md:h-6"/>
                     </Avatar>
                     <Typography component="h1" variant="h5">
-                        Sign in
+                        Login
                     </Typography>
-                    <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+                    <Box component="form" onSubmit={handleSubmit} noValidate sx={{mt: 1}}>
                         <TextField
                             margin="normal"
                             required
@@ -90,16 +95,16 @@ export default function SignIn() {
                             autoComplete="current-password"
                         />
                         <FormControlLabel
-                            control={<Checkbox value="remember" color="primary" />}
+                            control={<Checkbox value="remember" color="primary"/>}
                             label="Remember me"
                         />
                         <Button
                             type="submit"
                             fullWidth
                             variant="contained"
-                            sx={{ mt: 3, mb: 2 }}
+                            sx={{mt: 3, mb: 2}}
                         >
-                            Sign In
+                            Login
                         </Button>
                         <Grid container>
                             <Grid item xs>
@@ -115,8 +120,8 @@ export default function SignIn() {
                         </Grid>
                     </Box>
                 </Box>
-                <Box sx={{ mt: 8, mb: 4 }}>
-                    <Copyright />
+                <Box sx={{mt: 8, mb: 4}}>
+                    <Copyright/>
                 </Box>
             </Container>
         </ThemeProvider>
