@@ -57,7 +57,7 @@ const Navbar = () => {
         {/* Right Section: Provide Service Button and Icons */}
         <div className="flex items-center space-x-4 m-4">
           <BlackButton className="py-2" text="Provide a Service" onClick={()=> console.log('Black button pressed')} />
-          <RequestListButton className="h-6 w-6" onClick={openModal}/>
+          <RequestListButton className="h-6 w-6" onClick={()=> console.log('Black button pressed')}/>
           <IoNotificationsOutline className="h-6 w-6" />
           <Link to="/profile" className="text-current">
             <CgProfile className="h-6 w-6" />
@@ -66,31 +66,6 @@ const Navbar = () => {
           <IoSettingsOutline className="h-6 w-6" />
         </div>
       </div>
-      <Modal show={isModalOpen} onClose={closeModal}>
-        <div className='modal-content'>
-          <h1 className = 'modalTitle'>Incoming Requests</h1>
-          <div className = 'lineItem'>
-            <div className='ServiceDescription'> 
-              <p className = 'columnHeader'> Service Description</p> 
-              <p className = 'ServiceDescriptionElement'>Bike Repair: Seeking an experienced bike mechanic to fix gear and..</p>
-              <p className = 'ServiceDescriptionElement'>Nadine1</p>
-              <p className = 'ServiceDescriptionElement'>Nadine2</p>
-            </div>
-            <div className = 'PublishDate'>
-              <p className = 'columnHeader'> Publish Date</p>
-              <p className = 'PublishDateElement'>08.05.2024</p>
-              <p className = 'PublishDateElement'>21.08.2001</p>
-              <p className = 'PublishDateElement'>21.10.2021</p>
-            </div>
-            <div className = 'ViewButtons'>
-              <p className = 'emptyColumnHeader'> View Buttons</p>
-              <p className='PublishDateElement'>A<BlackButton text="View>" onClick={()=> console.log('Black button pressed')} /></p>
-              <p className='PublishDateElement'>B<BlackButton text="View>" onClick={()=> console.log('Black button pressed')} /></p>
-              <p className='PublishDateElement'>C<BlackButton text="View>" onClick={()=> console.log('Black button pressed')} /></p>
-              </div>
-          </div>
-        </div>
-      </Modal>
     </nav>
   );
 };

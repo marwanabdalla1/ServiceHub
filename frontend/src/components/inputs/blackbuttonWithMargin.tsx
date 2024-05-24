@@ -6,11 +6,12 @@ interface BlackButtonProps {
   onClick: () => void;
 }
 
-function BlackButton({text, className = '', onClick}: Readonly<BlackButtonProps>) {
+function BlackButtonWithMargin({text, className = '', onClick}: Readonly<BlackButtonProps>) {
   return (
     <button
       className={`bg-customBlack text-white font-semibold text-xs px-2 py-1 rounded-full shadow hover:bg-gray-100 max-h-8 whitespace-nowrap ${className}`}
       onClick={onClick}
+      style={{ marginRight:"1rem"}}
       
     >
       {text}
@@ -19,4 +20,4 @@ function BlackButton({text, className = '', onClick}: Readonly<BlackButtonProps>
 }
 
 
-export default BlackButton;
+export default BlackButtonWithMargin;

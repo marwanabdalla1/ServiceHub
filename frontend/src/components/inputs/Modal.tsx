@@ -1,5 +1,6 @@
 import React from 'react';
 import { IoClose } from "react-icons/io5";
+import IncomingRequestTable  from "../IncomingRequestsTable";
 
 interface ModalProps {
   show: boolean;
