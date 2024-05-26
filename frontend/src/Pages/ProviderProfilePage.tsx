@@ -21,6 +21,7 @@ import PinDropIcon from '@mui/icons-material/PinDrop';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import Breadcrumb from "../components/Breadcrumb";
+import LightBlueButton from "../components/inputs/BlueButton";
 
 const mockProvider: ServiceProvider = {
     id: '1',
@@ -34,14 +35,28 @@ const mockProvider: ServiceProvider = {
     location: 'Munich',
     availability: [
         {
-            dayOfWeek: DaysOfWeek.Monday,
+            dayOfWeek: DaysOfWeek.Thursday,
             isFixed: true,
             timeslots: [
                 {start: new Date('2024-05-11T15:00:00'), end: new Date('2024-05-11T20:00:00')}
             ]
         },
         {
-            dayOfWeek: DaysOfWeek.Thursday,
+            dayOfWeek: DaysOfWeek.Friday,
+            isFixed: true,
+            timeslots: [
+                {start: new Date('2024-05-11T15:00:00'), end: new Date('2024-05-11T20:00:00')}
+            ]
+        },
+        {
+            dayOfWeek: DaysOfWeek.Saturday,
+            isFixed: true,
+            timeslots: [
+                {start: new Date('2024-05-12T10:00:00'), end: new Date('2024-05-12T20:00:00')}
+            ]
+        },
+        {
+            dayOfWeek: DaysOfWeek.Sunday,
             isFixed: true,
             timeslots: [
                 {start: new Date('2024-05-12T10:00:00'), end: new Date('2024-05-12T20:00:00')}
@@ -122,9 +137,10 @@ function ProviderProfilePage() {
                             <Typography variant="h4" gutterBottom>
                                 {provider.firstName} {provider.lastName}
                             </Typography>
-                            <Box>
-                                <Button variant="contained" sx={{mr: 5}}>Contact Information</Button>
-                                <Button variant="outlined">Book now</Button>
+                            <Box sx={{ justifyContent: 'space-between'}}>
+                                <LightBlueButton className = 'px-3 py-2 rounded bg-white mr-3' text='Contact Information' onClick={() => console.log('booking button pressed')}></LightBlueButton>
+                                <LightBlueButton className = 'px-3 py-2 rounded' text='Book Now' onClick={() => console.log('booking button pressed')}></LightBlueButton>
+
                             </Box>
                         </Box>
 
@@ -147,31 +163,31 @@ function ProviderProfilePage() {
                             </Typography>
                         </Box>
 
-                        <Divider/>
+                        <Divider sx={{mt:2}}/>
 
-                        <Box sx={{display: 'flex', alignItems: 'center', mt: 2, justifyContent: 'space-between'}}>
-                            <PinDropIcon></PinDropIcon>
+                        <Box sx={{display: 'flex', alignItems: 'flex-start', mt: 2, justifyContent: 'space-between'}}>
+                            <PinDropIcon sx={{mt:2}}></PinDropIcon>
                             <Box sx={{display: 'flex', flexDirection: 'column', flex: '1 1 40%', alignItems: 'center', mt: 2}}>
                             <Typography variant="body2" color="text.secondary">
                                 {provider.description}
                             </Typography>
                             </Box>
 
-                            <AccessTimeIcon/>
-                            <Box sx={{display: 'flex', flexDirection: 'column', flex: '1 1 30%', alignItems: 'center', mt: 2}}>
+                            <AccessTimeIcon sx={{mt:2}}/>
+                            <Box sx={{display: 'flex', flexDirection: 'column', flex: '1 1 30%', alignItems: 'left', mt: 2}}>
                                 {provider.availability.map((availability, index) => (
                                     <Typography variant="body2" key={index} color="text.secondary">
                                         {daysOfWeekToString(availability.dayOfWeek)}: {availability.timeslots.map(slot => `${formatTime(slot.start)} - ${formatTime(slot.end)}`).join('\n')}
                                     </Typography>))}
                             </Box>
 
-                            <AccountBalanceWalletIcon sx={{mb: 1}}/>
+                            <AccountBalanceWalletIcon sx={{mb: 1, mt:2}}/>
                             <Box sx={{flex: '1 1 30%', alignItems: 'center', mt:2}}>
                                 <Typography variant="body2">
                                     Service Fee: €{provider.service.hourlyRate}/hour
                                 </Typography>
                                 <Typography variant="body2">
-                                    Payment methods: Cash, PayPal
+                                    Payment methods: Cash, PayPal {/*todo: add this to */}
                                 </Typography>
                             </Box>
                         </Box>
@@ -206,7 +222,7 @@ function ProviderProfilePage() {
                             <Typography variant="body2" gutterBottom>
                                 Share your thought with other customers
                             </Typography>
-                            <Button variant="outlined">Write a customer review</Button>
+                            <Button size='small' variant="outlined">Write a customer review</Button>
                         </Box>
                     </Grid>
                     <Grid item xs={9}>
