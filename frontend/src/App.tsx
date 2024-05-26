@@ -5,6 +5,8 @@ import ProfilePage from './Pages/ProfilePage';
 import SignInPage from './Pages/LoginPage';
 import SignUpPage from './Pages/SignUpPage';
 import NavigationBar from './components/Navbar';
+import HomePage from './Pages/HomePage';
+import AddServicePage from './Pages/AddServicePage';
 import ReviewPage from "./Pages/CustomerReviewPage";
 
 function App() {
@@ -20,16 +22,19 @@ function MainRoutes() {
     const showNavBar = location.pathname !== "/login" && location.pathname !== "/signup";
 
     return (
-        <>
+        <div className="h-screen flex flex-col">
             {showNavBar && <NavigationBar/>}
             <Routes>
+                <Route path="/" element={<HomePage/>} />
                 <Route path="/customer_review" element={<ReviewPage/>}/>
                 <Route path="/login" element={<SignInPage/>}/>
                 <Route path="/signup" element={<SignUpPage/>}/>
                 <Route path="/" element={<FilterPage/>}/>
                 <Route path="/profile" element={<ProfilePage/>}/>
+                <Route path="/addservice" element={<AddServicePage />} />
+                <Route path="*" element={<h1>Not Found</h1>} />
             </Routes>
-        </>
+        </div>
     );
 }
 
