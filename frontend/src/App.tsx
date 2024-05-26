@@ -10,6 +10,7 @@ import AddServicePage from './Pages/AddServicePage';
 import ReviewPage from "./Pages/CustomerReviewPage";
 
 import ProviderProfilePage from "./Pages/ProviderProfilePage";
+import UserProfilePage from "./Pages/ProfileSettingPage";
 
 function App() {
     return (
@@ -28,6 +29,7 @@ function MainRoutes() {
             {showNavBar && <NavigationBar/>}
             <Routes>
                 <Route path="/" element={<HomePage/>} />
+                <Route path="/userprofile" element={<UserProfilePage/>} />
                 <Route path="/customer_review" element={<ReviewPage/>}/>
                 <Route path="/login" element={<SignInPage/>}/>
                 <Route path="/signup" element={<SignUpPage/>}/>
