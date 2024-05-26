@@ -14,6 +14,8 @@ export type Service = {
     service: Service;
     imageUrl: string;
   };
+
+
   
   export const users: User[] = [
     {
@@ -108,6 +110,19 @@ export type Service = {
         serviceType: "movingServices",
         rating: 4.8,
         hourlyRating: 28.0,
+        isLicensed: true,
+      },
+      imageUrl: "/images/profiles/profile8.png",
+    },
+
+    {
+      userId: 9,
+      firstName: "Bob",
+      lastName: "Biker",
+      service: {
+        serviceType: "bikeRepair",
+        rating: 4.7,
+        hourlyRating: 25.0,
         isLicensed: true,
       },
       imageUrl: "/images/profiles/profile8.png",
