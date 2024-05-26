@@ -9,6 +9,8 @@ import HomePage from './Pages/HomePage';
 import AddServicePage from './Pages/AddServicePage';
 import ReviewPage from "./Pages/CustomerReviewPage";
 
+import ProviderProfilePage from "./Pages/ProviderProfilePage";
+
 function App() {
     return (
         <BrowserRouter>
@@ -29,10 +31,11 @@ function MainRoutes() {
                 <Route path="/customer_review" element={<ReviewPage/>}/>
                 <Route path="/login" element={<SignInPage/>}/>
                 <Route path="/signup" element={<SignUpPage/>}/>
-                <Route path="/" element={<FilterPage/>}/>
+                <Route path="/filter" element={<FilterPage/>}/>
                 <Route path="/profile" element={<ProfilePage/>}/>
                 <Route path="/addservice" element={<AddServicePage />} />
                 <Route path="*" element={<h1>Not Found</h1>} />
+                <Route path="/bob" element={<ProviderProfilePage/>}/>
             </Routes>
         </div>
     );
