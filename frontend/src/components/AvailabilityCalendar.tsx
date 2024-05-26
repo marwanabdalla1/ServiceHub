@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
-import { Calendar, momentLocalizer } from 'react-big-calendar';
+import {Calendar, dateFnsLocalizer, SlotInfo} from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import { format, startOfWeek, endOfWeek, startOfDay, endOfDay, eachDayOfInterval, parseISO, Locale, getDay} from 'date-fns';
-import { Availability, DaysOfWeek } from "../models/Availability";
-
-import { dateFnsLocalizer } from 'react-big-calendar';
-import {enUS} from "@mui/material/locale";
+import { format, startOfWeek, parseISO, getDay } from 'date-fns';
+import { enUS } from "@mui/material/locale";
+import { Dialog, Button, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from "@mui/material";
 
 const locales = {
     'en-US': enUS,
@@ -19,36 +17,88 @@ const localizer = dateFnsLocalizer({
     locales,
 });
 
-function AvailabilityCalendar() {
-    const [availability, setAvailability] = useState<Availability[]>([]);
+interface Event {
+    start: Date;
+    end: Date;
+    title: string;
+    isFixed?: boolean;  // Optional property to indicate if the event is fixed
+}
 
-    const parse = (input: string, formatString: string, locale?: Locale) => parseISO(input); // Simplified example
 
-    // Handlers for click and drag to create availability
-    const handleSelect = ({ start, end }: { start: Date; end: Date }) => {
-        const range = eachDayOfInterval({ start, end });
-        // convert range to your Availability format and update state
-        console.log(range); // Just for debugging
-        // Assume all-day availability
-        setAvailability([...availability, { dayOfWeek: start.getDay(), isFixed: true, timeslots: [{ start, end }] }]);
+interface AvailabilityCalendarProps {
+    isFixed: boolean;
+}
+
+function AvailabilityCalendar({ isFixed }: AvailabilityCalendarProps) {
+    const [availability, setAvailability] = useState<Event[]>([]);
+    const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+    const [open, setOpen] = useState(false);
+    const [eventTitle, setEventTitle] = useState("");
+
+    const handleSelect = ({ start, end }: SlotInfo) => {
+        const newEvent: Event = { start, end, title: "New Event", isFixed: isFixed };
+        setAvailability([...availability, newEvent]);
+    };
+
+    const handleSelectEvent = (event: Event) => {
+        setSelectedEvent(event);
+        setEventTitle(event.title);
+        setOpen(true);
+    };
+
+    const handleDelete = () => {
+        if (selectedEvent) {
+            setAvailability(availability.filter(a => a.start !== selectedEvent.start && a.end !== selectedEvent.end));
+            setOpen(false);
+        }
+    };
+
+    const handleSave = () => {
+        if (selectedEvent) {
+            setAvailability(availability.map(a =>
+                a.start === selectedEvent.start && a.end === selectedEvent.end ? { ...a, title: eventTitle } : a
+            ));
+            setOpen(false);
+        }
+    };
+
+    const handleClose = () => {
+        setOpen(false);
     };
 
     return (
         <div>
             <Calendar
                 localizer={localizer}
-                events={availability.map(a => ({
-                    start: a.timeslots[0].start,
-                    end: a.timeslots[0].end,
-                    title: 'Available'
-                }))}
+                events={availability}
                 startAccessor="start"
                 endAccessor="end"
                 style={{ height: 500 }}
                 selectable
                 onSelectSlot={handleSelect}
-            />
-            <button onClick={() => console.log(availability)}>Save Availability</button>
+                onSelectEvent={handleSelectEvent}>
+
+            </Calendar>
+            <Dialog open={open} onClose={handleClose}>
+                <DialogTitle>Edit Availability</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        label="Event Title"
+                        type="text"
+                        fullWidth
+                        variant="standard"
+                        value={eventTitle}
+                        onChange={(e) => setEventTitle(e.target.value)}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClose}>Cancel</Button>
+                    <Button onClick={handleSave} color="primary">Save</Button>
+                    <Button onClick={handleDelete} color="secondary">Delete</Button>
+                </DialogActions>
+            </Dialog>
         </div>
     );
 }

@@ -38,6 +38,8 @@ function MainRoutes() {
                 <Route path="/addservice" element={<AddServicePage />} />
                 <Route path="*" element={<h1>Not Found</h1>} />
                 <Route path="/bob" element={<ProviderProfilePage/>}/>
+                <Route path="select-availability" element={<SelectAvailabilityPage/>} />
+
             </Routes>
         </div>
     );
