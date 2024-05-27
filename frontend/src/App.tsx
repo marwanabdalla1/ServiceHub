@@ -11,6 +11,7 @@ import ReviewPage from "./Pages/CustomerReviewPage";
 
 import ProviderProfilePage from "./Pages/ProviderProfilePage";
 import UserProfilePage from "./Pages/ProfileSettingPage";
+import ProfileSettingPage from "./Pages/ProfileSettingPage";
 
 function App() {
     return (
@@ -29,13 +30,13 @@ function MainRoutes() {
             {showNavBar && <NavigationBar/>}
             <Routes>
                 <Route path="/" element={<HomePage/>} />
-                <Route path="/userprofile" element={<UserProfilePage/>} />
+                <Route path="/setprofile" element={<ProfileSettingPage/>} />
                 <Route path="/customer_review" element={<ReviewPage/>}/>
                 <Route path="/login" element={<SignInPage/>}/>
                 <Route path="/signup" element={<SignUpPage/>}/>
                 <Route path="/filter" element={<FilterPage/>}/>
                 <Route path="/profile" element={<ProfilePage/>}/>
-                <Route path="/addservice" element={<AddServicePage />} />
+                <Route path="/addservice" element={<AddServicePage/>} />
                 <Route path="*" element={<h1>Not Found</h1>} />
                 <Route path="/bob" element={<ProviderProfilePage/>}/>
             </Routes>

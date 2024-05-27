@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import {Container, Typography, TextField, Button, Box, Paper, Avatar, Divider} from '@mui/material';
 import BlueButton from "../components/inputs/BlueButton";
 import LightBlueFileButton from "../components/inputs/BlueUploadButton";
+import {useNavigate} from 'react-router-dom';
 
 type EditModeType = {
     [key: string]: boolean;
@@ -54,9 +55,15 @@ function UserProfile(): React.ReactElement {
         }
     };
 
+    const navigate = useNavigate()
+
+    const handleAddServiceClick = () => {
+        navigate('/addservice');
+    };
+
     const renderField = (label: string, field: string) => {
         return (
-            <Box sx={{display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap:0}}>
+            <Box sx={{display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 0}}>
                 <Typography variant="body1" sx={{fontWeight: 'bold'}}>{label}:</Typography>
                 <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                     {field === 'userId' || !editMode[field] ? (
@@ -82,11 +89,12 @@ function UserProfile(): React.ReactElement {
                 <Typography variant="h6" gutterBottom sx={{fontWeight: 'bold', fontSize: '24px', color: '#007BFF'}}>
                     Public Profile
                 </Typography>
-                <Box sx={{display: 'flex', flexDirection: 'column', gap:3, p: 3}}>
+                <Box sx={{display: 'flex', flexDirection: 'column', gap: 3, p: 3}}>
                     <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5}}>
                         <Avatar src={userImage ? URL.createObjectURL(userImage) : undefined}
                                 sx={{width: 80, height: 80}}/>
-                        <LightBlueFileButton text="Upload Profile Picture" onFileChange={handleFileUpload(setUserImage)} />
+                        <LightBlueFileButton text="Upload Profile Picture"
+                                             onFileChange={handleFileUpload(setUserImage)}/>
                     </Box>
                     {renderField("User ID", "userId")}
                     {renderField("First Name", "firstName")}
@@ -96,16 +104,30 @@ function UserProfile(): React.ReactElement {
                     {renderField("Address", "address")}
                     {renderField("Displayed Message", "message")}
                     <Divider sx={{my: 2}}/>
-                    <Typography variant="h6" gutterBottom component="div" sx={{fontWeight: 'bold', fontSize: '24px', color: '#007BFF'}}>
+                    <Typography variant="h6" gutterBottom component="div"
+                                sx={{fontWeight: 'bold', fontSize: '24px', color: '#007BFF'}}>
                         Service Provider Settings
                     </Typography>
-                    {renderField("Provided Services", "service")} // TODO: link to add service page
-                    <Box sx={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 1}}>
+                    <Box sx={{display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 0}}>
+                        <Typography variant="body1" sx={{fontWeight: 'bold'}}>Provided Services:</Typography>
+                        <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                            <Typography variant="body1">{fieldValue['service']}</Typography>
+                            <BlueButton text="Add Service" onClick={handleAddServiceClick} sx={{width: '150px'}}/>
+                        </Box>
+                    </Box>
+                    <Box sx={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        gap: 1
+                    }}>
                         <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 1}}>
                             <Typography variant="body1" sx={{fontWeight: 'bold'}}>Professional Certificate:</Typography>
                             <Typography variant="body1">{certificate ? certificate.name : "Not provided"}</Typography>
                         </Box>
-                        <LightBlueFileButton text="Upload" onFileChange={handleFileUpload(setCertificate)} />
+                        <LightBlueFileButton text="Upload" onFileChange={handleFileUpload(setCertificate)}
+                                             sx={{width: '100px'}}/>
                     </Box>
                 </Box>
             </Paper>
