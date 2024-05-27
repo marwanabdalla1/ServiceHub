@@ -3,6 +3,7 @@ import {Container, Typography, TextField, Button, Box, Paper, Avatar, Divider} f
 import BlueButton from "../components/inputs/BlueButton";
 import LightBlueFileButton from "../components/inputs/BlueUploadButton";
 import {useNavigate} from 'react-router-dom';
+import account from "../models/User";
 
 type EditModeType = {
     [key: string]: boolean;
@@ -12,7 +13,6 @@ type FieldType = {
     [key: string]: string;
 };
 
-// TODO: create the model and read from model
 function UserProfile(): React.ReactElement {
     const [editMode, setEditMode] = useState<EditModeType>({
         firstName: false,
@@ -20,18 +20,18 @@ function UserProfile(): React.ReactElement {
         email: false,
         phone: false,
         address: false,
-        message: false,
+        description: false,
         service: false
     });
     const [fieldValue, setFieldValue] = useState<FieldType>({
-        userId: Math.floor(10000000 + Math.random() * 90000000).toString(),
-        firstName: "Bob",
-        lastName: "Biker",
-        email: "bobbiker@gmail.com",
-        phone: "+49 157 *** *** 78",
-        address: "ExampleSt. 201, 80801 Munich",
-        message: "Having tinkered with bikes since I was 16, I've got the skills to fix yours up good as new. Whether it's a quick tune-up or a full overhaul, count on me to get your wheels rolling smoothly again.",
-        service: "Bike Repair"
+        userId: account.id,
+        firstName: account.firstName,
+        lastName: account.lastName,
+        email: account.email,
+        phone: account.phoneNumber,
+        address: account.address,
+        description: account.description,
+        service: account.serviceOfferings.map(service => service.serviceType).join(', '),
     });
     const [userImage, setUserImage] = useState<File | null>(null);
     const [certificate, setCertificate] = useState<File | null>(null);
@@ -102,7 +102,7 @@ function UserProfile(): React.ReactElement {
                     {renderField("Email Address", "email")}
                     {renderField("Phone Number", "phone")}
                     {renderField("Address", "address")}
-                    {renderField("Displayed Message", "message")}
+                    {renderField("Description", "description")}
                     <Divider sx={{my: 2}}/>
                     <Typography variant="h6" gutterBottom component="div"
                                 sx={{fontWeight: 'bold', fontSize: '24px', color: '#007BFF'}}>
