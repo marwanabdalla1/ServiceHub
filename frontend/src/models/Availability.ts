@@ -1,4 +1,4 @@
-import {AppointmentModel} from "@devexpress/dx-react-scheduler";
+// import {AppointmentModel} from "@devexpress/dx-react-scheduler";
 // Import your custom Appointment class and the necessary data.
 import { Appointment, appointments as importedAppointments } from './AppointmentModel';
 import {User} from "./User";
@@ -25,12 +25,12 @@ export type Timeslot = {
 };
 
 
-export interface ExtendedAppointment extends AppointmentModel {
-    id: number;
-    title: string;
-    type?: string; // Used for resource coloring or categorization
-    availability?: Availability; // Optional availability data
-}
+// export interface ExtendedAppointment extends AppointmentModel {
+//     id: number;
+//     title: string;
+//     type?: string; // Used for resource coloring or categorization
+//     availability?: Availability; // Optional availability data
+// }
 
 
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import AvailabilityCalendar from '../components/AvailabilityCalendar';
 import { Typography, Container, Button, Box, ToggleButton, ToggleButtonGroup } from '@mui/material';
-import AvailabilityCalendar2 from "../components/AvailabilityCalendar2";
+// import AvailabilityCalendar2 from "../components/AvailabilityCalendar2";
 
 
 const SelectAvailabilityPage: React.FC = () => {
