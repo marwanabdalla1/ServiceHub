@@ -5,6 +5,9 @@ import ProfilePage from './Pages/ProfilePage';
 import SignInPage from './Pages/LoginPage';
 import SignUpPage from './Pages/SignUpPage';
 import NavigationBar from './components/Navbar';
+import JobHistoryPage from './Pages/JobHistoryPage';
+import RequestHistoryPage from './Pages/RequestHistoryPage';
+import IncomingRequestsPage from './Pages/IncomingRequestsPage';
 
 function App() {
     return (
@@ -26,6 +29,9 @@ function MainRoutes() {
                 <Route path="/signup" element={<SignUpPage/>}/>
                 <Route path="/" element={<FilterPage/>}/>
                 <Route path="/profile" element={<ProfilePage/>}/>
+                <Route path="/jobs/jobHistory" element={<JobHistoryPage/>} />
+                <Route path="/jobs/requestHistory" element={<RequestHistoryPage/>} />
+                <Route path="/incomingRequests" element={<IncomingRequestsPage/>} />
             </Routes>
         </>
     );
