@@ -1,4 +1,6 @@
 // Define the type for the service object
+import {Availability, Review, ServiceOffering} from "./ServiceProviderPreliminary";
+
 export type Service = {
     serviceType: string;
     rating: number;
@@ -7,13 +9,43 @@ export type Service = {
   };
   
   // Define the type for the user object
-  export type User = {
-    userId: number;
-    firstName: string;
-    lastName: string;
-    service: Service;
-    imageUrl: string;
-  };
+export type User = {
+  userId: number;
+  firstName: string;
+  lastName: string;
+  service: Service;
+  imageUrl: string;
+};
+
+// todo: update this once the service offering etc. are done
+export type Account = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumner: string;
+  address: string;
+  createdOn: Date;
+  profileImageUrl: string;
+  description: string;
+  location: string;
+
+  isProvider: boolean;
+  isPremium: boolean;
+
+  serviceOfferings: ServiceOffering[];
+  // not sure if it is needed also the jobs and service requests/responses here as attributes
+  // or just keep the "account id" as a "foreign key" in those respective tables
+
+  availability: Availability[];
+
+  reviews: Review[];
+  rating: number;
+  reviewCount: number;
+
+};
+
+
   
   export const users: User[] = [
     {
@@ -108,6 +140,19 @@ export type Service = {
         serviceType: "movingServices",
         rating: 4.8,
         hourlyRating: 28.0,
+        isLicensed: true,
+      },
+      imageUrl: "/images/profiles/profile8.png",
+    },
+
+    {
+      userId: 9,
+      firstName: "Bob",
+      lastName: "Biker",
+      service: {
+        serviceType: "bikeRepair",
+        rating: 4.7,
+        hourlyRating: 25.0,
         isLicensed: true,
       },
       imageUrl: "/images/profiles/profile8.png",
