@@ -11,6 +11,8 @@ import ReviewPage from "./Pages/CustomerReviewPage";
 
 import ProviderProfilePage from "./Pages/ProviderProfilePage";
 
+import SelectAvailabilityPage from './Pages/SelectAvailabilityPage';
+
 function App() {
     return (
         <BrowserRouter>
@@ -36,6 +38,8 @@ function MainRoutes() {
                 <Route path="/addservice" element={<AddServicePage />} />
                 <Route path="*" element={<h1>Not Found</h1>} />
                 <Route path="/bob" element={<ProviderProfilePage/>}/>
+                <Route path="select-availability" element={<SelectAvailabilityPage/>} />
+
             </Routes>
         </div>
     );
