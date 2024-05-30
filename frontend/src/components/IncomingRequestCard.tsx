@@ -7,7 +7,6 @@ import { Divider, TextField } from '@mui/material';
 import { Request } from '../models/Request';
 import { GoStarFill } from 'react-icons/go';
 import BlackButton from './inputs/blackbutton';
-import BlackButtonWithMargin from './inputs/blackbuttonWithMargin';
 
 interface MediaCardProps {
   request: Request;
@@ -65,7 +64,7 @@ const IncomingRequestMediaCard: React.FC<MediaCardProps> = ({ request, onClose }
           placeholder="Enter description here..."
           sx={{ marginBottom: '1rem' }}
         />
-        <BlackButtonWithMargin text="Accept" onClick={onClose} />
+        <BlackButton text="Accept" onClick={onClose} sx={{ marginRight:"1rem" }}/>
         <BlackButton text="Decline" onClick={onClose} />
       </CardContent>
     </Card>

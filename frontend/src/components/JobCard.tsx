@@ -6,7 +6,6 @@ import Button from '@mui/material/Button';
 import { Job } from '../models/Job';
 import { GoStarFill } from 'react-icons/go';
 import BlackButton from './inputs/blackbutton';
-import BlackButtonWithMargin from './inputs/blackbuttonWithMargin';
 import Avatar from '@mui/material/Avatar';
 import { Divider } from '@mui/material';
 

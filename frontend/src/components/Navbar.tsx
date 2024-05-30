@@ -7,7 +7,6 @@ import BlackButton from "./inputs/blackbutton";
 import RequestListButton from "./inputs/requestListButton";
 import Modal from "./inputs/Modal";
 import { Link } from "react-router-dom";
-import './Navbar.css';
 
 const Navbar = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);

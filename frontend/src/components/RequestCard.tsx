@@ -6,7 +6,6 @@ import Button from '@mui/material/Button';
 import { Request } from '../models/Request';
 import { GoStarFill } from 'react-icons/go';
 import BlackButton from './inputs/blackbutton';
-import BlackButtonWithMargin from './inputs/blackbuttonWithMargin';
 import Avatar from '@mui/material/Avatar';
 import { Divider } from '@mui/material';
 
@@ -21,7 +20,7 @@ const MediaCard: React.FC<MediaCardProps> = ({ request, onClose }) => {
       case 'Pending':
         return (
           <>
-          <BlackButtonWithMargin text="Accept" onClick={onClose} />
+          <BlackButton text="Accept" onClick={onClose} sx={{ marginRight:"1rem" }}/>
           <BlackButton text="Decline" onClick={onClose} />
           </>
         );

@@ -14,14 +14,26 @@ import AddServicePage from './Pages/AddServicePage';
 import ReviewPage from "./Pages/CustomerReviewPage";
 
 import ProviderProfilePage from "./Pages/ProviderProfilePage";
+import UserProfilePage from "./Pages/ProfileSettingPage";
+import ProfileSettingPage from "./Pages/ProfileSettingPage";
 
 import SelectAvailabilityPage from './Pages/SelectAvailabilityPage';
 
+import SelectTimeslot from './Pages/bookingSteps/SelectTimeslotPage'
+import {BookingProvider} from "./context/BookingContext";
+import UpdateProfile from "./Pages/bookingSteps/UpdateProfile";
+import ReviewAndConfirm from "./Pages/bookingSteps/ReviewAndConfirm";
+import CreateAccountOrSignIn from "./Pages/bookingSteps/CreateAccountOrSignIn";
+
 function App() {
     return (
+
+        <BookingProvider>
+
         <BrowserRouter>
             <MainRoutes/>
         </BrowserRouter>
+        </BookingProvider>
     );
 }
 
@@ -34,6 +46,7 @@ function MainRoutes() {
             {showNavBar && <NavigationBar/>}
             <Routes>
                 <Route path="/" element={<HomePage/>} />
+                <Route path="/setprofile" element={<ProfileSettingPage/>} />
                 <Route path="/customer_review" element={<ReviewPage/>}/>
                 <Route path="/login" element={<SignInPage/>}/>
                 <Route path="/signup" element={<SignUpPage/>}/>
@@ -46,6 +59,10 @@ function MainRoutes() {
                 <Route path="*" element={<h1>Not Found</h1>} />
                 <Route path="/bob" element={<ProviderProfilePage/>}/>
                 <Route path="select-availability" element={<SelectAvailabilityPage/>} />
+                <Route path="/select-timeslot" element={<SelectTimeslot/>} />
+                <Route path="/create-account-or-sign-in" element={<CreateAccountOrSignIn />} />
+                <Route path="/update-profile" element={<UpdateProfile />} />
+                <Route path="/review-and-confirm" element={<ReviewAndConfirm />} />
 
             </Routes>
         </div>
