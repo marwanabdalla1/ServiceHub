@@ -7,7 +7,6 @@ export interface ButtonProps {
     onClick: () => void;
     sx?: any;  // make the Button component accepts a sx prop.
 }
-
 export const StyledButton = styled('button')({});
 
 function BlackButton({text, className = '', onClick, sx}: Readonly<ButtonProps>) {
@@ -20,6 +19,7 @@ function BlackButton({text, className = '', onClick, sx}: Readonly<ButtonProps>)
             {text}
         </StyledButton>
     );
+
 }
 
 
