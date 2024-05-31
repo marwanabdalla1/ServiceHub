@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
+import Box from '@mui/material/Box'; // Changed import
+import CardContent from '@mui/material/Box'; // Changed import
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -62,43 +62,43 @@ export default function IncomingRequestTable() {
   };
 
   return (
-    <Card sx={{ minWidth: 275, margin: 2 }}>
-      <CardContent>
+    <Box sx={{ minWidth: 275, margin: 2 }}>
+      <Box>
         <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />} aria-label="breadcrumb" sx={{ marginBottom: '16px' }}>
           <Typography color="textPrimary">Incoming Requests</Typography>
         </Breadcrumbs>
         <Typography variant="h6" component="div" sx={{ marginBottom: '16px' }}>
           Incoming Requests
         </Typography>
-        <div style={{ display: 'flex' }}>
-          <Card sx={{ flexGrow: 1, marginRight: 2 }}> 
-            <CardContent>
-              <TableContainer component={Paper} sx={{ overflow: 'auto' }}>
-                <Table sx={{ minWidth: 650 }} aria-label="simple table">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Type</TableCell>
-                      <TableCell>Published Date</TableCell>
-                      <TableCell></TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {rows.map((row) => (
-                      <IncomingRequestRow key={row.requestId} request={row} onViewDetails={() => openModal(row)} />
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </CardContent>
-          </Card>
-          <Modal show={isModalOpen} onClose={closeModal}>
-            <div className='modal-content'>
-              <h1 className='modalTitle'>Request Detail</h1>
-              {selectedRequest && <IncomingRequestMediaCard request={selectedRequest} onClose={closeModal} />}
-            </div>
-          </Modal>
-        </div>
-      </CardContent>
-    </Card>
+      </Box>
+      <Box style={{ display: 'flex' }}>
+        <Box sx={{ flexGrow: 1, marginRight: 2 }}>
+          <Box>
+            <TableContainer component={Paper} sx={{ overflow: 'auto' }}>
+              <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Type</TableCell>
+                    <TableCell>Published Date</TableCell>
+                    <TableCell></TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {rows.map((row) => (
+                    <IncomingRequestRow key={row.requestId} request={row} onViewDetails={() => openModal(row)} />
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Box>
+        </Box>
+        <Modal show={isModalOpen} onClose={closeModal}>
+          <div className='modal-content'>
+            <h1 className='modalTitle'>Request Detail</h1>
+            {selectedRequest && <IncomingRequestMediaCard request={selectedRequest} onClose={closeModal} />}
+          </div>
+        </Modal>
+      </Box>
+    </Box>
   );
 }

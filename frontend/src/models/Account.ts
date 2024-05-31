@@ -1,6 +1,12 @@
 // Define the type for the service object
-import {Availability, Review, ServiceOffering} from "./ServiceProviderPreliminary";
+import { Availability, Review } from "./ServiceProviderPreliminary";
+import { ServiceOffering } from "./ServiceOffering";
+import { ServiceType } from "./enums";
+import { ServiceRequest } from "./ServiceRequest";
+import { Job } from "./Job";
 
+
+//Candidate for deletion
 export type Service = {
     serviceType: string;
     rating: number;
@@ -8,6 +14,7 @@ export type Service = {
     isLicensed: boolean;
 };
 
+//Candidate for deletion
 // Define the type for the user object
 export type User = {
     userId: number;
@@ -17,8 +24,8 @@ export type User = {
     imageUrl: string;
 };
 
-// todo: update this once the service offering etc. are done
-export type Account = {
+
+export class Account {
     id: string;
     firstName: string;
     lastName: string;
@@ -33,15 +40,54 @@ export type Account = {
     isProvider: boolean;
     isPremium: boolean;
 
-    serviceOfferings: ServiceOffering[];
-    // not sure if it is needed also the jobs and service requests/responses here as attributes
-    // or just keep the "account id" as a "foreign key" in those respective tables
-
-    availability: Availability[];
-
-    reviews: Review[];
     rating: number;
     reviewCount: number;
+
+    //foreign keys
+    serviceOfferings: ServiceOffering[];
+    availability: Availability[];
+    reviews: Review[];
+    notifications: Notification[];
+    requestHistory: ServiceRequest[];
+    jobHistory: Job[];
+
+    constructor(id: string, firstName: string, lastName: string, email: string, phoneNumber: string,
+        address: string,
+        createdOn: Date,
+        profileImageUrl: string,
+        description: string,
+        location: string,
+        isProvider: boolean,
+        isPremium: boolean,
+        serviceOfferings: ServiceOffering[],
+        availability: Availability[],
+        reviews: Review[],
+        rating: number,
+        reviewCount: number,
+        notifications: Notification[],
+        requestHistory: ServiceRequest[],
+        jobHistory: Job[]) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.address = address;
+        this.createdOn = createdOn;
+        this.profileImageUrl = profileImageUrl;
+        this.description = description;
+        this.location = location;
+        this.isProvider = isProvider;
+        this.isPremium = isPremium;
+        this.serviceOfferings = serviceOfferings;
+        this.availability = availability;
+        this.reviews = reviews;
+        this.rating = rating;
+        this.reviewCount = reviewCount;
+        this.notifications = notifications;
+        this.requestHistory = requestHistory;
+        this.jobHistory = jobHistory;
+    }
 
 };
 
@@ -159,18 +205,7 @@ export const users: User[] = [
 
 ];
 
-const bikeRepairService: ServiceOffering = {
-    serviceType: "Bike Repair", //should be enum
-    hourlyRate: 50,
-    isCertified: false,
-};
-
-const babysittingService: ServiceOffering = {
-    serviceType: "Babysitting", //should be enum
-    hourlyRate: 50,
-    isCertified: false,
-};
-
+//Test-data to be removed, simply maintained in case required by original developer
 const account: Account = {
     id: "1234325413",
     firstName: "John",
@@ -187,11 +222,46 @@ const account: Account = {
     serviceOfferings: [],
     availability: [],
     reviews: [],
+    requestHistory: [],
+    jobHistory: [],
+    notifications: [],
     rating: 4.5,
     reviewCount: 100,
 };
+
+//Test-data to be removed, simply maintained in case required by original developer
+const bikeRepairService: ServiceOffering = {
+    serviceOfferingId: "bikeRepair0",
+    serviceType: ServiceType.bikeRepair,
+    description: "description0",
+    location: "location0",
+    provider: account,
+    hourlyRate: 50,
+    isCertified: false,
+    createdOn: new Date(),
+    lastUpdatedOn: new Date(),
+    certificate: new File([], "empty.txt", { type: "text/plain" }),
+    reviews: []
+
+};
+
+//Test-data to be removed, simply maintained in case required by original developer
+const babysittingService: ServiceOffering = {
+    serviceOfferingId: "babySitting0",
+    serviceType: ServiceType.babySitting,
+    description: "description1",
+    location: "location1",
+    provider: account,
+    hourlyRate: 50,
+    isCertified: false,
+    createdOn: new Date(),
+    lastUpdatedOn: new Date(),
+    certificate: new File([], "empty.txt", { type: "text/plain" }),
+    reviews: []
+};
+
+//Test-data to be removed, simply maintained in case required by original developer
 account.serviceOfferings.push(bikeRepairService);
 account.serviceOfferings.push(babysittingService);
 
 export default account;
-  

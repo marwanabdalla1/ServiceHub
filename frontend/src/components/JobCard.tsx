@@ -31,13 +31,13 @@ const MediaCard: React.FC<MediaCardProps> = ({ job, onClose }) => {
     <Card>
       <CardContent>
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem' }}>
-          <Avatar alt={job.provider} src={job.providerImage} sx={{ width: 100, height: 100, marginRight: '1rem' }} />
+          <Avatar alt={job.provider.firstName + " " + job.provider.lastName} src={job.providerImage} sx={{ width: 100, height: 100, marginRight: '1rem' }} />
           <div style={{ marginRight: '1rem' }}>
             <Typography variant="h6" >
               Request Detail
             </Typography>
             <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
-              Requestor: {job.provider}
+              Requestor: {job.provider.firstName + " " + job.provider.lastName}
             </Typography>
           </div>
           <div className='flex space-x-1 items-center'>

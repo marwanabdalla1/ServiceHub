@@ -1,28 +1,9 @@
 // import {AppointmentModel} from "@devexpress/dx-react-scheduler";
 // Import your custom Appointment class and the necessary data.
 import { Appointment, appointments as importedAppointments } from './AppointmentModel';
-import {User} from "./User";
-
-export enum DaysOfWeek {
-    Sunday,    // 0
-    Monday,    // 1
-    Tuesday,   // 2
-    Wednesday, // 3
-    Thursday,  // 4
-    Friday,    // 5
-    Saturday   // 6
-}
-
-export type Availability = {
-    dayOfWeek: DaysOfWeek;
-    isFixed: boolean;
-    timeslots: Timeslot[];
-};
-
-export type Timeslot = {
-    start: Date;
-    end: Date;
-};
+import { User } from "./Account";
+import { DaysOfWeek } from "./enums";
+import { Timeslot } from "./Timeslot";
 
 
 // export interface ExtendedAppointment extends AppointmentModel {
@@ -32,8 +13,16 @@ export type Timeslot = {
 //     availability?: Availability; // Optional availability data
 // }
 
-
-
+export class Availability {
+    dayOfWeek: DaysOfWeek;
+    isFixed: boolean;
+    timeslots: Timeslot[];
+    constructor(dayOfWeek: DaysOfWeek, isFixed: boolean, timeslots: Timeslot[]) {
+        this.dayOfWeek = dayOfWeek;
+        this.isFixed = isFixed;
+        this.timeslots = timeslots;
+    }
+};
 
 export interface SchedulerAppointment {
     id: number;
