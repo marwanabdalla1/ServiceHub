@@ -1,8 +1,21 @@
 import React, { useState, ChangeEvent } from 'react';
 import { Autocomplete, TextField, InputAdornment, Box, Grid } from '@mui/material';
 import LightBlueButton from '../components/inputs/BlueButton';
+import { useNavigate } from 'react-router-dom';
+
+interface FormData {
+    selectedService: { title: string } | null;
+    hourlyRate: string;
+    selectedPaymentMethods: Array<{ title: string }>;
+    description: string;
+    certificate: File | null;
+    defaultSlotTime: string;
+    travelTime: string;
+}
 
 function AddServicePage() {
+    const navigate = useNavigate();
+
     const serviceTypes = [
         { title: 'Bike Repair' }, { title: 'Moving' }, { title: 'Babysitting' }, 
         { title: 'Tutoring' }, { title: 'Petsetting' }, { title: 'Landscaping' }, 
@@ -12,13 +25,15 @@ function AddServicePage() {
         { title: 'Cash' }, { title: 'Paypal' }, { title: 'Bank Transfer' }
     ];
 
-    const [selectedService, setSelectedService] = useState<{ title: string } | null>(null);
-    const [hourlyRate, setHourlyRate] = useState<string>('');
-    const [selectedPaymentMethods, setSelectedPaymentMethods] = useState<Array<{ title: string }>>([]);
-    const [description, setDescription] = useState<string>('');
-    const [certificate, setCertificate] = useState<File | null>(null);
-    const [defaultSlotTime, setDefaultSlotTime] = useState<string>('');
-    const [travelTime, setTravelTime] = useState<string>('');
+    const [formData, setFormData] = useState<FormData>({
+        selectedService: null,
+        hourlyRate: '',
+        selectedPaymentMethods: [],
+        description: '',
+        certificate: null,
+        defaultSlotTime: '',
+        travelTime: ''
+    });
 
     const [errors, setErrors] = useState({
         selectedService: false,
@@ -31,39 +46,42 @@ function AddServicePage() {
     const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
         if (files && files.length > 0) {
-            setCertificate(files[0]);
+            setFormData(prev => ({ ...prev, certificate: files[0] }));
         } else {
-            setCertificate(null);
+            setFormData(prev => ({ ...prev, certificate: null }));
         }
+    };
+
+    const handleChange = (key: keyof FormData, value: any) => {
+        setFormData(prev => ({ ...prev, [key]: value }));
     };
 
     const validateForm = () => {
         const newErrors = {
-            selectedService: !selectedService,
-            hourlyRate: !hourlyRate,
-            selectedPaymentMethods: selectedPaymentMethods.length === 0,
-            defaultSlotTime: !defaultSlotTime,
-            travelTime: !travelTime
+            selectedService: !formData.selectedService,
+            hourlyRate: !formData.hourlyRate,
+            selectedPaymentMethods: formData.selectedPaymentMethods.length === 0,
+            defaultSlotTime: !formData.defaultSlotTime,
+            travelTime: !formData.travelTime
         };
 
         setErrors(newErrors);
-        
+
         return Object.values(newErrors).every(error => !error);
     };
 
     const handleSubmit = () => {
         if (validateForm()) {
             console.log('Submit button pressed');
-            const formData = {
-                selectedService,
-                hourlyRate,
-                selectedPaymentMethods,
-                description,
-                certificate,
-                defaultSlotTime: Number(defaultSlotTime),
-                travelTime: Number(travelTime)
+            const submissionData = {
+                ...formData,
+                defaultSlotTime: Number(formData.defaultSlotTime),
+                travelTime: Number(formData.travelTime)
             };
-            console.log(formData);
+
+            const { selectedService, travelTime } = submissionData;
+            navigate('/select-availability', { state: { selectedService, travelTime } });
+            console.log(submissionData);
         } else {
             console.log('Form validation failed');
         }
@@ -81,8 +99,8 @@ function AddServicePage() {
                             <Autocomplete
                                 options={serviceTypes}
                                 getOptionLabel={(option) => option.title}
-                                value={selectedService}
-                                onChange={(event, newValue) => setSelectedService(newValue)}
+                                value={formData.selectedService}
+                                onChange={(event, newValue) => handleChange('selectedService', newValue)}
                                 renderInput={(params) => (
                                     <TextField 
                                         {...params} 
@@ -102,8 +120,8 @@ function AddServicePage() {
                                 }}
                                 placeholder="Hourly Rate"
                                 fullWidth
-                                value={hourlyRate}
-                                onChange={(e) => setHourlyRate(e.target.value)}
+                                value={formData.hourlyRate}
+                                onChange={(e) => handleChange('hourlyRate', e.target.value)}
                                 error={errors.hourlyRate}
                                 helperText={errors.hourlyRate ? 'Hourly rate is required' : ''}
                             />
@@ -113,8 +131,8 @@ function AddServicePage() {
                                 multiple
                                 options={paymentMethods}
                                 getOptionLabel={(option) => option.title}
-                                value={selectedPaymentMethods}
-                                onChange={(event, newValue) => setSelectedPaymentMethods(newValue)}
+                                value={formData.selectedPaymentMethods}
+                                onChange={(event, newValue) => handleChange('selectedPaymentMethods', newValue)}
                                 renderInput={(params) => (
                                     <TextField 
                                         {...params} 
@@ -132,8 +150,8 @@ function AddServicePage() {
                                 label="Default Slot Time (minutes)"
                                 variant="outlined"
                                 fullWidth
-                                value={defaultSlotTime}
-                                onChange={(e) => setDefaultSlotTime(e.target.value)}
+                                value={formData.defaultSlotTime}
+                                onChange={(e) => handleChange('defaultSlotTime', e.target.value)}
                                 error={errors.defaultSlotTime}
                                 helperText={errors.defaultSlotTime ? 'Default slot time is required' : ''}
                             />
@@ -143,8 +161,8 @@ function AddServicePage() {
                                 label="Travel Time (minutes)"
                                 variant="outlined"
                                 fullWidth
-                                value={travelTime}
-                                onChange={(e) => setTravelTime(e.target.value)}
+                                value={formData.travelTime}
+                                onChange={(e) => handleChange('travelTime', e.target.value)}
                                 error={errors.travelTime}
                                 helperText={errors.travelTime ? 'Travel time is required' : ''}
                             />
@@ -160,8 +178,8 @@ function AddServicePage() {
                                 multiline
                                 rows={4}
                                 fullWidth
-                                value={description}
-                                onChange={(e) => setDescription(e.target.value)}
+                                value={formData.description}
+                                onChange={(e) => handleChange('description', e.target.value)}
                             />
                         </Box>
                         <Box>
