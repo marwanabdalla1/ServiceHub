@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import {GoStarFill} from "react-icons/go";
 import {Account as ServiceProvider } from '../models/Account';
-import { DaysOfWeek, ServiceType, jobStatus, ResponseStatus, RequestStatus } from '../models/enums';
+import { DaysOfWeek, ServiceType, JobStatus, ResponseStatus, RequestStatus } from '../models/enums';
 import {styled} from '@mui/system';
 import SearchIcon from '@mui/icons-material/Search';
 import PinDropIcon from '@mui/icons-material/PinDrop';

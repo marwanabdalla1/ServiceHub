@@ -18,14 +18,14 @@ import { Account } from '../models/Account';
 import account from '../models/Account';
 import { Timeslot } from '../models/Timeslot';
 import { ServiceRequest } from '../models/ServiceRequest';
-import { RequestStatus, ServiceType } from '../models/enums';
+import { RequestStatus, ServiceType, JobStatus } from '../models/enums';
 
 function createJob(
   jobId: string,
-  serviceType: string,
+  serviceType: ServiceType,
   appointmentTime: Date,
   serviceFee: string,
-  status: string,
+  status: JobStatus,
   description: string,
   provider: Account,
   providerImage: string,
@@ -53,18 +53,18 @@ function createJob(
 //Candidate for deletion
 const serviceRequests: ServiceRequest[] = [
   new ServiceRequest('sr1', RequestStatus.accepted, new Date(), ServiceType.babySitting, new Date(), [new File([], "empty.txt", { type: "text/plain" })], 
-  'something', null, account, account),
+  'something', 12, 30,  null, account, account, 5, '../../images/profiles/profile3.png'),
   new ServiceRequest('sr2', RequestStatus.declined, new Date(), ServiceType.bikeRepair, new Date(), [new File([], "empty.txt", { type: "text/plain" })], 
-  'somethingElse', null, account, account),
+  'somethingElse', 13, 30,  null, account, account, 5, '../../images/profiles/profile3.png'),
   new ServiceRequest('sr3', RequestStatus.pending, new Date(), ServiceType.homeRemodeling, new Date(), [new File([], "empty.txt", { type: "text/plain" })], 
-  'comment3', null, account, account)
+  'comment3', 14, 30, null, account, account, 5, '../../images/profiles/profile3.png')
 ];
 
 
 const rows: Job[] = [
-  createJob('1', 'Bike Repair', new Date('2024-05-11'), '50', 'Open', 'Description 1', account, '../../images/profiles/profile3.png', 4.99, new Date(), new Timeslot(new Date(), new Date()), serviceRequests[0]),
-  createJob('2', 'Car Wash', new Date('2024-05-12'), '30', 'Completed', 'Description 2', account, '../../images/profiles/profile2.png', 5, new Date(), new Timeslot(new Date(), new Date()), serviceRequests[1]),
-  createJob('3', 'Plumbing', new Date('2024-05-13'), '100', 'Pending', 'Description 3', account, '../../images/profiles/profile1.png',  3, new Date(), new Timeslot(new Date(), new Date()), serviceRequests[2]),
+  createJob('1', ServiceType.bikeRepair, new Date('2024-05-11'), '50', JobStatus.open, 'Description 1', account, '../../images/profiles/profile3.png', 4.99, new Date(), new Timeslot(new Date(), new Date()), serviceRequests[0]),
+  createJob('2', ServiceType.petSitting, new Date('2024-05-12'), '30', JobStatus.completed, 'Description 2', account, '../../images/profiles/profile2.png', 5, new Date(), new Timeslot(new Date(), new Date()), serviceRequests[1]),
+  createJob('3', ServiceType.homeRemodeling, new Date('2024-05-13'), '100', JobStatus.cancelled, 'Description 3', account, '../../images/profiles/profile1.png',  3, new Date(), new Timeslot(new Date(), new Date()), serviceRequests[2]),
 ];
 
 export default function JobHistoryTable() {

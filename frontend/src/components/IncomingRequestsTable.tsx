@@ -11,41 +11,55 @@ import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
-import { Request } from '../models/Request';
+import { ServiceRequest as Request } from '../models/ServiceRequest';
 import IncomingRequestRow from './IncomingRequestRow';
 import Modal from './inputs/Modal';
 import IncomingRequestMediaCard from './IncomingRequestCard';
+import { RequestStatus, ServiceType } from '../models/enums';
+import { Account } from '../models/Account';
+import { Job } from '../models/Job';
 
 function createRequest(
-  requestId: string,
-  serviceType: string,
+  serviceRequestId: string,
+  requestStatus: RequestStatus,
+  createdOn: Date,
+  serviceType: ServiceType,
   appointmentTime: Date,
-  serviceFee: string,
-  status: string,
-  description: string,
-  requestor: string,
-  requestorImage: string,
+  uploads: File[],
+  comment: string,
+  serviceFee: number,
+  duration: number,
+  job: Job | null,
+  provider: Account,
+  requestedBy: Account,
   rating: number,
-  publishedDate: Date
+  profileImageUrl: string,
 ): Request {
   return {
-    requestId,
+    serviceRequestId,
+    requestStatus,
+    createdOn,
     serviceType,
     appointmentTime,
+    uploads,
+    comment,
     serviceFee,
-    status,
-    description,
-    requestor,
-    requestorImage,
+    duration,
+    job,
+    provider,
+    requestedBy,
     rating,
-    publishedDate
+    profileImageUrl,
   };
 }
 
+const accounts: Account [] = [
+  new Account('11', 'Max', 'Mustermann', 'example.email@example.com', '911', 'Arcisstraße', new Date('2024-05-11'), 'stringImage', 'desc', 'loc', false, false, [], [], [], 5, 40, [], [], [])
+]
 const rows: Request[] = [
-  createRequest('1', 'Bike Repair', new Date('2024-05-11'), '50', 'Pending', 'Description 1', 'John Doe', '../../images/profiles/profile3.png', 4.99, new Date('2024-05-11')),
-  createRequest('2', 'Car Wash', new Date('2024-05-12'), '30', 'Pending', 'Description 2', 'Jane Smith', '../../images/profiles/profile2.png', 5, new Date('2024-05-11')),
-  createRequest('3', 'Plumbing', new Date('2024-05-13'), '100', 'Pending', 'Description 3', 'Alice Johnson', '../../images/profiles/profile1.png',  3, new Date('2024-05-11')),
+  createRequest('1', RequestStatus.pending, new Date('2024-05-11'), ServiceType.bikeRepair, new Date('2024-05-11'), [] , 'comment 1', 12, 30, null, accounts[0],accounts[0], 5,'../../images/profiles/profile3.png'),
+  createRequest('2', RequestStatus.pending, new Date('2024-05-12'), ServiceType.babySitting, new Date('2024-05-11'), [], 'comment 2', 13, 30, null, accounts[0], accounts[0], 4.99, '../../images/profiles/profile2.png'),
+  createRequest('3', RequestStatus.pending, new Date('2024-05-13'), ServiceType.houseCleaning, new Date('2024-05-11'), [], 'comment 3', 2001, 3, null, accounts[0], accounts[0], 4.5, '../../images/profiles/profile1.png'),
 ];
 
 export default function IncomingRequestTable() {
@@ -85,7 +99,7 @@ export default function IncomingRequestTable() {
                 </TableHead>
                 <TableBody>
                   {rows.map((row) => (
-                    <IncomingRequestRow key={row.requestId} request={row} onViewDetails={() => openModal(row)} />
+                    <IncomingRequestRow key={row.serviceRequestId} request={row} onViewDetails={() => openModal(row)} />
                   ))}
                 </TableBody>
               </Table>
@@ -95,7 +109,8 @@ export default function IncomingRequestTable() {
         <Modal show={isModalOpen} onClose={closeModal}>
           <div className='modal-content'>
             <h1 className='modalTitle'>Request Detail</h1>
-            {selectedRequest && <IncomingRequestMediaCard request={selectedRequest} onClose={closeModal} />}
+            {selectedRequest && <IncomingRequestMediaCard request={selectedRequest} 
+                                                          onClose={closeModal} />}
           </div>
         </Modal>
       </Box>

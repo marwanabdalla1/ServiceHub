@@ -8,6 +8,7 @@ import { GoStarFill } from 'react-icons/go';
 import BlackButton from './inputs/blackbutton';
 import Avatar from '@mui/material/Avatar';
 import { Divider } from '@mui/material';
+import { JobStatus } from '../models/enums';
 
 interface MediaCardProps {
   job: Job;
@@ -17,7 +18,7 @@ interface MediaCardProps {
 const MediaCard: React.FC<MediaCardProps> = ({ job, onClose }) => {
   const renderButton = () => {
     switch (job.status) {
-      case 'Open':
+      case JobStatus.open:
         return (
           <BlackButton text="Mark as completed" onClick={onClose} />
         );

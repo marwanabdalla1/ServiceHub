@@ -217,7 +217,7 @@ const account: Account = {
     profileImageUrl: "/images/profiles/profile1.png",
     description: "Professional bike repair service",
     location: "New York, NY",
-    isProvider: true,
+    isProvider: false,
     isPremium: true,
     serviceOfferings: [],
     availability: [],
@@ -228,6 +228,7 @@ const account: Account = {
     rating: 4.5,
     reviewCount: 100,
 };
+
 
 //Test-data to be removed, simply maintained in case required by original developer
 const bikeRepairService: ServiceOffering = {

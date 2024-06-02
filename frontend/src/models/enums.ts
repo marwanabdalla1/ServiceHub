@@ -19,7 +19,7 @@ export enum starCount {
 
 }
 
-export enum jobStatus {
+export enum JobStatus {
     completed, // 0
     cancelled, // 1
     open, // 2
@@ -43,7 +43,7 @@ export enum ServiceType {
     houseCleaning, // 1
     babySitting, // 2
     tutoring, // 3
-    petSetting, // 4
+    petSitting, // 4
     landscapingServices, // 5
     homeRemodeling, // 6
     movingServices, // 7

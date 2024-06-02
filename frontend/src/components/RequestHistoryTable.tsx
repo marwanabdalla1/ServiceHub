@@ -93,7 +93,11 @@ export default function RequestHistoryTable() {
         </Box>
         {showMediaCard && selectedRequest && (
           <div style={{ position: 'relative', flexShrink: 0, width: 400, marginLeft: 2 }}>
-            <MediaCard request={selectedRequest} onClose={() => setShowMediaCard(false)} />
+            <MediaCard request={selectedRequest} 
+                        onClose={() => setShowMediaCard(false)} 
+                        onAccept={() => console.log('accepted.') }
+                        onDecline={() => console.log('declined.') }
+                        onProposeNewTime={() => console.log('New Time: ')} />
           </div>
         )}
       </Box>

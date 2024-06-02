@@ -1,14 +1,15 @@
 import { Timeslot } from "./Timeslot";
 import { Account } from "./Account";
 import { ServiceRequest } from "./ServiceRequest";
+import { JobStatus, ServiceType } from "./enums";
 
 export class Job {
   jobId: string;
-  serviceType: string; //
+  serviceType: ServiceType; //
   appointmentTime: Date;
   dateOfService: Date;
   serviceFee: string;
-  status: string;
+  status: JobStatus;
   description: string;
   provider: Account;
   providerImage: string; // Candidate for deletion
@@ -18,7 +19,7 @@ export class Job {
   timeOfService: Timeslot;
   request: ServiceRequest;
 
-  constructor(jobId: string, serviceType: string, dateOfService: Date, serviceFee: string, status: string,
+  constructor(jobId: string, serviceType: ServiceType, dateOfService: Date, serviceFee: string, status: JobStatus,
     description: string, provider: Account, providerImage: string, rating: number, timeOfService: Timeslot, request: ServiceRequest) {
     this.jobId = jobId;
     this.serviceType = serviceType;

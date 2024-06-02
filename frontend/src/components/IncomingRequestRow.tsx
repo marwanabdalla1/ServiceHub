@@ -2,8 +2,9 @@ import * as React from 'react';
 import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 import Button from '@mui/material/Button';
-import { Request } from '../models/Request';
+import { ServiceRequest as Request } from '../models/ServiceRequest';
 import BlackButton from './inputs/blackbutton';
+import { ServiceType } from '../models/enums';
 
 interface IncomingRequestRowProps {
   request: Request;
@@ -13,8 +14,8 @@ interface IncomingRequestRowProps {
 const RequestRow: React.FC<IncomingRequestRowProps> = ({ request, onViewDetails }) => {
   return (
     <TableRow>
-      <TableCell>{request.serviceType}</TableCell>
-      <TableCell>{request.publishedDate.toLocaleDateString()}</TableCell>
+      <TableCell>{ServiceType[request.serviceType]}</TableCell>
+      <TableCell>{request.createdOn.toLocaleDateString()}</TableCell>
       <TableCell>
         <BlackButton text="View" onClick={() => onViewDetails(request)}/>
       </TableCell>
