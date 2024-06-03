@@ -8,11 +8,12 @@ import NewTimeslotRequestMediaCard from '../components/NewTimeslotRequestMediaCa
 function UpdateTimeslot() {
   const { requestDetails, setSelectedTime, selectedDate, setSelectedDate, availableTimes, setAvailableTimes } = useRequest();
   const navigate = useNavigate();
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleTimeClick = (time: string) => {
     setSelectedTime(time);
-    //navigate('/incomingRequests');
+    console.log('selected Date:' + selectedDate);
+    console.log('date is: ' + time);
+    navigate('/proposeNewTime');
   };
 
   const handleDateClick = (date: string) => {
@@ -25,13 +26,6 @@ function UpdateTimeslot() {
     setAvailableTimes(newAvailableTimes);
   };
 
-  const handleOpenModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
 
   return (
     <Container>
@@ -65,7 +59,6 @@ function UpdateTimeslot() {
           </Box>
         </Box>
       </Box>
-        <NewTimeslotRequestMediaCard request={requestDetails} onClose={handleCloseModal} />
     </Container>
   );
 }
