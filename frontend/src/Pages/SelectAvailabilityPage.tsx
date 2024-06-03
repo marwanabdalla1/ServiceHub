@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import AvailabilityCalendar from '../components/AvailabilityCalendar';
 import { Typography, Container, Button, Box, ToggleButton, ToggleButtonGroup } from '@mui/material';
-// import AvailabilityCalendar2 from "../components/AvailabilityCalendar2";
+import { useLocation } from 'react-router-dom';
 
 
 const SelectAvailabilityPage: React.FC = () => {
+    const location = useLocation();
+    const { selectedService } = location.state || {};
     const [isFixed, setIsFixed] = useState(false);
 
     const handleFixedChange = () => {
