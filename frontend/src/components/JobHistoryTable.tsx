@@ -62,9 +62,9 @@ const serviceRequests: ServiceRequest[] = [
 
 
 const rows: Job[] = [
-  createJob('1', ServiceType.bikeRepair, new Date('2024-05-11'), '50', JobStatus.open, 'Description 1', account, '../../images/profiles/profile3.png', 4.99, new Date(), new Timeslot(new Date(), new Date()), serviceRequests[0]),
-  createJob('2', ServiceType.petSitting, new Date('2024-05-12'), '30', JobStatus.completed, 'Description 2', account, '../../images/profiles/profile2.png', 5, new Date(), new Timeslot(new Date(), new Date()), serviceRequests[1]),
-  createJob('3', ServiceType.homeRemodeling, new Date('2024-05-13'), '100', JobStatus.cancelled, 'Description 3', account, '../../images/profiles/profile1.png',  3, new Date(), new Timeslot(new Date(), new Date()), serviceRequests[2]),
+  createJob('1', ServiceType.bikeRepair, new Date('2024-05-11'), '50', JobStatus.open, 'Description 1', account, '../../images/profiles/profile3.png', 4.99, new Date(), new Timeslot(ServiceType.babySitting, new Date(), new Date(), true), serviceRequests[0]),
+  createJob('2', ServiceType.petSitting, new Date('2024-05-12'), '30', JobStatus.completed, 'Description 2', account, '../../images/profiles/profile2.png', 5, new Date(), new Timeslot(ServiceType.tutoring, new Date(), new Date(), true), serviceRequests[1]),
+  createJob('3', ServiceType.homeRemodeling, new Date('2024-05-13'), '100', JobStatus.cancelled, 'Description 3', account, '../../images/profiles/profile1.png',  3, new Date(), new Timeslot(ServiceType.petSitting, new Date(), new Date(), true), serviceRequests[2]),
 ];
 
 export default function JobHistoryTable() {

@@ -32,7 +32,7 @@ const mockProvider: ServiceProvider = {
     lastName: 'Biker',
     serviceOfferings: [new ServiceOffering('offering0',
         ServiceType.bikeRepair, new Date(), new Date(), new File([], "empty.txt", { type: "text/plain" }), 15, 'desc0', true,
-    'Munich', account, [])],
+    'Munich', account, 1, 0.5, [])],
     location: 'Munich',
     availability: [
         {

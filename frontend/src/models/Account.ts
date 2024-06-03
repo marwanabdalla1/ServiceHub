@@ -242,6 +242,8 @@ const bikeRepairService: ServiceOffering = {
     createdOn: new Date(),
     lastUpdatedOn: new Date(),
     certificate: new File([], "empty.txt", { type: "text/plain" }),
+    baseDuration: 2,
+    bufferTimeDuration: 0.5,
     reviews: []
 
 };
@@ -258,6 +260,8 @@ const babysittingService: ServiceOffering = {
     createdOn: new Date(),
     lastUpdatedOn: new Date(),
     certificate: new File([], "empty.txt", { type: "text/plain" }),
+    baseDuration: 2,
+    bufferTimeDuration: 0.5,
     reviews: []
 };
 

@@ -15,11 +15,9 @@ import { Timeslot } from "./Timeslot";
 
 export class Availability {
     dayOfWeek: DaysOfWeek;
-    isFixed: boolean;
     timeslots: Timeslot[];
-    constructor(dayOfWeek: DaysOfWeek, isFixed: boolean, timeslots: Timeslot[]) {
+    constructor(dayOfWeek: DaysOfWeek, timeslots: Timeslot[]) {
         this.dayOfWeek = dayOfWeek;
-        this.isFixed = isFixed;
         this.timeslots = timeslots;
     }
 };
