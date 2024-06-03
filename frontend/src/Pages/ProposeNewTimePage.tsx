@@ -2,22 +2,28 @@ import React, { useState } from 'react';
 import NavigationBar from '../components/Navbar';
 import MediaCard from '../components/Card';
 import {users, User} from '../models/Account';
-import { Request } from '../models/Request';
+import { ServiceRequest as Request } from '../models/ServiceRequest';
 import Sidebar from '../components/SideBarLists';
 import { useRequest } from '../context/RequestContext';
 import { Card, CardContent, Avatar, Typography, TextField, Divider, Box } from '@mui/material';
 import BlackButton from '../components/inputs/blackbutton';
 import { GoStarFill } from 'react-icons/go';
 import { ServiceType } from '../models/enums';
+import { useNavigate } from 'react-router-dom';
 
 function ProposeNewtimePage() {
   const { requestDetails } = useRequest();
   const [description, setDescription] = useState(requestDetails.comment);
   const [duration, setDuration] = useState(requestDetails.duration);
+  const navigate = useNavigate();
 
   const handleSendNewTimeProposed = () => {
     console.log('Send updated Request')
     //navigate('/update-timeslot'); // Navigate to the calendar to select a new Timeslot
+  };
+
+  const handleClose = () => {
+    navigate('/incomingRequests'); // Navigate to the calendar to select a new Timeslot
   };
 
   const handleDescriptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -65,10 +71,10 @@ function ProposeNewtimePage() {
         Service Type: {ServiceType[requestDetails.serviceType]}
       </Typography>
       <Typography variant="body2">
-        Declined Appointment Time: <Typography component="span" sx={{ textDecoration: 'line-through' }}>{requestDetails.appointmentTime.toLocaleString()}</Typography>
+        Previous Appointment: <Typography component="span" sx={{ textDecoration: 'line-through', fontSize: '0.91rem' }}>{requestDetails.appointmentTime.toLocaleString()}</Typography>
           </Typography>
       {requestDetails.updatedAppointmentTime && <Typography variant="body2">
-        Proposed Appointment Time: {requestDetails.updatedAppointmentTime.toLocaleString()}
+        Proposed Appointment: {requestDetails.updatedAppointmentTime.toLocaleString()}
       </Typography>}
       <TextField
         label="est. duration (h)"
@@ -94,7 +100,7 @@ function ProposeNewtimePage() {
         sx={{ marginBottom: '1rem' }}
       />
       <BlackButton text="Send Updated Request" onClick={handleSendNewTimeProposed} sx={{ marginRight: "1rem" }} />
-      <BlackButton text="Close" onClick={handleSendNewTimeProposed} />
+      <BlackButton text="Close" onClick={handleClose} />
     </CardContent>
   </Card>
    </Box>

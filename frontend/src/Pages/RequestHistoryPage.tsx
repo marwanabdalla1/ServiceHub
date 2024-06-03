@@ -3,7 +3,6 @@ import NavigationBar from '../components/Navbar';
 import MediaCard from '../components/Card';
 import {users, User} from '../models/Account';
 import RequestHistoryTable from '../components/RequestHistoryTable';
-import { Request } from '../models/Request';
 import Sidebar from '../components/SideBarLists';
 
 

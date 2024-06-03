@@ -11,8 +11,22 @@ function UpdateTimeslot() {
 
   const handleTimeClick = (time: string) => {
     setSelectedTime(time);
-    console.log('selected Date:' + selectedDate);
-    console.log('date is: ' + time);
+    //temporarily the dates are assumed to all be within the current month
+
+    let formattedDate = selectedDate ? selectedDate : "";
+    if (!selectedDate) {
+      formattedDate = new Date().getDate().toString().padStart(2, '0');
+      setSelectedDate(formattedDate);
+    }
+    
+    // Format the new appointment date and time
+    const currentYear = new Date().getFullYear();
+    const currentMonth = (new Date().getMonth() + 1).toString().padStart(2, '0'); // Month is zero-based
+    const selectedDay = formattedDate.padStart(2, '0');
+
+    const newAppointment = `${currentYear}-${currentMonth}-${selectedDay}T${time}:00`;
+    console.log(newAppointment);
+    requestDetails.updatedAppointmentTime = new Date(newAppointment);
     navigate('/proposeNewTime');
   };
 
@@ -42,7 +56,7 @@ function UpdateTimeslot() {
             {['11', '12', '16', '17', '18', '19', '23', '24', '25', '26', '30', '31'].map((date) => (
               <Grid item key={date} onClick={() => handleDateClick(date)}>
                 <Button variant={date === selectedDate ? 'contained' : 'outlined'}>
-                  {`May ${date}`}
+                  {`June ${date}`}
                 </Button>
               </Grid>
             ))}

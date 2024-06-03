@@ -14,7 +14,7 @@ import {
     Rating
 } from '@mui/material';
 import {GoStarFill} from "react-icons/go";
-import {Account as ServiceProvider } from '../models/Account';
+import {Account as ServiceProvider, bikeRepairService } from '../models/Account';
 import { DaysOfWeek, ServiceType, JobStatus, ResponseStatus, RequestStatus } from '../models/enums';
 import {styled} from '@mui/system';
 import SearchIcon from '@mui/icons-material/Search';
@@ -37,68 +37,75 @@ const mockProvider: ServiceProvider = {
     availability: [
         {
             dayOfWeek: DaysOfWeek.Thursday,
-            isFixed: true,
             timeslots: [
-                {start: new Date('2024-05-11T15:00:00'), end: new Date('2024-05-11T20:00:00')}
+                {title: ServiceType.bikeRepair, start: new Date('2024-05-11T15:00:00'), end: new Date('2024-05-11T20:00:00'), isFixed: false}
             ]
         },
         {
             dayOfWeek: DaysOfWeek.Friday,
-            isFixed: true,
             timeslots: [
-                {start: new Date('2024-05-11T15:00:00'), end: new Date('2024-05-11T20:00:00')}
+                {title: ServiceType.babySitting, start: new Date('2024-05-11T15:00:00'), end: new Date('2024-05-11T20:00:00'), isFixed: true}
             ]
         },
         {
             dayOfWeek: DaysOfWeek.Saturday,
-            isFixed: true,
             timeslots: [
-                {start: new Date('2024-05-12T10:00:00'), end: new Date('2024-05-12T20:00:00')}
+                {title: ServiceType.petSitting, start: new Date('2024-05-11T15:00:00'), end: new Date('2024-05-11T20:00:00'), isFixed: true}
             ]
         },
         {
             dayOfWeek: DaysOfWeek.Sunday,
-            isFixed: true,
             timeslots: [
-                {start: new Date('2024-05-12T10:00:00'), end: new Date('2024-05-12T20:00:00')}
+                {title: ServiceType.homeRemodeling, start: new Date('2024-05-11T15:00:00'), end: new Date('2024-05-11T20:00:00'), isFixed: false}
             ]
         }
     ],
+    
     reviews: [
         {
-            id: '1',
+            reviewId: '1',
             rating: 5,
             content: 'Very friendly, great service. I can definitely recommend!',
-            createdOn: '2024-05-03',
-            reviewer: 'Sebastian Müller'
+            createdOn: new Date('2024-05-03'),
+            reviewer: account,
+            recipient: account,
+            service: bikeRepairService
         },
         {
-            id: '2',
+            reviewId: '2',
             rating: 5,
             content: 'Bob is very competent and quick in his work. I will definitely be using him for all my bike repairs from now on.',
-            createdOn: '2024-05-03',
-            reviewer: 'Smith Jackson'
+            createdOn: new Date('2024-05-03'),
+            reviewer: account,
+            recipient: account,
+            service: bikeRepairService
         },
         {
-            id: '3',
+            reviewId: '3',
             rating: 5,
             content: 'Great Service!',
-            createdOn: '2024-04-03',
-            reviewer: 'Anna Schmidt'
+            createdOn: new Date('2024-05-03'),
+            reviewer: account,
+            recipient: account,
+            service: bikeRepairService
         },
         {
-            id: '4',
+            reviewId: '4',
             rating: 4,
             content: 'Good',
-            createdOn: '2024-04-02',
-            reviewer: 'John Doe'
+            createdOn: new Date('2024-05-03'),
+            reviewer: account,
+            recipient: account,
+            service: bikeRepairService
         },
         {
-            id: '5',
+            reviewId: '5',
             rating: 4,
             content: 'Good',
-            createdOn: '2024-03-02',
-            reviewer: 'John Doe'
+            createdOn: new Date('2024-05-03'),
+            reviewer: account,
+            recipient: account,
+            service: bikeRepairService
         },
 
     ],
@@ -258,11 +265,11 @@ function ProviderProfilePage() {
                             </Box>
                             <Divider sx={{mb: 2}}/>
                             {provider.reviews.map((review) => (
-                                <Card key={review.id} sx={{mb: 2}}>
+                                <Card key={review.reviewId} sx={{mb: 2}}>
                                     <CardContent>
                                         <Box sx={{display: 'flex', alignItems: 'center', mb: 1}}>
                                             <Avatar sx={{mr: 2}}/>
-                                            <Typography variant="h6">{review.reviewer}</Typography>
+                                            <Typography variant="h6">{review.reviewer.firstName + " " + review.reviewer.lastName}</Typography>
                                         </Box>
                                         <Box sx={{display: 'flex', alignItems: 'center', mb: 2}}>
                                             {/*<GoStarFill className='text-yellow-500'/>*/}
