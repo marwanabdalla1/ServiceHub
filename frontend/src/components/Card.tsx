@@ -5,7 +5,7 @@ import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import { User } from '../models/User';
+import { User } from '../models/Account';
 import { GoStarFill } from "react-icons/go";
 
 

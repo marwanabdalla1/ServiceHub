@@ -12,16 +12,20 @@ import { Divider } from '@mui/material';
 interface MediaCardProps {
   request: Request;
   onClose: () => void;
+  onAccept: (request: Request) => void;
+  onDecline: (request: Request) => void;
+  onProposeNewTime: (request: Request, newTime: Date) => void;
 }
 
-const MediaCard: React.FC<MediaCardProps> = ({ request, onClose }) => {
+const MediaCard: React.FC<MediaCardProps> = ({ request, onClose, onAccept,onDecline, onProposeNewTime }) => {
   const renderButton = () => {
     switch (request.status) {
       case 'Pending':
         return (
           <>
           <BlackButton text="Accept" onClick={onClose} sx={{ marginRight:"1rem" }}/>
-          <BlackButton text="Decline" onClick={onClose} />
+          <BlackButton text="Decline" onClick={onClose} sx={{ marginRight: "1rem" }} />
+          <BlackButton text="Propose New Time" onClick={onClose}/>
           </>
         );
       default:

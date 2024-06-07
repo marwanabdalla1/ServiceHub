@@ -20,19 +20,24 @@ import ProfileSettingPage from "./Pages/ProfileSettingPage";
 import SelectAvailabilityPage from './Pages/SelectAvailabilityPage';
 
 import SelectTimeslot from './Pages/bookingSteps/SelectTimeslotPage'
+import UpdateTimeslot from './Pages/UpdateTimeslotPage'
 import {BookingProvider} from "./context/BookingContext";
 import UpdateProfile from "./Pages/bookingSteps/UpdateProfile";
 import ReviewAndConfirm from "./Pages/bookingSteps/ReviewAndConfirm";
 import CreateAccountOrSignIn from "./Pages/bookingSteps/CreateAccountOrSignIn";
+import ListsLandingPage from "./Pages/listsLandingPage";
+
+import { RequestProvider } from './context/RequestContext';
 
 function App() {
     return (
 
         <BookingProvider>
-
+        <RequestProvider>
         <BrowserRouter>
             <MainRoutes/>
         </BrowserRouter>
+        </RequestProvider>
         </BookingProvider>
     );
 }
@@ -60,9 +65,12 @@ function MainRoutes() {
                 <Route path="/bob" element={<ProviderProfilePage/>}/>
                 <Route path="select-availability" element={<SelectAvailabilityPage/>} />
                 <Route path="/select-timeslot" element={<SelectTimeslot/>} />
+                <Route path="/update-timeslot" element={<UpdateTimeslot/>} />
                 <Route path="/create-account-or-sign-in" element={<CreateAccountOrSignIn />} />
                 <Route path="/update-profile" element={<UpdateProfile />} />
                 <Route path="/review-and-confirm" element={<ReviewAndConfirm />} />
+                <Route path="/listsLandingPage" element={<ListsLandingPage />} />
+
 
             </Routes>
         </div>

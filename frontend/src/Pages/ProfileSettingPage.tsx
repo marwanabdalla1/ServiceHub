@@ -3,7 +3,7 @@ import {Container, Typography, TextField, Button, Box, Paper, Avatar, Divider} f
 import BlueButton from "../components/inputs/BlueButton";
 import LightBlueFileButton from "../components/inputs/BlueUploadButton";
 import {useNavigate} from 'react-router-dom';
-import account from "../models/User";
+import account from "../models/Account";
 
 type EditModeType = {
     [key: string]: boolean;

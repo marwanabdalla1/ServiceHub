@@ -14,7 +14,8 @@ import {
     Rating
 } from '@mui/material';
 import {GoStarFill} from "react-icons/go";
-import {ServiceProvider, DaysOfWeek} from '../models/ServiceProviderPreliminary';
+import {Account as ServiceProvider } from '../models/Account';
+import { DaysOfWeek, ServiceType, JobStatus, ResponseStatus, RequestStatus } from '../models/enums';
 import {styled} from '@mui/system';
 import SearchIcon from '@mui/icons-material/Search';
 import PinDropIcon from '@mui/icons-material/PinDrop';
@@ -22,16 +23,16 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import Breadcrumb from "../components/Breadcrumb";
 import LightBlueButton from "../components/inputs/BlueButton";
+import { ServiceOffering } from '../models/ServiceOffering';
+import account from '../models/Account';
 
 const mockProvider: ServiceProvider = {
     id: '1',
     firstName: 'Bob',
     lastName: 'Biker',
-    service: {
-        serviceType: 'Bike Repair',
-        hourlyRate: 15,
-        isCertified: true
-    },
+    serviceOfferings: [new ServiceOffering('offering0',
+        ServiceType.bikeRepair, new Date(), new Date(), new File([], "empty.txt", { type: "text/plain" }), 15, 'desc0', true,
+    'Munich', account, 1, 0.5, [])],
     location: 'Munich',
     availability: [
         {
@@ -103,7 +104,18 @@ const mockProvider: ServiceProvider = {
     ],
     rating: 4.6,
     reviewCount: 5,
-    description: 'Having tinkered with bikes since I was 16, I\'ve got the skills to fix yours up good as new.'
+    description: 'Having tinkered with bikes since I was 16, I\'ve got the skills to fix yours up good as new.',
+    email: 'bob.biker@biking.com',
+    address: 'Biking Avenue',
+    createdOn: new Date(),
+    phoneNumber: '07775000',
+    isProvider: true,
+    profileImageUrl: '/images/profiles/profile2.png',
+    isPremium: false,
+    notifications: [],
+    requestHistory: [],
+    jobHistory: []
+
 
 };
 
@@ -153,7 +165,7 @@ function ProviderProfilePage() {
                                 </Typography>
                             </Box>
                             <Typography variant="body2" color="text.secondary">
-                                {provider.service.serviceType}
+                                {provider.serviceOfferings[0].serviceType}
                             </Typography>
                             <Typography variant="body2" gutterBottom>
                                 {provider.location}
@@ -184,7 +196,7 @@ function ProviderProfilePage() {
                             <AccountBalanceWalletIcon sx={{mb: 1, mt:2}}/>
                             <Box sx={{flex: '1 1 30%', alignItems: 'center', mt:2}}>
                                 <Typography variant="body2">
-                                    Service Fee: €{provider.service.hourlyRate}/hour
+                                    Service Fee: €{provider.serviceOfferings[0].hourlyRate}/hour
                                 </Typography>
                                 <Typography variant="body2">
                                     Payment methods: Cash, PayPal {/*todo: add this to */}
