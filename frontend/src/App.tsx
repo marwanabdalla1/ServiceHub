@@ -14,8 +14,8 @@ import AddServicePage from './Pages/AddServicePage';
 import ReviewPage from "./Pages/CustomerReviewPage";
 
 // import ProviderProfilePage from "./Pages/ProviderProfilePage";
-import UserProfilePage from "./Pages/ProfileSettingPage";
-import ProfileSettingPage from "./Pages/ProfileSettingPage";
+// import UserProfilePage from "./Pages/ProfileSettingPage";
+// import ProfileSettingPage from "./Pages/ProfileSettingPage";
 
 import SelectAvailabilityPage from './Pages/SelectAvailabilityPage';
 
@@ -51,7 +51,7 @@ function MainRoutes() {
             {showNavBar && <NavigationBar/>}
             <Routes>
                 <Route path="/" element={<HomePage/>} />
-                <Route path="/setprofile" element={<ProfileSettingPage/>} />
+                {/* <Route path="/setprofile" element={<ProfileSettingPage/>} /> */}
                 <Route path="/customer_review" element={<ReviewPage/>}/>
                 <Route path="/login" element={<SignInPage/>}/>
                 <Route path="/signup" element={<SignUpPage/>}/>

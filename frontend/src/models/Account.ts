@@ -25,71 +25,56 @@ export type User = {
 };
 
 
-export class Account {
+export type Account = {
     id: string;
     firstName: string;
     lastName: string;
-    email: string;
-    phoneNumber: string;
-    address: string;
-    createdOn: Date;
+    email?: string;
+    phoneNumber?: string;
+    address?: string;
+    createdOn?: Date;
     profileImageUrl: string;
-    description: string;
-    location: string;
+    description?: string;
+    location?: string;
 
-    isProvider: boolean;
-    isPremium: boolean;
+    isProvider?: boolean;
+    isPremium?: boolean;
 
     rating: number;
-    reviewCount: number;
+    reviewCount?: number;
 
-    //foreign keys
+    // foreign keys
     serviceOfferings: ServiceOffering[];
-    availability: Availability[];
-    reviews: Review[];
-    notifications: Notification[];
-    requestHistory: ServiceRequest[];
-    jobHistory: Job[];
-
-    constructor(id: string, firstName: string, lastName: string, email: string, phoneNumber: string,
-        address: string,
-        createdOn: Date,
-        profileImageUrl: string,
-        description: string,
-        location: string,
-        isProvider: boolean,
-        isPremium: boolean,
-        serviceOfferings: ServiceOffering[],
-        availability: Availability[],
-        reviews: Review[],
-        rating: number,
-        reviewCount: number,
-        notifications: Notification[],
-        requestHistory: ServiceRequest[],
-        jobHistory: Job[]) {
-        this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.phoneNumber = phoneNumber;
-        this.address = address;
-        this.createdOn = createdOn;
-        this.profileImageUrl = profileImageUrl;
-        this.description = description;
-        this.location = location;
-        this.isProvider = isProvider;
-        this.isPremium = isPremium;
-        this.serviceOfferings = serviceOfferings;
-        this.availability = availability;
-        this.reviews = reviews;
-        this.rating = rating;
-        this.reviewCount = reviewCount;
-        this.notifications = notifications;
-        this.requestHistory = requestHistory;
-        this.jobHistory = jobHistory;
-    }
-
+    availability?: Availability[];
+    reviews?: Review[];
+    notifications?: Notification[];
+    requestHistory?: ServiceRequest[];
+    jobHistory?: Job[];
 };
+
+
+// export type Account = {
+//     id: string;
+//     firstName: string;
+//     lastName: string;
+//     email?: string;
+//     phoneNumber?: string;
+//     address?: string;
+//     createdOn?: Date;
+//     profileImageUrl?: string;
+//     description?: string;
+//     location?: string;
+//     isProvider: boolean;
+//     isPremium?: boolean;
+//     rating: number;
+//     reviewCount?: number;
+//     serviceOfferings?: ServiceOffering[];
+//     availability?: Availability[];
+//     reviews?: Review[];
+//     notifications?: Notification[];
+//     requestHistory?: ServiceRequest[];
+//     jobHistory?: Job[];
+// };
 
 
 export const users: User[] = [
@@ -233,10 +218,9 @@ const account: Account = {
 //Test-data to be removed, simply maintained in case required by original developer
 const bikeRepairService: ServiceOffering = {
     serviceOfferingId: "bikeRepair0",
-    serviceType: ServiceType.bikeRepair,
+    serviceType: "Bike Repair",
     description: "description0",
     location: "location0",
-    provider: account,
     hourlyRate: 50,
     isCertified: false,
     createdOn: new Date(),
@@ -244,17 +228,17 @@ const bikeRepairService: ServiceOffering = {
     certificate: new File([], "empty.txt", { type: "text/plain" }),
     baseDuration: 2,
     bufferTimeDuration: 0.5,
-    reviews: []
+    reviews: [],
+    rating: 4.5
 
 };
 
 //Test-data to be removed, simply maintained in case required by original developer
 const babysittingService: ServiceOffering = {
     serviceOfferingId: "babySitting0",
-    serviceType: ServiceType.babySitting,
+    serviceType: "Babysitting",
     description: "description1",
     location: "location1",
-    provider: account,
     hourlyRate: 50,
     isCertified: false,
     createdOn: new Date(),
@@ -262,7 +246,8 @@ const babysittingService: ServiceOffering = {
     certificate: new File([], "empty.txt", { type: "text/plain" }),
     baseDuration: 2,
     bufferTimeDuration: 0.5,
-    reviews: []
+    reviews: [],
+    rating: 4.5
 };
 
 //Test-data to be removed, simply maintained in case required by original developer
