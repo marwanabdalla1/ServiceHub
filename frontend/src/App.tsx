@@ -13,7 +13,7 @@ import HomePage from './Pages/HomePage';
 import AddServicePage from './Pages/AddServicePage';
 import ReviewPage from "./Pages/CustomerReviewPage";
 
-import ProviderProfilePage from "./Pages/ProviderProfilePage";
+// import ProviderProfilePage from "./Pages/ProviderProfilePage";
 import UserProfilePage from "./Pages/ProfileSettingPage";
 import ProfileSettingPage from "./Pages/ProfileSettingPage";
 
@@ -62,7 +62,7 @@ function MainRoutes() {
                 <Route path="/incomingRequests" element={<IncomingRequestsPage/>} />
                 <Route path="/addservice" element={<AddServicePage />} />
                 <Route path="*" element={<h1>Not Found</h1>} />
-                <Route path="/bob" element={<ProviderProfilePage/>}/>
+                {/* <Route path="/bob" element={<ProviderProfilePage/>}/> */}
                 <Route path="select-availability" element={<SelectAvailabilityPage/>} />
                 <Route path="/select-timeslot" element={<SelectTimeslot/>} />
                 <Route path="/update-timeslot" element={<UpdateTimeslot/>} />

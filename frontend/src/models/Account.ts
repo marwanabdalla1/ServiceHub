@@ -1,10 +1,10 @@
 // Define the type for the service object
-import { Availability, Review } from "./ServiceProviderPreliminary";
+import {  Review } from "./ServiceProviderPreliminary";
 import { ServiceOffering } from "./ServiceOffering";
 import { ServiceType } from "./enums";
 import { ServiceRequest } from "./ServiceRequest";
 import { Job } from "./Job";
-
+import { Availability } from "./Availability";
 
 //Candidate for deletion
 export type Service = {
