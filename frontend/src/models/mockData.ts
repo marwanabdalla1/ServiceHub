@@ -1,4 +1,3 @@
-
 import { Account } from './Account';
 
 export const users: Account[] = [
@@ -8,6 +7,7 @@ export const users: Account[] = [
         lastName: "Doe",
         profileImageUrl: "/images/profiles/profile1.png",
         rating: 4.5,
+        location: "Berlin, Germany",
         serviceOfferings: [
             {
                 serviceType: "bikeRepair",
@@ -23,6 +23,7 @@ export const users: Account[] = [
         lastName: "Smith",
         profileImageUrl: "/images/profiles/profile2.png",
         rating: 4.8,
+        location: "Hamburg, Germany",
         serviceOfferings: [
             {
                 serviceType: "houseCleaning",
@@ -38,6 +39,7 @@ export const users: Account[] = [
         lastName: "Brown",
         profileImageUrl: "/images/profiles/profile3.png",
         rating: 4.3,
+        location: "Munich, Germany",
         serviceOfferings: [
             {
                 serviceType: "babySitting",
@@ -53,6 +55,7 @@ export const users: Account[] = [
         lastName: "Davis",
         profileImageUrl: "/images/profiles/profile4.png",
         rating: 4.9,
+        location: "Frankfurt, Germany",
         serviceOfferings: [
             {
                 serviceType: "tutoring",
@@ -68,6 +71,7 @@ export const users: Account[] = [
         lastName: "Wilson",
         profileImageUrl: "/images/profiles/profile5.png",
         rating: 4.6,
+        location: "Dresden, Germany",
         serviceOfferings: [
             {
                 serviceType: "petSitting",
@@ -83,6 +87,7 @@ export const users: Account[] = [
         lastName: "Johnson",
         profileImageUrl: "/images/profiles/profile6.png",
         rating: 4.7,
+        location: "Cologne, Germany",
         serviceOfferings: [
             {
                 serviceType: "landScaping",
@@ -98,6 +103,7 @@ export const users: Account[] = [
         lastName: "Williams",
         profileImageUrl: "/images/profiles/profile7.png",
         rating: 4.4,
+        location: "Stuttgart, Germany",
         serviceOfferings: [
             {
                 serviceType: "homeRemodeling",
@@ -113,6 +119,7 @@ export const users: Account[] = [
         lastName: "Jones",
         profileImageUrl: "/images/profiles/profile8.png",
         rating: 4.8,
+        location: "Hanover, Germany",
         serviceOfferings: [
             {
                 serviceType: "movingServices",
@@ -128,6 +135,7 @@ export const users: Account[] = [
         lastName: "Biker",
         profileImageUrl: "/images/profiles/profile8.png",
         rating: 4.7,
+        location: "Mainz, Germany",
         serviceOfferings: [
             {
                 serviceType: "bikeRepair",

@@ -9,7 +9,12 @@ import Modal from "./inputs/Modal";
 import { Link } from "react-router-dom";
 import { Menu, MenuItem } from '@mui/material';
 
-const Navbar = () => {
+
+interface NavbarProps {
+  toggleDrawer: () => void;
+}
+
+const Navbar : React.FC<NavbarProps> = ({toggleDrawer}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -60,7 +65,9 @@ const Navbar = () => {
               <CiSearch className="h-6 w-6" />
             </button>
           </div>
+          <button onClick={toggleDrawer} >
           <FiFilter className="h-6 w-6 text-blue-500 ml-2" />
+          </button>
         </div>
 
         {/* Right Section: Provide Service Button and Icons */}

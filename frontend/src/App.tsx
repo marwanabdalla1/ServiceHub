@@ -48,7 +48,7 @@ function MainRoutes() {
 
     return (
         <div className="h-screen flex flex-col">
-            {showNavBar && <NavigationBar/>}
+            {showNavBar && <NavigationBar toggleDrawer={() => {}}/>}
             <Routes>
                 <Route path="/" element={<HomePage/>} />
                 {/* <Route path="/setprofile" element={<ProfileSettingPage/>} /> */}
