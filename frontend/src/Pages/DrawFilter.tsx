@@ -36,29 +36,46 @@ import BuildIcon from '@mui/icons-material/Build';
 import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
 
 interface DrawerFilterProps {
-    openDrawer: boolean;
-    toggleDrawer: () => void;
+  openDrawer: boolean;
+  toggleDrawer: () => void;
+  filterState: {
+    type: string;
+    priceRange: number[];
+    locations: string[];
+    isLicensed: boolean;
+  };
+  onPriceChange: (value: number[]) => void;
+  onLocationChange: (value: string[]) => void;
+  onTypeChange: (value: string) => void;
+  onLicensedChange: (value: boolean) => void;
+  onClearFilters: () => void;
 }
 
 const germanCities = [
   'Berlin', 'Munich', 'Hamburg', 'Cologne', 'Frankfurt', 'Stuttgart', 'Düsseldorf', 'Dortmund', 'Essen', 'Leipzig'
 ];
 
-export const DrawerFilter: React.FC<DrawerFilterProps> = ({toggleDrawer, openDrawer }) => {
-  const [open, setOpen] = React.useState(false);
-  const [type, setType] = React.useState('Bike Repair');
-  const [priceRange, setPriceRange] = React.useState<number[]>([15, 35]);
-  const [locations, setLocations] = React.useState<string[]>([]);
+export const DrawerFilter: React.FC<DrawerFilterProps> = ({
+  toggleDrawer, openDrawer, filterState, onPriceChange, onLocationChange, onTypeChange, onLicensedChange, onClearFilters
+}) => {
 
   const handlePriceChange = (event: Event, newValue: number | number[]) => {
-    setPriceRange(newValue as number[]);
+    onPriceChange(newValue as number[]);
   };
 
   const handleLocationChange = (event: SelectChangeEvent<string[]>) => {
     const {
       target: { value },
     } = event;
-    setLocations(typeof value === 'string' ? value.split(',') : value);
+    onLocationChange(typeof value === 'string' ? value.split(',') : value);
+  };
+
+  const handleTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    onTypeChange(event.target.value);
+  };
+
+  const handleLicensedChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    onLicensedChange(event.target.checked);
   };
 
   return (
@@ -97,10 +114,8 @@ export const DrawerFilter: React.FC<DrawerFilterProps> = ({toggleDrawer, openDra
                 Service type
               </FormLabel>
               <RadioGroup
-                value={type || ''}
-                onChange={(event) => {
-                  setType(event.target.value);
-                }}
+                value={filterState.type}
+                onChange={handleTypeChange}
               >
                 <Box
                   sx={{
@@ -158,7 +173,7 @@ export const DrawerFilter: React.FC<DrawerFilterProps> = ({toggleDrawer, openDra
                       <Radio
                         disableIcon
                         overlay
-                        checked={type === item.name}
+                        checked={filterState.type === item.name}
                         variant="outlined"
                         color="neutral"
                         value={item.name}
@@ -166,7 +181,7 @@ export const DrawerFilter: React.FC<DrawerFilterProps> = ({toggleDrawer, openDra
                         slotProps={{
                           action: {
                             sx: {
-                              ...(type === item.name && {
+                              ...(filterState.type === item.name && {
                                 borderWidth: 2,
                                 borderColor:
                                   'var(--joy-palette-primary-outlinedBorder)',
@@ -184,8 +199,6 @@ export const DrawerFilter: React.FC<DrawerFilterProps> = ({toggleDrawer, openDra
               </RadioGroup>
             </FormControl>
 
-           
-
             <Typography level="title-md" fontWeight="bold" sx={{ mt: 2 }}>
               Booking options
             </Typography>
@@ -198,17 +211,19 @@ export const DrawerFilter: React.FC<DrawerFilterProps> = ({toggleDrawer, openDra
                   Show service providers with verified credentials.
                 </FormHelperText>
               </Box>
-              <Switch />
+              <Switch
+                checked={filterState.isLicensed}
+                onChange={handleLicensedChange}
+              />
             </FormControl>
-
 
             <Typography level="title-md" fontWeight="bold" sx={{ mt: 2 }}>
               Price Range
             </Typography>
             <FormControl sx={{ width: '100%', mt: 2 }}>
               <Slider
-                sx = {{width: '90%', mx: 'auto'}}
-                value={priceRange}
+                sx={{ width: '90%', mx: 'auto' }}
+                value={filterState.priceRange}
                 onChange={handlePriceChange}
                 valueLabelDisplay="auto"
                 min={15}
@@ -228,7 +243,7 @@ export const DrawerFilter: React.FC<DrawerFilterProps> = ({toggleDrawer, openDra
             <FormControl sx={{ width: '100%', mt: 2 }}>
               <Select
                 multiple
-                value={locations}
+                value={filterState.locations}
                 onChange={handleLocationChange}
                 displayEmpty
                 renderValue={(selected) => (
@@ -262,15 +277,11 @@ export const DrawerFilter: React.FC<DrawerFilterProps> = ({toggleDrawer, openDra
             <Button
               variant="outlined"
               color="neutral"
-              onClick={() => {
-                setType('');
-                setPriceRange([15, 35]);
-                setLocations([]);
-              }}
+              onClick={onClearFilters}
             >
               Clear
             </Button>
-            <Button onClick={() => setOpen(false)}>Apply</Button>
+            <Button onClick={toggleDrawer}>Apply</Button>
           </Stack>
         </Sheet>
       </Drawer>
