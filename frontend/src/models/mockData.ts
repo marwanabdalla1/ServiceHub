@@ -10,7 +10,7 @@ export const users: Account[] = [
         location: "Berlin, Germany",
         serviceOfferings: [
             {
-                serviceType: "bikeRepair",
+                serviceType: "Bike Repair",
                 hourlyRate: 20.0,
                 rating: 4.5,
                 isCertified: true,
@@ -26,7 +26,7 @@ export const users: Account[] = [
         location: "Hamburg, Germany",
         serviceOfferings: [
             {
-                serviceType: "houseCleaning",
+                serviceType: "House Cleaning",
                 hourlyRate: 25.0,
                 rating: 4.8,
                 isCertified: true,
@@ -42,7 +42,7 @@ export const users: Account[] = [
         location: "Munich, Germany",
         serviceOfferings: [
             {
-                serviceType: "babySitting",
+                serviceType: "Baby Sitting",
                 hourlyRate: 15.0,
                 rating: 4.3,
                 isCertified: false,
@@ -58,7 +58,7 @@ export const users: Account[] = [
         location: "Frankfurt, Germany",
         serviceOfferings: [
             {
-                serviceType: "tutoring",
+                serviceType: "Tutoring",
                 hourlyRate: 30.0,
                 rating: 4.9,
                 isCertified: true,
@@ -74,7 +74,7 @@ export const users: Account[] = [
         location: "Dresden, Germany",
         serviceOfferings: [
             {
-                serviceType: "petSitting",
+                serviceType: "Pet Sitting",
                 hourlyRate: 18.0,
                 rating: 4.6,
                 isCertified: false,
@@ -90,7 +90,7 @@ export const users: Account[] = [
         location: "Cologne, Germany",
         serviceOfferings: [
             {
-                serviceType: "landScaping",
+                serviceType: "Landscaping Service",
                 hourlyRate: 22.0,
                 rating: 4.7,
                 isCertified: true,
@@ -106,7 +106,7 @@ export const users: Account[] = [
         location: "Stuttgart, Germany",
         serviceOfferings: [
             {
-                serviceType: "homeRemodeling",
+                serviceType: "Home Remodeling",
                 hourlyRate: 35.0,
                 rating: 4.4,
                 isCertified: true,
@@ -122,7 +122,7 @@ export const users: Account[] = [
         location: "Hanover, Germany",
         serviceOfferings: [
             {
-                serviceType: "movingServices",
+                serviceType: "Moving Service",
                 hourlyRate: 28.0,
                 rating: 4.8,
                 isCertified: true,
@@ -138,7 +138,7 @@ export const users: Account[] = [
         location: "Mainz, Germany",
         serviceOfferings: [
             {
-                serviceType: "bikeRepair",
+                serviceType: "Bike Repair",
                 hourlyRate: 25.0,
                 rating: 4.7,
                 isCertified: true,

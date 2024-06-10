@@ -14,7 +14,7 @@ interface JobRowProps {
 const JobRow: React.FC<JobRowProps> = ({ job, onViewDetails }) => {
   return (
     <TableRow>
-      <TableCell>{ServiceType[job.serviceType]}</TableCell>
+      <TableCell>{job.serviceType}</TableCell>
       <TableCell>{job.status}</TableCell>
       <TableCell>{job.appointmentTime.toLocaleDateString()}</TableCell>
       <TableCell>

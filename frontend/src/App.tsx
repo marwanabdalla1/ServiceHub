@@ -1,5 +1,5 @@
 import React from 'react';
-import {BrowserRouter, Routes, Route, useLocation} from "react-router-dom";
+import {BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import FilterPage from './Pages/FilterPage';
 import ProfilePage from './Pages/ProfilePage';
 import SignInPage from './Pages/LoginPage';
@@ -25,7 +25,6 @@ import {BookingProvider} from "./context/BookingContext";
 import UpdateProfile from "./Pages/bookingSteps/UpdateProfile";
 import ReviewAndConfirm from "./Pages/bookingSteps/ReviewAndConfirm";
 import CreateAccountOrSignIn from "./Pages/bookingSteps/CreateAccountOrSignIn";
-import ListsLandingPage from "./Pages/listsLandingPage";
 
 import { RequestProvider } from './context/RequestContext';
 
@@ -48,7 +47,7 @@ function MainRoutes() {
 
     return (
         <div className="h-screen flex flex-col">
-            {showNavBar && <NavigationBar toggleDrawer={() => {}}/>}
+            {showNavBar && <NavigationBar toggleDrawer={() => {}} onChange={() => {}} onSearch={() => {}} search={""}/>}
             <Routes>
                 <Route path="/" element={<HomePage/>} />
                 {/* <Route path="/setprofile" element={<ProfileSettingPage/>} /> */}
@@ -69,7 +68,6 @@ function MainRoutes() {
                 <Route path="/create-account-or-sign-in" element={<CreateAccountOrSignIn />} />
                 <Route path="/update-profile" element={<UpdateProfile />} />
                 <Route path="/review-and-confirm" element={<ReviewAndConfirm />} />
-                <Route path="/listsLandingPage" element={<ListsLandingPage />} />
 
 
             </Routes>
