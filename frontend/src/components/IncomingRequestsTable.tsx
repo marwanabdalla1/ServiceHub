@@ -108,7 +108,7 @@ export default function IncomingRequestTable() {
         </Box>
         <Modal show={isModalOpen} onClose={closeModal}>
           <div className='modal-content'>
-            <h1 className='modalTitle'>Request Detail</h1>
+            <h3 className='modalTitle'>Request Detail</h3>
             {selectedRequest && <IncomingRequestMediaCard request={selectedRequest} 
                                                           onClose={closeModal} />}
           </div>

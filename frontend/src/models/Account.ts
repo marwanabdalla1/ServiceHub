@@ -1,9 +1,10 @@
 // Define the type for the service object
-import { Availability, Review } from "./ServiceProviderPreliminary";
+import { Availability } from "./Availability";
 import { ServiceOffering } from "./ServiceOffering";
 import { ServiceType } from "./enums";
 import { ServiceRequest } from "./ServiceRequest";
 import { Job } from "./Job";
+import { Review } from "./Review";
 
 
 //Candidate for deletion
@@ -231,7 +232,7 @@ const account: Account = {
 
 
 //Test-data to be removed, simply maintained in case required by original developer
-const bikeRepairService: ServiceOffering = {
+export const bikeRepairService: ServiceOffering = {
     serviceOfferingId: "bikeRepair0",
     serviceType: ServiceType.bikeRepair,
     description: "description0",

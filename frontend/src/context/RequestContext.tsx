@@ -10,6 +10,7 @@ interface RequestDetails {
     createdOn: Date;
     serviceType: ServiceType;
     appointmentTime: Date;
+    updatedAppointmentTime: Date | null;
     uploads: File[];
     comment: string;
     serviceFee: number;
@@ -49,6 +50,7 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
         createdOn: new Date(),
         serviceType: ServiceType.tutoring,
         appointmentTime: new Date(),
+        updatedAppointmentTime: null,
         uploads: [],
         comment: 'default Request Context',
         serviceFee: 0,
@@ -60,7 +62,9 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
         requestedBy: account,
         rating: -1,
         profileImageUrl: account.profileImageUrl
+
     });
+    
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
     const [availableTimes, setAvailableTimes] = useState<string[]>([

@@ -28,6 +28,7 @@ import CreateAccountOrSignIn from "./Pages/bookingSteps/CreateAccountOrSignIn";
 import ListsLandingPage from "./Pages/listsLandingPage";
 
 import { RequestProvider } from './context/RequestContext';
+import ProposeNewtimePage from './Pages/ProposeNewTimePage';
 
 function App() {
     return (
@@ -70,6 +71,7 @@ function MainRoutes() {
                 <Route path="/update-profile" element={<UpdateProfile />} />
                 <Route path="/review-and-confirm" element={<ReviewAndConfirm />} />
                 <Route path="/listsLandingPage" element={<ListsLandingPage />} />
+                <Route path="/proposeNewTime" element={<ProposeNewtimePage />} />
 
 
             </Routes>
