@@ -9,16 +9,7 @@ import Modal from "./inputs/Modal";
 import { Link } from "react-router-dom";
 import { Menu, MenuItem } from '@mui/material';
 
-
-
-interface NavbarProps {
-  toggleDrawer: () => void;
-  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onSearch: () => void;
-  search: string;
-}
-
-const Navbar : React.FC<NavbarProps> = ({toggleDrawer, onChange, onSearch, search}) => {
+const Navbar = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -37,9 +28,6 @@ const Navbar : React.FC<NavbarProps> = ({toggleDrawer, onChange, onSearch, searc
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
-
-
-
 
   return (
     <nav className="bg-blue-300 shadow-md h-20">
@@ -65,18 +53,14 @@ const Navbar : React.FC<NavbarProps> = ({toggleDrawer, onChange, onSearch, searc
           <div className="flex items-center flex-grow">
             <input
               type="text"
-              placeholder={ "Search for a service" }
+              placeholder="Search for a service"
               className="flex-grow px-2 py-1 rounded-l-full focus:outline-none"
-              value={search}
-              onChange={onChange}
             />
-            <button className="text-blue-500" onClick={onSearch}>
+            <button className="text-blue-500">
               <CiSearch className="h-6 w-6" />
             </button>
           </div>
-          <button onClick={toggleDrawer} >
           <FiFilter className="h-6 w-6 text-blue-500 ml-2" />
-          </button>
         </div>
 
         {/* Right Section: Provide Service Button and Icons */}

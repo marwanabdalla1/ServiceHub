@@ -1,12 +1,12 @@
 
 export enum DaysOfWeek {
-    Sunday = "Sunday",
-    Monday = "Monday",
-    Tuesday = "Tuesday",
-    Wednesday = "Wednesday",
-    Thursday = "Thursday",
-    Friday = "Friday",
-    Saturday = "Saturday"
+    Sunday,    // 0
+    Monday,    // 1
+    Tuesday,   // 2
+    Wednesday, // 3
+    Thursday,  // 4
+    Friday,    // 5
+    Saturday   // 6
 }
 
 export enum starCount {
@@ -20,31 +20,31 @@ export enum starCount {
 }
 
 export enum JobStatus {
-    completed = "completed",
-    cancelled = "cancelled",
-    open = "open"
+    completed, // 0
+    cancelled, // 1
+    open, // 2
 }
 
 export enum ResponseStatus {
-    accept = "accepted",
-    decline = "declined",
-    proposeNewTime = "new time proposed"
+    accept, // 0
+    decline, // 1
+    proposeNewTime // 2
 }
 
 export enum RequestStatus {
-    accepted = "accepted",
-    pending = "pending",
-    cancelled = "cancelled",
-    declined = "declined"
+    accepted, // 0
+    pending, // 1
+    cancelled, // 2
+    declined, // 3
 }
 
 export enum ServiceType {
-    bikeRepair = "Bike Repair",
-    houseCleaning = "House Cleaning",
-    babySitting = "Baby Sitting",
-    tutoring = "Tutoring",
-    petSitting = "Pet Sitting",
-    landscapingServices = "Landscaping Service",
-    homeRemodeling = "Home Remodeling",
-    movingServices = "Moving Service"
+    bikeRepair, // 0
+    houseCleaning, // 1
+    babySitting, // 2
+    tutoring, // 3
+    petSitting, // 4
+    landscapingServices, // 5
+    homeRemodeling, // 6
+    movingServices, // 7
 }

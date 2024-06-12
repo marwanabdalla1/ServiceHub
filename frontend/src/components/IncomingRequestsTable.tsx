@@ -53,29 +53,9 @@ function createRequest(
   };
 }
 
-const accounts: Account[] = [
-  {
-    id: '11',
-    firstName: 'Max',
-    lastName: 'Mustermann',
-    email: 'example.email@example.com',
-    phoneNumber: '911',
-    address: 'Arcisstraße',
-    profileImageUrl: 'stringImage',
-    description: 'desc',
-    location: 'loc',
-    isProvider: false,
-    isPremium: false,
-    rating: 5,
-    reviewCount: 40,
-    serviceOfferings: [],
-    availability: [],
-    reviews: [],
-    notifications: [],
-    requestHistory: [],
-    jobHistory: []
-  }
-];
+const accounts: Account [] = [
+  new Account('11', 'Max', 'Mustermann', 'example.email@example.com', '911', 'Arcisstraße', new Date('2024-05-11'), 'stringImage', 'desc', 'loc', false, false, [], [], [], 5, 40, [], [], [])
+]
 const rows: Request[] = [
   createRequest('1', RequestStatus.pending, new Date('2024-05-11'), ServiceType.bikeRepair, new Date('2024-05-11'), [] , 'comment 1', 12, 30, null, accounts[0],accounts[0], 5,'../../images/profiles/profile3.png'),
   createRequest('2', RequestStatus.pending, new Date('2024-05-12'), ServiceType.babySitting, new Date('2024-05-11'), [], 'comment 2', 13, 30, null, accounts[0], accounts[0], 4.99, '../../images/profiles/profile2.png'),

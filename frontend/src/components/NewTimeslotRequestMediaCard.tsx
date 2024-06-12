@@ -10,6 +10,7 @@ import { GoStarFill } from 'react-icons/go';
 import BlackButton from './inputs/blackbutton';
 import { RequestStatus, ServiceType } from '../models/enums';
 import { Job } from '../models/Job';
+import { generateId } from './helperFunctions';
 import { useNavigate } from "react-router-dom";
 import { useRequest } from '../context/RequestContext';
 
@@ -95,7 +96,7 @@ const NewTimeslotRequestMediaCard: React.FC<MediaCardProps> = ({ request, onClos
             Request ID: {request.serviceRequestId}
           </Typography>
           <Typography variant="body2">
-            Service Type: {request.serviceType}
+            Service Type: {ServiceType[request.serviceType]}
           </Typography>
           <Typography variant="body2">
             Appointment Time: {request.appointmentTime.toLocaleString()}
