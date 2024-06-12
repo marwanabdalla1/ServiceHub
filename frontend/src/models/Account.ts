@@ -1,11 +1,10 @@
-// Define the type for the service object
-import { Availability } from "./Availability";
+//Define the type for the service object
+import { Review } from "./ServiceProviderPreliminary";
 import { ServiceOffering } from "./ServiceOffering";
 import { ServiceType } from "./enums";
 import { ServiceRequest } from "./ServiceRequest";
 import { Job } from "./Job";
-import { Review } from "./Review";
-
+import { Availability } from "./Availability";
 
 //Candidate for deletion
 export type Service = {
@@ -26,110 +25,193 @@ export type User = {
 };
 
 
-export class Account {
+export type Account = {
     id: string;
     firstName: string;
     lastName: string;
-    email: string;
-    phoneNumber: string;
-    address: string;
-    createdOn: Date;
+    email?: string;
+    phoneNumber?: string;
+    address?: string;
+    createdOn?: Date;
     profileImageUrl: string;
-    description: string;
-    location: string;
+    description?: string;
+    location?: string;
 
-    isProvider: boolean;
-    isPremium: boolean;
+    isProvider?: boolean;
+    isPremium?: boolean;
 
     rating: number;
-    reviewCount: number;
+    reviewCount?: number;
 
-    //foreign keys
+    // foreign keys
     serviceOfferings: ServiceOffering[];
-    availability: Availability[];
-    reviews: Review[];
-    notifications: Notification[];
-    requestHistory: ServiceRequest[];
-    jobHistory: Job[];
-
-    constructor(id: string, firstName: string, lastName: string, email: string, phoneNumber: string,
-        address: string,
-        createdOn: Date,
-        profileImageUrl: string,
-        description: string,
-        location: string,
-        isProvider: boolean,
-        isPremium: boolean,
-        serviceOfferings: ServiceOffering[],
-        availability: Availability[],
-        reviews: Review[],
-        rating: number,
-        reviewCount: number,
-        notifications: Notification[],
-        requestHistory: ServiceRequest[],
-        jobHistory: Job[]) {
-        this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.phoneNumber = phoneNumber;
-        this.address = address;
-        this.createdOn = createdOn;
-        this.profileImageUrl = profileImageUrl;
-        this.description = description;
-        this.location = location;
-        this.isProvider = isProvider;
-        this.isPremium = isPremium;
-        this.serviceOfferings = serviceOfferings;
-        this.availability = availability;
-        this.reviews = reviews;
-        this.rating = rating;
-        this.reviewCount = reviewCount;
-        this.notifications = notifications;
-        this.requestHistory = requestHistory;
-        this.jobHistory = jobHistory;
-    }
-
+    availability?: Availability[];
+    reviews?: Review[];
+    notifications?: Notification[];
+    requestHistory?: ServiceRequest[];
+    jobHistory?: Job[];
 };
 
 
-export const users: User[] = [
+// export type Account = {
+//     id: string;
+//     firstName: string;
+//     lastName: string;
+//     email?: string;
+//     phoneNumber?: string;
+//     address?: string;
+//     createdOn?: Date;
+//     profileImageUrl?: string;
+//     description?: string;
+//     location?: string;
+//     isProvider: boolean;
+//     isPremium?: boolean;
+//     rating: number;
+//     reviewCount?: number;
+//     serviceOfferings?: ServiceOffering[];
+//     availability?: Availability[];
+//     reviews?: Review[];
+//     notifications?: Notification[];
+//     requestHistory?: ServiceRequest[];
+//     jobHistory?: Job[];
+// };
+
+
+
+
+//Test-data to be removed, simply maintained in case required by original developer
+const account: Account = {
+    id: "1234325413",
+    firstName: "John",
+    lastName: "Doe",
+    email: "john.doe@example.com",
+    phoneNumber: "1234567890",
+    address: "123 Main St",
+    createdOn: new Date(),
+    profileImageUrl: "/images/profiles/profile1.png",
+    description: "Professional bike repair service",
+    location: "New York, NY",
+    isProvider: false,
+    isPremium: true,
+    serviceOfferings: [],
+    availability: [],
+    reviews: [],
+    requestHistory: [],
+    jobHistory: [],
+    notifications: [],
+    rating: 4.5,
+    reviewCount: 100,
+};
+
+
+//Test-data to be removed, simply maintained in case required by original developer
+const bikeRepairService: ServiceOffering = {
+    serviceOfferingId: "bikeRepair0",
+    serviceType: "Bike Repair",
+    description: "description0",
+    location: "location0",
+    hourlyRate: 50,
+    isCertified: false,
+    createdOn: new Date(),
+    lastUpdatedOn: new Date(),
+    certificate: new File([], "empty.txt", { type: "text/plain" }),
+    baseDuration: 2,
+    bufferTimeDuration: 0.5,
+    reviews: [],
+    rating: 4.5
+
+};
+
+//Test-data to be removed, simply maintained in case required by original developer
+const babysittingService: ServiceOffering = {
+    serviceOfferingId: "babySitting0",
+    serviceType: "Babysitting",
+    description: "description1",
+    location: "location1",
+    hourlyRate: 50,
+    isCertified: false,
+    createdOn: new Date(),
+    lastUpdatedOn: new Date(),
+    certificate: new File([], "empty.txt", { type: "text/plain" }),
+    baseDuration: 2,
+    bufferTimeDuration: 0.5,
+    reviews: [],
+    rating: 4.5
+};
+
+//Test-data to be removed, simply maintained in case required by original developer
+account.serviceOfferings.push(bikeRepairService);
+account.serviceOfferings.push(babysittingService);
+
+export default account;
+
+export const users: Account[] = [
     {
-        userId: 1,
+        id: "1",
         firstName: "John",
         lastName: "Doe",
-        service: {
-            serviceType: "bikeRepair",
-            rating: 4.5,
-            hourlyRating: 20.0,
-            isLicensed: true,
-        },
-        imageUrl: "/images/profiles/profile1.png",
+        email: "john.doe@mail.com",
+        phoneNumber: "1234567890",
+        address: "123 Main St",
+        createdOn: new Date(),
+        profileImageUrl: "/images/profiles/profile1.png",
+        description: "Professional bike repair service",
+        location: "New York, NY",
+        isProvider: false,
+        isPremium: true,
+        serviceOfferings: [bikeRepairService],
+        availability: [],
+        reviews: [],
+        requestHistory: [],
+        jobHistory: [],
+        notifications: [],
+        rating: 4.5,
+        reviewCount: 100,
     },
     {
-        userId: 2,
+        id: "2",
         firstName: "Jane",
         lastName: "Smith",
-        service: {
-            serviceType: "houseCleaning",
-            rating: 4.8,
-            hourlyRating: 25.0,
-            isLicensed: true,
-        },
-        imageUrl: "/images/profiles/profile2.png",
+        email: "jane.smith@mail.com",
+        phoneNumber: "1234567890",
+        address: "123 Main St",
+        createdOn: new Date(),
+        profileImageUrl: "/images/profiles/profile2.png",
+        description: "House cleaning service",
+        location: "New York, NY",
+        isProvider: false,
+        isPremium: true,
+        serviceOfferings: [babysittingService],
+        availability: [],
+        reviews: [],
+        requestHistory: [],
+        jobHistory: [],
+        notifications: [],
+        rating: 4.8,
+        reviewCount: 100,
     },
     {
-        userId: 3,
+        id: "3",
         firstName: "Robert",
         lastName: "Brown",
-        service: {
-            serviceType: "babySitting",
-            rating: 4.3,
-            hourlyRating: 15.0,
-            isLicensed: false,
-        },
-        imageUrl: "/images/profiles/profile3.png",
-    },
+        email: "robert.brown@mail.com",
+        phoneNumber: "1234567890",
+        address: "123 Main St",
+        createdOn: new Date(),
+        profileImageUrl: "/images/profiles/profile3.png",
+        description: "House cleaning service",
+        location: "New York, NY",
+        isProvider: false,
+        isPremium: true,
+        serviceOfferings: [babysittingService],
+        availability: [],
+        reviews: [],
+        requestHistory: [],
+        jobHistory: [],
+        notifications: [],
+        rating: 4.8,
+        reviewCount: 100,
+    },/*
     {
         userId: 4,
         firstName: "Emily",
@@ -202,72 +284,6 @@ export const users: User[] = [
             isLicensed: true,
         },
         imageUrl: "/images/profiles/profile8.png",
-    },
+    },*/
 
 ];
-
-//Test-data to be removed, simply maintained in case required by original developer
-const account: Account = {
-    id: "1234325413",
-    firstName: "John",
-    lastName: "Doe",
-    email: "john.doe@example.com",
-    phoneNumber: "1234567890",
-    address: "123 Main St",
-    createdOn: new Date(),
-    profileImageUrl: "/images/profiles/profile1.png",
-    description: "Professional bike repair service",
-    location: "New York, NY",
-    isProvider: false,
-    isPremium: true,
-    serviceOfferings: [],
-    availability: [],
-    reviews: [],
-    requestHistory: [],
-    jobHistory: [],
-    notifications: [],
-    rating: 4.5,
-    reviewCount: 100,
-};
-
-
-//Test-data to be removed, simply maintained in case required by original developer
-export const bikeRepairService: ServiceOffering = {
-    serviceOfferingId: "bikeRepair0",
-    serviceType: ServiceType.bikeRepair,
-    description: "description0",
-    location: "location0",
-    provider: account,
-    hourlyRate: 50,
-    isCertified: false,
-    createdOn: new Date(),
-    lastUpdatedOn: new Date(),
-    certificate: new File([], "empty.txt", { type: "text/plain" }),
-    baseDuration: 2,
-    bufferTimeDuration: 0.5,
-    reviews: []
-
-};
-
-//Test-data to be removed, simply maintained in case required by original developer
-const babysittingService: ServiceOffering = {
-    serviceOfferingId: "babySitting0",
-    serviceType: ServiceType.babySitting,
-    description: "description1",
-    location: "location1",
-    provider: account,
-    hourlyRate: 50,
-    isCertified: false,
-    createdOn: new Date(),
-    lastUpdatedOn: new Date(),
-    certificate: new File([], "empty.txt", { type: "text/plain" }),
-    baseDuration: 2,
-    bufferTimeDuration: 0.5,
-    reviews: []
-};
-
-//Test-data to be removed, simply maintained in case required by original developer
-account.serviceOfferings.push(bikeRepairService);
-account.serviceOfferings.push(babysittingService);
-
-export default account;

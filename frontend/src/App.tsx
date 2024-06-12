@@ -1,5 +1,5 @@
 import React from 'react';
-import {BrowserRouter, Routes, Route, useLocation} from "react-router-dom";
+import {BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import FilterPage from './Pages/FilterPage';
 import ProfilePage from './Pages/ProfilePage';
 import SignInPage from './Pages/LoginPage';
@@ -8,14 +8,13 @@ import NavigationBar from './components/Navbar';
 import JobHistoryPage from './Pages/JobHistoryPage';
 import RequestHistoryPage from './Pages/RequestHistoryPage';
 import IncomingRequestsPage from './Pages/IncomingRequestsPage';
-
 import HomePage from './Pages/HomePage';
 import AddServicePage from './Pages/AddServicePage';
 import ReviewPage from "./Pages/CustomerReviewPage";
 
-import ProviderProfilePage from "./Pages/ProviderProfilePage";
-import UserProfilePage from "./Pages/ProfileSettingPage";
-import ProfileSettingPage from "./Pages/ProfileSettingPage";
+// import ProviderProfilePage from "./Pages/ProviderProfilePage";
+// import UserProfilePage from "./Pages/ProfileSettingPage";
+// import ProfileSettingPage from "./Pages/ProfileSettingPage";
 
 import SelectAvailabilityPage from './Pages/SelectAvailabilityPage';
 
@@ -25,7 +24,7 @@ import {BookingProvider} from "./context/BookingContext";
 import UpdateProfile from "./Pages/bookingSteps/UpdateProfile";
 import ReviewAndConfirm from "./Pages/bookingSteps/ReviewAndConfirm";
 import CreateAccountOrSignIn from "./Pages/bookingSteps/CreateAccountOrSignIn";
-import ListsLandingPage from "./Pages/listsLandingPage";
+// import ListsLandingPage from "./Pages/listsLandingPage";
 
 import { RequestProvider } from './context/RequestContext';
 import ProposeNewtimePage from './Pages/ProposeNewTimePage';
@@ -45,14 +44,14 @@ function App() {
 
 function MainRoutes() {
     const location = useLocation();
-    const showNavBar = location.pathname !== "/login" && location.pathname !== "/signup";
+    const showNavBar = location.pathname !== "/login" && location.pathname !== "/signup" && location.pathname !=="/filter";
 
     return (
         <div className="h-screen flex flex-col">
-            {showNavBar && <NavigationBar/>}
+            {showNavBar && <NavigationBar toggleDrawer={() => {}} onChange={() => {}} onSearch={() => {}} search={""}/>}
             <Routes>
                 <Route path="/" element={<HomePage/>} />
-                <Route path="/setprofile" element={<ProfileSettingPage/>} />
+                {/* <Route path="/setprofile" element={<ProfileSettingPage/>} /> */}
                 <Route path="/customer_review" element={<ReviewPage/>}/>
                 <Route path="/login" element={<SignInPage/>}/>
                 <Route path="/signup" element={<SignUpPage/>}/>
@@ -63,15 +62,13 @@ function MainRoutes() {
                 <Route path="/incomingRequests" element={<IncomingRequestsPage/>} />
                 <Route path="/addservice" element={<AddServicePage />} />
                 <Route path="*" element={<h1>Not Found</h1>} />
-                <Route path="/bob" element={<ProviderProfilePage/>}/>
+                {/* <Route path="/bob" element={<ProviderProfilePage/>}/> */}
                 <Route path="select-availability" element={<SelectAvailabilityPage/>} />
                 <Route path="/select-timeslot" element={<SelectTimeslot/>} />
                 <Route path="/update-timeslot" element={<UpdateTimeslot/>} />
                 <Route path="/create-account-or-sign-in" element={<CreateAccountOrSignIn />} />
                 <Route path="/update-profile" element={<UpdateProfile />} />
                 <Route path="/review-and-confirm" element={<ReviewAndConfirm />} />
-                <Route path="/listsLandingPage" element={<ListsLandingPage />} />
-                <Route path="/proposeNewTime" element={<ProposeNewtimePage />} />
 
 
             </Routes>

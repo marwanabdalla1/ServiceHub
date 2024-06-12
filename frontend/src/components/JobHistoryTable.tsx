@@ -50,7 +50,7 @@ function createJob(
   };
 }
 
-//Candidate for deletion
+
 const serviceRequests: ServiceRequest[] = [
   new ServiceRequest('sr1', RequestStatus.accepted, new Date(), ServiceType.babySitting, new Date(), [new File([], "empty.txt", { type: "text/plain" })], 
   'something', 12, 30,  null, account, account, 5, '../../images/profiles/profile3.png'),

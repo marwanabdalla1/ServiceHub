@@ -3,7 +3,7 @@ import NavigationBar from '../components/Navbar';
 import MediaCard from '../components/Card';
 import {users, User} from '../models/Account';
 import RequestHistoryTable from '../components/RequestHistoryTable';
-import Sidebar from '../components/SideBarLists';
+import { Request } from '../models/Request';
 
 
 function RequestHistoryPage() {
