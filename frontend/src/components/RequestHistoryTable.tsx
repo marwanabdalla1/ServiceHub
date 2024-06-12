@@ -1,5 +1,5 @@
 import * as React from 'react';
-import Box from '@mui/material/Box'; // Changed import
+import Box from '@mui/material/Box';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -12,39 +12,55 @@ import Breadcrumbs from '@mui/material/Breadcrumbs';
 import Link from '@mui/material/Link';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import MediaCard from './RequestCard';
-import { Request } from '../models/Request';
-import RequestRow from './RequestRow';
+import { ServiceRequest as Request } from '../models/ServiceRequest';
+import RequestRow from './RequestRow'
+import {ServiceType, RequestStatus} from '../models/enums'
+import { Account } from '../models/Account';
+import { Job } from '../models/Job';
 
 function createRequest(
-  requestId: string,
-  serviceType: string,
+  serviceRequestId: string,
+  requestStatus: RequestStatus,
+  createdOn: Date,
+  serviceType: ServiceType,
   appointmentTime: Date,
-  serviceFee: string,
-  status: string,
-  description: string,
-  requestor: string,
-  requestorImage: string,
+  uploads: File[],
+  comment: string,
+  serviceFee: number,
+  duration: number,
+  job: Job | null,
+  provider: Account,
+  requestedBy: Account,
   rating: number,
-  publishedDate: Date
+  profileImageUrl: string,
 ): Request {
   return {
-    requestId,
+    serviceRequestId,
+    requestStatus,
+    createdOn,
     serviceType,
     appointmentTime,
+    uploads,
+    comment,
     serviceFee,
-    status,
-    description,
-    requestor,
-    requestorImage,
+    duration,
+    job,
+    provider,
+    requestedBy,
     rating,
-    publishedDate
+    profileImageUrl,
   };
 }
 
+
+const accounts: Account [] = [
+  new Account('11', 'Max', 'Mustermann', 'example.email@example.com', '911', 'Arcisstraße', new Date('2024-05-11'), 'stringImage', 'desc', 'loc', false, false, [], [], [], 5, 40, [], [], [])
+]
+
 const rows: Request[] = [
-  createRequest('1', 'Bike Repair', new Date('2024-05-11'), '50', 'Open', 'Description 1', 'John Doe', '../../images/profiles/profile3.png', 4.99, new Date('2024-05-13')),
-  createRequest('2', 'Car Wash', new Date('2024-05-12'), '30', 'Completed', 'Description 2', 'Jane Smith', '../../images/profiles/profile2.png', 5, new Date('2024-05-13')),
-  createRequest('3', 'Plumbing', new Date('2024-05-13'), '100', 'Pending', 'Description 3', 'Alice Johnson', '../../images/profiles/profile1.png',  3, new Date('2024-05-13')),
+  createRequest('1', RequestStatus.pending, new Date('2024-05-11'), ServiceType.bikeRepair, new Date('2024-05-11'), [] , 'comment 1', 12, 30, null, accounts[0],accounts[0], 5,'../../images/profiles/profile3.png'),
+  createRequest('2', RequestStatus.pending, new Date('2024-05-12'), ServiceType.babySitting, new Date('2024-05-11'), [], 'comment 2', 13, 30, null, accounts[0], accounts[0], 4.99, '../../images/profiles/profile2.png'),
+  createRequest('3', RequestStatus.pending, new Date('2024-05-13'), ServiceType.houseCleaning, new Date('2024-05-11'), [], 'comment 3', 2001, 3, null, accounts[0], accounts[0], 4.5, '../../images/profiles/profile1.png'),
 ];
 
 export default function RequestHistoryTable() {

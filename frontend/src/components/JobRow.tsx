@@ -4,7 +4,7 @@ import TableCell from '@mui/material/TableCell';
 import Button from '@mui/material/Button';
 import { Job } from '../models/Job';
 import BlackButton from './inputs/blackbutton';
-import { ServiceType } from '../models/enums';
+import { ServiceType, JobStatus } from '../models/enums';
 
 interface JobRowProps {
   job: Job;

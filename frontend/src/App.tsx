@@ -8,7 +8,6 @@ import NavigationBar from './components/Navbar';
 import JobHistoryPage from './Pages/JobHistoryPage';
 import RequestHistoryPage from './Pages/RequestHistoryPage';
 import IncomingRequestsPage from './Pages/IncomingRequestsPage';
-
 import HomePage from './Pages/HomePage';
 import AddServicePage from './Pages/AddServicePage';
 import ReviewPage from "./Pages/CustomerReviewPage";
@@ -25,8 +24,10 @@ import {BookingProvider} from "./context/BookingContext";
 import UpdateProfile from "./Pages/bookingSteps/UpdateProfile";
 import ReviewAndConfirm from "./Pages/bookingSteps/ReviewAndConfirm";
 import CreateAccountOrSignIn from "./Pages/bookingSteps/CreateAccountOrSignIn";
+// import ListsLandingPage from "./Pages/listsLandingPage";
 
 import { RequestProvider } from './context/RequestContext';
+import ProposeNewtimePage from './Pages/ProposeNewTimePage';
 
 function App() {
     return (
