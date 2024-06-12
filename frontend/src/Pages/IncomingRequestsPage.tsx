@@ -3,7 +3,6 @@ import NavigationBar from '../components/Navbar';
 import MediaCard from '../components/Card';
 import {users, User} from '../models/Account';
 import IncomingRequestsTable from '../components/IncomingRequestsTable';
-import Sidebar from '../components/SideBarLists';
 
 
 function IncomingRequestsPage() {

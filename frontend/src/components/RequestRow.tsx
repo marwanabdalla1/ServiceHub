@@ -14,7 +14,7 @@ interface RequestRowProps {
 const RequestRow: React.FC<RequestRowProps> = ({ request, onViewDetails }) => {
   return (
     <TableRow>
-      <TableCell>{ServiceType[request.serviceType]}</TableCell>
+      <TableCell>{request.serviceType}</TableCell>
       <TableCell>{RequestStatus[request.requestStatus]}</TableCell>
       <TableCell>{request.appointmentTime.toLocaleDateString()}</TableCell>
       <TableCell>

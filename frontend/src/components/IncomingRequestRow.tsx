@@ -14,7 +14,7 @@ interface IncomingRequestRowProps {
 const RequestRow: React.FC<IncomingRequestRowProps> = ({ request, onViewDetails }) => {
   return (
     <TableRow>
-      <TableCell>{ServiceType[request.serviceType]}</TableCell>
+      <TableCell>{request.serviceType}</TableCell>
       <TableCell>{request.createdOn.toLocaleDateString()}</TableCell>
       <TableCell>
         <BlackButton text="View" onClick={() => onViewDetails(request)}/>

@@ -96,7 +96,7 @@ const NewTimeslotRequestMediaCard: React.FC<MediaCardProps> = ({ request, onClos
             Request ID: {request.serviceRequestId}
           </Typography>
           <Typography variant="body2">
-            Service Type: {ServiceType[request.serviceType]}
+            Service Type: {request.serviceType}
           </Typography>
           <Typography variant="body2">
             Appointment Time: {request.appointmentTime.toLocaleString()}
