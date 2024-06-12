@@ -27,10 +27,10 @@ function UserProfile(): React.ReactElement {
         userId: account.id,
         firstName: account.firstName,
         lastName: account.lastName,
-        email: account.email,
-        phone: account.phoneNumber,
-        address: account.address,
-        description: account.description,
+        email: account.email ? account.email : "",
+        phone: account.phoneNumber ? account.phoneNumber : "",
+        address: account.address ? account.address : "",
+        description: account.description ? account.description : "",
         service: account.serviceOfferings.map(service => service.serviceType).join(', '),
     });
     const [userImage, setUserImage] = useState<File | null>(null);

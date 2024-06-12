@@ -25,7 +25,7 @@ export type User = {
 };
 
 
-export type Account = {
+export class Account {
     id: string;
     firstName: string;
     lastName: string;
@@ -36,22 +36,61 @@ export type Account = {
     profileImageUrl: string;
     description?: string;
     location?: string;
-
     isProvider?: boolean;
     isPremium?: boolean;
-
     rating: number;
     reviewCount?: number;
-
-    // foreign keys
     serviceOfferings: ServiceOffering[];
     availability?: Availability[];
     reviews?: Review[];
     notifications?: Notification[];
     requestHistory?: ServiceRequest[];
     jobHistory?: Job[];
-};
 
+    constructor(
+        id: string,
+        firstName: string,
+        lastName: string,
+        profileImageUrl: string,
+        rating: number,
+        serviceOfferings: ServiceOffering[],
+        email?: string,
+        phoneNumber?: string,
+        address?: string,
+        createdOn?: Date,
+        description?: string,
+        location?: string,
+        isProvider?: boolean,
+        isPremium?: boolean,
+        reviewCount?: number,
+        availability?: Availability[],
+        reviews?: Review[],
+        notifications?: Notification[],
+        requestHistory?: ServiceRequest[],
+        jobHistory?: Job[]
+    ) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.address = address;
+        this.createdOn = createdOn;
+        this.profileImageUrl = profileImageUrl;
+        this.description = description;
+        this.location = location;
+        this.isProvider = isProvider;
+        this.isPremium = isPremium;
+        this.rating = rating;
+        this.reviewCount = reviewCount;
+        this.serviceOfferings = serviceOfferings;
+        this.availability = availability;
+        this.reviews = reviews;
+        this.notifications = notifications;
+        this.requestHistory = requestHistory;
+        this.jobHistory = jobHistory;
+    }
+}
 
 // export type Account = {
 //     id: string;
@@ -118,7 +157,8 @@ export const bikeRepairService: ServiceOffering = {
     baseDuration: 2,
     bufferTimeDuration: 0.5,
     reviews: [],
-    rating: 4.5
+    rating: 4.5,
+    provider: account
 
 };
 
@@ -136,7 +176,8 @@ export const babysittingService: ServiceOffering = {
     baseDuration: 2,
     bufferTimeDuration: 0.5,
     reviews: [],
-    rating: 4.5
+    rating: 4.5,
+    provider: account
 };
 
 //Test-data to be removed, simply maintained in case required by original developer

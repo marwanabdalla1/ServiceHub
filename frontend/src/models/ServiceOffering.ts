@@ -2,19 +2,39 @@ import { ServiceType } from "./enums";
 import { Account } from "./Account";
 import { Review } from "./Review";
 
-export type ServiceOffering = {
-    serviceOfferingId?: string;
-    serviceType: string;
-    lastUpdatedOn?: Date;
-    createdOn?: Date;
-    certificate?: File;
+export class ServiceOffering {
+    serviceOfferingId: string;
+    serviceType: ServiceType;
+    lastUpdatedOn: Date;
+    createdOn: Date;
+    certificate: File;
     hourlyRate: number;
-    description?: string;
-    isCertified?: boolean;
-    location?: string;
-    providerId?: string;  // Use providerId instead of Account type
-    baseDuration?: number;
-    bufferTimeDuration?: number;
-    reviews?: Review[];
+    description: string;
+    isCertified: boolean;
+    location: string;
+    provider: Account;
+    baseDuration: number;
+    bufferTimeDuration: number;
+    reviews: Review[];
     rating: number;
-};
+
+
+    constructor(serviceOfferingId: string, serviceType: ServiceType, lastUpdatedOn: Date, createdOn: Date,
+        certificate: File, hourlyRate: number, description: string, isCertified: boolean, location: string,
+        provider: Account, baseDuration: number, bufferTimeDuration: number, reviews: Review[], rating: number) {
+        this.serviceOfferingId = serviceOfferingId;
+        this.serviceType = serviceType;
+        this.lastUpdatedOn = lastUpdatedOn;
+        this.createdOn = createdOn;
+        this.certificate = certificate;
+        this.hourlyRate = hourlyRate;
+        this.description = description;
+        this.isCertified = isCertified;
+        this.location = location;
+        this.provider = provider;
+        this.baseDuration = baseDuration;
+        this.bufferTimeDuration = bufferTimeDuration;
+        this.reviews = reviews;
+        this.rating = rating;
+    }
+}

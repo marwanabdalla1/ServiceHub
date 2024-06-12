@@ -45,7 +45,7 @@ function App() {
 
 function MainRoutes() {
     const location = useLocation();
-    const showNavBar = location.pathname !== "/login" && location.pathname !== "/signup";
+    const showNavBar = location.pathname !== "/login" && location.pathname !== "/signup" && location.pathname !=="/filter";
 
     return (
         <div className="h-screen flex flex-col">
