@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {Box, Typography, Card, CardContent, Avatar} from '@mui/material';
-import {Appointment} from "../models/AppointmentModel";
+import {Appointment} from "../models/Appointment";
 
 const AppointmentCard: React.FC<Appointment> = ({date, user, service}) => {
     return (

@@ -25,6 +25,7 @@ import Breadcrumb from "../components/Breadcrumb";
 import LightBlueButton from "../components/inputs/BlueButton";
 import { ServiceOffering } from '../models/ServiceOffering';
 import account from '../models/Account';
+import { Link, useParams } from 'react-router-dom';
 
 const mockProvider: ServiceProvider = {
     id: '1',
@@ -136,7 +137,7 @@ const formatTime = (date: Date): string => {
 
 function ProviderProfilePage() {
     const provider = mockProvider;
-
+    const { id } = useParams(); //use this to then make a post request to the user with the id to get the user data
     return (
         <Container>
 
@@ -158,8 +159,9 @@ function ProviderProfilePage() {
                             </Typography>
                             <Box sx={{ justifyContent: 'space-between'}}>
                                 <LightBlueButton className = 'px-3 py-2 rounded bg-white mr-3' text='Contact Information' onClick={() => console.log('booking button pressed')}></LightBlueButton>
+                                <Link to={`/select-timeslot/${id}`}>
                                 <LightBlueButton className = 'px-3 py-2 rounded' text='Book Now' onClick={() => console.log('booking button pressed')}></LightBlueButton>
-
+                                </Link>
                             </Box>
                         </Box>
 

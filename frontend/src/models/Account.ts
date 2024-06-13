@@ -14,7 +14,7 @@ export type Service = {
     isLicensed: boolean;
 };
 
-//Candidate for deletion
+// TODO: Candidate for deletion as it is not used
 // Define the type for the user object
 export type User = {
     userId: number;
