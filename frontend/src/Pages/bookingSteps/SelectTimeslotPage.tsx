@@ -1,18 +1,25 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Container, Box, Typography, Card, CardContent, Grid, Button } from '@mui/material';
 import { useBooking } from '../../context/BookingContext';
 
 function SelectTimeslot() {
     const { bookingDetails, setSelectedTime, selectedDate, setSelectedDate, availableTimes, setAvailableTimes } = useBooking();
     const navigate = useNavigate();
+    const { id } = useParams(); //use this to then make a post request to the user with the id to get the user data
 
+    // review-and-confirm/:id
+
+    //this should be optional depending on the token 
     const handleTimeClick = (time: string) => {
         setSelectedTime(time);
         navigate('/create-account-or-sign-in');
-    };
+    }; 
 
     const handleDateClick = (date: string) => {
+
+        // this should have some data added from the previous page (see implementation from proivde service to select availability )
+
         setSelectedDate(date);
         // Update available times based on the selected date
         // This is a placeholder. Replace with actual logic to fetch available times.
@@ -45,11 +52,15 @@ function SelectTimeslot() {
                     <Box sx={{ mt: 4 }}>
                         {/* Available time slots */}
                         {availableTimes.map((time) => (
-                            <Card key={time} sx={{ mb: 1, cursor: 'pointer' }} onClick={() => handleTimeClick(time)}>
+                                <Card key={time} sx={{ mb: 1, cursor: 'pointer' }} onClick={() => {}}>
                                 <CardContent>
+                                <Link to={`/review-and-confirm/${id}`}>
                                     <Typography>{time}</Typography>
+                                    </Link>
                                 </CardContent>
-                            </Card>
+                                </Card>
+                            
+                            
                         ))}
                     </Box>
                 </Box>

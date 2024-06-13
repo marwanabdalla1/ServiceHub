@@ -67,7 +67,6 @@ function MainRoutes() {
                 <Route path="/jobs/requestHistory" element={<RequestHistoryPage/>}/>
                 <Route path="/incomingRequests" element={<IncomingRequestsPage/>}/>
                 <Route path="/addservice" element={<AddServicePage/>}/>
-                <Route path="*" element={<h1>Not Found</h1>}/>
                 <Route path="/provider-profile/:id" element={<ProviderProfilePage/>}/>
                 <Route path="select-availability" element={<SelectAvailabilityPage/>}/>
                 <Route path="/select-timeslot" element={<SelectTimeslot/>}/>
@@ -81,9 +80,10 @@ function MainRoutes() {
                 <Route path="/update-timeslot/" element={<UpdateTimeslot/>} />
                 <Route path="/create-account-or-sign-in" element={<CreateAccountOrSignIn />} />
                 <Route path="/update-profile" element={<UpdateProfile />} />
-                <Route path="/review-and-confirm" element={<ReviewAndConfirm />} />
+                <Route path="/review-and-confirm/:id" element={<ReviewAndConfirm />} />
                 <Route path="/listsLandingPage" element={<ListsLandingPage />} />
                 <Route path="/proposeNewTime" element={<ProposeNewtimePage />} />
+                <Route path="*" element={<h1>Not Found</h1>}/>
 
 
             </Routes>
