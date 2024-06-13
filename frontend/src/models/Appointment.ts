@@ -2,7 +2,7 @@ import { Account as User, users } from './Account';
 
 export class Appointment {
     date: string;
-    user: User;
+    user: User; // TODO: should change to Account? -> User will be deleted
     service: string;
     bookingRef: string;
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import NavigationBar from '../components/Navbar';
-import MediaCard from '../components/Card';
+import MediaCard from '../components/ProfileCard';
 import {users, Account as User} from '../models/Account';
 import { DrawerFilter } from './DrawFilter';
 import { searchServices, searchServicesBackEnd } from '../components/SearchFunction';

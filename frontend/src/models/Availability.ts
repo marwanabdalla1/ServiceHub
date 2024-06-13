@@ -1,6 +1,6 @@
 // import {AppointmentModel} from "@devexpress/dx-react-scheduler";
 // Import your custom Appointment class and the necessary data.
-import { Appointment, appointments as importedAppointments } from './AppointmentModel';
+import { Appointment, appointments as importedAppointments } from './Appointment';
 import { Account as User } from "./Account";
 import { DaysOfWeek } from "./enums";
 import { Timeslot } from "./Timeslot";

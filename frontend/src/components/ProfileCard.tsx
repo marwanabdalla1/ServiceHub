@@ -7,6 +7,7 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { Account as User } from '../models/Account';
 import { GoStarFill } from "react-icons/go";
+import { Link } from 'react-router-dom';
 
 
 export default function MediaCard({ user } : {user : User} ) {
@@ -50,12 +51,13 @@ export default function MediaCard({ user } : {user : User} ) {
       </CardContent>
       <div className='flex justify-center'>
       <CardActions>
+        <Link to={`/provider-profile/${user.id}`}>
         <Button size="small">Book Now</Button>
+        </Link>
       </CardActions>
       </div>
       
     </Card>
     </div>
-   
   );
 }

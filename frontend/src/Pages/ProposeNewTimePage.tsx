@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import NavigationBar from '../components/Navbar';
-import MediaCard from '../components/Card';
+import MediaCard from '../components/ProfileCard';
 import {users, User} from '../models/Account';
 import { ServiceRequest as Request } from '../models/ServiceRequest';
 import { useRequest } from '../context/RequestContext';

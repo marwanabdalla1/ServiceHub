@@ -1,0 +1,14 @@
+{
+  "dependencies": {
+    "express": "^4.19.2",
+    "mongoose": "^8.4.1"
+  },
+  "scripts": {
+    "start": "concurrently \"npm:start-front\" \"npm:start-back\"",
+    "start-front": "cd frontend && npm start",
+    "start-back": "cd backend && npm start"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

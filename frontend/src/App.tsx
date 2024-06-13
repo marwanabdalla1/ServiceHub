@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {BrowserRouter, Routes, Route, useLocation} from "react-router-dom";
 import FilterPage from './Pages/FilterPage';
 import ProfilePage from './Pages/ProfilePage';
@@ -27,18 +27,23 @@ import ReviewAndConfirm from "./Pages/bookingSteps/ReviewAndConfirm";
 import CreateAccountOrSignIn from "./Pages/bookingSteps/CreateAccountOrSignIn";
 import ListsLandingPage from "./Pages/listsLandingPage";
 
-import { RequestProvider } from './context/RequestContext';
+import {RequestProvider} from './context/RequestContext';
+import axios from "axios";
 import ProposeNewtimePage from './Pages/ProposeNewTimePage';
 
 function App() {
-    return (
 
+    useEffect(() => {
+        axios.defaults.baseURL = "http://localhost:8080";
+    }, []);
+
+    return (
         <BookingProvider>
-        <RequestProvider>
-        <BrowserRouter>
-            <MainRoutes/>
-        </BrowserRouter>
-        </RequestProvider>
+            <RequestProvider>
+                <BrowserRouter>
+                    <MainRoutes/>
+                </BrowserRouter>
+            </RequestProvider>
         </BookingProvider>
     );
 }
@@ -51,22 +56,29 @@ function MainRoutes() {
         <div className="h-screen flex flex-col">
             {showNavBar && <NavigationBar toggleDrawer={() => {}} onChange={() => {}} onSearch={() => {}} search={""}/>}
             <Routes>
-                <Route path="/" element={<HomePage/>} />
-                <Route path="/setprofile" element={<ProfileSettingPage/>} />
+                <Route path="/" element={<HomePage/>}/>
+                <Route path="/setprofile" element={<ProfileSettingPage/>}/>
                 <Route path="/customer_review" element={<ReviewPage/>}/>
                 <Route path="/login" element={<SignInPage/>}/>
                 <Route path="/signup" element={<SignUpPage/>}/>
                 <Route path="/filter" element={<FilterPage/>}/>
                 <Route path="/profile" element={<ProfilePage/>}/>
-                <Route path="/jobs/jobHistory" element={<JobHistoryPage/>} />
-                <Route path="/jobs/requestHistory" element={<RequestHistoryPage/>} />
-                <Route path="/incomingRequests" element={<IncomingRequestsPage/>} />
-                <Route path="/addservice" element={<AddServicePage />} />
-                <Route path="*" element={<h1>Not Found</h1>} />
-                <Route path="/bob" element={<ProviderProfilePage/>}/>
+                <Route path="/jobs/jobHistory" element={<JobHistoryPage/>}/>
+                <Route path="/jobs/requestHistory" element={<RequestHistoryPage/>}/>
+                <Route path="/incomingRequests" element={<IncomingRequestsPage/>}/>
+                <Route path="/addservice" element={<AddServicePage/>}/>
+                <Route path="*" element={<h1>Not Found</h1>}/>
+                <Route path="/provider-profile/:id" element={<ProviderProfilePage/>}/>
+                <Route path="select-availability" element={<SelectAvailabilityPage/>}/>
+                <Route path="/select-timeslot" element={<SelectTimeslot/>}/>
+                <Route path="/update-timeslot" element={<UpdateTimeslot/>}/>
+                <Route path="/create-account-or-sign-in" element={<CreateAccountOrSignIn/>}/>
+                <Route path="/update-profile" element={<UpdateProfile/>}/>
+                <Route path="/review-and-confirm" element={<ReviewAndConfirm/>}/>
+                <Route path="/listsLandingPage" element={<ListsLandingPage/>}/>
                 <Route path="select-availability" element={<SelectAvailabilityPage/>} />
-                <Route path="/select-timeslot" element={<SelectTimeslot/>} />
-                <Route path="/update-timeslot" element={<UpdateTimeslot/>} />
+                <Route path="/select-timeslot/:id" element={<SelectTimeslot/>} />
+                <Route path="/update-timeslot/" element={<UpdateTimeslot/>} />
                 <Route path="/create-account-or-sign-in" element={<CreateAccountOrSignIn />} />
                 <Route path="/update-profile" element={<UpdateProfile />} />
                 <Route path="/review-and-confirm" element={<ReviewAndConfirm />} />
