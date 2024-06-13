@@ -3,7 +3,6 @@ import NavigationBar from '../components/Navbar';
 import MediaCard from '../components/Card';
 import {users, User} from '../models/Account';
 import { ServiceRequest as Request } from '../models/ServiceRequest';
-import Sidebar from '../components/SideBarLists';
 import { useRequest } from '../context/RequestContext';
 import { Card, CardContent, Avatar, Typography, TextField, Divider, Box } from '@mui/material';
 import BlackButton from '../components/inputs/blackbutton';
@@ -68,7 +67,7 @@ function ProposeNewtimePage() {
         Request ID: {requestDetails.serviceRequestId}
       </Typography>
       <Typography variant="body2">
-        Service Type: {ServiceType[requestDetails.serviceType]}
+        Service Type: {requestDetails.serviceType}
       </Typography>
       <Typography variant="body2">
         Previous Appointment: <Typography component="span" sx={{ textDecoration: 'line-through', fontSize: '0.91rem' }}>{requestDetails.appointmentTime.toLocaleString()}</Typography>

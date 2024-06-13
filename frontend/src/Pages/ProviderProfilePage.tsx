@@ -32,7 +32,7 @@ const mockProvider: ServiceProvider = {
     lastName: 'Biker',
     serviceOfferings: [new ServiceOffering('offering0',
         ServiceType.bikeRepair, new Date(), new Date(), new File([], "empty.txt", { type: "text/plain" }), 15, 'desc0', true,
-    'Munich', account, 1, 0.5, [])],
+    'Munich', account, 1, 0.5, [], 3)],
     location: 'Munich',
     availability: [
         {
@@ -194,10 +194,10 @@ function ProviderProfilePage() {
 
                             <AccessTimeIcon sx={{mt:2}}/>
                             <Box sx={{display: 'flex', flexDirection: 'column', flex: '1 1 30%', alignItems: 'left', mt: 2}}>
-                                {provider.availability.map((availability, index) => (
+                                {provider.availability ? provider.availability.map((availability, index) => (
                                     <Typography variant="body2" key={index} color="text.secondary">
                                         {daysOfWeekToString(availability.dayOfWeek)}: {availability.timeslots.map(slot => `${formatTime(slot.start)} - ${formatTime(slot.end)}`).join('\n')}
-                                    </Typography>))}
+                                    </Typography>)) : ""}
                             </Box>
 
                             <AccountBalanceWalletIcon sx={{mb: 1, mt:2}}/>
@@ -264,7 +264,7 @@ function ProviderProfilePage() {
                                 <Typography variant="body2">Sort by: Top Reviews</Typography>
                             </Box>
                             <Divider sx={{mb: 2}}/>
-                            {provider.reviews.map((review) => (
+                            {provider.reviews ? provider.reviews.map((review) => (
                                 <Card key={review.reviewId} sx={{mb: 2}}>
                                     <CardContent>
                                         <Box sx={{display: 'flex', alignItems: 'center', mb: 1}}>
@@ -290,7 +290,7 @@ function ProviderProfilePage() {
                                         </Box>
                                     </CardContent>
                                 </Card>
-                            ))}
+                            )) : ""}
                         </Box>
                     </Grid>
                 </Grid>

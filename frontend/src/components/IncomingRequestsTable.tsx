@@ -16,7 +16,7 @@ import IncomingRequestRow from './IncomingRequestRow';
 import Modal from './inputs/Modal';
 import IncomingRequestMediaCard from './IncomingRequestCard';
 import { RequestStatus, ServiceType } from '../models/enums';
-import { Account } from '../models/Account';
+import { Account, bikeRepairService } from '../models/Account';
 import { Job } from '../models/Job';
 
 function createRequest(
@@ -54,7 +54,7 @@ function createRequest(
 }
 
 const accounts: Account [] = [
-  new Account('11', 'Max', 'Mustermann', 'example.email@example.com', '911', 'Arcisstraße', new Date('2024-05-11'), 'stringImage', 'desc', 'loc', false, false, [], [], [], 5, 40, [], [], [])
+  new Account('11', 'Max', 'Mustermann', '', 3.5, [bikeRepairService], 'example.email@example.com')
 ]
 const rows: Request[] = [
   createRequest('1', RequestStatus.pending, new Date('2024-05-11'), ServiceType.bikeRepair, new Date('2024-05-11'), [] , 'comment 1', 12, 30, null, accounts[0],accounts[0], 5,'../../images/profiles/profile3.png'),

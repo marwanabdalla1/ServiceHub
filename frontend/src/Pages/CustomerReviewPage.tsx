@@ -44,7 +44,7 @@ const ReviewPage: React.FC = () => {
                                     height: 56,
                                     mr: 2
                                 }}
-                                src={bobBikerAppointment?.user.imageUrl}
+                                src={bobBikerAppointment?.user.profileImageUrl}
                             />
                             <Box>
                                 <Typography
