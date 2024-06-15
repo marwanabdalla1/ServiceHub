@@ -1,6 +1,5 @@
 import "dotenv/config";
 import express from "express";
-import corsConfig from "./middleware/corsConfig";
 import router from "./routes/Account";
 import account from "./models/account";
 import errorHandler from "./middleware/errorHandler";
