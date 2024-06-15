@@ -1,22 +1,15 @@
 import React, { useState } from 'react';
-import AvailabilityCalendar from '../components/AvailabilityCalendar';
-import { Typography, Container, Button, Box, ToggleButton, ToggleButtonGroup } from '@mui/material';
-import { useLocation } from 'react-router-dom';
-
-
+import AvailabilityCalendar, { Event } from '../components/AvailabilityCalendar';
+import { Typography, Container, Button, Box } from '@mui/material';
 const SelectAvailabilityPage: React.FC = () => {
-    const location = useLocation();
-    const { selectedService } = location.state || {};
-    const [isFixed, setIsFixed] = useState(false);
+    const [serviceType, setServiceType] = useState("Babysitting"); // Placeholder for the service type [e.g. "Tutoring"]
+    const [defaultSlotDuration, setDefaultSlotDuration] = useState(60); // Placeholder for the default slot duration
+    // const [globalAvailabilities, setGlobalAvailabilities] = useState<Event[]>([{start: Date.now(), end: Date.now(), title: "Event"}]); // Placeholder for the global availabilities [e.g. tutor availabilities]
 
-    const handleFixedChange = () => {
-        setIsFixed(!isFixed);
-    };
-
-    // todo: actual save
     const saveAvailability = () => {
         console.log("Saving availability...");
         // Placeholder function for saving availability
+        // console.log(globalAvailabilities);
     };
 
     return (
@@ -25,20 +18,12 @@ const SelectAvailabilityPage: React.FC = () => {
                 <Typography variant="h4">
                     Set Your Weekly Availability
                 </Typography>
-                <ToggleButtonGroup
-                    color="primary"
-                    value={isFixed ? 'fixed' : 'notFixed'}
-                    exclusive
-                    onChange={handleFixedChange}
-                >
-                    <ToggleButton value="fixed">Set as Fixed</ToggleButton>
-                    <ToggleButton value="notFixed">Set as Not Fixed</ToggleButton>
-                </ToggleButtonGroup>
             </Box>
-            <AvailabilityCalendar isFixed={isFixed}/>
-            {/* Uncomment the line below once the AvailabilityCalendar2 is fixed or working */}
-            {/* <AvailabilityCalendar2 /> */}
-
+            <AvailabilityCalendar
+                Servicetype={serviceType}
+                defaultSlotDuration={defaultSlotDuration}
+                // globalAvailabilities={globalAvailabilities}
+            />
             <Box display="flex" justifyContent="flex-end" sx={{ mt: 4 }}>
                 <Button variant="contained" color="primary" onClick={saveAvailability}>
                     Save Availability
@@ -46,6 +31,6 @@ const SelectAvailabilityPage: React.FC = () => {
             </Box>
         </Container>
     );
-}
+};
 
 export default SelectAvailabilityPage;

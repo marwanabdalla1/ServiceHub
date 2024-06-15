@@ -3,7 +3,7 @@ import {Calendar, dateFnsLocalizer, SlotInfo} from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { format, startOfWeek, parseISO, getDay } from 'date-fns';
 import { enUS } from "@mui/material/locale";
-import { Dialog, Button, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from "@mui/material";
+import { Dialog, Button, DialogActions, DialogContent, DialogTitle } from "@mui/material";
 
 const locales = {
     'en-US': enUS,
@@ -17,7 +17,7 @@ const localizer = dateFnsLocalizer({
     locales,
 });
 
-interface Event {
+export interface Event {
     start: Date;
     end: Date;
     title: string;
@@ -25,82 +25,118 @@ interface Event {
 }
 
 
-interface AvailabilityCalendarProps {
-    isFixed: boolean;
+interface ServiceScheduleProps {
+    Servicetype: string;
+    defaultSlotDuration: number;
 }
 
-function AvailabilityCalendar({ isFixed }: AvailabilityCalendarProps) {
+function AvailabilityCalendar({Servicetype, defaultSlotDuration }: ServiceScheduleProps) {
+
+    //TODO Add global availabilities from different services as a prop
+
     const [availability, setAvailability] = useState<Event[]>([]);
     const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-    const [open, setOpen] = useState(false);
-    const [eventTitle, setEventTitle] = useState("");
+    const [DeleteDialog, setDeleteDialog] = useState(false);
+    const [clashDialogOpen, setClashDialogOpen] = useState(false);
 
     const handleSelect = ({ start, end }: SlotInfo) => {
-        const newEvent: Event = { start, end, title: "New Event", isFixed: isFixed };
-        setAvailability([...availability, newEvent]);
+        const newEvent: Event = { start, end, title: Servicetype, isFixed: false };
+        console.log(availability)
+        // Check for event clash
+        const isClashing = availability.some(event =>
+            (newEvent.start < event.end && newEvent.end > event.start)
+        );
+
+        if (isClashing) {
+            setClashDialogOpen(true);
+        } else {
+            // Adjust start and end times to include buffer and default slot duration
+            
+            let adjustedEnd = end
+            if (end.getTime() - start.getTime() < defaultSlotDuration * 60000) {
+                 adjustedEnd = new Date(start.getTime() + defaultSlotDuration * 60000);
+            }
+
+            const adjustedEvent: Event = { start: start, end: adjustedEnd, title: Servicetype, isFixed: false };
+            setAvailability([...availability, adjustedEvent]);
+        }
     };
 
-    const handleSelectEvent = (event: Event) => {
-        setSelectedEvent(event);
-        setEventTitle(event.title);
-        setOpen(true);
-    };
+   
 
     const handleDelete = () => {
         if (selectedEvent) {
             setAvailability(availability.filter(a => a.start !== selectedEvent.start && a.end !== selectedEvent.end));
-            setOpen(false);
+            setDeleteDialog(false);
         }
     };
 
-    const handleSave = () => {
+
+    const handleSelectEvent = (event: Event) => {
+        setSelectedEvent(event);
+        setDeleteDialog(true);
+    };
+
+    const handleFixWeekly = () => {
         if (selectedEvent) {
-            setAvailability(availability.map(a =>
-                a.start === selectedEvent.start && a.end === selectedEvent.end ? { ...a, title: eventTitle } : a
-            ));
-            setOpen(false);
+            const filteredAvailability = availability.filter(a => a.start !== selectedEvent.start && a.end !== selectedEvent.end);
+            const newEvent: Event = { start: selectedEvent.start, end: selectedEvent.end, title: selectedEvent.title, isFixed: true };
+            setAvailability([...filteredAvailability, newEvent]);
+            setDeleteDialog(false);
         }
+    }
+    
+    const handleClose = () => {
+        setDeleteDialog(false);
     };
 
-    const handleClose = () => {
-        setOpen(false);
+    const handleClashDialogClose = () => {
+        setClashDialogOpen(false);
     };
+   
 
     return (
         <div>
-            <Calendar
-                localizer={localizer}
-                events={availability}
-                startAccessor="start"
-                endAccessor="end"
-                style={{ height: 500 }}
-                selectable
-                onSelectSlot={handleSelect}
-                onSelectEvent={handleSelectEvent}>
+        <Calendar
+             defaultView='week'
+             views={['week']}
+             localizer={localizer}
+             events={availability}
+             startAccessor="start"
+             endAccessor="end"
+             style={{ height: 500 }}
+             selectable
+             onSelectSlot={handleSelect}
+             onSelectEvent={handleSelectEvent}>
 
-            </Calendar>
-            <Dialog open={open} onClose={handleClose}>
-                <DialogTitle>Edit Availability</DialogTitle>
+
+        </Calendar>
+        <Dialog open={DeleteDialog} onClose={handleClose}>
+            <DialogTitle>Delete Slot?</DialogTitle>
+            <DialogContent>
+                {selectedEvent && <p> {selectedEvent.title}</p>}
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={handleClose}>Cancel</Button>
+                <Button onClick={handleFixWeekly}>Repeat Weekly</Button>
+                <Button onClick={handleDelete} color="secondary">Delete</Button>
+            </DialogActions>
+        </Dialog>
+        <Dialog open={clashDialogOpen} onClose={handleClashDialogClose}>
+                <DialogTitle>Event Clash</DialogTitle>
                 <DialogContent>
-                    <TextField
-                        autoFocus
-                        margin="dense"
-                        label="Event Title"
-                        type="text"
-                        fullWidth
-                        variant="standard"
-                        value={eventTitle}
-                        onChange={(e) => setEventTitle(e.target.value)}
-                    />
+                    The new event clashes with an existing event.
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleClose}>Cancel</Button>
-                    <Button onClick={handleSave} color="primary">Save</Button>
-                    <Button onClick={handleDelete} color="secondary">Delete</Button>
+                    <Button onClick={handleClashDialogClose}>OK</Button>
                 </DialogActions>
             </Dialog>
-        </div>
+    </div>
+
     );
+            
+        
+    
 }
 
 export default AvailabilityCalendar;
