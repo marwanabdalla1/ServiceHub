@@ -3,7 +3,7 @@ import { CiMenuBurger } from 'react-icons/ci';
 
 interface RequestListButtonProps {
   className?: string;
-  onClick: () => void;
+  onClick: (event: React.MouseEvent<HTMLElement>) => void;
 }
 
 function RequestListButton({className = '', onClick}: Readonly<RequestListButtonProps>) {

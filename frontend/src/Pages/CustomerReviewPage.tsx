@@ -1,7 +1,7 @@
 import React from 'react';
 import {Container, Box, Typography, Card, CardContent, Avatar, Button, TextField} from '@mui/material';
 import Rating from '@mui/material/Rating';
-import {appointments, bobBikerAppointment} from '../models/AppointmentModel';
+import {appointments, bobBikerAppointment} from '../models/Appointment';
 import AppointmentCard from '../components/AppointmentCard';
 
 const ReviewPage: React.FC = () => {
@@ -44,7 +44,7 @@ const ReviewPage: React.FC = () => {
                                     height: 56,
                                     mr: 2
                                 }}
-                                src={bobBikerAppointment?.user.imageUrl}
+                                src={bobBikerAppointment?.user.profileImageUrl}
                             />
                             <Box>
                                 <Typography

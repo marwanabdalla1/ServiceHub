@@ -1,12 +1,12 @@
 import * as React from 'react';
 import {Box, Typography, Card, CardContent, Avatar} from '@mui/material';
-import {Appointment} from "../models/AppointmentModel";
+import {Appointment} from "../models/Appointment";
 
 const AppointmentCard: React.FC<Appointment> = ({date, user, service}) => {
     return (
         <Card sx={{mb: 4, height: '80px'}}>
             <CardContent  sx={{ p: 1, display: 'flex', alignItems: 'center' }}>
-                <Avatar src={user.imageUrl} alt={user.firstName} sx={{mr: 2}}/>
+                <Avatar src={user.profileImageUrl} alt={user.firstName} sx={{mr: 2}}/>
                 <Box>
                     <Typography variant="body2" color="text.secondary">
                         {date}

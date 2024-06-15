@@ -14,7 +14,8 @@ import {
     Rating
 } from '@mui/material';
 import {GoStarFill} from "react-icons/go";
-import {ServiceProvider, DaysOfWeek} from '../models/ServiceProviderPreliminary';
+import {Account as ServiceProvider, bikeRepairService } from '../models/Account';
+import { DaysOfWeek, ServiceType, JobStatus, ResponseStatus, RequestStatus } from '../models/enums';
 import {styled} from '@mui/system';
 import SearchIcon from '@mui/icons-material/Search';
 import PinDropIcon from '@mui/icons-material/PinDrop';
@@ -22,88 +23,107 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import Breadcrumb from "../components/Breadcrumb";
 import LightBlueButton from "../components/inputs/BlueButton";
+import { ServiceOffering } from '../models/ServiceOffering';
+import account from '../models/Account';
+import { Link, useParams } from 'react-router-dom';
 
 const mockProvider: ServiceProvider = {
     id: '1',
     firstName: 'Bob',
     lastName: 'Biker',
-    service: {
-        serviceType: 'Bike Repair',
-        hourlyRate: 15,
-        isCertified: true
-    },
+    serviceOfferings: [new ServiceOffering('offering0',
+        ServiceType.bikeRepair, new Date(), new Date(), new File([], "empty.txt", { type: "text/plain" }), 15, 'desc0', true,
+    'Munich', account, 1, 0.5, [], 3)],
     location: 'Munich',
     availability: [
         {
             dayOfWeek: DaysOfWeek.Thursday,
-            isFixed: true,
             timeslots: [
-                {start: new Date('2024-05-11T15:00:00'), end: new Date('2024-05-11T20:00:00')}
+                {title: ServiceType.bikeRepair, start: new Date('2024-05-11T15:00:00'), end: new Date('2024-05-11T20:00:00'), isFixed: false}
             ]
         },
         {
             dayOfWeek: DaysOfWeek.Friday,
-            isFixed: true,
             timeslots: [
-                {start: new Date('2024-05-11T15:00:00'), end: new Date('2024-05-11T20:00:00')}
+                {title: ServiceType.babySitting, start: new Date('2024-05-11T15:00:00'), end: new Date('2024-05-11T20:00:00'), isFixed: true}
             ]
         },
         {
             dayOfWeek: DaysOfWeek.Saturday,
-            isFixed: true,
             timeslots: [
-                {start: new Date('2024-05-12T10:00:00'), end: new Date('2024-05-12T20:00:00')}
+                {title: ServiceType.petSitting, start: new Date('2024-05-11T15:00:00'), end: new Date('2024-05-11T20:00:00'), isFixed: true}
             ]
         },
         {
             dayOfWeek: DaysOfWeek.Sunday,
-            isFixed: true,
             timeslots: [
-                {start: new Date('2024-05-12T10:00:00'), end: new Date('2024-05-12T20:00:00')}
+                {title: ServiceType.homeRemodeling, start: new Date('2024-05-11T15:00:00'), end: new Date('2024-05-11T20:00:00'), isFixed: false}
             ]
         }
     ],
+    
     reviews: [
         {
-            id: '1',
+            reviewId: '1',
             rating: 5,
             content: 'Very friendly, great service. I can definitely recommend!',
-            createdOn: '2024-05-03',
-            reviewer: 'Sebastian Müller'
+            createdOn: new Date('2024-05-03'),
+            reviewer: account,
+            recipient: account,
+            service: bikeRepairService
         },
         {
-            id: '2',
+            reviewId: '2',
             rating: 5,
             content: 'Bob is very competent and quick in his work. I will definitely be using him for all my bike repairs from now on.',
-            createdOn: '2024-05-03',
-            reviewer: 'Smith Jackson'
+            createdOn: new Date('2024-05-03'),
+            reviewer: account,
+            recipient: account,
+            service: bikeRepairService
         },
         {
-            id: '3',
+            reviewId: '3',
             rating: 5,
             content: 'Great Service!',
-            createdOn: '2024-04-03',
-            reviewer: 'Anna Schmidt'
+            createdOn: new Date('2024-05-03'),
+            reviewer: account,
+            recipient: account,
+            service: bikeRepairService
         },
         {
-            id: '4',
+            reviewId: '4',
             rating: 4,
             content: 'Good',
-            createdOn: '2024-04-02',
-            reviewer: 'John Doe'
+            createdOn: new Date('2024-05-03'),
+            reviewer: account,
+            recipient: account,
+            service: bikeRepairService
         },
         {
-            id: '5',
+            reviewId: '5',
             rating: 4,
             content: 'Good',
-            createdOn: '2024-03-02',
-            reviewer: 'John Doe'
+            createdOn: new Date('2024-05-03'),
+            reviewer: account,
+            recipient: account,
+            service: bikeRepairService
         },
 
     ],
     rating: 4.6,
     reviewCount: 5,
-    description: 'Having tinkered with bikes since I was 16, I\'ve got the skills to fix yours up good as new.'
+    description: 'Having tinkered with bikes since I was 16, I\'ve got the skills to fix yours up good as new.',
+    email: 'bob.biker@biking.com',
+    address: 'Biking Avenue',
+    createdOn: new Date(),
+    phoneNumber: '07775000',
+    isProvider: true,
+    profileImageUrl: '/images/profiles/profile2.png',
+    isPremium: false,
+    notifications: [],
+    requestHistory: [],
+    jobHistory: []
+
 
 };
 
@@ -117,7 +137,7 @@ const formatTime = (date: Date): string => {
 
 function ProviderProfilePage() {
     const provider = mockProvider;
-
+    const { id } = useParams(); //use this to then make a post request to the user with the id to get the user data
     return (
         <Container>
 
@@ -139,8 +159,9 @@ function ProviderProfilePage() {
                             </Typography>
                             <Box sx={{ justifyContent: 'space-between'}}>
                                 <LightBlueButton className = 'px-3 py-2 rounded bg-white mr-3' text='Contact Information' onClick={() => console.log('booking button pressed')}></LightBlueButton>
+                                <Link to={`/select-timeslot/${id}`}>
                                 <LightBlueButton className = 'px-3 py-2 rounded' text='Book Now' onClick={() => console.log('booking button pressed')}></LightBlueButton>
-
+                                </Link>
                             </Box>
                         </Box>
 
@@ -153,7 +174,7 @@ function ProviderProfilePage() {
                                 </Typography>
                             </Box>
                             <Typography variant="body2" color="text.secondary">
-                                {provider.service.serviceType}
+                                {provider.serviceOfferings[0].serviceType}
                             </Typography>
                             <Typography variant="body2" gutterBottom>
                                 {provider.location}
@@ -175,16 +196,16 @@ function ProviderProfilePage() {
 
                             <AccessTimeIcon sx={{mt:2}}/>
                             <Box sx={{display: 'flex', flexDirection: 'column', flex: '1 1 30%', alignItems: 'left', mt: 2}}>
-                                {provider.availability.map((availability, index) => (
+                                {provider.availability ? provider.availability.map((availability, index) => (
                                     <Typography variant="body2" key={index} color="text.secondary">
                                         {daysOfWeekToString(availability.dayOfWeek)}: {availability.timeslots.map(slot => `${formatTime(slot.start)} - ${formatTime(slot.end)}`).join('\n')}
-                                    </Typography>))}
+                                    </Typography>)) : ""}
                             </Box>
 
                             <AccountBalanceWalletIcon sx={{mb: 1, mt:2}}/>
                             <Box sx={{flex: '1 1 30%', alignItems: 'center', mt:2}}>
                                 <Typography variant="body2">
-                                    Service Fee: €{provider.service.hourlyRate}/hour
+                                    Service Fee: €{provider.serviceOfferings[0].hourlyRate}/hour
                                 </Typography>
                                 <Typography variant="body2">
                                     Payment methods: Cash, PayPal {/*todo: add this to */}
@@ -245,12 +266,12 @@ function ProviderProfilePage() {
                                 <Typography variant="body2">Sort by: Top Reviews</Typography>
                             </Box>
                             <Divider sx={{mb: 2}}/>
-                            {provider.reviews.map((review) => (
-                                <Card key={review.id} sx={{mb: 2}}>
+                            {provider.reviews ? provider.reviews.map((review) => (
+                                <Card key={review.reviewId} sx={{mb: 2}}>
                                     <CardContent>
                                         <Box sx={{display: 'flex', alignItems: 'center', mb: 1}}>
                                             <Avatar sx={{mr: 2}}/>
-                                            <Typography variant="h6">{review.reviewer}</Typography>
+                                            <Typography variant="h6">{review.reviewer.firstName + " " + review.reviewer.lastName}</Typography>
                                         </Box>
                                         <Box sx={{display: 'flex', alignItems: 'center', mb: 2}}>
                                             {/*<GoStarFill className='text-yellow-500'/>*/}
@@ -271,7 +292,7 @@ function ProviderProfilePage() {
                                         </Box>
                                     </CardContent>
                                 </Card>
-                            ))}
+                            )) : ""}
                         </Box>
                     </Grid>
                 </Grid>

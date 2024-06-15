@@ -2,26 +2,31 @@ import * as React from 'react';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import { Request } from '../models/Request';
+//import Button from '@mui/material/Button';
+import { ServiceRequest as Request} from '../models/ServiceRequest';
 import { GoStarFill } from 'react-icons/go';
 import BlackButton from './inputs/blackbutton';
 import Avatar from '@mui/material/Avatar';
 import { Divider } from '@mui/material';
+import { RequestStatus } from '../models/enums';
 
 interface MediaCardProps {
   request: Request;
   onClose: () => void;
+  onAccept: (request: Request) => void;
+  onDecline: (request: Request) => void;
+  onProposeNewTime: (request: Request, newTime: Date) => void;
 }
 
-const MediaCard: React.FC<MediaCardProps> = ({ request, onClose }) => {
+const MediaCard: React.FC<MediaCardProps> = ({ request, onClose, onAccept,onDecline, onProposeNewTime }) => {
   const renderButton = () => {
-    switch (request.status) {
-      case 'Pending':
+    switch (request.requestStatus) {
+      case RequestStatus.pending:
         return (
           <>
           <BlackButton text="Accept" onClick={onClose} sx={{ marginRight:"1rem" }}/>
-          <BlackButton text="Decline" onClick={onClose} />
+          <BlackButton text="Decline" onClick={onClose} sx={{ marginRight: "1rem" }} />
+          <BlackButton text="Propose New Time" onClick={onClose}/>
           </>
         );
       default:
@@ -34,13 +39,13 @@ const MediaCard: React.FC<MediaCardProps> = ({ request, onClose }) => {
     <Card>
       <CardContent>
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem' }}>
-          <Avatar alt={request.requestor} src={request.requestorImage} sx={{ width: 100, height: 100, marginRight: '1rem' }} />
+          <Avatar alt={request.requestedBy.firstName + " " + request.requestedBy.lastName} src={request.profileImageUrl} sx={{ width: 100, height: 100, marginRight: '1rem' }} />
           <div style={{ marginRight: '1rem' }}>
             <Typography variant="h6" >
               Request Detail
             </Typography>
             <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
-              Requestor: {request.requestor}
+              Requestor: {request.requestedBy.firstName + " " + request.requestedBy.lastName }
             </Typography>
           </div>
           <div className='flex space-x-1 items-center'>
@@ -54,7 +59,7 @@ const MediaCard: React.FC<MediaCardProps> = ({ request, onClose }) => {
         </div>
         <Divider sx={{marginBottom:'1rem'}}/>
         <Typography variant="body2">
-          Request ID: {request.requestId}
+          Request ID: {request.serviceRequestId}
         </Typography>
         <Typography variant="body2">
           Service Type: {request.serviceType}
@@ -66,11 +71,11 @@ const MediaCard: React.FC<MediaCardProps> = ({ request, onClose }) => {
           Service Fee: {request.serviceFee}
         </Typography>
         <Typography variant="body2" sx={{marginBottom:'1rem'}}>
-          Status: {request.status}
+          Status: {request.requestStatus}
         </Typography>
         <Divider sx={{marginBottom:'1rem'}}/>
         <Typography variant="body2" sx={{marginBottom:'1rem'}}>
-          Description: {request.description}
+          Description: {request.comment}
         </Typography>
         {renderButton()}
       </CardContent>

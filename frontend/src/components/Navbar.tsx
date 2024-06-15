@@ -7,9 +7,20 @@ import BlackButton from "./inputs/blackbutton";
 import RequestListButton from "./inputs/requestListButton";
 import Modal from "./inputs/Modal";
 import { Link } from "react-router-dom";
+import { Menu, MenuItem } from '@mui/material';
 
-const Navbar = () => {
+
+
+interface NavbarProps {
+  toggleDrawer: () => void;
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onSearch: () => void;
+  search: string;
+}
+
+const Navbar : React.FC<NavbarProps> = ({toggleDrawer, onChange, onSearch, search}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const openModal = () => {
     setIsModalOpen(true);
@@ -18,6 +29,17 @@ const Navbar = () => {
   const closeModal = () => {
     setIsModalOpen(false);
   };
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+
+
 
   return (
     <nav className="bg-blue-300 shadow-md h-20">
@@ -43,20 +65,24 @@ const Navbar = () => {
           <div className="flex items-center flex-grow">
             <input
               type="text"
-              placeholder="Search for a service"
+              placeholder={ "Search for a service" }
               className="flex-grow px-2 py-1 rounded-l-full focus:outline-none"
+              value={search}
+              onChange={onChange}
             />
-            <button className="text-blue-500">
+            <button className="text-blue-500" onClick={onSearch}>
               <CiSearch className="h-6 w-6" />
             </button>
           </div>
+          <button onClick={toggleDrawer} >
           <FiFilter className="h-6 w-6 text-blue-500 ml-2" />
+          </button>
         </div>
 
         {/* Right Section: Provide Service Button and Icons */}
         <div className="flex items-center space-x-4 m-4">
           <BlackButton className="py-2" text="Provide a Service" onClick={()=> console.log('Black button pressed')} />
-          <RequestListButton className="h-6 w-6" onClick={()=> console.log('Black button pressed')}/>
+          <RequestListButton className="h-6 w-6" onClick={handleMenuOpen} />
           <IoNotificationsOutline className="h-6 w-6" />
           <Link to="/profile" className="text-current">
             <CgProfile className="h-6 w-6" />
@@ -65,6 +91,25 @@ const Navbar = () => {
           <IoSettingsOutline className="h-6 w-6" />
         </div>
       </div>
+
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+      >
+        <MenuItem component={Link} to="/jobs/jobHistory" onClick={handleMenuClose}>Job History</MenuItem>
+        <MenuItem component={Link} to="/jobs/requestHistory" onClick={handleMenuClose}>Request History</MenuItem>
+        <MenuItem component={Link} to="/incomingRequests" onClick={handleMenuClose}>Incoming Requests</MenuItem>
+      </Menu>
+
     </nav>
   );
 };

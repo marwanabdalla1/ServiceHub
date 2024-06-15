@@ -22,6 +22,7 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import {createTheme, ThemeProvider} from '@mui/material/styles';
 import {blue} from "@mui/material/colors";
+import axios from 'axios';
 
 function Copyright(props: any) {
     return (
@@ -45,13 +46,30 @@ const defaultTheme = createTheme({
 });
 
 export default function SignUp() {
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
-        console.log({
+
+        // Prepare the user data
+        const account = {
+            firstName: data.get('firstName'),
+            lastName: data.get('lastName'),
             email: data.get('email'),
             password: data.get('password'),
-        });
+        };
+
+        try {
+            // Make a POST request to the /signup endpoint
+            const response = await axios.post('/api/auth/signup', account);
+            // Log the status and status text of the response
+            console.log(`Status: ${response.status}`);
+            console.log(`Status Text: ${response.statusText}`);
+
+            console.log(response.data);
+        } catch (error) {
+            // Handle the error here. For example, you might display an error message to the user
+            console.error('Error creating user:', error);
+        }
     };
 
     return (
@@ -133,7 +151,7 @@ export default function SignUp() {
                         </Button>
                         <Grid container justifyContent="flex-end">
                             <Grid item>
-                                <Link href="#" variant="body2">
+                                <Link href="login" variant="body2">
                                     Already have an account? Login
                                 </Link>
                             </Grid>

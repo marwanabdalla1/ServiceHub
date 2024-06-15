@@ -4,6 +4,7 @@ import TableCell from '@mui/material/TableCell';
 import Button from '@mui/material/Button';
 import { Job } from '../models/Job';
 import BlackButton from './inputs/blackbutton';
+import { ServiceType, JobStatus } from '../models/enums';
 
 interface JobRowProps {
   job: Job;
@@ -14,7 +15,7 @@ const JobRow: React.FC<JobRowProps> = ({ job, onViewDetails }) => {
   return (
     <TableRow>
       <TableCell>{job.serviceType}</TableCell>
-      <TableCell>{job.status}</TableCell>
+      <TableCell>{JobStatus[job.status]}</TableCell>
       <TableCell>{job.appointmentTime.toLocaleDateString()}</TableCell>
       <TableCell>
         <BlackButton text="View" onClick={() => onViewDetails(job)}/>
