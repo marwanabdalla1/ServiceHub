@@ -52,7 +52,7 @@ export default function MediaCard({ user } : {user : User} ) {
       <div className='flex justify-center'>
       <CardActions>
         <Link to={`/provider-profile/${user.id}`}>
-        <Button size="small">Book Now</Button>
+          <Button size="small">Book Now</Button>
         </Link>
       </CardActions>
       </div>
