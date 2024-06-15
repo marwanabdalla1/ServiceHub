@@ -1,7 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import corsConfig from "./middleware/corsConfig";
-import authRouter from "./routes/auth";
+import router from "./routes/Account";
 import account from "./models/account";
 import errorHandler from "./middleware/errorHandler";
 import logger from "./middleware/logger";
@@ -21,7 +21,7 @@ app.use(cors(corsOptions));
 app.use(logger);
 
 app.use(express.json());
-app.use("/api/auth", authRouter);
+app.use("/api/auth", router);
 
 app.get("/", async (req, res, next) => {
     try {
