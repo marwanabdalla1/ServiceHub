@@ -11,7 +11,7 @@ const users = [
         createdOn: new Date(),
         profileImageUrl: "/images/profiles/profile1.png",
         description: "Enthusiastic and experienced bike repair technician.",
-        location: "New York, NY",
+        location: "Berlin",
         isProvider: false,
         isPremium: true,
         serviceOfferings: [
@@ -19,7 +19,7 @@ const users = [
                 serviceOfferingId: "bikeRepair0",
                 serviceType: "Bike Repair",
                 description: "Professional bike repair services.",
-                location: "New York, NY",
+                location: "Berlin",
                 hourlyRate: 50,
                 isCertified: false,
                 createdOn: new Date(),
@@ -44,7 +44,7 @@ const users = [
         createdOn: new Date(),
         profileImageUrl: "/images/profiles/profile2.png",
         description: "Dedicated to providing top-notch house cleaning services.",
-        location: "New York, NY",
+        location: "Munich",
         isProvider: false,
         isPremium: true,
         serviceOfferings: [
@@ -52,7 +52,7 @@ const users = [
                 serviceOfferingId: "babySitting0",
                 serviceType: "Baby Sitting",
                 description: "Reliable and caring babysitting services.",
-                location: "New York, NY",
+                location: "Munich",
                 hourlyRate: 50,
                 isCertified: false,
                 createdOn: new Date(),
@@ -77,7 +77,7 @@ const users = [
         createdOn: new Date(),
         profileImageUrl: "/images/profiles/profile3.png",
         description: "Passionate about keeping homes spotless.",
-        location: "New York, NY",
+        location: "Hamburg",
         isProvider: false,
         isPremium: true,
         serviceOfferings: [
@@ -85,7 +85,7 @@ const users = [
                 serviceOfferingId: "babySitting1",
                 serviceType: "Baby Sitting",
                 description: "Expert babysitting services.",
-                location: "New York, NY",
+                location: "Hamburg",
                 hourlyRate: 50,
                 isCertified: false,
                 createdOn: new Date(),
@@ -110,7 +110,7 @@ const users = [
         createdOn: new Date(),
         profileImageUrl: "/images/profiles/profile4.png",
         description: "Experienced tutor with a passion for teaching.",
-        location: "New York, NY",
+        location: "Cologne",
         isProvider: false,
         isPremium: true,
         serviceOfferings: [
@@ -118,7 +118,7 @@ const users = [
                 serviceOfferingId: "tutoring0",
                 serviceType: "Tutoring",
                 description: "Personalized tutoring services.",
-                location: "New York, NY",
+                location: "Cologne",
                 hourlyRate: 30,
                 isCertified: true,
                 createdOn: new Date(),
@@ -143,7 +143,7 @@ const users = [
         createdOn: new Date(),
         profileImageUrl: "/images/profiles/profile5.png",
         description: "Animal lover and professional pet sitter.",
-        location: "New York, NY",
+        location: "Frankfurt",
         isProvider: false,
         isPremium: true,
         serviceOfferings: [
@@ -151,7 +151,7 @@ const users = [
                 serviceOfferingId: "petSitting0",
                 serviceType: "Pet Sitting",
                 description: "Trustworthy pet sitting services.",
-                location: "New York, NY",
+                location: "Frankfurt",
                 hourlyRate: 18,
                 isCertified: false,
                 createdOn: new Date(),
@@ -176,7 +176,7 @@ const users = [
         createdOn: new Date(),
         profileImageUrl: "/images/profiles/profile6.png",
         description: "Creative and skilled landscaper.",
-        location: "New York, NY",
+        location: "Stuttgart",
         isProvider: false,
         isPremium: true,
         serviceOfferings: [
@@ -184,7 +184,7 @@ const users = [
                 serviceOfferingId: "landscaping0",
                 serviceType: "Landscaping Service",
                 description: "Expert landscaping services.",
-                location: "New York, NY",
+                location: "Stuttgart",
                 hourlyRate: 22,
                 isCertified: true,
                 createdOn: new Date(),
@@ -209,7 +209,7 @@ const users = [
         createdOn: new Date(),
         profileImageUrl: "/images/profiles/profile7.png",
         description: "Experienced home remodeling professional.",
-        location: "New York, NY",
+        location: "Düsseldorf",
         isProvider: false,
         isPremium: true,
         serviceOfferings: [
@@ -217,7 +217,7 @@ const users = [
                 serviceOfferingId: "homeRemodeling0",
                 serviceType: "Home Remodeling",
                 description: "Comprehensive home remodeling services.",
-                location: "New York, NY",
+                location: "Düsseldorf",
                 hourlyRate: 35,
                 isCertified: true,
                 createdOn: new Date(),
@@ -242,7 +242,7 @@ const users = [
         createdOn: new Date(),
         profileImageUrl: "/images/profiles/profile8.png",
         description: "Professional mover with years of experience.",
-        location: "New York, NY",
+        location: "Dortmund",
         isProvider: false,
         isPremium: true,
         serviceOfferings: [
@@ -250,7 +250,7 @@ const users = [
                 serviceOfferingId: "movingServices0",
                 serviceType: "Moving Service",
                 description: "Reliable and efficient moving services.",
-                location: "New York, NY",
+                location: "Dortmund",
                 hourlyRate: 28,
                 isCertified: true,
                 createdOn: new Date(),
@@ -275,7 +275,7 @@ const users = [
         createdOn: new Date(),
         profileImageUrl: "/images/profiles/profile9.png",
         description: "Avid cyclist and expert bike repair technician.",
-        location: "New York, NY",
+        location: "Essen",
         isProvider: false,
         isPremium: true,
         serviceOfferings: [
@@ -283,7 +283,7 @@ const users = [
                 serviceOfferingId: "bikeRepair1",
                 serviceType: "Bike Repair",
                 description: "Top-notch bike repair services.",
-                location: "New York, NY",
+                location: "Essen",
                 hourlyRate: 50,
                 isCertified: false,
                 createdOn: new Date(),
@@ -307,9 +307,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run() {
     try {
         await client.connect();
-        const database = client.db('ServiceHub'); // Change this to your database name
-        const accountsCollection = database.collection('accounts');
-        const serviceOfferingsCollection = database.collection('serviceofferings');
+        const database = client.db('ServiceHub'); 
 
         // Clear existing data
         await accountsCollection.deleteMany({});
