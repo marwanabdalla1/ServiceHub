@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {Calendar, dateFnsLocalizer, SlotInfo} from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import { format, startOfWeek, parseISO, getDay } from 'date-fns';
+import { format, startOfWeek, parseISO, getDay, startOfDay, endOfDay } from 'date-fns';
 import { enUS } from "@mui/material/locale";
 import { Dialog, Button, DialogActions, DialogContent, DialogTitle } from "@mui/material";
 
@@ -24,6 +24,7 @@ export interface Event {
     isFixed?: boolean;  // Optional property to indicate if the event is fixed
 }
 
+type RangeType = Date[] | { start: Date; end: Date };
 
 interface ServiceScheduleProps {
     Servicetype: string;
@@ -93,7 +94,17 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration }: ServiceSchedu
     const handleClashDialogClose = () => {
         setClashDialogOpen(false);
     };
-   
+
+
+    const handleRangeChange = (range: RangeType) => {
+        if (Array.isArray(range)) {
+          // range is a Date[]
+          const start = startOfDay(range[0]);
+          const end = endOfDay(range[range.length - 1]);
+          console.log(start, end);
+        } 
+      };
+ 
 
     return (
         <div>
@@ -107,7 +118,9 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration }: ServiceSchedu
              style={{ height: 500 }}
              selectable
              onSelectSlot={handleSelect}
-             onSelectEvent={handleSelectEvent}>
+             onSelectEvent={handleSelectEvent}
+             onRangeChange={handleRangeChange}
+             >
 
 
         </Calendar>
@@ -140,3 +153,7 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration }: ServiceSchedu
 }
 
 export default AvailabilityCalendar;
+
+function moment(arg0: Date): any {
+    throw new Error('Function not implemented.');
+}
