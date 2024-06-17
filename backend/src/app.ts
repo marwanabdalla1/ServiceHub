@@ -26,8 +26,9 @@ app.use(logger);
 
 app.use(express.json());
 app.use("/api/auth", AccountRouter);
+
 app.use("/api/offerings", OfferingRouter);
-app.use("/api/accounts", BookingRouter);
+app.use("/api/provider", BookingRouter);
 
 app.get("/", async (req, res, next) => {
     try {

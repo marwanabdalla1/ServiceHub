@@ -1,16 +1,17 @@
 import { Router } from 'express';
-import { getProviderById, getServiceOfferingById } from '../controller/booking';
+// import {getProviderById} from '../controller/AccountController';
+import {getProviderById, getServiceOfferingById } from '../controller/BookingController';
 
 const router = Router();
 
 // Account routes
 // router.get('/accounts/:id', getAccountById);
-router.get('/provider/:providerId', getProviderById);
+router.get('/:providerId', getProviderById);
 
 // router.put('/accounts/:id', updateAccount);
 
 // Service Offering routes
-router.get('/provider/:providerId/offering/:offeringId', getServiceOfferingById);
+router.get('/:providerId/offering/:offeringId', getServiceOfferingById);
 // router.get('/offering/:id', getServiceOfferingById);
 // router.get('/serviceOfferings', listServiceOfferings);
 

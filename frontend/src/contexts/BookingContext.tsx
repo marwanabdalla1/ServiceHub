@@ -41,13 +41,13 @@ const defaultContext: BookingContextProps = {
     setTimeAndDuration: () => {},
     // fetchAccountDetails: async () => ({ id: '', firstName: '', lastName: '', email: '' } as Account),
     fetchAccountDetails: async (accountId: string): Promise<Account> => {
-        const response = await fetch(`/api/accounts/${accountId}`);
+        const response = await fetch(`/api/provider/${accountId}`);
         const data = await response.json();
         console.log(data);
         return data as Account;
     },
     fetchOfferingDetails: async (offeringId: string) => {
-        const response = await fetch(`/api/serviceofferings/${offeringId}`);
+        const response = await fetch(`/api/offerings/${offeringId}`);
         const data = await response.json();
         return data as ServiceOffering;
     },
@@ -75,14 +75,14 @@ export const BookingProvider: React.FC<{ children: ReactNode }> = ({ children })
     };
 
     const fetchAccountDetails = async (accountId: string): Promise<Account> => {
-        const response = await fetch(`/api/accounts/${accountId}`);
+        const response = await fetch(`/api/provider/${accountId}`);
         const data = await response.json();
         console.log(data);
         return data as Account;
     };
 
     const fetchOfferingDetails = async (offeringId: string) => {
-        const response = await fetch(`/api/serviceofferings/${offeringId}`);
+        const response = await fetch(`/api/offerings/${offeringId}`);
         const data = await response.json();
         console.log(data);
         return data as ServiceOffering;
