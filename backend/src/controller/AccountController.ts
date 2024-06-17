@@ -19,6 +19,8 @@ function errorHandler(req: Request, res: Response, requiredProperties: string[])
     return false;
 }
 
+
+
 export const signup: RequestHandler = async (req, res, next) => {
     // Check if body contains required properties
     const error = errorHandler(req, res, [

@@ -8,7 +8,7 @@ interface ICertificate {
 }
 
 export interface IServiceOffering extends Document {
-    // serviceOfferingId: string;
+    serviceOfferingId: string;
     serviceType: ServiceType;
     lastUpdatedOn: Date;
     createdOn: Date;
@@ -24,7 +24,7 @@ export interface IServiceOffering extends Document {
 }
 
 const ServiceOfferingSchema: Schema = new Schema({
-    // serviceOfferingId: {type: String, required: true},
+    serviceOfferingId: {type: String, required: true},
     serviceType: {type: String, enum: Object.values(ServiceType), required: true},
     lastUpdatedOn: {type: Date, required: true},
     createdOn: {type: Date, required: true},
@@ -38,5 +38,8 @@ const ServiceOfferingSchema: Schema = new Schema({
     bufferTimeDuration: {type: Number, required: true},
     reviews: [{type: Schema.Types.ObjectId, ref: 'Review', required: true}],
 });
+
+// TODO Cascade delete service offerings when an account is deleted
+
 
 export default mongoose.model<IServiceOffering>('ServiceOffering', ServiceOfferingSchema);
