@@ -22,6 +22,7 @@ export interface Event {
     end: Date;
     title: string;
     isFixed?: boolean;  // Optional property to indicate if the event is fixed
+    isbooked: boolean;
 }
 
 type RangeType = Date[] | { start: Date; end: Date };
@@ -41,7 +42,7 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration }: ServiceSchedu
     const [clashDialogOpen, setClashDialogOpen] = useState(false);
 
     const handleSelect = ({ start, end }: SlotInfo) => {
-        const newEvent: Event = { start, end, title: Servicetype, isFixed: false };
+        const newEvent: Event = { start, end, title: Servicetype, isFixed: false, isbooked: false};
         console.log(availability)
         // Check for event clash
         const isClashing = availability.some(event =>
@@ -58,7 +59,7 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration }: ServiceSchedu
                  adjustedEnd = new Date(start.getTime() + defaultSlotDuration * 60000);
             }
 
-            const adjustedEvent: Event = { start: start, end: adjustedEnd, title: Servicetype, isFixed: false };
+            const adjustedEvent: Event = { start: start, end: adjustedEnd, title: Servicetype, isFixed: false, isbooked: false};
             setAvailability([...availability, adjustedEvent]);
         }
     };
@@ -81,7 +82,7 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration }: ServiceSchedu
     const handleFixWeekly = () => {
         if (selectedEvent) {
             const filteredAvailability = availability.filter(a => a.start !== selectedEvent.start && a.end !== selectedEvent.end);
-            const newEvent: Event = { start: selectedEvent.start, end: selectedEvent.end, title: selectedEvent.title, isFixed: true };
+            const newEvent: Event = { start: selectedEvent.start, end: selectedEvent.end, title: selectedEvent.title, isFixed: true, isbooked: false};
             setAvailability([...filteredAvailability, newEvent]);
             setDeleteDialog(false);
         }
