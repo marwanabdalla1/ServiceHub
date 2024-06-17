@@ -5,7 +5,7 @@ import {authenticate, deleteUser, login, logout, signup} from "../controller/Acc
 const router = express.Router();
 router.post("/signup", signup);
 router.post("/login", login);
-router.post("/logout", logout);
+router.get("/logout", logout);
 router.get("/authenticate", authenticate);
 router.post("/delete", deleteUser);
 

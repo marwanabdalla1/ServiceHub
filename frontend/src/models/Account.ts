@@ -29,16 +29,16 @@ export class Account {
     id: string;
     firstName: string;
     lastName: string;
-    email?: string;
+    email: string;
     phoneNumber?: string;
     address?: string;
     createdOn?: Date;
-    profileImageUrl: string;
+    profileImageUrl?: string;
     description?: string;
     location?: string;
     isProvider?: boolean;
     isPremium?: boolean;
-    rating: number;
+    rating?: number;
     reviewCount?: number;
     serviceOfferings: ServiceOffering[];
     availability?: Availability[];
@@ -51,10 +51,10 @@ export class Account {
         id: string,
         firstName: string,
         lastName: string,
-        profileImageUrl: string,
-        rating: number,
-        serviceOfferings: ServiceOffering[],
-        email?: string,
+        email: string,
+        profileImageUrl?: string,
+        rating?: number,
+
         phoneNumber?: string,
         address?: string,
         createdOn?: Date,
@@ -63,6 +63,7 @@ export class Account {
         isProvider?: boolean,
         isPremium?: boolean,
         reviewCount?: number,
+        serviceOfferings?: ServiceOffering[],
         availability?: Availability[],
         reviews?: Review[],
         notifications?: Notification[],
@@ -83,12 +84,12 @@ export class Account {
         this.isPremium = isPremium;
         this.rating = rating;
         this.reviewCount = reviewCount;
-        this.serviceOfferings = serviceOfferings;
-        this.availability = availability;
-        this.reviews = reviews;
-        this.notifications = notifications;
-        this.requestHistory = requestHistory;
-        this.jobHistory = jobHistory;
+        this.serviceOfferings = serviceOfferings || [];
+        this.availability = availability || [];
+        this.reviews = reviews || [];
+        this.notifications = notifications || [];
+        this.requestHistory = requestHistory || [];
+        this.jobHistory = jobHistory || [];
     }
 }
 
@@ -159,6 +160,7 @@ export const bikeRepairService: ServiceOffering = {
     reviews: [],
     rating: 4.5,
     provider: account
+
 };
 
 // Test-data to be removed, simply maintained in case required by original developer
@@ -251,222 +253,79 @@ export const users: Account[] = [
         notifications: [],
         rating: 4.8,
         reviewCount: 100,
-    },
+    },/*
     {
-        id: "4",
+        userId: 4,
         firstName: "Emily",
         lastName: "Davis",
-        email: "emily.davis@mail.com",
-        phoneNumber: "1234567890",
-        address: "123 Main St",
-        createdOn: new Date(),
-        profileImageUrl: "/images/profiles/profile4.png",
-        description: "Tutoring service",
-        location: "New York, NY",
-        isProvider: false,
-        isPremium: true,
-        serviceOfferings: [
-            {
-                serviceOfferingId: "tutoring0",
-                serviceType: ServiceType.tutoring,
-                description: "description2",
-                location: "location2",
-                hourlyRate: 30,
-                isCertified: true,
-                createdOn: new Date(),
-                lastUpdatedOn: new Date(),
-                certificate: new File([], "empty.txt", { type: "text/plain" }),
-                baseDuration: 2,
-                bufferTimeDuration: 0.5,
-                reviews: [],
-                rating: 4.9,
-                provider: account
-            }
-        ],
-        availability: [],
-        reviews: [],
-        requestHistory: [],
-        jobHistory: [],
-        notifications: [],
-        rating: 4.9,
-        reviewCount: 100,
+        service: {
+            serviceType: "tutoring",
+            rating: 4.9,
+            hourlyRating: 30.0,
+            isLicensed: true,
+        },
+        imageUrl: "/images/profiles/profile4.png",
     },
     {
-        id: "5",
+        userId: 5,
         firstName: "Michael",
         lastName: "Wilson",
-        email: "michael.wilson@mail.com",
-        phoneNumber: "1234567890",
-        address: "123 Main St",
-        createdOn: new Date(),
-        profileImageUrl: "/images/profiles/profile5.png",
-        description: "Pet sitting service",
-        location: "New York, NY",
-        isProvider: false,
-        isPremium: true,
-        serviceOfferings: [
-            {
-                serviceOfferingId: "petSitting0",
-                serviceType: ServiceType.petSitting,
-                description: "description3",
-                location: "location3",
-                hourlyRate: 18,
-                isCertified: false,
-                createdOn: new Date(),
-                lastUpdatedOn: new Date(),
-                certificate: new File([], "empty.txt", { type: "text/plain" }),
-                baseDuration: 2,
-                bufferTimeDuration: 0.5,
-                reviews: [],
-                rating: 4.6,
-                provider: account
-            }
-        ],
-        availability: [],
-        reviews: [],
-        requestHistory: [],
-        jobHistory: [],
-        notifications: [],
-        rating: 4.6,
-        reviewCount: 100,
+        service: {
+            serviceType: "petSitting",
+            rating: 4.6,
+            hourlyRating: 18.0,
+            isLicensed: false,
+        },
+        imageUrl: "/images/profiles/profile5.png",
     },
     {
-        id: "6",
+        userId: 6,
         firstName: "Sarah",
         lastName: "Johnson",
-        email: "sarah.johnson@mail.com",
-        phoneNumber: "1234567890",
-        address: "123 Main St",
-        createdOn: new Date(),
-        profileImageUrl: "/images/profiles/profile6.png",
-        description: "Landscaping service",
-        location: "New York, NY",
-        isProvider: false,
-        isPremium: true,
-        serviceOfferings: [
-            {
-                serviceOfferingId: "landscaping0",
-                serviceType: ServiceType.landscapingServices,
-                description: "description4",
-                location: "location4",
-                hourlyRate: 22,
-                isCertified: true,
-                createdOn: new Date(),
-                lastUpdatedOn: new Date(),
-                certificate: new File([], "empty.txt", { type: "text/plain" }),
-                baseDuration: 2,
-                bufferTimeDuration: 0.5,
-                reviews: [],
-                rating: 4.7,
-                provider: account
-            }
-        ],
-        availability: [],
-        reviews: [],
-        requestHistory: [],
-        jobHistory: [],
-        notifications: [],
-        rating: 4.7,
-        reviewCount: 100,
+        service: {
+            serviceType: "landScaping",
+            rating: 4.7,
+            hourlyRating: 22.0,
+            isLicensed: true,
+        },
+        imageUrl: "/images/profiles/profile6.png",
     },
     {
-        id: "7",
+        userId: 7,
         firstName: "David",
         lastName: "Williams",
-        email: "david.williams@mail.com",
-        phoneNumber: "1234567890",
-        address: "123 Main St",
-        createdOn: new Date(),
-        profileImageUrl: "/images/profiles/profile7.png",
-        description: "Home remodeling service",
-        location: "New York, NY",
-        isProvider: false,
-        isPremium: true,
-        serviceOfferings: [
-            {
-                serviceOfferingId: "homeRemodeling0",
-                serviceType: ServiceType.homeRemodeling,
-                description: "description5",
-                location: "location5",
-                hourlyRate: 35,
-                isCertified: true,
-                createdOn: new Date(),
-                lastUpdatedOn: new Date(),
-                certificate: new File([], "empty.txt", { type: "text/plain" }),
-                baseDuration: 2,
-                bufferTimeDuration: 0.5,
-                reviews: [],
-                rating: 4.4,
-                provider: account
-            }
-        ],
-        availability: [],
-        reviews: [],
-        requestHistory: [],
-        jobHistory: [],
-        notifications: [],
-        rating: 4.4,
-        reviewCount: 100,
+        service: {
+            serviceType: "homeRemodeling",
+            rating: 4.4,
+            hourlyRating: 35.0,
+            isLicensed: true,
+        },
+        imageUrl: "/images/profiles/profile7.png",
     },
     {
-        id: "8",
+        userId: 8,
         firstName: "Ashley",
         lastName: "Jones",
-        email: "ashley.jones@mail.com",
-        phoneNumber: "1234567890",
-        address: "123 Main St",
-        createdOn: new Date(),
-        profileImageUrl: "/images/profiles/profile8.png",
-        description: "Moving services",
-        location: "New York, NY",
-        isProvider: false,
-        isPremium: true,
-        serviceOfferings: [
-            {
-                serviceOfferingId: "movingServices0",
-                serviceType: ServiceType.movingServices,
-                description: "description6",
-                location: "location6",
-                hourlyRate: 28,
-                isCertified: true,
-                createdOn: new Date(),
-                lastUpdatedOn: new Date(),
-                certificate: new File([], "empty.txt", { type: "text/plain" }),
-                baseDuration: 2,
-                bufferTimeDuration: 0.5,
-                reviews: [],
-                rating: 4.8,
-                provider: account
-            }
-        ],
-        availability: [],
-        reviews: [],
-        requestHistory: [],
-        jobHistory: [],
-        notifications: [],
-        rating: 4.8,
-        reviewCount: 100,
+        service: {
+            serviceType: "movingServices",
+            rating: 4.8,
+            hourlyRating: 28.0,
+            isLicensed: true,
+        },
+        imageUrl: "/images/profiles/profile8.png",
     },
+
     {
-        id: "9",
+        userId: 9,
         firstName: "Bob",
         lastName: "Biker",
-        email: "bob.biker@mail.com",
-        phoneNumber: "1234567890",
-        address: "123 Main St",
-        createdOn: new Date(),
-        profileImageUrl: "/images/profiles/profile9.png",
-        description: "Bike repair service",
-        location: "New York, NY",
-        isProvider: false,
-        isPremium: true,
-        serviceOfferings: [bikeRepairService],
-        availability: [],
-        reviews: [],
-        requestHistory: [],
-        jobHistory: [],
-        notifications: [],
-        rating: 4.7,
-        reviewCount: 100,
-    },
+        service: {
+            serviceType: "bikeRepair",
+            rating: 4.7,
+            hourlyRating: 25.0,
+            isLicensed: true,
+        },
+        imageUrl: "/images/profiles/profile8.png",
+    },*/
+
 ];
