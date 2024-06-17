@@ -19,16 +19,9 @@ interface NavbarProps {
 }
 
 const Navbar : React.FC<NavbarProps> = ({toggleDrawer, onChange, onSearch, search}) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-  const openModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-  };
+  
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);

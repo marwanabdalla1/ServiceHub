@@ -1,6 +1,4 @@
 import * as React from 'react';
-import AspectRatio from '@mui/joy/AspectRatio';
-import Box from '@mui/joy/Box';
 import Drawer from '@mui/joy/Drawer';
 import Button from '@mui/joy/Button';
 import Card from '@mui/joy/Card';
@@ -25,7 +23,6 @@ import Slider from '@mui/material/Slider';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import Chip from '@mui/material/Chip';
-import Done from '@mui/icons-material/Done';
 import DirectionsBikeIcon from '@mui/icons-material/DirectionsBike';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import ChildFriendlyIcon from '@mui/icons-material/ChildFriendly';
@@ -34,6 +31,7 @@ import PetsIcon from '@mui/icons-material/Pets';
 import SpaIcon from '@mui/icons-material/Spa';
 import BuildIcon from '@mui/icons-material/Build';
 import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
+import Box from '@mui/material/Box';
 
 interface DrawerFilterProps {
   openDrawer: boolean;
@@ -42,12 +40,12 @@ interface DrawerFilterProps {
     type: string;
     priceRange: number[];
     locations: string[];
-    isLicensed: boolean;
+    isLicensed?: boolean; // Allow it to be undefined
   };
   onPriceChange: (value: number[]) => void;
   onLocationChange: (value: string[]) => void;
   onTypeChange: (value: string) => void;
-  onLicensedChange: (value: boolean) => void;
+  onLicensedChange: (value?: boolean) => void; // Allow it to be undefined
   onClearFilters: () => void;
 }
 
@@ -75,7 +73,7 @@ export const DrawerFilter: React.FC<DrawerFilterProps> = ({
   };
 
   const handleLicensedChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onLicensedChange(event.target.checked);
+    onLicensedChange(event.target.checked ? true : undefined); // Set to undefined if unchecked
   };
 
   return (
@@ -212,7 +210,7 @@ export const DrawerFilter: React.FC<DrawerFilterProps> = ({
                 </FormHelperText>
               </Box>
               <Switch
-                checked={filterState.isLicensed}
+                checked={filterState.isLicensed ?? false}
                 onChange={handleLicensedChange}
               />
             </FormControl>
@@ -227,12 +225,12 @@ export const DrawerFilter: React.FC<DrawerFilterProps> = ({
                 onChange={handlePriceChange}
                 valueLabelDisplay="auto"
                 min={15}
-                max={35}
+                max={60}
                 step={1}
                 marks={[
                   { value: 15, label: '$15' },
-                  { value: 25, label: '$25' },
-                  { value: 35, label: '$35' }
+                  { value: 37.5, label: '$37.5' },
+                  { value: 60, label: '$60' }
                 ]}
               />
             </FormControl>
