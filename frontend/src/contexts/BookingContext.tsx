@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Account } from '../models/Account';
+import {ServiceOffering} from "../models/ServiceOffering";
 
 interface BookingDetails {
     location: string;     // Location of service
@@ -9,6 +10,7 @@ interface BookingDetails {
     provider: Account | null;     // Service provider
     requestedBy: Account | null;  // User who requested the service
     endTime?: Date | null;     // endtime/duration of the service
+    serviceOffeing: ServiceOffering | null;
 }
 
 interface BookingContextProps {
@@ -18,6 +20,8 @@ interface BookingContextProps {
     setSelectedServiceDetails: (service: string, price: string) => void;
     setTimeAndDuration: (startTime: Date, endTime: Date) => void;
     fetchAccountDetails: (accountId: string) => Promise<Account>;
+    fetchOfferingDetails: (offeringId: string) => Promise<ServiceOffering>; // Rename for clarity
+
 }
 
 const defaultContext: BookingContextProps = {
@@ -29,12 +33,24 @@ const defaultContext: BookingContextProps = {
         price: '',
         provider: null,
         requestedBy: null,
+        serviceOffeing: null,
     },
     setProvider: () => {},
     setRequestedBy: () => {},
     setSelectedServiceDetails: () => {},
     setTimeAndDuration: () => {},
-    fetchAccountDetails: async () => ({ id: '', firstName: '', lastName: '', email: '' } as Account),
+    // fetchAccountDetails: async () => ({ id: '', firstName: '', lastName: '', email: '' } as Account),
+    fetchAccountDetails: async (accountId: string): Promise<Account> => {
+        const response = await fetch(`/api/accounts/${accountId}`);
+        const data = await response.json();
+        console.log(data);
+        return data as Account;
+    },
+    fetchOfferingDetails: async (offeringId: string) => {
+        const response = await fetch(`/api/serviceofferings/${offeringId}`);
+        const data = await response.json();
+        return data as ServiceOffering;
+    },
 };
 
 const BookingContext = createContext<BookingContextProps>(defaultContext);
@@ -61,7 +77,15 @@ export const BookingProvider: React.FC<{ children: ReactNode }> = ({ children })
     const fetchAccountDetails = async (accountId: string): Promise<Account> => {
         const response = await fetch(`/api/accounts/${accountId}`);
         const data = await response.json();
+        console.log(data);
         return data as Account;
+    };
+
+    const fetchOfferingDetails = async (offeringId: string) => {
+        const response = await fetch(`/api/serviceofferings/${offeringId}`);
+        const data = await response.json();
+        console.log(data);
+        return data as ServiceOffering;
     };
 
     return (
@@ -71,7 +95,8 @@ export const BookingProvider: React.FC<{ children: ReactNode }> = ({ children })
             setRequestedBy,
             setSelectedServiceDetails,
             setTimeAndDuration,
-            fetchAccountDetails
+            fetchAccountDetails,
+            fetchOfferingDetails,
         }}>
             {children}
         </BookingContext.Provider>

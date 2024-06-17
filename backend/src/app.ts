@@ -2,6 +2,7 @@ import "dotenv/config"
 import express from "express";
 import account from "./models/account";
 import authRouter from "./routes/auth";
+import bookingRouter from "./routes/booking";
 import cors from "cors";
 
 
@@ -25,6 +26,7 @@ app.use(cors({
 
 app.use(express.json());
 app.use("/api/auth", authRouter);
+app.use("/api/accounts", bookingRouter);
 
 app.get("/", async (req, res, next) => {
     try {

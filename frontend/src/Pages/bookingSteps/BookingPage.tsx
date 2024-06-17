@@ -33,7 +33,7 @@ const BookingPage = () => {
     //         if (step !== stepNumber) {
     //             navigate(`/provider/${providerId}/offering/${offeringId}/booking/step${step}`);
     //         }
-    //     }, [step, providerId, offeringId, navigate, stepNumber]);ing logic
+    //     }, [step, providerId, offeringId, navigate, stepNumber]);
     //     // Assume an API call fetches the provider details
     //     const response = await fetch(`/api/providers/${providerId}`);
     //     const providerData = await response.json();
