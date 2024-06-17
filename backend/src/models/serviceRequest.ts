@@ -17,6 +17,8 @@ export interface IServiceRequest extends Document {
     comment: string;
     serviceFee: number;
     duration: number;
+
+    serviceOffering: Schema.Types.ObjectId; //reference to the service ofering
     job: Schema.Types.ObjectId; // Reference to a Job document
     provider: Schema.Types.ObjectId; // Reference to an Account document
     requestedBy: Schema.Types.ObjectId; // Reference to an Account document
@@ -34,10 +36,11 @@ const ServiceRequestSchema: Schema = new Schema({
     comment: {type: String, required: true},
     serviceFee: {type: Number, required: true},
     duration: {type: Number, required: true},
+    serviceOffering: {type: Schema.Types.ObjectId, ref: 'ServiceOffering', required: true},
     job: {type: Schema.Types.ObjectId, ref: 'Job', required: true},
     provider: {type: Schema.Types.ObjectId, ref: 'Account', required: true},
     requestedBy: {type: Schema.Types.ObjectId, ref: 'Account', required: true},
-    rating: {type: Number, required: true},
+    rating: {type: Number, required: true}, //todo: is this needed? rating should only be tied with job and not request
     profileImageUrl: {type: String, required: true},
 });
 

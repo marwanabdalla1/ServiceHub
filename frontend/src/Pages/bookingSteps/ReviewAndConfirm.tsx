@@ -1,9 +1,16 @@
 import React from 'react';
 import { Container, Box, Typography, Card, CardContent, TextField, Button } from '@mui/material';
-import { useBooking } from '../../context/BookingContext';
+import { useBooking } from '../../contexts/BookingContext';
 import {useNavigate} from "react-router-dom";
 
-function ReviewAndConfirm() {
+
+
+interface ReviewAndConfirmProps {
+    onComplete: () => void;
+    onBack: () => void;
+}
+
+function ReviewAndConfirm({ onComplete, onBack }: ReviewAndConfirmProps) {
     const { bookingDetails } = useBooking();
     const navigate = useNavigate();
 
@@ -22,13 +29,16 @@ function ReviewAndConfirm() {
                     <Typography variant="h4" gutterBottom>
                         Review and confirm booking
                     </Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+                        <Button variant="outlined" onClick={onBack}>Back</Button>
+                    </Box>
                     <Card sx={{ mb: 2 }}>
                         <CardContent>
                             <Typography variant="h6" gutterBottom>
                                 Booking Details
                             </Typography>
                             <Typography variant="body1">
-                                <strong>Name:</strong> {bookingDetails.name}
+                                <strong>Name:</strong> {bookingDetails.provider?.lastName}
                             </Typography>
                             <Typography variant="body1">
                                 <strong>Location:</strong> {bookingDetails.location}
@@ -37,7 +47,7 @@ function ReviewAndConfirm() {
                                 <strong>Service:</strong> {bookingDetails.service}
                             </Typography>
                             <Typography variant="body1">
-                                <strong>Date:</strong> {bookingDetails.date}
+                                <strong>Date:</strong> {bookingDetails.startTime ? bookingDetails.startTime.toLocaleString() : 'No date set'}
                             </Typography>
                             <Typography variant="body1">
                                 <strong>Price:</strong> {bookingDetails.price}
@@ -68,12 +78,12 @@ function ReviewAndConfirm() {
                     <Card>
                         <CardContent sx={{ display: 'flex', alignItems: 'center' }}>
                             <Box>
-                                <Typography variant="h6">{bookingDetails.name}</Typography>
+                                <Typography variant="h6">{bookingDetails.provider?.lastName}</Typography>
                                 <Typography variant="body2" color="text.secondary">
                                     {bookingDetails.location}
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary">
-                                    {bookingDetails.date}
+                                    {bookingDetails.startTime ? bookingDetails.startTime.toLocaleString() : 'No date set'}
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary">
                                     {bookingDetails.service}

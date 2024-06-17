@@ -21,15 +21,16 @@ import SelectAvailabilityPage from './Pages/SelectAvailabilityPage';
 
 import SelectTimeslot from './Pages/bookingSteps/SelectTimeslotPage'
 import UpdateTimeslot from './Pages/UpdateTimeslotPage'
-import {BookingProvider} from "./context/BookingContext";
+import {BookingProvider} from "./contexts/BookingContext";
 import UpdateProfile from "./Pages/bookingSteps/UpdateProfile";
 import ReviewAndConfirm from "./Pages/bookingSteps/ReviewAndConfirm";
 import CreateAccountOrSignIn from "./Pages/bookingSteps/CreateAccountOrSignIn";
 import ListsLandingPage from "./Pages/listsLandingPage";
 
-import {RequestProvider} from './context/RequestContext';
+import {RequestProvider} from './contexts/RequestContext';
 import axios from "axios";
 import ProposeNewtimePage from './Pages/ProposeNewTimePage';
+import BookingPage from "./Pages/bookingSteps/BookingPage";
 
 function App() {
 
@@ -69,18 +70,21 @@ function MainRoutes() {
                 <Route path="/addservice" element={<AddServicePage/>}/>
                 <Route path="/provider-profile/:id" element={<ProviderProfilePage/>}/>
                 <Route path="select-availability" element={<SelectAvailabilityPage/>}/>
-                <Route path="/select-timeslot" element={<SelectTimeslot/>}/>
                 <Route path="/update-timeslot" element={<UpdateTimeslot/>}/>
-                <Route path="/create-account-or-sign-in" element={<CreateAccountOrSignIn/>}/>
-                <Route path="/update-profile" element={<UpdateProfile/>}/>
-                <Route path="/review-and-confirm" element={<ReviewAndConfirm/>}/>
+
+
+                {/*booking*/}
+                <Route path="/provider/:providerId/offering/:offeringId" element={<ProviderProfilePage />} />
+                <Route path="/provider/:providerId/offering/:offeringId/booking/:step" element={<BookingPage />} />
+
+                {/*old ones*/}
+                {/*<Route path="/create-account-or-sign-in" element={<CreateAccountOrSignIn/>}/>*/}
+                {/*<Route path="/update-profile" element={<UpdateProfile/>}/>*/}
+                {/*<Route path="/review-and-confirm" element={<ReviewAndConfirm/>}/>*/}
+
                 <Route path="/listsLandingPage" element={<ListsLandingPage/>}/>
                 <Route path="select-availability" element={<SelectAvailabilityPage/>} />
-                <Route path="/select-timeslot/:id" element={<SelectTimeslot/>} />
                 <Route path="/update-timeslot/" element={<UpdateTimeslot/>} />
-                <Route path="/create-account-or-sign-in" element={<CreateAccountOrSignIn />} />
-                <Route path="/update-profile" element={<UpdateProfile />} />
-                <Route path="/review-and-confirm/:id" element={<ReviewAndConfirm />} />
                 <Route path="/listsLandingPage" element={<ListsLandingPage />} />
                 <Route path="/proposeNewTime" element={<ProposeNewtimePage />} />
                 <Route path="*" element={<h1>Not Found</h1>}/>

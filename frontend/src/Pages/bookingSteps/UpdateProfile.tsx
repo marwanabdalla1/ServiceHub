@@ -1,9 +1,15 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Box, Typography, Card, CardContent, TextField, Button, Grid } from '@mui/material';
-import { useBooking } from '../../context/BookingContext';
+import { useBooking } from '../../contexts/BookingContext';
 
-function UpdateProfile() {
+
+interface UpdateProfileProps {
+    onNext: () => void;
+    onBack: () => void;
+}
+
+function UpdateProfile({ onNext, onBack }: UpdateProfileProps) {
     const { bookingDetails } = useBooking();
     const navigate = useNavigate();
 
@@ -22,6 +28,10 @@ function UpdateProfile() {
                     <Typography variant="h4" gutterBottom>
                         Please update your profile
                     </Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+                        <Button variant="outlined" onClick={onBack}>Back</Button>
+                        <Button variant="contained" onClick={onNext}>Next</Button>
+                    </Box>
                     <Card>
                         <CardContent>
                             <Typography variant="h6" gutterBottom>
@@ -66,12 +76,12 @@ function UpdateProfile() {
                     <Card>
                         <CardContent sx={{ display: 'flex', alignItems: 'center' }}>
                             <Box>
-                                <Typography variant="h6">{bookingDetails.name}</Typography>
+                                <Typography variant="h6">{bookingDetails.provider?.lastName}</Typography>
                                 <Typography variant="body2" color="text.secondary">
                                     {bookingDetails.location}
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary">
-                                    {bookingDetails.date}
+                                    {bookingDetails.startTime ? bookingDetails.startTime.toLocaleString() : 'No date set'}
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary">
                                     {bookingDetails.service}

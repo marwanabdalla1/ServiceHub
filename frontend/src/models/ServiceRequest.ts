@@ -1,6 +1,8 @@
 import { ServiceType, RequestStatus } from "./enums";
 import { Job } from "./Job";
 import { Account } from "./Account";
+import { ServiceOffering } from "./ServiceOffering";
+
 
 export class ServiceRequest {
     serviceRequestId: string;
@@ -15,17 +17,17 @@ export class ServiceRequest {
 
     //foreign keys
     job: Job | null;
+    serviceOffering: ServiceOffering;
     provider: Account;
     requestedBy: Account;
     rating: number;
     profileImageUrl: string;
 
 
-    //notification is not 
 
     constructor(serviceRequestId: string, requestStatus: RequestStatus, createdOn: Date, serviceType: ServiceType,
         appointmentTime: Date, uploads: File[], comment: string, serviceFee: number, duration: number, job: Job | null, provider: Account, requestedBy: Account, rating: number,
-        profileImageUrl: string) {
+        profileImageUrl: string, serviceOffering: ServiceOffering) {
         this.serviceRequestId = serviceRequestId;
         this.requestStatus = requestStatus;
         this.createdOn = createdOn;
@@ -40,5 +42,6 @@ export class ServiceRequest {
         this.requestedBy = requestedBy;
         this.rating = rating;
         this.profileImageUrl = profileImageUrl;
+        this.serviceOffering = serviceOffering;
     }
 }

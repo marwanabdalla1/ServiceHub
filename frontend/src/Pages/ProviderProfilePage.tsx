@@ -1,3 +1,5 @@
+// this is more like offering profile page instead of provider profile page
+
 import React from 'react';
 import {
     Container,
@@ -25,7 +27,8 @@ import Breadcrumb from "../components/Breadcrumb";
 import LightBlueButton from "../components/inputs/BlueButton";
 import { ServiceOffering } from '../models/ServiceOffering';
 import account from '../models/Account';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
+
 
 const mockProvider: ServiceProvider = {
     id: '1',
@@ -124,7 +127,6 @@ const mockProvider: ServiceProvider = {
     requestHistory: [],
     jobHistory: []
 
-
 };
 
 const daysOfWeekToString = (day: DaysOfWeek): string => {
@@ -137,12 +139,23 @@ const formatTime = (date: Date): string => {
 
 function ProviderProfilePage() {
     const provider = mockProvider;
-    const { id } = useParams(); //use this to then make a post request to the user with the id to get the user data
+    const { providerId, offeringId } = useParams(); //use this to then make a post request to the user with the id to get the user data
+
+    const navigate = useNavigate();
+
+    // go to the booking page
+    const handleBookNow = () => {
+        navigate(`/provider/${providerId}/offering/${providerId}/booking/step0`);
+    };
+
+
+    // handle "book now" button
     return (
         <Container>
 
             <Box sx={{mt: 4}}>
                 <Breadcrumb paths={[
+                    // todo: change this!
                     {label: 'Home', href: '/'},
                     {label: 'Munich', href: '/munich'},
                     {label: 'Bike Repair', href: '/munich/bike-repair'},
@@ -159,9 +172,9 @@ function ProviderProfilePage() {
                             </Typography>
                             <Box sx={{ justifyContent: 'space-between'}}>
                                 <LightBlueButton className = 'px-3 py-2 rounded bg-white mr-3' text='Contact Information' onClick={() => console.log('booking button pressed')}></LightBlueButton>
-                                <Link to={`/select-timeslot/${id}`}>
-                                <LightBlueButton className = 'px-3 py-2 rounded' text='Book Now' onClick={() => console.log('booking button pressed')}></LightBlueButton>
-                                </Link>
+                                {/*<Link to={`/select-timeslot/${id}`}>*/}
+                                <LightBlueButton className = 'px-3 py-2 rounded' text='Book Now' onClick={handleBookNow}></LightBlueButton>
+                                {/*</Link>*/}
                             </Box>
                         </Box>
 
@@ -243,7 +256,7 @@ function ProviderProfilePage() {
                             <Typography variant="body2" gutterBottom>
                                 Share your thought with other customers
                             </Typography>
-                            <Button size='small' variant="outlined">Write a customer review</Button>
+                            {/*<Button size='small' variant="outlined">Write a customer review</Button>*/}
                         </Box>
                     </Grid>
                     <Grid item xs={9}>

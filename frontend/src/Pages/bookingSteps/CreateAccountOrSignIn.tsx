@@ -1,12 +1,18 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Box, Typography, Button, Card, CardContent } from '@mui/material';
-import { useBooking } from '../../context/BookingContext';
+import { useBooking } from '../../contexts/BookingContext';
 
-function CreateAccountOrSignIn() {
+
+interface CreateAccountOrSignInProps {
+    onNext: () => void;
+    onBack: () => void;
+}
+
+function CreateAccountOrSignIn({ onNext, onBack }: CreateAccountOrSignInProps) {
     const { bookingDetails } = useBooking();
     const navigate = useNavigate();
-    const isAuthenticated = false; // Replace this with your actual authentication logic
+    const isAuthenticated = false; // todo: Replace this with actual authentication logic
 
     useEffect(() => {
         if (isAuthenticated) {
@@ -27,8 +33,12 @@ function CreateAccountOrSignIn() {
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
                 <Box sx={{ width: '60%' }}>
                     <Typography variant="h6" gutterBottom>
-                        Step 2 of 3
+                        Step 1 of 3
                     </Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+                        <Button variant="outlined" onClick={onBack}>Back</Button>
+                        <Button variant="contained" onClick={onNext}>Next</Button>
+                    </Box>
                     <Typography variant="h4" gutterBottom>
                         Create account or sign in
                     </Typography>
@@ -43,7 +53,7 @@ function CreateAccountOrSignIn() {
                     <Card>
                         <CardContent sx={{ display: 'flex', alignItems: 'center' }}>
                             <Box>
-                                <Typography variant="h6">{bookingDetails.name}</Typography>
+                                <Typography variant="h6">{`${bookingDetails.provider?.firstName} ${bookingDetails.provider?.lastName}`}</Typography>
                                 <Typography variant="body2" color="text.secondary">
                                     {bookingDetails.location}
                                 </Typography>
