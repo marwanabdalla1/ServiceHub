@@ -19,7 +19,7 @@ const accountSchema = new mongoose.Schema({
 
     serviceOfferings: [{type: mongoose.Schema.Types.ObjectId, ref: 'ServiceOffering'}],
     availability: [{type: mongoose.Schema.Types.ObjectId, ref: 'Availability'}],
-    reviews: [{type: mongoose.Schema.Types.ObjectId, ref: 'Review'}],
+    // reviews: [{type: mongoose.Schema.Types.ObjectId, ref: 'Review'}],
     notifications: [{type: mongoose.Schema.Types.ObjectId, ref: 'Notification'}],
     requestHistory: [{type: mongoose.Schema.Types.ObjectId, ref: 'ServiceRequest'}],
     jobHistory: [{type: mongoose.Schema.Types.ObjectId, ref: 'Job'}],

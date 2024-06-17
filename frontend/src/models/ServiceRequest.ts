@@ -17,7 +17,7 @@ export class ServiceRequest {
 
     //foreign keys
     job: Job | null;
-    serviceOffering: ServiceOffering;
+    serviceOffering: ServiceOffering | null;   //todo: make it non-null
     provider: Account;
     requestedBy: Account;
     rating: number;
@@ -25,13 +25,14 @@ export class ServiceRequest {
 
 
 
-    constructor(serviceRequestId: string, requestStatus: RequestStatus, createdOn: Date, serviceType: ServiceType,
+    constructor(serviceRequestId: string, requestStatus: RequestStatus, createdOn: Date, serviceType: ServiceType, serviceOffering: ServiceOffering | null,
         appointmentTime: Date, uploads: File[], comment: string, serviceFee: number, duration: number, job: Job | null, provider: Account, requestedBy: Account, rating: number,
-        profileImageUrl: string, serviceOffering: ServiceOffering) {
+        profileImageUrl: string) {
         this.serviceRequestId = serviceRequestId;
         this.requestStatus = requestStatus;
         this.createdOn = createdOn;
         this.serviceType = serviceType;
+        this.serviceOffering = serviceOffering
         this.appointmentTime = appointmentTime;
         this.uploads = uploads;
         this.comment = comment;
@@ -42,6 +43,5 @@ export class ServiceRequest {
         this.requestedBy = requestedBy;
         this.rating = rating;
         this.profileImageUrl = profileImageUrl;
-        this.serviceOffering = serviceOffering;
     }
 }
