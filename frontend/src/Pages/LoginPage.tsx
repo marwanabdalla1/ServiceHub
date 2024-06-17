@@ -23,6 +23,8 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import {createTheme, ThemeProvider} from '@mui/material/styles';
 import {blue} from "@mui/material/colors";
+import {useNavigate} from "react-router-dom";
+import axios from "axios";
 
 function Copyright(props: PropsWithChildren<{}>) {
     return (
@@ -46,14 +48,27 @@ const defaultTheme = createTheme({
 });
 
 export default function SignIn() {
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    const navigate = useNavigate();
+
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
-        console.log({
+        const user = {
             email: data.get('email'),
             password: data.get('password'),
-        });
+        };
+
+        try {
+            const response = await axios.post('/api/auth/login', user);
+            console.log(response.data);
+
+            // Redirect to the home page
+            navigate('/');
+        } catch (error) {
+            console.error('Error logging in:', error);
+        }
     };
+
 
     return (
         <ThemeProvider theme={defaultTheme}>
