@@ -12,6 +12,7 @@ import RequestRouter from "./routes/Request";
 
 // Import the models to ensure they are registered
 import './models/serviceOffering';
+import TimeSlotRouter from "./routes/TimeSlot";
 
 const app = express();
 
@@ -30,6 +31,9 @@ app.use(express.json());
 app.use("/api/auth", AuthRouter);
 app.use("/api/account", AccountRouter);
 app.use("/api/offerings", OfferingRouter);
+app.use("/api/timeslots", TimeSlotRouter);
+
+
 app.use("/api/requests", RequestRouter);
 
 app.get("/", async (req, res, next) => {
