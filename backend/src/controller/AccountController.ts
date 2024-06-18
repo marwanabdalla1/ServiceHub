@@ -1,5 +1,4 @@
 import Account from "../models/account";
-import timeslot from "../models/timeslot";
 import {Request, Response, RequestHandler} from "express";
 
 // Define ERRORS object
@@ -78,83 +77,4 @@ export const signup: RequestHandler = async (req, res, next) => {
     }
 }
 
-// export const getEvents: RequestHandler = async (req, res, next) => {
-//     try {
-
-//         //It would retreive the events for the current week (from Frontend)
-//         //it should check if the current week is only two weeks away from the calendar
-//         //if it is, then it should call a function that creates the fixed events for the next 6 months as well
-//         const { start, end } = req.query;
-//         const startDate = moment(start);
-//         const endDate = moment(end);
-//         const events = await timeslot.find();
-//         const weekInstances = generateWeeklyInstances(events, startDate, endDate);
-//         res.json(weekInstances);    }
-//          catch (err) {
-//         let message = '';
-//         if (err instanceof Error) {
-//             message = err.message;
-//         }
-//         return res.status(500).json({
-//             error: "Internal server error",
-//             message: message,
-//         });
-//     }
-// }
-
-
-// export const saveEvents: RequestHandler = async (req, res, next) => {
-//     try {
-//         const { events } = req.body;
-//         // await timeslot.deleteMany({});
-//         //save the events for the current week,
-//         //then make a function that parses the events and checks if they are fixed
-//         //if they are fixed, then save them for the next week until 6 months in advance
-//         await timeslot.insertMany(events);
-//         res.status(201).json({ message: "Events saved successfully" });
-//     } catch (err) {
-//         let message = '';
-//         if (err instanceof Error) {
-//             message = err.message;
-//         }
-//         return res.status(500).json({
-//             error: "Internal server error",
-//             message: message,
-//         });
-//     }
-// }
-
-// function generateWeeklyInstances(events, startDate, endDate) {
-//     const weekInstances: { title: any; start: any; end: any; }[] = [];
-  
-//     events.forEach(event => {
-//       const dayOfWeek = event.dayOfWeek;
-//       let currentDate = moment(startDate).day(dayOfWeek); // Get the date for the specific day in the start date week
-  
-//       while (currentDate.isBefore(endDate)) {
-//         if (currentDate.isBetween(startDate, endDate, 'day', '[]')) {
-//           const start = moment(currentDate).set({
-//             hour: event.startTime.split(':')[0],
-//             minute: event.startTime.split(':')[1],
-//             second: event.startTime.split(':')[2]
-//           });
-  
-//           const end = moment(currentDate).set({
-//             hour: event.endTime.split(':')[0],
-//             minute: event.endTime.split(':')[1],
-//             second: event.endTime.split(':')[2]
-//           });
-  
-//           weekInstances.push({ title: event.title, start: start.toISOString(), end: end.toISOString() });
-//         }
-  
-//         currentDate.add(1, 'week'); // Move to the same day in the next week
-//       }
-//     });
-  
-//     return weekInstances;
-//   }
-
-// function moment(end: ParsedQs) {
-//     throw new Error("Function not implemented.");
-// }
+ 

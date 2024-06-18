@@ -1,37 +1,40 @@
-import mongoose, {Document, Schema} from 'mongoose';
-import {ServiceType} from './enums';
+import mongoose, { Document, Schema } from 'mongoose';
 
 export interface ITimeslot extends Document {
-    title: ServiceType;
-    start: Date;
-    end: Date;
-    isFixed: boolean;
+  title: string; // Changed to string
+  start: Date;
+  end: Date;
+  isFixed: boolean;
+  isBooked: boolean;  
+  createdById: string;
+
 }
 
-const TimeslotSchema: Schema = new Schema({
-    title: {
-        type: String,
-        required: true
-    },
-    start: {
-        type: Date,
-        required: true
-    },
-    end: {
-        type: Date,
-        required: true
-    },
-    isFixed: {
-        type: Boolean,
-        required: true
-    },
-     
-    isBooked: {
-        type: Boolean,
-        required: true
-    }
-
-    
+const TimeSlot: Schema = new Schema({
+  title: {
+    type: String,
+    required: true
+  },
+  start: {
+    type: Date,
+    required: true
+  },
+  end: {
+    type: Date,
+    required: true
+  },
+  isFixed: {
+    type: Boolean,
+    required: true
+  },
+  isBooked: {
+    type: Boolean,
+    required: true
+  },
+  createdById: {
+    type: String,
+    required: true
+  }
 });
 
-export default mongoose.model<ITimeslot>('Timeslot', TimeslotSchema);
+export default mongoose.model<ITimeslot>('Timeslot', TimeSlot);
