@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import AvailabilityCalendar, { Event } from '../components/AvailabilityCalendar';
+import AvailabilityCalendar, { TimeSlot } from '../components/AvailabilityCalendar';
 import { Typography, Container, Button, Box } from '@mui/material';
 const SelectAvailabilityPage: React.FC = () => {
     const [serviceType, setServiceType] = useState("Babysitting"); // Placeholder for the service type [e.g. "Tutoring"]
@@ -16,6 +16,7 @@ const SelectAvailabilityPage: React.FC = () => {
                 </Typography>
             </Box>
             <AvailabilityCalendar
+                createdById='user12'
                 Servicetype={serviceType}
                 defaultSlotDuration={defaultSlotDuration}
                 // globalAvailabilities={globalAvailabilities}
