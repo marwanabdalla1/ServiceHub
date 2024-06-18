@@ -39,15 +39,17 @@ function App() {
     }, []);
 
     return (
-        <BookingProvider>
-            <RequestProvider>
-                <AccountProvider>
-                    <BrowserRouter>
+        <BrowserRouter>
+            <BookingProvider>
+                <RequestProvider>
+                    <AccountProvider>
+
                         <MainRoutes/>
-                    </BrowserRouter>
-                </AccountProvider>
-            </RequestProvider>
-        </BookingProvider>
+
+                    </AccountProvider>
+                </RequestProvider>
+            </BookingProvider>
+        </BrowserRouter>
     );
 }
 

@@ -25,6 +25,7 @@ import {createTheme, ThemeProvider} from '@mui/material/styles';
 import {blue} from "@mui/material/colors";
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
+import {useAuth} from "../context/AuthContext";
 
 function Copyright(props: PropsWithChildren<{}>) {
     return (
@@ -48,27 +49,12 @@ const defaultTheme = createTheme({
 });
 
 export default function SignIn() {
-    const navigate = useNavigate();
+    const { loginUser } = useAuth();
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        const data = new FormData(event.currentTarget);
-        const user = {
-            email: data.get('email'),
-            password: data.get('password'),
-        };
-
-        try {
-            const response = await axios.post('/api/auth/login', user);
-            console.log(response.data);
-
-            // Redirect to the home page
-            navigate('/');
-        } catch (error) {
-            console.error('Error logging in:', error);
-        }
+        await loginUser(event);
     };
-
 
     return (
         <ThemeProvider theme={defaultTheme}>

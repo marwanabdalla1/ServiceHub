@@ -41,6 +41,7 @@ export const AccountProvider = ({children}: Props) => {
             firstName: response?.data.firstName,
             lastName: response?.data.lastName,
             email: response?.data.email,
+            serviceOfferings: []
         };
         localStorage.setItem('account', JSON.stringify(accountObj));
 

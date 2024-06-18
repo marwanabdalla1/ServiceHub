@@ -8,6 +8,7 @@ import RequestListButton from "./inputs/requestListButton";
 import Modal from "./inputs/Modal";
 import { Link } from "react-router-dom";
 import { Menu, MenuItem } from '@mui/material';
+import {useAuth} from "../context/AuthContext";
 
 
 
@@ -19,9 +20,10 @@ interface NavbarProps {
 }
 
 const Navbar : React.FC<NavbarProps> = ({toggleDrawer, onChange, onSearch, search}) => {
+  const { isLoggedIn } = useAuth();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-  
+
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -30,9 +32,6 @@ const Navbar : React.FC<NavbarProps> = ({toggleDrawer, onChange, onSearch, searc
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
-
-
-
 
   return (
     <nav className="bg-blue-300 shadow-md h-20">

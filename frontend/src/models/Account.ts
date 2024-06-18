@@ -54,7 +54,7 @@ export class Account {
         email: string,
         profileImageUrl?: string,
         rating?: number,
-
+        serviceOfferings?: ServiceOffering[],
         phoneNumber?: string,
         address?: string,
         createdOn?: Date,
@@ -63,7 +63,6 @@ export class Account {
         isProvider?: boolean,
         isPremium?: boolean,
         reviewCount?: number,
-        serviceOfferings?: ServiceOffering[],
         availability?: Availability[],
         reviews?: Review[],
         notifications?: Notification[],
