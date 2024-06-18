@@ -11,7 +11,6 @@ export interface ITimeslot extends Document {
 const TimeslotSchema: Schema = new Schema({
     title: {
         type: String,
-        enum: Object.values(ServiceType),
         required: true
     },
     start: {
@@ -25,7 +24,14 @@ const TimeslotSchema: Schema = new Schema({
     isFixed: {
         type: Boolean,
         required: true
+    },
+     
+    isBooked: {
+        type: Boolean,
+        required: true
     }
+
+    
 });
 
 export default mongoose.model<ITimeslot>('Timeslot', TimeslotSchema);
