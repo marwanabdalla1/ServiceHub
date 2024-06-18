@@ -3,7 +3,7 @@ import {Calendar, dateFnsLocalizer, SlotInfo} from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { format, startOfWeek, parseISO, getDay, startOfDay, endOfDay } from 'date-fns';
 import { enUS } from "@mui/material/locale";
-import { Dialog, Button, DialogActions, DialogContent, DialogTitle } from "@mui/material";
+import { Dialog, Button, DialogActions, DialogContent, DialogTitle, Box } from "@mui/material";
 
 const locales = {
     'en-US': enUS,
@@ -40,6 +40,12 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration }: ServiceSchedu
     const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
     const [DeleteDialog, setDeleteDialog] = useState(false);
     const [clashDialogOpen, setClashDialogOpen] = useState(false);
+
+    const saveAvailability = () => {
+        //make the post request to save the availability
+        //change the availability to be something also fetchable
+        console.log(availability);
+    };
 
     const handleSelect = ({ start, end }: SlotInfo) => {
         const newEvent: Event = { start, end, title: Servicetype, isFixed: false, isbooked: false};
@@ -145,6 +151,11 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration }: ServiceSchedu
                     <Button onClick={handleClashDialogClose}>OK</Button>
                 </DialogActions>
             </Dialog>
+            <Box display="flex" justifyContent="flex-end" sx={{ mt: 4 }}>
+                <Button variant="contained" color="primary" onClick={saveAvailability}>
+                    Save Availability
+                </Button>
+            </Box>
     </div>
 
     );
