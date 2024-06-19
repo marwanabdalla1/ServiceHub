@@ -17,6 +17,7 @@ const app = express();
 // Configure CORS for connecting backend and frontend
 const corsOptions = {
     origin: 'http://localhost:3000',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed methods
     optionsSuccessStatus: 200
 };
 

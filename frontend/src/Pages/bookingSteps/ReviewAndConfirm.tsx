@@ -112,10 +112,10 @@ function ReviewAndConfirm({ onComplete, onBack , bookingDetails}: ReviewAndConfi
                                 <strong>Name:</strong> {bookingDetails.provider?.lastName}
                             </Typography>
                             <Typography variant="body1">
-                                <strong>Location:</strong> {bookingDetails.location}
+                                <strong>Location:</strong> {bookingDetails.serviceOffering?.location}
                             </Typography>
                             <Typography variant="body1">
-                                <strong>Service:</strong> {bookingDetails.serviceOffering?.serviceType}
+                                <strong>Service:</strong> {bookingDetails.serviceType}
                             </Typography>
                             <Typography variant="body1">
                                 <strong>Date:</strong> {bookingDetails.startTime ? bookingDetails.startTime.toLocaleString() : 'No date set'}

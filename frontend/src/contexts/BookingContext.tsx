@@ -89,7 +89,7 @@ export const BookingProvider: React.FC<{ children: ReactNode }> = ({ children })
         }
 
         // Fetch the provider details using the provider ID from the offering data
-        const providerResponse = await fetch(`/api/auth/provider/${offeringData.provider}`);
+        const providerResponse = await fetch(`/api/auth/providers/${offeringData.provider}`);
         const providerData = await providerResponse.json();
 
         // console.log(providerData);

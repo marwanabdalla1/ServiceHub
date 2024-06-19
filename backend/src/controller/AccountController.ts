@@ -94,3 +94,26 @@ export const getProviderById = async (req: Request, res: Response) => {
         res.status(500).json({ message: err.message });
     }
 };
+
+export const updateUserDetails = async(req: Request, res: Response) => {
+    const {id} = req.params;
+    console.log(id)
+    const updates = req.body;
+
+    console.log(req.body)
+
+    try {
+        const updatedUser = await Account.findOneAndUpdate({_id: id}, updates, { new: true, upsert:true, strict:false});
+        if (!updatedUser) {
+            return res.status(404).send({ message: 'User not found' });
+        }
+        res.send(updatedUser);
+        console.log(updatedUser)
+    } catch (error) {
+        res.status(400).send(error);
+    }
+
+}
+
+
+

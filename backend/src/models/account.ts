@@ -11,6 +11,8 @@ export interface IAccount extends Document {
     profileImageUrl: string;
     description: string;
     location: string;
+    postal: string;
+    country: string;
     isProvider: boolean;
     isPremium: boolean;
     serviceOfferings: Types.ObjectId[]; // Reference to ServiceOffering documents
@@ -24,10 +26,13 @@ export interface IAccount extends Document {
 const accountSchema: Schema = new Schema({
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
-    email: { type: String, required: true },
+    email: { type: String, required: true, unique:true },
     password: { type: String, required: true },
     phoneNumber: { type: String, required: false },
     address: { type: String, required: false },
+    postal: { type: String, required: false },
+    country: { type: String, required: false },
+
     createdOn: { type: Date, required: false, default: Date.now },
     profileImageUrl: String,
     description: String,

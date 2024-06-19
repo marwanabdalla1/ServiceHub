@@ -36,6 +36,8 @@ export class Account {
     profileImageUrl: string;
     description?: string;
     location?: string;
+    postal?: string;
+    country?: string;
     isProvider?: boolean;
     isPremium?: boolean;
     rating: number;
@@ -60,6 +62,8 @@ export class Account {
         createdOn?: Date,
         description?: string,
         location?: string,
+        country?:string,
+        postal?: string,
         isProvider?: boolean,
         isPremium?: boolean,
         reviewCount?: number,
@@ -79,6 +83,8 @@ export class Account {
         this.profileImageUrl = profileImageUrl;
         this.description = description;
         this.location = location;
+        this.country = country;
+        this.postal = postal;
         this.isProvider = isProvider;
         this.isPremium = isPremium;
         this.rating = rating;
@@ -129,7 +135,9 @@ const account: Account = {
     createdOn: new Date(),
     profileImageUrl: "/images/profiles/profile1.png",
     description: "Professional bike repair service",
-    location: "New York, NY",
+    location: "New York",
+    postal: "12344",
+    country: "USA",
     isProvider: false,
     isPremium: true,
     serviceOfferings: [],

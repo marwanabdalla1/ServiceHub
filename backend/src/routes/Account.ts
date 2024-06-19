@@ -1,10 +1,13 @@
 import express from "express";
-import { signup, getProviderById } from "../controller/AccountController";
+import { signup, getProviderById, updateUserDetails } from "../controller/AccountController";
 
 
 const router = express.Router();
 router.post("/signup", signup);
 
-router.get('/provider/:providerId', getProviderById);
+router.get('/providers/:providerId', getProviderById);
+
+router.put('/accounts/:id', updateUserDetails);
+
 
 export default router;
