@@ -8,6 +8,7 @@ import RequestListButton from "./inputs/requestListButton";
 import Modal from "./inputs/Modal";
 import { Link } from "react-router-dom";
 import { Menu, MenuItem } from '@mui/material';
+import {useAuth} from "../context/AuthContext";
 
 
 
@@ -19,9 +20,10 @@ interface NavbarProps {
 }
 
 const Navbar : React.FC<NavbarProps> = ({toggleDrawer, onChange, onSearch, search}) => {
+  const { isLoggedIn } = useAuth();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-  
+
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -30,9 +32,6 @@ const Navbar : React.FC<NavbarProps> = ({toggleDrawer, onChange, onSearch, searc
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
-
-
-
 
   return (
     <nav className="bg-blue-300 shadow-md h-20">
@@ -77,7 +76,7 @@ const Navbar : React.FC<NavbarProps> = ({toggleDrawer, onChange, onSearch, searc
           <BlackButton className="py-2" text="Provide a Service" onClick={()=> console.log('Black button pressed')} />
           <RequestListButton className="h-6 w-6" onClick={handleMenuOpen} />
           <IoNotificationsOutline className="h-6 w-6" />
-          <Link to="/profile" className="text-current">
+          <Link to="/setprofile" className="text-current">
             <CgProfile className="h-6 w-6" />
           </Link>
           <div className="h-6 w-0.5 bg-gray-800"></div>

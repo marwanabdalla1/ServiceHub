@@ -29,18 +29,18 @@ export class Account {
     _id: string;
     firstName: string;
     lastName: string;
-    email?: string;
+    email: string;
     phoneNumber?: string;
     address?: string;
     createdOn?: Date;
-    profileImageUrl: string;
+    profileImageUrl?: string;
     description?: string;
     location?: string;
     postal?: string;
     country?: string;
     isProvider?: boolean;
     isPremium?: boolean;
-    rating: number;
+    rating?: number;
     reviewCount?: number;
     serviceOfferings: ServiceOffering[];
     availability?: Availability[];
@@ -53,10 +53,10 @@ export class Account {
         _id: string,
         firstName: string,
         lastName: string,
-        profileImageUrl: string,
-        rating: number,
-        serviceOfferings: ServiceOffering[],
-        email?: string,
+        email: string,
+        profileImageUrl?: string,
+        rating?: number,
+        serviceOfferings?: ServiceOffering[],
         phoneNumber?: string,
         address?: string,
         createdOn?: Date,
@@ -89,12 +89,12 @@ export class Account {
         this.isPremium = isPremium;
         this.rating = rating;
         this.reviewCount = reviewCount;
-        this.serviceOfferings = serviceOfferings;
-        this.availability = availability;
-        this.reviews = reviews;
-        this.notifications = notifications;
-        this.requestHistory = requestHistory;
-        this.jobHistory = jobHistory;
+        this.serviceOfferings = serviceOfferings || [];
+        this.availability = availability || [];
+        this.reviews = reviews || [];
+        this.notifications = notifications || [];
+        this.requestHistory = requestHistory || [];
+        this.jobHistory = jobHistory || [];
     }
 }
 
@@ -168,6 +168,7 @@ export const bikeRepairService: ServiceOffering = {
     rating: 4.5,
     reviewCount: 2,
     provider: account
+
 };
 
 // Test-data to be removed, simply maintained in case required by original developer
@@ -261,49 +262,21 @@ export const users: Account[] = [
         notifications: [],
         rating: 4.8,
         reviewCount: 100,
-    },
+    },/*
     {
-        _id: "4",
+        id: "4",
         firstName: "Emily",
         lastName: "Davis",
-        email: "emily.davis@mail.com",
-        phoneNumber: "1234567890",
-        address: "123 Main St",
-        createdOn: new Date(),
-        profileImageUrl: "/images/profiles/profile4.png",
-        description: "Tutoring service",
-        location: "New York, NY",
-        isProvider: false,
-        isPremium: true,
-        serviceOfferings: [
-            {
-                _id: "tutoring0",
-                serviceType: ServiceType.tutoring,
-                description: "description2",
-                location: "location2",
-                hourlyRate: 30,
-                isCertified: true,
-                createdOn: new Date(),
-                lastUpdatedOn: new Date(),
-                certificate: new File([], "empty.txt", { type: "text/plain" }),
-                baseDuration: 2,
-                bufferTimeDuration: 0.5,
-                reviews: [],
-                rating: 4.9,
-                reviewCount: 5,
-                provider: account
-            }
-        ],
-        availability: [],
-        reviews: [],
-        requestHistory: [],
-        jobHistory: [],
-        notifications: [],
-        rating: 4.9,
-        reviewCount: 100,
+        service: {
+            serviceType: "tutoring",
+            rating: 4.9,
+            hourlyRating: 30.0,
+            isLicensed: true,
+        },
+        imageUrl: "/images/profiles/profile4.png",
     },
     {
-        _id: "5",
+        id: "5",
         firstName: "Michael",
         lastName: "Wilson",
         email: "michael.wilson@mail.com",
@@ -317,7 +290,7 @@ export const users: Account[] = [
         isPremium: true,
         serviceOfferings: [
             {
-                _id: "petSitting0",
+                serviceOfferingId: "petSitting0",
                 serviceType: ServiceType.petSitting,
                 description: "description3",
                 location: "location3",
@@ -330,7 +303,6 @@ export const users: Account[] = [
                 bufferTimeDuration: 0.5,
                 reviews: [],
                 rating: 4.6,
-                reviewCount: 5,
                 provider: account
             }
         ],
@@ -343,7 +315,7 @@ export const users: Account[] = [
         reviewCount: 100,
     },
     {
-        _id: "6",
+        id: "6",
         firstName: "Sarah",
         lastName: "Johnson",
         email: "sarah.johnson@mail.com",
@@ -357,7 +329,7 @@ export const users: Account[] = [
         isPremium: true,
         serviceOfferings: [
             {
-                _id: "landscaping0",
+                serviceOfferingId: "landscaping0",
                 serviceType: ServiceType.landscapingServices,
                 description: "description4",
                 location: "location4",
@@ -370,7 +342,6 @@ export const users: Account[] = [
                 bufferTimeDuration: 0.5,
                 reviews: [],
                 rating: 4.7,
-                reviewCount: 3,
                 provider: account
             }
         ],
@@ -383,7 +354,7 @@ export const users: Account[] = [
         reviewCount: 100,
     },
     {
-        _id: "7",
+        id: "7",
         firstName: "David",
         lastName: "Williams",
         email: "david.williams@mail.com",
@@ -397,7 +368,7 @@ export const users: Account[] = [
         isPremium: true,
         serviceOfferings: [
             {
-                _id: "homeRemodeling0",
+                serviceOfferingId: "homeRemodeling0",
                 serviceType: ServiceType.homeRemodeling,
                 description: "description5",
                 location: "location5",
@@ -410,8 +381,7 @@ export const users: Account[] = [
                 bufferTimeDuration: 0.5,
                 reviews: [],
                 rating: 4.4,
-                provider: account,
-                reviewCount: 5,
+                provider: account
             }
         ],
         availability: [],
@@ -423,7 +393,7 @@ export const users: Account[] = [
         reviewCount: 100,
     },
     {
-        _id: "8",
+        id: "8",
         firstName: "Ashley",
         lastName: "Jones",
         email: "ashley.jones@mail.com",
@@ -437,7 +407,7 @@ export const users: Account[] = [
         isPremium: true,
         serviceOfferings: [
             {
-                _id: "movingServices0",
+                serviceOfferingId: "movingServices0",
                 serviceType: ServiceType.movingServices,
                 description: "description6",
                 location: "location6",
@@ -450,7 +420,6 @@ export const users: Account[] = [
                 bufferTimeDuration: 0.5,
                 reviews: [],
                 rating: 4.8,
-                reviewCount: 5,
                 provider: account
             }
         ],
@@ -463,7 +432,7 @@ export const users: Account[] = [
         reviewCount: 100,
     },
     {
-        _id: "9",
+        id: "9",
         firstName: "Bob",
         lastName: "Biker",
         email: "bob.biker@mail.com",
@@ -483,5 +452,5 @@ export const users: Account[] = [
         notifications: [],
         rating: 4.7,
         reviewCount: 100,
-    },
+    },*/
 ];

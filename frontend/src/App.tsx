@@ -30,6 +30,7 @@ import ListsLandingPage from "./Pages/listsLandingPage";
 import {RequestProvider} from './contexts/RequestContext';
 import axios from "axios";
 import ProposeNewtimePage from './Pages/ProposeNewTimePage';
+import {AccountProvider} from "./context/AuthContext";
 import BookingPage from "./Pages/bookingSteps/BookingPage";
 
 function App() {
@@ -39,23 +40,30 @@ function App() {
     }, []);
 
     return (
-        <BookingProvider>
-            <RequestProvider>
-                <BrowserRouter>
-                    <MainRoutes/>
-                </BrowserRouter>
-            </RequestProvider>
-        </BookingProvider>
+        <BrowserRouter>
+            <BookingProvider>
+                <RequestProvider>
+                    <AccountProvider>
+
+                        <MainRoutes/>
+
+                    </AccountProvider>
+                </RequestProvider>
+            </BookingProvider>
+        </BrowserRouter>
     );
 }
 
 function MainRoutes() {
     const location = useLocation();
-    const showNavBar = location.pathname !== "/login" && location.pathname !== "/signup" && location.pathname !=="/filter";
+    const showNavBar = location.pathname !== "/login" && location.pathname !== "/signup" && location.pathname !== "/filter";
 
     return (
         <div className="h-screen flex flex-col">
-            {showNavBar && <NavigationBar toggleDrawer={() => {}} onChange={() => {}} onSearch={() => {}} search={""}/>}
+            {showNavBar && <NavigationBar toggleDrawer={() => {
+            }} onChange={() => {
+            }} onSearch={() => {
+            }} search={""}/>}
             <Routes>
                 <Route path="/" element={<HomePage/>}/>
                 <Route path="/setprofile" element={<ProfileSettingPage/>}/>
@@ -70,6 +78,7 @@ function MainRoutes() {
                 <Route path="/addservice" element={<AddServicePage/>}/>
                 <Route path="/provider-profile/:id" element={<ProviderProfilePage/>}/>
                 <Route path="select-availability" element={<SelectAvailabilityPage/>}/>
+                <Route path="/select-timeslot" element={<SelectTimeslot/>}/>
                 <Route path="/update-timeslot" element={<UpdateTimeslot/>}/>
 
 
@@ -83,9 +92,8 @@ function MainRoutes() {
                 {/*<Route path="/review-and-confirm" element={<ReviewAndConfirm/>}/>*/}
 
                 <Route path="/listsLandingPage" element={<ListsLandingPage/>}/>
-                <Route path="select-availability" element={<SelectAvailabilityPage/>} />
+                <Route path="/select-timeslot/:id" element={<SelectTimeslot/>} />
                 <Route path="/update-timeslot/" element={<UpdateTimeslot/>} />
-                <Route path="/listsLandingPage" element={<ListsLandingPage />} />
                 <Route path="/proposeNewTime" element={<ProposeNewtimePage />} />
                 <Route path="*" element={<h1>Not Found</h1>}/>
 
