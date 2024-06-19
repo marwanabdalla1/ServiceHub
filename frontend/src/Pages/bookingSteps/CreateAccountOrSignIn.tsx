@@ -1,24 +1,67 @@
 import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import {useNavigate, useParams} from 'react-router-dom';
 import { Container, Box, Typography, Button, Card, CardContent } from '@mui/material';
-import { useBooking } from '../../contexts/BookingContext';
+import {BookingDetails, useBooking } from '../../contexts/BookingContext';
+import {Account} from "../../models/Account";
 
 
 interface CreateAccountOrSignInProps {
     onNext: () => void;
     onBack: () => void;
+    bookingDetails: BookingDetails;
 }
 
-function CreateAccountOrSignIn({ onNext, onBack }: CreateAccountOrSignInProps) {
-    const { bookingDetails } = useBooking();
+function CreateAccountOrSignIn({ onNext, onBack, bookingDetails }: CreateAccountOrSignInProps) {
+    const { setRequestedBy} = useBooking();
     const navigate = useNavigate();
-    const isAuthenticated = false; // todo: Replace this with actual authentication logic
+    const { offeringId } = useParams<{ offeringId: string }>(); // Get the offeringId from the route params
+
+    const isAuthenticated = true; // todo: Replace this with actual authentication logic
 
     useEffect(() => {
+        console.log("Effect run check", isAuthenticated);
         if (isAuthenticated) {
-            navigate('/update-profile');
+            console.log("AUTHENTICATED!!!")
+            const fetchUserDetails = async () => {
+                // Fetch the user details from your authentication service or context
+                const user = await fetchUserFromAuthService();
+                console.log(user)
+                setRequestedBy(user);
+                console.log(bookingDetails)
+                // navigate('/update-profile');
+            };
+
+            fetchUserDetails();
+
         }
     }, [isAuthenticated, navigate]);
+
+
+    //todo: implement this
+    const fetchUserFromAuthService = async (): Promise<Account> => {
+        // Mock implementation: Replace with actual logic to fetch the authenticated user details
+        return {
+            _id: '1',
+            firstName: 'John',
+            lastName: 'Doe',
+            email: 'john.doe@example.com',
+            phoneNumber: '1234567890',
+            address: '123 Main St',
+            location: 'City',
+            description: '',
+            isProvider: false,
+            profileImageUrl: '',
+            isPremium: false,
+            createdOn: new Date(),
+            notifications: [],
+            requestHistory: [],
+            jobHistory: [],
+            serviceOfferings: [],
+            reviews: [],
+            rating: 0,
+            reviewCount: 0
+        };
+    };
 
     const handleSignUpClick = () => {
         navigate('/signup');
@@ -55,13 +98,13 @@ function CreateAccountOrSignIn({ onNext, onBack }: CreateAccountOrSignInProps) {
                             <Box>
                                 <Typography variant="h6">{`${bookingDetails.provider?.firstName} ${bookingDetails.provider?.lastName}`}</Typography>
                                 <Typography variant="body2" color="text.secondary">
-                                    {bookingDetails.location}
+                                    {bookingDetails.serviceOffering?.location}
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary">
-                                    {bookingDetails.service}
+                                    {bookingDetails.serviceType}
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary">
-                                    {bookingDetails.price}
+                                    {bookingDetails.price} per hour
                                 </Typography>
                             </Box>
                         </CardContent>

@@ -26,7 +26,7 @@ export type User = {
 
 
 export class Account {
-    id: string;
+    _id: string;
     firstName: string;
     lastName: string;
     email?: string;
@@ -48,7 +48,7 @@ export class Account {
     jobHistory?: Job[];
 
     constructor(
-        id: string,
+        _id: string,
         firstName: string,
         lastName: string,
         profileImageUrl: string,
@@ -69,7 +69,7 @@ export class Account {
         requestHistory?: ServiceRequest[],
         jobHistory?: Job[]
     ) {
-        this.id = id;
+        this._id = _id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -120,7 +120,7 @@ export class Account {
 
 //Test-data to be removed, simply maintained in case required by original developer
 const account: Account = {
-    id: "1234325413",
+    _id: "1234325413",
     firstName: "John",
     lastName: "Doe",
     email: "john.doe@example.com",
@@ -145,7 +145,7 @@ const account: Account = {
 
 // Test-data to be removed, simply maintained in case required by original developer
 export const bikeRepairService: ServiceOffering = {
-    serviceOfferingId: "bikeRepair0",
+    _id: "bikeRepair0",
     serviceType: ServiceType.bikeRepair,
     description: "description0",
     location: "location0",
@@ -158,12 +158,13 @@ export const bikeRepairService: ServiceOffering = {
     bufferTimeDuration: 0.5,
     reviews: [],
     rating: 4.5,
+    reviewCount: 2,
     provider: account
 };
 
 // Test-data to be removed, simply maintained in case required by original developer
 export const babysittingService: ServiceOffering = {
-    serviceOfferingId: "babySitting0",
+    _id: "babySitting0",
     serviceType: ServiceType.babySitting,
     description: "description1",
     location: "location1",
@@ -175,6 +176,7 @@ export const babysittingService: ServiceOffering = {
     baseDuration: 2,
     bufferTimeDuration: 0.5,
     reviews: [],
+    reviewCount: 2,
     rating: 4.5,
     provider: account
 };
@@ -187,7 +189,7 @@ export default account;
 
 export const users: Account[] = [
     {
-        id: "1",
+        _id: "1",
         firstName: "John",
         lastName: "Doe",
         email: "john.doe@mail.com",
@@ -209,7 +211,7 @@ export const users: Account[] = [
         reviewCount: 100,
     },
     {
-        id: "2",
+        _id: "2",
         firstName: "Jane",
         lastName: "Smith",
         email: "jane.smith@mail.com",
@@ -231,7 +233,7 @@ export const users: Account[] = [
         reviewCount: 100,
     },
     {
-        id: "3",
+        _id: "3",
         firstName: "Robert",
         lastName: "Brown",
         email: "robert.brown@mail.com",
@@ -253,7 +255,7 @@ export const users: Account[] = [
         reviewCount: 100,
     },
     {
-        id: "4",
+        _id: "4",
         firstName: "Emily",
         lastName: "Davis",
         email: "emily.davis@mail.com",
@@ -267,7 +269,7 @@ export const users: Account[] = [
         isPremium: true,
         serviceOfferings: [
             {
-                serviceOfferingId: "tutoring0",
+                _id: "tutoring0",
                 serviceType: ServiceType.tutoring,
                 description: "description2",
                 location: "location2",
@@ -280,6 +282,7 @@ export const users: Account[] = [
                 bufferTimeDuration: 0.5,
                 reviews: [],
                 rating: 4.9,
+                reviewCount: 5,
                 provider: account
             }
         ],
@@ -292,7 +295,7 @@ export const users: Account[] = [
         reviewCount: 100,
     },
     {
-        id: "5",
+        _id: "5",
         firstName: "Michael",
         lastName: "Wilson",
         email: "michael.wilson@mail.com",
@@ -306,7 +309,7 @@ export const users: Account[] = [
         isPremium: true,
         serviceOfferings: [
             {
-                serviceOfferingId: "petSitting0",
+                _id: "petSitting0",
                 serviceType: ServiceType.petSitting,
                 description: "description3",
                 location: "location3",
@@ -319,6 +322,7 @@ export const users: Account[] = [
                 bufferTimeDuration: 0.5,
                 reviews: [],
                 rating: 4.6,
+                reviewCount: 5,
                 provider: account
             }
         ],
@@ -331,7 +335,7 @@ export const users: Account[] = [
         reviewCount: 100,
     },
     {
-        id: "6",
+        _id: "6",
         firstName: "Sarah",
         lastName: "Johnson",
         email: "sarah.johnson@mail.com",
@@ -345,7 +349,7 @@ export const users: Account[] = [
         isPremium: true,
         serviceOfferings: [
             {
-                serviceOfferingId: "landscaping0",
+                _id: "landscaping0",
                 serviceType: ServiceType.landscapingServices,
                 description: "description4",
                 location: "location4",
@@ -358,6 +362,7 @@ export const users: Account[] = [
                 bufferTimeDuration: 0.5,
                 reviews: [],
                 rating: 4.7,
+                reviewCount: 3,
                 provider: account
             }
         ],
@@ -370,7 +375,7 @@ export const users: Account[] = [
         reviewCount: 100,
     },
     {
-        id: "7",
+        _id: "7",
         firstName: "David",
         lastName: "Williams",
         email: "david.williams@mail.com",
@@ -384,7 +389,7 @@ export const users: Account[] = [
         isPremium: true,
         serviceOfferings: [
             {
-                serviceOfferingId: "homeRemodeling0",
+                _id: "homeRemodeling0",
                 serviceType: ServiceType.homeRemodeling,
                 description: "description5",
                 location: "location5",
@@ -397,7 +402,8 @@ export const users: Account[] = [
                 bufferTimeDuration: 0.5,
                 reviews: [],
                 rating: 4.4,
-                provider: account
+                provider: account,
+                reviewCount: 5,
             }
         ],
         availability: [],
@@ -409,7 +415,7 @@ export const users: Account[] = [
         reviewCount: 100,
     },
     {
-        id: "8",
+        _id: "8",
         firstName: "Ashley",
         lastName: "Jones",
         email: "ashley.jones@mail.com",
@@ -423,7 +429,7 @@ export const users: Account[] = [
         isPremium: true,
         serviceOfferings: [
             {
-                serviceOfferingId: "movingServices0",
+                _id: "movingServices0",
                 serviceType: ServiceType.movingServices,
                 description: "description6",
                 location: "location6",
@@ -436,6 +442,7 @@ export const users: Account[] = [
                 bufferTimeDuration: 0.5,
                 reviews: [],
                 rating: 4.8,
+                reviewCount: 5,
                 provider: account
             }
         ],
@@ -448,7 +455,7 @@ export const users: Account[] = [
         reviewCount: 100,
     },
     {
-        id: "9",
+        _id: "9",
         firstName: "Bob",
         lastName: "Biker",
         email: "bob.biker@mail.com",

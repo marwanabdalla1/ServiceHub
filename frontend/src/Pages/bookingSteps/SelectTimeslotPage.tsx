@@ -1,17 +1,18 @@
 import React from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Container, Box, Typography, Card, CardContent, Grid, Button } from '@mui/material';
-import { useBooking } from '../../contexts/BookingContext';
+import { useBooking, BookingDetails } from '../../contexts/BookingContext';
 import {Account} from "../../models/Account";
 
 
 interface SelectTimeslotProps {
     onNext: () => void;
     onBack: () => void;
+    bookingDetails: BookingDetails;
 }
 
-function SelectTimeslot({ onNext, onBack }: SelectTimeslotProps) {
-    const { bookingDetails, setProvider,
+function SelectTimeslot({ onNext, onBack, bookingDetails }: SelectTimeslotProps) {
+    const {setProvider,
     setRequestedBy, setSelectedServiceDetails, setTimeAndDuration } = useBooking();
     const navigate = useNavigate();
     const { id } = useParams(); //use this to then make a post request to the user with the id to get the user data
@@ -85,7 +86,7 @@ function SelectTimeslot({ onNext, onBack }: SelectTimeslotProps) {
                                     {bookingDetails.location}
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary">
-                                    {bookingDetails.service}
+                                    {bookingDetails.serviceOffering?.serviceType}
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary">
                                     {bookingDetails.price}

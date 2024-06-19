@@ -81,9 +81,10 @@ export const signup: RequestHandler = async (req, res, next) => {
 // get provider details
 export const getProviderById = async (req: Request, res: Response) => {
     try {
-        const account = await Account.findById(req.params.id);
+        console.log(req.params)
+        const account = await Account.findById(req.params.providerId);
         if (!account) {
-            return res.status(404).json({ message: 'Account not found' });
+            return res.status(404).json({ message: 'Account not found! '+ req.params.providerId });
         }
         else if (!account.isProvider){
             return res.status(400).json({message: 'This is NOT a provider!'})

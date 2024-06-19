@@ -38,12 +38,12 @@ export enum RequestStatus {
 }
 
 export enum ServiceType {
-    bikeRepair, // 0
-    houseCleaning, // 1
-    babySitting, // 2
-    tutoring, // 3
-    petSitting, // 4
-    landscapingServices, // 5
-    homeRemodeling, // 6
-    movingServices, // 7
+    bikeRepair = "Bike Repair", // 0
+    houseCleaning = "House Cleaning", // 1
+    babySitting = "Baby Sitting", // 2
+    tutoring = "Tutoring", // 3
+    petSitting = "Pet Sitting", // 4
+    landscapingServices = "Landscaping Services", // 5
+    homeRemodeling = "Home Remodeling", // 6
+    movingServices = "Moving Services", // 7
 }

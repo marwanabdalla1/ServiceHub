@@ -1,6 +1,7 @@
+// do NOT use this anymore!
+
 import Account from "../models/account";
 import ServiceOffering from '../models/serviceOffering';
-
 import {Request, Response, RequestHandler} from "express";
 
 // Authentication Context

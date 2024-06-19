@@ -7,7 +7,7 @@ import logger from "./middleware/logger";
 import notFoundHandler from "./middleware/notFoundHandler";
 import AccountRouter from "./routes/Account";
 import OfferingRouter from "./routes/Offering";
-import BookingRouter from "./routes/booking";
+import RequestRouter from "./routes/Request";
 
 // Import the models to ensure they are registered
 import './models/serviceOffering';
@@ -26,9 +26,8 @@ app.use(logger);
 
 app.use(express.json());
 app.use("/api/auth", AccountRouter);
-
 app.use("/api/offerings", OfferingRouter);
-app.use("/api/provider", BookingRouter);
+app.use("/api/requests", RequestRouter);
 
 app.get("/", async (req, res, next) => {
     try {

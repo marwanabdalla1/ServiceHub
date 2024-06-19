@@ -1,16 +1,17 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Box, Typography, Card, CardContent, TextField, Button, Grid } from '@mui/material';
-import { useBooking } from '../../contexts/BookingContext';
+import { useBooking, BookingDetails } from '../../contexts/BookingContext';
 
 
 interface UpdateProfileProps {
     onNext: () => void;
     onBack: () => void;
+    bookingDetails: BookingDetails;
 }
 
-function UpdateProfile({ onNext, onBack }: UpdateProfileProps) {
-    const { bookingDetails } = useBooking();
+function UpdateProfile({ onNext, onBack, bookingDetails}: UpdateProfileProps) {
+    // const { bookingDetails } = useBooking();
     const navigate = useNavigate();
 
     const handleSaveProfile = () => {
@@ -84,7 +85,7 @@ function UpdateProfile({ onNext, onBack }: UpdateProfileProps) {
                                     {bookingDetails.startTime ? bookingDetails.startTime.toLocaleString() : 'No date set'}
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary">
-                                    {bookingDetails.service}
+                                    {bookingDetails.serviceOffering?.serviceType}
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary">
                                     {bookingDetails.price}

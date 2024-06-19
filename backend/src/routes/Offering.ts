@@ -1,8 +1,11 @@
 import express from "express";
-import { getOfferings } from "../controller/OfferingController";
+import { getOfferings, getServiceOfferingById } from "../controller/OfferingController";
 
 const OfferingRouter = express.Router();
 
 OfferingRouter.get("/", getOfferings);
+
+OfferingRouter.get('/:offeringId', getServiceOfferingById);
+
 
 export default OfferingRouter;

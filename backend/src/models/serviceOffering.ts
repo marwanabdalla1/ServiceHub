@@ -8,7 +8,6 @@ interface ICertificate {
 }
 
 export interface IServiceOffering extends Document {
-    serviceOfferingId: string;
     serviceType: ServiceType;
     lastUpdatedOn: Date;
     createdOn: Date;
@@ -17,17 +16,18 @@ export interface IServiceOffering extends Document {
     description: string;
     isCertified: boolean;
     location: string;
-    provider: Schema.Types.ObjectId; // Reference to an Account document
+    provider: Types.ObjectId; // Reference to an Account document
     baseDuration: number;
     bufferTimeDuration: number;
-    reviews: Schema.Types.ObjectId[]; // Reference to Review documents
+    reviews: Types.ObjectId[]; // Reference to Review documents
+    rating: number,
+    reviewCount: number,
 }
 
 const ServiceOfferingSchema: Schema = new Schema({
-    serviceOfferingId: {type: String, required: true},
     serviceType: {type: String, enum: Object.values(ServiceType), required: true},
     lastUpdatedOn: {type: Date, required: true},
-    createdOn: {type: Date, required: true},
+    // createdOn: {type: Date, required: true},
     certificate: {name: String, data: Buffer, contentType: String},
     hourlyRate: {type: Number, required: true},
     description: {type: String, required: true},
@@ -37,7 +37,10 @@ const ServiceOfferingSchema: Schema = new Schema({
     baseDuration: {type: Number, required: true},
     bufferTimeDuration: {type: Number, required: true},
     reviews: [{type: Schema.Types.ObjectId, ref: 'Review', required: true}],
-});
+    rating: {type: Number, required: true},
+    reviewCount: {type: Number, required: true},
+
+}, {timestamps: true});
 
 // TODO Cascade delete service offerings when an account is deleted
 

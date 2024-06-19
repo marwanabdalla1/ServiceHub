@@ -117,7 +117,7 @@ const populateData = async () => {
             reviewData.service = serviceOffering._id as Types.ObjectId;
             const review = new Review(reviewData);
             await review.save();
-            serviceOffering.reviews.push(review._id as Schema.Types.ObjectId);
+            serviceOffering.reviews.push(review._id as Types.ObjectId);
         }
 
         await serviceOffering.save();
