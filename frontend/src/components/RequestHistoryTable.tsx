@@ -24,7 +24,7 @@ function createRequest(
   requestStatus: RequestStatus,
   createdOn: Date,
   serviceType: ServiceType,
-  serviceOffering: ServiceOffering | null,
+  serviceOffering: ServiceOffering | null | undefined,
   appointmentTime: Date,
   uploads: File[],
   comment: string,

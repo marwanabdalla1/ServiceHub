@@ -18,6 +18,8 @@ import IncomingRequestMediaCard from './IncomingRequestCard';
 import {RequestStatus, ServiceType} from '../models/enums';
 import {Account, bikeRepairService} from '../models/Account';
 import {Job} from '../models/Job';
+import {ServiceOffering} from "../models/ServiceOffering";
+
 
 function createRequest(
     serviceRequestId: string,

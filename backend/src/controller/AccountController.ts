@@ -206,7 +206,7 @@ export const deleteUser: RequestHandler = async (req, res, next) => {
 
 
 // get provider details
-export const getProviderById = async (req: Request, res: Response) => {
+export const getProviderById:RequestHandler = async (req, res) => {
     try {
         console.log(req.params)
         const account = await Account.findById(req.params.providerId);
@@ -222,7 +222,7 @@ export const getProviderById = async (req: Request, res: Response) => {
     }
 };
 
-export const updateUserDetails = async(req: Request, res: Response) => {
+export const updateUserDetails:RequestHandler = async(req, res) => {
     const {id} = req.params;
     console.log(id)
     const updates = req.body;

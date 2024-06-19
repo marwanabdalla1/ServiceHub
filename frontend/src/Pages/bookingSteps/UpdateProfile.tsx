@@ -193,7 +193,7 @@ function UpdateProfile({ onNext, onBack, bookingDetails}: UpdateProfileProps) {
                                 </Grid>
                             </Grid>
                             <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-                                <Button variant="contained" sx={{ mr: 2 }} onClick={handleSaveProfile} disabled={isAnyFieldMissing()}>
+                                <Button variant="contained" sx={{ mr: 2 }} onClick={isModified? handleSaveProfile:onNext} disabled={isAnyFieldMissing()}>
                                     {isModified ? "Save":"Confirm"}
                                 </Button>
                                 {/*todo: handle cancel*/}
