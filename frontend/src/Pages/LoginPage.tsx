@@ -23,6 +23,9 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import {createTheme, ThemeProvider} from '@mui/material/styles';
 import {blue} from "@mui/material/colors";
+import {useNavigate} from "react-router-dom";
+import axios from "axios";
+import {useAuth} from "../context/AuthContext";
 
 function Copyright(props: PropsWithChildren<{}>) {
     return (
@@ -46,13 +49,11 @@ const defaultTheme = createTheme({
 });
 
 export default function SignIn() {
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    const { loginUser } = useAuth();
+
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        const data = new FormData(event.currentTarget);
-        console.log({
-            email: data.get('email'),
-            password: data.get('password'),
-        });
+        await loginUser(event);
     };
 
     return (

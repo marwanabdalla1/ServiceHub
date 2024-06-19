@@ -21,7 +21,7 @@ interface RequestDetails {
     provider: Account;
     requestedBy: Account;
     rating: number;
-    profileImageUrl: string;
+    profileImageUrl?: string;
 
 }
 
