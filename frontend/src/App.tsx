@@ -32,6 +32,7 @@ import axios from "axios";
 import ProposeNewtimePage from './Pages/ProposeNewTimePage';
 import {AccountProvider} from "./contexts/AuthContext";
 import BookingPage from "./Pages/bookingSteps/BookingPage";
+import BecomeProPage from './Pages/BecomePro';
 
 function App() {
 
@@ -79,6 +80,7 @@ function MainRoutes() {
                 <Route path="/provider-profile/:id" element={<ProviderProfilePage/>}/>
                 <Route path="select-availability" element={<SelectAvailabilityPage/>}/>
                 <Route path="/update-timeslot" element={<UpdateTimeslot/>}/>
+                <Route path="/becomepro" element={<BecomeProPage/>}/>
 
 
                 {/*booking*/}
