@@ -203,3 +203,44 @@ export const deleteUser: RequestHandler = async (req, res, next) => {
         });
     }
 }
+
+
+// get provider details
+export const getProviderById:RequestHandler = async (req, res) => {
+    try {
+        console.log(req.params)
+        const account = await Account.findById(req.params.providerId);
+        if (!account) {
+            return res.status(404).json({ message: 'Account not found! '+ req.params.providerId });
+        }
+        else if (!account.isProvider){
+            return res.status(400).json({message: 'This is NOT a provider!'})
+        }
+        res.json(account);
+    } catch (err: any) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
+export const updateUserDetails:RequestHandler = async(req, res) => {
+    const {id} = req.params;
+    console.log(id)
+    const updates = req.body;
+
+    console.log(req.body)
+
+    try {
+        const updatedUser = await Account.findOneAndUpdate({_id: id}, updates, { new: true, upsert:true, strict:false});
+        if (!updatedUser) {
+            return res.status(404).send({ message: 'User not found' });
+        }
+        res.send(updatedUser);
+        console.log(updatedUser)
+    } catch (error) {
+        res.status(400).send(error);
+    }
+
+}
+
+
+

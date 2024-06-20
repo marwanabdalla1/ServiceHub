@@ -18,12 +18,15 @@ import IncomingRequestMediaCard from './IncomingRequestCard';
 import {RequestStatus, ServiceType} from '../models/enums';
 import {Account, bikeRepairService} from '../models/Account';
 import {Job} from '../models/Job';
+import {ServiceOffering} from "../models/ServiceOffering";
+
 
 function createRequest(
     serviceRequestId: string,
     requestStatus: RequestStatus,
     createdOn: Date,
     serviceType: ServiceType,
+    serviceOffering: ServiceOffering | undefined,
     appointmentTime: Date,
     uploads: File[],
     comment: string,
@@ -40,6 +43,7 @@ function createRequest(
         requestStatus,
         createdOn,
         serviceType,
+        serviceOffering,
         appointmentTime,
         uploads,
         comment,
@@ -57,9 +61,9 @@ const accounts: Account [] = [
     new Account('11', 'Max', 'Mustermann', 'example.email@example.com', '', 3.5, [bikeRepairService])
 ]
 const rows: Request[] = [
-    createRequest('1', RequestStatus.pending, new Date('2024-05-11'), ServiceType.bikeRepair, new Date('2024-05-11'), [], 'comment 1', 12, 30, null, accounts[0], accounts[0], 5, '../../images/profiles/profile3.png'),
-    createRequest('2', RequestStatus.pending, new Date('2024-05-12'), ServiceType.babySitting, new Date('2024-05-11'), [], 'comment 2', 13, 30, null, accounts[0], accounts[0], 4.99, '../../images/profiles/profile2.png'),
-    createRequest('3', RequestStatus.pending, new Date('2024-05-13'), ServiceType.houseCleaning, new Date('2024-05-11'), [], 'comment 3', 2001, 3, null, accounts[0], accounts[0], 4.5, '../../images/profiles/profile1.png'),
+    createRequest('1', RequestStatus.pending, new Date('2024-05-11'), ServiceType.bikeRepair, undefined, new Date('2024-05-11'), [], 'comment 1', 12, 30, null, accounts[0], accounts[0], 5, '../../images/profiles/profile3.png'),
+    createRequest('2', RequestStatus.pending, new Date('2024-05-12'), ServiceType.babySitting, undefined, new Date('2024-05-11'), [], 'comment 2', 13, 30, null, accounts[0], accounts[0], 4.99, '../../images/profiles/profile2.png'),
+    createRequest('3', RequestStatus.pending, new Date('2024-05-13'), ServiceType.houseCleaning, undefined, new Date('2024-05-11'), [], 'comment 3', 2001, 3, null, accounts[0], accounts[0], 4.5, '../../images/profiles/profile1.png'),
 ];
 
 export default function IncomingRequestTable() {

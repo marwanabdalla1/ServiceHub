@@ -37,7 +37,7 @@ export const AccountProvider = ({children}: Props) => {
     function handleResponse(response: AxiosResponse<any>) {
         localStorage.setItem('token', response?.data.token);
         const accountObj = {
-            id: response?.data.id,
+            _id: response?.data.id,
             firstName: response?.data.firstName,
             lastName: response?.data.lastName,
             email: response?.data.email,

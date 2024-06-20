@@ -12,7 +12,7 @@ import { RequestStatus, ServiceType } from '../models/enums';
 import { Job } from '../models/Job';
 import { generateId } from './helperFunctions';
 import { useNavigate } from "react-router-dom";
-import { useRequest } from '../context/RequestContext';
+import { useRequest } from '../contexts/RequestContext';
 
 interface MediaCardProps {
   request: Request;

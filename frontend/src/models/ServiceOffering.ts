@@ -3,11 +3,11 @@ import { Account } from "./Account";
 import { Review } from "./Review";
 
 export class ServiceOffering {
-    serviceOfferingId: string;
+    _id: string;
     serviceType: ServiceType;
     lastUpdatedOn: Date;
     createdOn: Date;
-    certificate: File;
+    certificate: File | null;
     hourlyRate: number;
     description: string;
     isCertified: boolean;
@@ -16,13 +16,14 @@ export class ServiceOffering {
     baseDuration: number;
     bufferTimeDuration: number;
     reviews: Review[];
+    reviewCount: number;
     rating: number;
 
 
     constructor(serviceOfferingId: string, serviceType: ServiceType, lastUpdatedOn: Date, createdOn: Date,
-        certificate: File, hourlyRate: number, description: string, isCertified: boolean, location: string,
-        provider: Account, baseDuration: number, bufferTimeDuration: number, reviews: Review[], rating: number) {
-        this.serviceOfferingId = serviceOfferingId;
+        certificate: File | null, hourlyRate: number, description: string, isCertified: boolean, location: string,
+        provider: Account, baseDuration: number, bufferTimeDuration: number, reviews: Review[], reviewCount: number, rating: number) {
+        this._id = serviceOfferingId;
         this.serviceType = serviceType;
         this.lastUpdatedOn = lastUpdatedOn;
         this.createdOn = createdOn;
@@ -35,6 +36,7 @@ export class ServiceOffering {
         this.baseDuration = baseDuration;
         this.bufferTimeDuration = bufferTimeDuration;
         this.reviews = reviews;
+        this.reviewCount = reviewCount;
         this.rating = rating;
     }
 }

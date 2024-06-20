@@ -23,6 +23,7 @@ import { RequestStatus, ServiceType, JobStatus } from '../models/enums';
 function createJob(
   jobId: string,
   serviceType: ServiceType,
+  // todo: add serviceOffering
   appointmentTime: Date,
   serviceFee: string,
   status: JobStatus,
@@ -52,11 +53,11 @@ function createJob(
 
 //Candidate for deletion
 const serviceRequests: ServiceRequest[] = [
-  new ServiceRequest('sr1', RequestStatus.accepted, new Date(), ServiceType.babySitting, new Date(), [new File([], "empty.txt", { type: "text/plain" })], 
+  new ServiceRequest('sr1', RequestStatus.accepted, new Date(), ServiceType.babySitting,  null, new Date(), [new File([], "empty.txt", { type: "text/plain" })],
   'something', 12, 30,  null, account, account, 5, '../../images/profiles/profile3.png'),
-  new ServiceRequest('sr2', RequestStatus.declined, new Date(), ServiceType.bikeRepair, new Date(), [new File([], "empty.txt", { type: "text/plain" })], 
+  new ServiceRequest('sr2', RequestStatus.declined, new Date(), ServiceType.bikeRepair, null, new Date(), [new File([], "empty.txt", { type: "text/plain" })],
   'somethingElse', 13, 30,  null, account, account, 5, '../../images/profiles/profile3.png'),
-  new ServiceRequest('sr3', RequestStatus.pending, new Date(), ServiceType.homeRemodeling, new Date(), [new File([], "empty.txt", { type: "text/plain" })], 
+  new ServiceRequest('sr3', RequestStatus.pending, new Date(), ServiceType.homeRemodeling, null, new Date(), [new File([], "empty.txt", { type: "text/plain" })],
   'comment3', 14, 30, null, account, account, 5, '../../images/profiles/profile3.png')
 ];
 

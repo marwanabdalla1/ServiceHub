@@ -23,7 +23,7 @@ import Container from '@mui/material/Container';
 import {createTheme, ThemeProvider} from '@mui/material/styles';
 import {blue} from "@mui/material/colors";
 import axios from 'axios';
-import {useAuth} from "../context/AuthContext";
+import {useAuth} from "../contexts/AuthContext";
 
 function Copyright(props: any) {
     return (

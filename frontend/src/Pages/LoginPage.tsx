@@ -25,7 +25,7 @@ import {createTheme, ThemeProvider} from '@mui/material/styles';
 import {blue} from "@mui/material/colors";
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
-import {useAuth} from "../context/AuthContext";
+import {useAuth} from "../contexts/AuthContext";
 
 function Copyright(props: PropsWithChildren<{}>) {
     return (
