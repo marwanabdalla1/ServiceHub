@@ -6,6 +6,7 @@ import errorHandler from "./middleware/errorHandler";
 import logger from "./middleware/logger";
 import notFoundHandler from "./middleware/notFoundHandler";
 import AccountRouter from "./routes/Account";
+import AuthRouter from "./routes/Auth";
 import OfferingRouter from "./routes/Offering";
 import RequestRouter from "./routes/Request";
 
@@ -26,7 +27,8 @@ app.use(cors(corsOptions));
 app.use(logger);
 
 app.use(express.json());
-app.use("/api/auth", AccountRouter);
+app.use("/api/auth", AuthRouter);
+app.use("/api/account", AccountRouter);
 app.use("/api/offerings", OfferingRouter);
 app.use("/api/requests", RequestRouter);
 
