@@ -61,7 +61,7 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration, createdById }:
     }, [createdById]);
 
     const saveAvailability = () => {
-        console.log("Saving availability:", availability)
+        console.log("Saving availability:", availability);
         axios.post('/api/timeslots', {
             events: availability
         }).then(response => {
@@ -129,6 +129,7 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration, createdById }:
             // Check if we need to extend fixed slots
             const lastDate = new Date(Math.max(...availability.map(slot => slot.end.getTime())));
             if (end > lastDate) {
+                console.log(end, lastDate);
                 axios.post('/api/timeslots/extend', {
                     start: lastDate,
                     end: moment(lastDate).add(6, 'months').toDate(),
