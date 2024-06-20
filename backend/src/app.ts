@@ -13,6 +13,7 @@ import RequestRouter from "./routes/Request";
 import './models/serviceOffering';
 import TimeSlotRouter from "./routes/TimeSlot";
 import PaymentRouter from "./routes/PaymentRouter";
+import WebhookRouter from "./routes/WebhookRouter";
 
 const app = express();
 
@@ -27,11 +28,12 @@ app.use(cors(corsOptions));
 // Middleware for logging
 app.use(logger);
 
+app.use("/api/webhook", express.raw({ type: 'application/json' }), WebhookRouter); //DON'T MOVE THIS LINE AFTER EXPRESS.JSON
 app.use(express.json());
 app.use("/api/auth", AccountRouter);
 app.use("/api/offerings", OfferingRouter);
 app.use("/api/timeslots", TimeSlotRouter);
-app.use("/api/becompro", PaymentRouter);
+app.use("/api/becomepro", PaymentRouter);
 
 app.use("/api/requests", RequestRouter);
 

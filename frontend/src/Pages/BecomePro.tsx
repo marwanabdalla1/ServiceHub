@@ -11,7 +11,7 @@ const BecomeProPage = () => {
 
   const handleJoinNow = async () => {
     try {
-      const response = await axios.post('/api/becompro', { client_reference_id: userid });
+      const response = await axios.post('/api/becomepro/payment', { client_reference_id: userid });
       const sessionId = response.data.id;
       const stripe = await stripePromise;
 

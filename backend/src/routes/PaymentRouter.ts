@@ -1,9 +1,9 @@
 import express from "express";
-import {  pay, handleStripeWebhook } from "../controller/PaymentController";
+import bodyParser from "body-parser";
+import { pay, handleStripeWebhook } from "../controller/PaymentController";
 
 const PaymentRouter = express.Router();
-PaymentRouter.post("", pay)
-PaymentRouter.post("/webhook",handleStripeWebhook)
-
+PaymentRouter.post("/stripe", bodyParser.raw({ type: 'application/json' }), handleStripeWebhook);
+PaymentRouter.post("/payment", pay);
 
 export default PaymentRouter;
