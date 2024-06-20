@@ -114,7 +114,7 @@ function FilterPage() {
         />
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-screen-lg w-full mx-auto '>
           {offerings.map((offering) => (
-            <MediaCard key={offering.id} user={offering} />
+            <MediaCard key={offering._id} user={offering} />
           ))}
         </div>
       </div>

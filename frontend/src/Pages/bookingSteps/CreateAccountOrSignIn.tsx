@@ -1,18 +1,69 @@
 import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import {useNavigate, useParams} from 'react-router-dom';
 import { Container, Box, Typography, Button, Card, CardContent } from '@mui/material';
-import { useBooking } from '../../context/BookingContext';
+import {BookingDetails, useBooking } from '../../contexts/BookingContext';
+import {Account} from "../../models/Account";
 
-function CreateAccountOrSignIn() {
-    const { bookingDetails } = useBooking();
+
+interface CreateAccountOrSignInProps {
+    onNext: () => void;
+    onBack: () => void;
+    bookingDetails: BookingDetails;
+}
+
+function CreateAccountOrSignIn({ onNext, onBack, bookingDetails }: CreateAccountOrSignInProps) {
+    const { setRequestedBy} = useBooking();
     const navigate = useNavigate();
-    const isAuthenticated = false; // Replace this with your actual authentication logic
+    const { offeringId } = useParams<{ offeringId: string }>(); // Get the offeringId from the route params
+
+    const isAuthenticated = true; // todo: Replace this with actual authentication logic
 
     useEffect(() => {
+        console.log("Effect run check", isAuthenticated);
         if (isAuthenticated) {
-            navigate('/update-profile');
+            console.log("AUTHENTICATED!!!")
+            const fetchUserDetails = async () => {
+                // Fetch the user details from your authentication service or context
+                const user = await fetchUserFromAuthService();
+                console.log(user)
+                setRequestedBy(user);
+                console.log(bookingDetails)
+                // navigate('/update-profile');
+            };
+
+            fetchUserDetails();
+
         }
     }, [isAuthenticated, navigate]);
+
+
+    //todo: implement this
+    const fetchUserFromAuthService = async (): Promise<Account> => {
+        // Mock implementation: Replace with actual logic to fetch the authenticated user details
+        return {
+            _id: '666eda4dda888fe359668b63',
+            firstName: 'John',
+            lastName: 'Doe',
+            email: 'john.doe@mail.com',
+            phoneNumber: '1234567890',
+            address: '123 Main St',
+            location: 'Berlin',
+            postal: "12345",
+            country: "Germany",
+            description: 'Enthusiastic and experienced bike repair technician.',
+            isProvider: false,
+            profileImageUrl: '',
+            isPremium: true,
+            createdOn: new Date('2024-06-16T12:27:57.086+00:00'),
+            notifications: [],
+            requestHistory: [],
+            jobHistory: [],
+            serviceOfferings: [],
+            reviews: [],
+            rating: 0,
+            reviewCount: 0
+        };
+    };
 
     const handleSignUpClick = () => {
         navigate('/signup');
@@ -27,8 +78,12 @@ function CreateAccountOrSignIn() {
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
                 <Box sx={{ width: '60%' }}>
                     <Typography variant="h6" gutterBottom>
-                        Step 2 of 3
+                        Step 1 of 3
                     </Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+                        <Button variant="outlined" onClick={onBack}>Back</Button>
+                        <Button variant="contained" onClick={onNext}>Next</Button>
+                    </Box>
                     <Typography variant="h4" gutterBottom>
                         Create account or sign in
                     </Typography>
@@ -43,15 +98,15 @@ function CreateAccountOrSignIn() {
                     <Card>
                         <CardContent sx={{ display: 'flex', alignItems: 'center' }}>
                             <Box>
-                                <Typography variant="h6">{bookingDetails.name}</Typography>
+                                <Typography variant="h6">{`${bookingDetails.provider?.firstName} ${bookingDetails.provider?.lastName}`}</Typography>
                                 <Typography variant="body2" color="text.secondary">
-                                    {bookingDetails.location}
+                                    {bookingDetails.serviceOffering?.location}
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary">
-                                    {bookingDetails.service}
+                                    {bookingDetails.serviceType}
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary">
-                                    {bookingDetails.price}
+                                    {bookingDetails.price} per hour
                                 </Typography>
                             </Box>
                         </CardContent>

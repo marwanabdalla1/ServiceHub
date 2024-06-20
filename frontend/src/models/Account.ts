@@ -26,19 +26,21 @@ export type User = {
 
 
 export class Account {
-    id: string;
+    _id: string;
     firstName: string;
     lastName: string;
-    email?: string;
+    email: string;
     phoneNumber?: string;
     address?: string;
     createdOn?: Date;
-    profileImageUrl: string;
+    profileImageUrl?: string;
     description?: string;
     location?: string;
+    postal?: string;
+    country?: string;
     isProvider?: boolean;
     isPremium?: boolean;
-    rating: number;
+    rating?: number;
     reviewCount?: number;
     serviceOfferings: ServiceOffering[];
     availability?: Availability[];
@@ -48,18 +50,20 @@ export class Account {
     jobHistory?: Job[];
 
     constructor(
-        id: string,
+        _id: string,
         firstName: string,
         lastName: string,
-        profileImageUrl: string,
-        rating: number,
-        serviceOfferings: ServiceOffering[],
-        email?: string,
+        email: string,
+        profileImageUrl?: string,
+        rating?: number,
+        serviceOfferings?: ServiceOffering[],
         phoneNumber?: string,
         address?: string,
         createdOn?: Date,
         description?: string,
         location?: string,
+        country?:string,
+        postal?: string,
         isProvider?: boolean,
         isPremium?: boolean,
         reviewCount?: number,
@@ -69,7 +73,7 @@ export class Account {
         requestHistory?: ServiceRequest[],
         jobHistory?: Job[]
     ) {
-        this.id = id;
+        this._id = _id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -79,16 +83,18 @@ export class Account {
         this.profileImageUrl = profileImageUrl;
         this.description = description;
         this.location = location;
+        this.country = country;
+        this.postal = postal;
         this.isProvider = isProvider;
         this.isPremium = isPremium;
         this.rating = rating;
         this.reviewCount = reviewCount;
-        this.serviceOfferings = serviceOfferings;
-        this.availability = availability;
-        this.reviews = reviews;
-        this.notifications = notifications;
-        this.requestHistory = requestHistory;
-        this.jobHistory = jobHistory;
+        this.serviceOfferings = serviceOfferings || [];
+        this.availability = availability || [];
+        this.reviews = reviews || [];
+        this.notifications = notifications || [];
+        this.requestHistory = requestHistory || [];
+        this.jobHistory = jobHistory || [];
     }
 }
 
@@ -120,7 +126,7 @@ export class Account {
 
 //Test-data to be removed, simply maintained in case required by original developer
 const account: Account = {
-    id: "1234325413",
+    _id: "1234325413",
     firstName: "John",
     lastName: "Doe",
     email: "john.doe@example.com",
@@ -129,7 +135,9 @@ const account: Account = {
     createdOn: new Date(),
     profileImageUrl: "/images/profiles/profile1.png",
     description: "Professional bike repair service",
-    location: "New York, NY",
+    location: "New York",
+    postal: "12344",
+    country: "USA",
     isProvider: false,
     isPremium: true,
     serviceOfferings: [],
@@ -145,7 +153,7 @@ const account: Account = {
 
 // Test-data to be removed, simply maintained in case required by original developer
 export const bikeRepairService: ServiceOffering = {
-    serviceOfferingId: "bikeRepair0",
+    _id: "bikeRepair0",
     serviceType: ServiceType.bikeRepair,
     description: "description0",
     location: "location0",
@@ -158,12 +166,14 @@ export const bikeRepairService: ServiceOffering = {
     bufferTimeDuration: 0.5,
     reviews: [],
     rating: 4.5,
+    reviewCount: 2,
     provider: account
+
 };
 
 // Test-data to be removed, simply maintained in case required by original developer
 export const babysittingService: ServiceOffering = {
-    serviceOfferingId: "babySitting0",
+    _id: "babySitting0",
     serviceType: ServiceType.babySitting,
     description: "description1",
     location: "location1",
@@ -175,6 +185,7 @@ export const babysittingService: ServiceOffering = {
     baseDuration: 2,
     bufferTimeDuration: 0.5,
     reviews: [],
+    reviewCount: 2,
     rating: 4.5,
     provider: account
 };
@@ -187,7 +198,7 @@ export default account;
 
 export const users: Account[] = [
     {
-        id: "1",
+        _id: "1",
         firstName: "John",
         lastName: "Doe",
         email: "john.doe@mail.com",
@@ -209,7 +220,7 @@ export const users: Account[] = [
         reviewCount: 100,
     },
     {
-        id: "2",
+        _id: "2",
         firstName: "Jane",
         lastName: "Smith",
         email: "jane.smith@mail.com",
@@ -231,7 +242,7 @@ export const users: Account[] = [
         reviewCount: 100,
     },
     {
-        id: "3",
+        _id: "3",
         firstName: "Robert",
         lastName: "Brown",
         email: "robert.brown@mail.com",
@@ -251,45 +262,18 @@ export const users: Account[] = [
         notifications: [],
         rating: 4.8,
         reviewCount: 100,
-    },
+    },/*
     {
         id: "4",
         firstName: "Emily",
         lastName: "Davis",
-        email: "emily.davis@mail.com",
-        phoneNumber: "1234567890",
-        address: "123 Main St",
-        createdOn: new Date(),
-        profileImageUrl: "/images/profiles/profile4.png",
-        description: "Tutoring service",
-        location: "New York, NY",
-        isProvider: false,
-        isPremium: true,
-        serviceOfferings: [
-            {
-                serviceOfferingId: "tutoring0",
-                serviceType: ServiceType.tutoring,
-                description: "description2",
-                location: "location2",
-                hourlyRate: 30,
-                isCertified: true,
-                createdOn: new Date(),
-                lastUpdatedOn: new Date(),
-                certificate: new File([], "empty.txt", { type: "text/plain" }),
-                baseDuration: 2,
-                bufferTimeDuration: 0.5,
-                reviews: [],
-                rating: 4.9,
-                provider: account
-            }
-        ],
-        availability: [],
-        reviews: [],
-        requestHistory: [],
-        jobHistory: [],
-        notifications: [],
-        rating: 4.9,
-        reviewCount: 100,
+        service: {
+            serviceType: "tutoring",
+            rating: 4.9,
+            hourlyRating: 30.0,
+            isLicensed: true,
+        },
+        imageUrl: "/images/profiles/profile4.png",
     },
     {
         id: "5",
@@ -468,5 +452,5 @@ export const users: Account[] = [
         notifications: [],
         rating: 4.7,
         reviewCount: 100,
-    },
+    },*/
 ];

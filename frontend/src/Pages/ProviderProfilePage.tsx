@@ -1,4 +1,6 @@
-import React from 'react';
+// this is more like offering profile page instead of provider profile page
+
+import React, {useEffect, useState} from 'react';
 import {
     Container,
     Box,
@@ -25,15 +27,17 @@ import Breadcrumb from "../components/Breadcrumb";
 import LightBlueButton from "../components/inputs/BlueButton";
 import { ServiceOffering } from '../models/ServiceOffering';
 import account from '../models/Account';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
+import {useBooking} from "../contexts/BookingContext";
+
 
 const mockProvider: ServiceProvider = {
-    id: '1',
+    _id: '1',
     firstName: 'Bob',
     lastName: 'Biker',
     serviceOfferings: [new ServiceOffering('offering0',
         ServiceType.bikeRepair, new Date(), new Date(), new File([], "empty.txt", { type: "text/plain" }), 15, 'desc0', true,
-    'Munich', account, 1, 0.5, [], 3)],
+    'Munich', account, 1, 0.5, [], 3, 4.5)],
     location: 'Munich',
     availability: [
         {
@@ -124,7 +128,6 @@ const mockProvider: ServiceProvider = {
     requestHistory: [],
     jobHistory: []
 
-
 };
 
 const daysOfWeekToString = (day: DaysOfWeek): string => {
@@ -136,17 +139,51 @@ const formatTime = (date: Date): string => {
 };
 
 function ProviderProfilePage() {
-    const provider = mockProvider;
-    const { id } = useParams(); //use this to then make a post request to the user with the id to get the user data
+    const { fetchAccountDetails, fetchOfferingDetails } = useBooking();
+    const [provider, setProvider] = useState<ServiceProvider | null>(null);
+    const [offering, setOffering] = useState<ServiceOffering | null>(null);
+
+
+    // const provider = mockProvider;
+    const {offeringId} = useParams<{offeringId:string}>(); //use this to then make a request to the user with the id to get the user data
+
+    console.log("offeringId");
+
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const fetchData = async () => {
+            if (offeringId) {
+                const fetchedOffering = await fetchOfferingDetails(offeringId);
+                setOffering(fetchedOffering);
+                const fetchedProvider = await fetchAccountDetails(offeringId);
+                setProvider(fetchedProvider);
+            }
+        };
+
+        fetchData();
+    }, [offeringId, fetchAccountDetails, fetchOfferingDetails]);
+
+    // go to the booking page
+    const handleBookNow = () => {
+        navigate(`/offerings/${offeringId}/booking/step0`);
+    };
+
+    if (!provider || !offering) {
+        return <div>Loading...</div>; // You can replace this with a more sophisticated loading indicator if desired
+    }
+
+    // handle "book now" button
     return (
         <Container>
 
             <Box sx={{mt: 4}}>
                 <Breadcrumb paths={[
+                    // todo: change this!
                     {label: 'Home', href: '/'},
                     {label: 'Munich', href: '/munich'},
                     {label: 'Bike Repair', href: '/munich/bike-repair'},
-                    {label: 'Bob Biker'}
+                    {label: `${provider.firstName} ${provider.lastName}`}
                 ]}/>
                 <Grid container spacing={4} sx={{mt: 2}}>
                     <Grid item xs={3}>
@@ -159,28 +196,30 @@ function ProviderProfilePage() {
                             </Typography>
                             <Box sx={{ justifyContent: 'space-between'}}>
                                 <LightBlueButton className = 'px-3 py-2 rounded bg-white mr-3' text='Contact Information' onClick={() => console.log('booking button pressed')}></LightBlueButton>
-                                <Link to={`/select-timeslot/${id}`}>
-                                <LightBlueButton className = 'px-3 py-2 rounded' text='Book Now' onClick={() => console.log('booking button pressed')}></LightBlueButton>
-                                </Link>
+                                {/*<Link to={`/select-timeslot/${id}`}>*/}
+                                <LightBlueButton className = 'px-3 py-2 rounded' text='Book Now' onClick={handleBookNow}></LightBlueButton>
+                                {/*</Link>*/}
                             </Box>
                         </Box>
 
                         <Box sx={{display: 'flex', alignItems: 'center', mt: 2, justifyContent: 'space-between'}}>
                             <Box sx={{display: 'flex', alignItems: 'center'}}>
-                                <Typography variant="h5" sx={{mr: 1}}>{provider.rating}</Typography>
+                                <Typography variant="h5" sx={{mr: 1}}>{offering.rating}</Typography>
                                 <GoStarFill className='text-yellow-500'/>
                                 <Typography variant="body2" sx={{ml: 1}}>
-                                    ({provider.reviewCount} reviews)
+                                    ({offering.reviewCount} reviews)
                                 </Typography>
                             </Box>
                             <Typography variant="body2" color="text.secondary">
-                                {provider.serviceOfferings[0].serviceType}
+                                {offering.serviceType}
                             </Typography>
                             <Typography variant="body2" gutterBottom>
-                                {provider.location}
+                                {offering.location}
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
                                 Next Availability: Sat, 11 May
+                                {/*//todo: modify availability!*/}
+                                {/*{provider.availability}  */}
                             </Typography>
                         </Box>
 
@@ -190,7 +229,7 @@ function ProviderProfilePage() {
                             <PinDropIcon sx={{mt:2}}></PinDropIcon>
                             <Box sx={{display: 'flex', flexDirection: 'column', flex: '1 1 40%', alignItems: 'center', mt: 2}}>
                             <Typography variant="body2" color="text.secondary">
-                                {provider.description}
+                                {offering.description}
                             </Typography>
                             </Box>
 
@@ -205,7 +244,7 @@ function ProviderProfilePage() {
                             <AccountBalanceWalletIcon sx={{mb: 1, mt:2}}/>
                             <Box sx={{flex: '1 1 30%', alignItems: 'center', mt:2}}>
                                 <Typography variant="body2">
-                                    Service Fee: €{provider.serviceOfferings[0].hourlyRate}/hour
+                                    Service Fee: €{offering.hourlyRate}/hour
                                 </Typography>
                                 <Typography variant="body2">
                                     Payment methods: Cash, PayPal {/*todo: add this to */}
@@ -220,11 +259,11 @@ function ProviderProfilePage() {
                             <CardContent>
                                 <Typography variant="h6">Customer reviews</Typography>
                                 <Typography variant="h4" gutterBottom>
-                                    {provider.rating} <Rating precision={0.25} defaultValue={provider.rating} readOnly={true}/>
+                                    {offering.rating} <Rating precision={0.25} defaultValue={offering.rating} readOnly={true}/>
 
                                 </Typography>
                                 <Typography variant="body2">
-                                    {provider.reviewCount} global ratings
+                                    {offering.reviewCount} global ratings
                                 </Typography>
                                 <Box sx={{mt: 2}}>
                                     <Typography variant="body2">5 star</Typography>
@@ -238,12 +277,12 @@ function ProviderProfilePage() {
                         </Card>
 
                         <Box sx={{mt: 5}}>
-                            <Typography variant="h6" gutterBottom>
-                                Review this Service</Typography>
-                            <Typography variant="body2" gutterBottom>
-                                Share your thought with other customers
-                            </Typography>
-                            <Button size='small' variant="outlined">Write a customer review</Button>
+                            {/*<Typography variant="h6" gutterBottom>*/}
+                            {/*    Review this Service</Typography>*/}
+                            {/*<Typography variant="body2" gutterBottom>*/}
+                            {/*    Share your thought with other customers*/}
+                            {/*</Typography>*/}
+                            {/*<Button size='small' variant="outlined">Write a customer review</Button>*/}
                         </Box>
                     </Grid>
                     <Grid item xs={9}>
@@ -266,6 +305,9 @@ function ProviderProfilePage() {
                                 <Typography variant="body2">Sort by: Top Reviews</Typography>
                             </Box>
                             <Divider sx={{mb: 2}}/>
+
+                            {/*todo: update the reviews part once the review controllers etc. are done!*/}
+
                             {provider.reviews ? provider.reviews.map((review) => (
                                 <Card key={review.reviewId} sx={{mb: 2}}>
                                     <CardContent>
