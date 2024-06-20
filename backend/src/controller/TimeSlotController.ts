@@ -2,7 +2,7 @@ import { RequestHandler } from 'express';
 import moment from 'moment';
 import Timeslot, { ITimeslot } from '../models/timeslot'; // Adjust the path as necessary
 
-// Function to generate weekly instances
+// Function to generate weekly instances (existing code)
 function generateWeeklyInstances(events: ITimeslot[], startDate: moment.Moment, endDate: moment.Moment) {
     const weekInstances: ITimeslot[] = [];
     console.log("To beFuture Events: ", events);
@@ -49,10 +49,12 @@ function generateWeeklyInstances(events: ITimeslot[], startDate: moment.Moment, 
     return weekInstances;
 }
 
-// New Endpoint to Extend Fixed Slots
+// New Endpoint to Extend Fixed Slots (existing code)
 export const extendFixedSlots: RequestHandler = async (req, res, next) => {
     try {
+        console.log("Extend function called")
         const { start, end, createdById } = req.body;
+        console.log
         const startDate = moment(start).subtract(1, 'week');
         const endDate = moment(end).subtract(1, 'week');
 
@@ -90,7 +92,10 @@ export const extendFixedSlots: RequestHandler = async (req, res, next) => {
     }
 };
 
-// Existing Get Events Controller
+//Add more logic that handles the delete logic of the fixed slots
+
+
+// Existing Get Events Controller (existing code)
 export const getEvents: RequestHandler = async (req, res, next) => {
     const { createdById } = req.query;
     try {
@@ -123,7 +128,7 @@ export const saveEvents: RequestHandler = async (req, res, next) => {
         console.log('Events to insert:', eventsToInsert); // Debugging: Log the processed events
 
         // Save the new events
-        await Timeslot.insertMany(eventsToInsert);
+        await Timeslot.insertMany(eventsToInsert, { ordered: false });
 
         // Parse the events and check if they are fixed
         const fixedEvents = events.filter((event: ITimeslot) => event.isFixed);
@@ -140,7 +145,7 @@ export const saveEvents: RequestHandler = async (req, res, next) => {
             isFixed: instance.isFixed,
             isBooked: instance.isBooked,
             createdById: instance.createdById // Ensure createdById is included here
-        })));
+        })), { ordered: false });
 
         res.status(201).json({ message: "Events saved successfully" });
     } catch (err) {
@@ -155,81 +160,3 @@ export const saveEvents: RequestHandler = async (req, res, next) => {
         });
     }
 };
-
-
-// export const getEventstoUpdate: RequestHandler = async (req, res, next) => {
-//     try {
-//       const { start, end } = req.query;
-//       const startDate = moment(start as string);
-//       const endDate = moment(end as string);
-//       const events = await Timeslot.find();
-  
-//       // Check if the current week is within two weeks from now
-//       if (moment().add(2, 'weeks').isAfter(startDate)) {
-//         // Create fixed events for the next 6 months if needed
-//         const futureEndDate = moment().add(6, 'months');
-//         const futureInstances = generateWeeklyInstances(events, moment(), futureEndDate);
-  
-//         // Insert future instances into the database
-//         await Timeslot.insertMany(futureInstances.map(instance => ({
-//           title: instance.title,
-//           start: instance.start,
-//           end: instance.end,
-//           isFixed: instance.isFixed,
-//           isBooked: instance.isBooked,
-//           createdById: instance.createdById
-//         })));
-//       }
-  
-//       const weekInstances = generateWeeklyInstances(events, startDate, endDate);
-//       res.json(weekInstances);
-//     } catch (err) {
-//       let message = '';
-//       if (err instanceof Error) {
-//         message = err.message;
-//       }
-//       return res.status(500).json({
-//         error: "Internal server error",
-//         message: message,
-//       });
-//     }
-//   };
-
-// Get Events Controller
-// export const getEvents: RequestHandler = async (req, res, next) => {
-//     try {
-//       const { start, end } = req.query;
-//       const startDate = moment(start as string);
-//       const endDate = moment(end as string);
-//       const events = await Timeslot.find();
-  
-//       // Check if the current week is within two weeks from now
-//       if (moment().add(2, 'weeks').isAfter(startDate)) {
-//         // Create fixed events for the next 6 months if needed
-//         const futureEndDate = moment().add(6, 'months');
-//         const futureInstances = generateWeeklyInstances(events, moment(), futureEndDate);
-  
-//         // Insert future instances into the database
-//         await Timeslot.insertMany(futureInstances.map(instance => ({
-//           title: instance.title,
-//           start: instance.start,
-//           end: instance.end,
-//           isFixed: instance.isFixed,
-//           isBooked: instance.isBooked,
-//           createdById: instance.createdById
-//         })));
-//       }
-  
-//       const weekInstances = generateWeeklyInstances(events, startDate, endDate);
-//       res.json(weekInstances);
-//     } catch (err) {
-//       let message = '';
-//       if (err instanceof Error) {
-//         message = err.message;
-//       }
-//       return res.status(500).json({
-//         error: "Internal server error",
-//         message: message,
-//       });
-//     }
-//   };
