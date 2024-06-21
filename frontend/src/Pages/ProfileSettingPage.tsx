@@ -1,9 +1,10 @@
-import React, {useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {Container, Typography, TextField, Button, Box, Paper, Avatar, Divider} from '@mui/material';
 import BlueButton from "../components/inputs/BlueButton";
 import LightBlueFileButton from "../components/inputs/BlueUploadButton";
 import {useNavigate} from 'react-router-dom';
-import account from "../models/Account";
+import {useAuth} from "../contexts/AuthContext";
+import axios from "axios";
 
 type EditModeType = {
     [key: string]: boolean;
@@ -14,6 +15,55 @@ type FieldType = {
 };
 
 function UserProfile(): React.ReactElement {
+
+    const [account, setAccount] = useState<any>(null);
+    const {token} = useAuth();
+
+    /**
+     * Custom hook to skip the first render of a component
+     * @param effect
+     * @param deps
+     */
+    function useSkipFirstEffect(effect: React.EffectCallback, deps?: React.DependencyList) {
+        const isFirstRender = useRef(true);
+
+        useEffect(() => {
+            if (isFirstRender.current) {
+                isFirstRender.current = false;
+                return;
+            }
+
+            return effect();
+        }, deps);
+    }
+
+    /**
+     * Fetch account details from the backend everytime the account state changes
+     *
+     */
+    useSkipFirstEffect(() => {
+        (async () => {
+            try {
+                const response = await axios.get('/api/account', { // replace with your backend endpoint
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                console.log(`Status: ${response.status}`);
+                console.log(response.data);
+
+                // Only update the account state if the new data is different
+                if (JSON.stringify(response.data) !== JSON.stringify(account)) {
+                    setAccount(response.data);
+                }
+            } catch (error) {
+                console.error('Error fetching account details:', error);
+            }
+        })();
+    }, [account]);
+
+
+
     const [editMode, setEditMode] = useState<EditModeType>({
         firstName: false,
         lastName: false,
@@ -23,16 +73,34 @@ function UserProfile(): React.ReactElement {
         description: false,
         service: false
     });
+
+
     const [fieldValue, setFieldValue] = useState<FieldType>({
-        userId: account._id,
-        firstName: account.firstName,
-        lastName: account.lastName,
-        email: account.email ? account.email : "",
-        phone: account.phoneNumber ? account.phoneNumber : "",
-        address: account.address ? account.address : "",
-        description: account.description ? account.description : "",
-        service: account.serviceOfferings.map(service => service.serviceType).join(', '),
+        userId: "",
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        address: "",
+        description: "",
+        // service: "",
     });
+
+    useEffect(() => {
+        if (account) {
+            setFieldValue({
+                userId: account._id,
+                firstName: account.firstName,
+                lastName: account.lastName,
+                email: account.email,
+                phone: account.phone ? account.phone : "",
+                address: account.address ? account.address : "",
+                description: account.description ? account.description : "",
+                // service: account.serviceOfferings.map(service => service.serviceType).join(', '),
+            });
+        }
+    }, [account]);
+
     const [userImage, setUserImage] = useState<File | null>(null);
     const [certificate, setCertificate] = useState<File | null>(null);
 
@@ -46,11 +114,34 @@ function UserProfile(): React.ReactElement {
     };
 
     const handleFieldChange = (field: string, newValue: string) => {
+        // Update the local state
         setFieldValue(prevState => ({...prevState, [field]: newValue}));
+    };
+
+    const handleFieldSave = async (field: string) => {
+        // Prepare the updated account data
+        const updatedAccount = {...account, [field]: fieldValue[field]};
+
+        // Send a PUT request to the backend
+        try {
+            const response = await axios.put('/api/account', updatedAccount, { // replace with your backend endpoint
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            console.log(`Status: ${response.status}`);
+            console.log(response.data);
+
+            // Update the account state with the response data
+            setAccount(response.data);
+        } catch (error) {
+            console.error('Error updating account details:', error);
+        }
     };
 
     const handleKeyPress = (event: React.KeyboardEvent, field: string) => {
         if (event.key === 'Enter') {
+            handleFieldSave(field).then(r => console.log('Field saved'));
             handleEditClick(field);
         }
     };
