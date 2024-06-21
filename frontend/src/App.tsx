@@ -1,7 +1,6 @@
 import React, {useEffect} from 'react';
 import {BrowserRouter, Routes, Route, useLocation} from "react-router-dom";
 import FilterPage from './Pages/FilterPage';
-import ProfilePage from './Pages/ProfilePage';
 import SignInPage from './Pages/LoginPage';
 import SignUpPage from './Pages/SignUpPage';
 import NavigationBar from './components/Navbar';
@@ -71,7 +70,6 @@ function MainRoutes() {
                 <Route path="/login" element={<SignInPage/>}/>
                 <Route path="/signup" element={<SignUpPage/>}/>
                 <Route path="/filter" element={<FilterPage/>}/>
-                <Route path="/profile" element={<ProfilePage/>}/>
                 <Route path="/jobs/jobHistory" element={<JobHistoryPage/>}/>
                 <Route path="/jobs/requestHistory" element={<RequestHistoryPage/>}/>
                 <Route path="/incomingRequests" element={<IncomingRequestsPage/>}/>
