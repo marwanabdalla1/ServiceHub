@@ -39,7 +39,7 @@ interface ServiceScheduleProps {
 function AvailabilityCalendar({ Servicetype, defaultSlotDuration, createdById }: ServiceScheduleProps) {
     const [availability, setAvailability] = useState<TimeSlot[]>([]);
     const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot | null>(null);
-    const [DeleteDialog, setDeleteDialog] = useState(false);
+    const [deleteDialog, setDeleteDialog] = useState(false);
     const [clashDialogOpen, setClashDialogOpen] = useState(false);
 
     useEffect(() => {
@@ -49,6 +49,7 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration, createdById }:
                 createdById: createdById
             }
         }).then(response => {
+            console.log(response.data)
             const events = response.data.map((event: any) => ({
                 ...event,
                 start: new Date(event.start),
@@ -65,7 +66,14 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration, createdById }:
         axios.post('/api/timeslots', {
             events: availability
         }).then(response => {
-            console.log("Availability saved:", response.data);
+            const { insertedEvents } = response.data;
+            const savedEvents = insertedEvents.map((event: any) => ({
+                ...event,
+                start: new Date(event.start),
+                end: new Date(event.end)
+            }));
+            setAvailability(savedEvents);
+            console.log("Availability saved:", savedEvents);
         }).catch(error => {
             console.error("Error saving availability:", error);
         });
@@ -102,7 +110,7 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration, createdById }:
         setSelectedTimeSlot(TimeSlot);
         setDeleteDialog(true);
     };
-    
+
     const handleFixWeekly = () => {
         if (selectedTimeSlot) {
             const filteredAvailability = availability.filter(a => a.start !== selectedTimeSlot.start && a.end !== selectedTimeSlot.end);
@@ -111,21 +119,21 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration, createdById }:
             setDeleteDialog(false);
         }
     };
-    
+
     const handleClose = () => {
         setDeleteDialog(false);
     };
-    
+
     const handleClashDialogClose = () => {
         setClashDialogOpen(false);
     };
-    
+
     const handleRangeChange = (range: RangeType) => {
         if (Array.isArray(range)) {
             const start = startOfDay(range[0]);
             const end = endOfDay(range[range.length - 1]);
             console.log(`Range changed: ${start.toISOString()} - ${end.toISOString()}`);
-    
+
             // Check if we need to extend fixed slots
             const lastDate = new Date(Math.max(...availability.map(slot => slot.end.getTime())));
             if (end > lastDate) {
@@ -174,7 +182,7 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration, createdById }:
             }
         }
     };
-    
+
     return (
         <div>
             <Calendar
@@ -190,10 +198,10 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration, createdById }:
                 onSelectEvent={handleSelectTimeSlot}
                 onRangeChange={handleRangeChange}
             />
-            <Dialog open={DeleteDialog} onClose={handleClose}>
+            <Dialog open={deleteDialog} onClose={handleClose}>
                 <DialogTitle>Delete Slot?</DialogTitle>
                 <DialogContent>
-                    {selectedTimeSlot && <p> {selectedTimeSlot.title}</p>}
+                    {selectedTimeSlot && <p>{selectedTimeSlot.title}</p>}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>Cancel</Button>

@@ -54,7 +54,7 @@ export const extendFixedSlots: RequestHandler = async (req, res, next) => {
     try {
         console.log("Extend function called")
         const { start, end, createdById } = req.body;
-        console.log
+        console.log(req.body)
         const startDate = moment(start).subtract(1, 'week');
         const endDate = moment(end).subtract(1, 'week');
 
@@ -111,11 +111,9 @@ export const getEvents: RequestHandler = async (req, res, next) => {
 export const saveEvents: RequestHandler = async (req, res, next) => {
     try {
         const { events } = req.body;
-        console.log('Received events:', events); // Debugging: Log the received events
 
         await Timeslot.deleteMany({ createdById: events[0].createdById });
 
-        // Log the events to be inserted
         const eventsToInsert = events.map((event: ITimeslot) => ({
             title: event.title,
             start: event.start,
@@ -125,35 +123,32 @@ export const saveEvents: RequestHandler = async (req, res, next) => {
             createdById: event.createdById
         }));
 
-        console.log('Events to insert:', eventsToInsert); // Debugging: Log the processed events
-
-        // Save the new events
-        await Timeslot.insertMany(eventsToInsert, { ordered: false });
-
-        // Parse the events and check if they are fixed
         const fixedEvents = events.filter((event: ITimeslot) => event.isFixed);
+        const regularEvents = events.filter((event: ITimeslot) => !event.isFixed);
 
-        // Save fixed events for the next week until 6 months in advance
-       // Save fixed events for the next week until the last day of the week of the submitted timeslots
-       const futureEndDate = moment(events[0].end).endOf('week');
-       const futureInstances = generateWeeklyInstances(fixedEvents, moment(events[0].start), futureEndDate);
+        let futureInstances: ITimeslot[] = [];
+        if (fixedEvents.length > 0) {
+            const futureEndDate = moment(fixedEvents[0].end).endOf('week').add(6, 'months');
+            futureInstances = generateWeeklyInstances(fixedEvents, moment(fixedEvents[0].start).add(1, 'week'), futureEndDate);
+        }
 
-        await Timeslot.insertMany(futureInstances.map(instance => ({
-            title: instance.title,
-            start: instance.start,
-            end: instance.end,
-            isFixed: instance.isFixed,
-            isBooked: instance.isBooked,
-            createdById: instance.createdById // Ensure createdById is included here
+        const allEventsToInsert = [...regularEvents, ...futureInstances];
+
+        const insertedEvents = await Timeslot.insertMany(allEventsToInsert.map(event => ({
+            title: event.title,
+            start: event.start,
+            end: event.end,
+            isFixed: event.isFixed,
+            isBooked: event.isBooked,
+            createdById: event.createdById
         })), { ordered: false });
 
-        res.status(201).json({ message: "Events saved successfully" });
+        res.status(201).json({ insertedEvents });
     } catch (err) {
         let message = '';
         if (err instanceof Error) {
             message = err.message;
         }
-        console.error('Error saving events:', message); // Debugging: Log the error message
         return res.status(500).json({
             error: "Internal server error",
             message: message,
