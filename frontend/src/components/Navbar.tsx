@@ -73,7 +73,9 @@ const Navbar : React.FC<NavbarProps> = ({toggleDrawer, onChange, onSearch, searc
 
         {/* Right Section: Provide Service Button and Icons */}
         <div className="flex items-center space-x-4 m-4">
+          <Link to={isLoggedIn() ? "/addservice" : "/login"} className="text-current">
           <BlackButton className="py-2" text="Provide a Service" onClick={()=> console.log('Black button pressed')} />
+            </Link>
           <RequestListButton className="h-6 w-6" onClick={handleMenuOpen} />
           <IoNotificationsOutline className="h-6 w-6" />
           <Link to={isLoggedIn() ? "/setprofile" : "/login"} className="text-current">
