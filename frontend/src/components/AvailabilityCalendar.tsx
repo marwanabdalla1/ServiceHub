@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, dateFnsLocalizer, SlotInfo } from 'react-big-calendar';
+import React, { useState, useEffect } from 'react';
+import { Calendar, dateFnsLocalizer, SlotInfo } from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { format, startOfWeek, parseISO, getDay, startOfDay, endOfDay } from 'date-fns';
 import { enUS } from '@mui/material/locale';
@@ -90,10 +92,14 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration, createdById }:
             setClashDialogOpen(true);
         } else {
             let adjustedEnd = end;
+            let adjustedEnd = end;
             if (end.getTime() - start.getTime() < defaultSlotDuration * 60000) {
+                adjustedEnd = new Date(start.getTime() + defaultSlotDuration * 60000);
                 adjustedEnd = new Date(start.getTime() + defaultSlotDuration * 60000);
             }
 
+            const adjustedTimeSlot: TimeSlot = { start: start, end: adjustedEnd, title: Servicetype, isFixed: false, isBooked: false, createdById };
+            setAvailability([...availability, adjustedTimeSlot]);
             const adjustedTimeSlot: TimeSlot = { start: start, end: adjustedEnd, title: Servicetype, isFixed: false, isBooked: false, createdById };
             setAvailability([...availability, adjustedTimeSlot]);
         }
@@ -102,16 +108,24 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration, createdById }:
     const handleDelete = () => {
         if (selectedTimeSlot) {
             setAvailability(availability.filter(a => a.start !== selectedTimeSlot.start && a.end !== selectedTimeSlot.end));
+        if (selectedTimeSlot) {
+            setAvailability(availability.filter(a => a.start !== selectedTimeSlot.start && a.end !== selectedTimeSlot.end));
             setDeleteDialog(false);
         }
     };
 
     const handleSelectTimeSlot = (TimeSlot: TimeSlot) => {
         setSelectedTimeSlot(TimeSlot);
+    const handleSelectTimeSlot = (TimeSlot: TimeSlot) => {
+        setSelectedTimeSlot(TimeSlot);
         setDeleteDialog(true);
     };
-
+    
     const handleFixWeekly = () => {
+        if (selectedTimeSlot) {
+            const filteredAvailability = availability.filter(a => a.start !== selectedTimeSlot.start && a.end !== selectedTimeSlot.end);
+            const newTimeSlot: TimeSlot = { start: selectedTimeSlot.start, end: selectedTimeSlot.end, title: selectedTimeSlot.title, isFixed: true, isBooked: false, createdById };
+            setAvailability([...filteredAvailability, newTimeSlot]);
         if (selectedTimeSlot) {
             const filteredAvailability = availability.filter(a => a.start !== selectedTimeSlot.start && a.end !== selectedTimeSlot.end);
             const newTimeSlot: TimeSlot = { start: selectedTimeSlot.start, end: selectedTimeSlot.end, title: selectedTimeSlot.title, isFixed: true, isBooked: false, createdById };
@@ -123,7 +137,7 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration, createdById }:
     const handleClose = () => {
         setDeleteDialog(false);
     };
-
+    
     const handleClashDialogClose = () => {
         setClashDialogOpen(false);
     };
