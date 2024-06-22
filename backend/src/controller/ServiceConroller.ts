@@ -4,8 +4,6 @@ import Account from '../models/account';
 import { Types } from 'mongoose';
 import { ServiceType } from '../models/enums'; // Assuming this is where your enum is defined
 
-// Create another service controller for now to avoid merge conflicts, but should maybe be merged with some other controller later
-
 export const addService = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userId = (req as any).user.userId;
@@ -61,13 +59,16 @@ export const addService = async (req: Request, res: Response, next: NextFunction
         });
 
         // Save the new service offering to the database
-        await newServiceOffering.save();
+        const savedServiceOffering = await newServiceOffering.save();
 
         // Update the account's isProvider field to true if it's not already true
         if (!account.isProvider) {
             account.isProvider = true;
-            await account.save();
         }
+
+        // Add the new service offering to the account's serviceOfferings array
+        account.serviceOfferings.push(savedServiceOffering._id as Types.ObjectId);
+        await account.save();
 
         res.status(201).send('Service offering added successfully');
     } catch (err) {
