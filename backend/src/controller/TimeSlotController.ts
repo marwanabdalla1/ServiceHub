@@ -5,7 +5,6 @@ import Timeslot, { ITimeslot } from '../models/timeslot'; // Adjust the path as 
 // Function to generate weekly instances (existing code)
 function generateWeeklyInstances(events: ITimeslot[], startDate: moment.Moment, endDate: moment.Moment) {
     const weekInstances: ITimeslot[] = [];
-    console.log("To beFuture Events: ", events);
     events.forEach(event => {
         const dayOfWeek = moment(event.start).day();
         let currentDate = moment(startDate).day(dayOfWeek); // Get the date for the specific day in the start date week
@@ -52,9 +51,7 @@ function generateWeeklyInstances(events: ITimeslot[], startDate: moment.Moment, 
 // New Endpoint to Extend Fixed Slots (existing code)
 export const extendFixedSlots: RequestHandler = async (req, res, next) => {
     try {
-        console.log("Extend function called")
         const { start, end, createdById } = req.body;
-        console.log(req.body)
         const startDate = moment(start).subtract(1, 'week');
         const endDate = moment(end).subtract(1, 'week');
 
@@ -92,8 +89,39 @@ export const extendFixedSlots: RequestHandler = async (req, res, next) => {
     }
 };
 
-//Add more logic that handles the delete logic of the fixed slots
+// Delete Timeslot Endpoint (existing code)
+export const deleteTimeslot: RequestHandler = async (req, res, next) => {
+    try {
+        const { event } = req.body;
+        const start = new Date(event.start);
+        const end = new Date(event.end);
+        const { createdById, title, isFixed } = event;
 
+        // Delete the specific event
+        await Timeslot.deleteOne({ start, end, createdById });
+
+        // If the event is fixed, delete its future instances
+        if (isFixed) {
+            const futureStartDate = moment(start).add(1, 'week');
+            await Timeslot.deleteMany({
+                createdById,
+                title,
+                start: { $gte: futureStartDate.toDate() }
+            });
+        }
+
+        res.status(200).json({ message: 'Timeslot deleted successfully' });
+    } catch (err) {
+        let message = '';
+        if (err instanceof Error) {
+            message = err.message;
+        }
+        return res.status(500).json({
+            error: "Internal server error",
+            message: message,
+        });
+    }
+};
 
 // Existing Get Events Controller (existing code)
 export const getEvents: RequestHandler = async (req, res, next) => {
@@ -107,36 +135,24 @@ export const getEvents: RequestHandler = async (req, res, next) => {
     }
 }; 
 
-// Existing Save Events Controller
+// Updated Save Events Controller
 export const saveEvents: RequestHandler = async (req, res, next) => {
     try {
         const { events } = req.body;
-        //Instead of deleting all the events, we could parse through the events in the db
-        //and see what hasn't been there anymore and delete those, and if it's a fixed event
-        //that has disappeared, we could delete all the future instances of that event
-        //other
-        await Timeslot.deleteMany({ createdById: events[0].createdById });
+        const createdById = events[0].createdById;
 
-        const eventsToInsert = events.map((event: ITimeslot) => ({
-            title: event.title,
-            start: event.start,
-            end: event.end,
-            isFixed: event.isFixed,
-            isBooked: event.isBooked,
-            createdById: event.createdById
-        }));
 
+        // Generate future instances for new fixed events
         const fixedEvents = events.filter((event: ITimeslot) => event.isFixed);
-        const regularEvents = events.filter((event: ITimeslot) => !event.isFixed);
-
         let futureInstances: ITimeslot[] = [];
         if (fixedEvents.length > 0) {
             const futureEndDate = moment(fixedEvents[0].end).endOf('week').add(6, 'months');
             futureInstances = generateWeeklyInstances(fixedEvents, moment(fixedEvents[0].start).add(1, 'week'), futureEndDate);
         }
 
-        const allEventsToInsert = [...regularEvents, ...futureInstances];
-
+        // Insert new events
+        const allEventsToInsert = [...events, ...futureInstances];
+        console.log('All events to insert:', allEventsToInsert);
         const insertedEvents = await Timeslot.insertMany(allEventsToInsert.map(event => ({
             title: event.title,
             start: event.start,

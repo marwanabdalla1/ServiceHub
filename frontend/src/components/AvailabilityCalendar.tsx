@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, dateFnsLocalizer, SlotInfo } from 'react-big-calendar';
+import { Calendar, dateFnsLocalizer, SlotInfo, EventProps } from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { format, startOfWeek, parseISO, getDay, startOfDay, endOfDay } from 'date-fns';
 import { enUS } from '@mui/material/locale';
@@ -43,13 +43,11 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration, createdById }:
     const [clashDialogOpen, setClashDialogOpen] = useState(false);
 
     useEffect(() => {
-        // Fetch current timeslots from the database
         axios.get('/api/timeslots', {
             params: {
                 createdById: createdById
             }
         }).then(response => {
-            console.log(response.data)
             const events = response.data.map((event: any) => ({
                 ...event,
                 start: new Date(event.start),
@@ -62,7 +60,6 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration, createdById }:
     }, [createdById]);
 
     const saveAvailability = () => {
-        console.log("Saving availability:", availability);
         axios.post('/api/timeslots', {
             events: availability
         }).then(response => {
@@ -73,7 +70,6 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration, createdById }:
                 end: new Date(event.end)
             }));
             setAvailability(savedEvents);
-            console.log("Availability saved:", savedEvents);
         }).catch(error => {
             console.error("Error saving availability:", error);
         });
@@ -81,7 +77,6 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration, createdById }:
 
     const handleSelect = ({ start, end }: SlotInfo) => {
         const newTimeSlot: TimeSlot = { start, end, title: Servicetype, isFixed: false, isBooked: false, createdById };
-        console.log('New time slot:', newTimeSlot);
         const isClashing = availability.some(TimeSlot =>
             (newTimeSlot.start < TimeSlot.end && newTimeSlot.end > TimeSlot.start)
         );
@@ -101,8 +96,14 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration, createdById }:
 
     const handleDelete = () => {
         if (selectedTimeSlot) {
-            setAvailability(availability.filter(a => a.start !== selectedTimeSlot.start && a.end !== selectedTimeSlot.end));
-            setDeleteDialog(false);
+            axios.delete('/api/timeslots', {
+                data: { event: selectedTimeSlot }
+            }).then(() => {
+                setAvailability(availability.filter(a => a.start !== selectedTimeSlot.start && a.end !== selectedTimeSlot.end));
+                setDeleteDialog(false);
+            }).catch(error => {
+                console.error("Error deleting timeslot:", error);
+            });
         }
     };
 
@@ -132,18 +133,14 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration, createdById }:
         if (Array.isArray(range)) {
             const start = startOfDay(range[0]);
             const end = endOfDay(range[range.length - 1]);
-            console.log(`Range changed: ${start.toISOString()} - ${end.toISOString()}`);
 
-            // Check if we need to extend fixed slots
             const lastDate = new Date(Math.max(...availability.map(slot => slot.end.getTime())));
             if (end > lastDate) {
-                console.log(end, lastDate);
                 axios.post('/api/timeslots/extend', {
                     start: lastDate,
                     end: moment(lastDate).add(6, 'months').toDate(),
                     createdById: createdById
                 }).then(() => {
-                    // Fetch events again after extending
                     axios.get('/api/timeslots', {
                         params: {
                             createdById: createdById
@@ -162,7 +159,6 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration, createdById }:
                     console.error("Error extending fixed slots:", error);
                 });
             } else {
-                // Fetch events in the new range
                 axios.get('/api/timeslots', {
                     params: {
                         start: start.toISOString(),
@@ -183,6 +179,11 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration, createdById }:
         }
     };
 
+    const eventPropGetter = (event: TimeSlot) => {
+        const backgroundColor = event.isFixed ? 'purple' : 'blue';
+        return { style: { backgroundColor } };
+    };
+
     return (
         <div>
             <Calendar
@@ -197,6 +198,7 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration, createdById }:
                 onSelectSlot={handleSelect}
                 onSelectEvent={handleSelectTimeSlot}
                 onRangeChange={handleRangeChange}
+                eventPropGetter={eventPropGetter}
             />
             <Dialog open={deleteDialog} onClose={handleClose}>
                 <DialogTitle>Delete Slot?</DialogTitle>
