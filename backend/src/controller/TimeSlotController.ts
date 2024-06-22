@@ -111,7 +111,10 @@ export const getEvents: RequestHandler = async (req, res, next) => {
 export const saveEvents: RequestHandler = async (req, res, next) => {
     try {
         const { events } = req.body;
-
+        //Instead of deleting all the events, we could parse through the events in the db
+        //and see what hasn't been there anymore and delete those, and if it's a fixed event
+        //that has disappeared, we could delete all the future instances of that event
+        //other
         await Timeslot.deleteMany({ createdById: events[0].createdById });
 
         const eventsToInsert = events.map((event: ITimeslot) => ({
