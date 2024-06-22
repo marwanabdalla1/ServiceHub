@@ -14,6 +14,7 @@ import ReviewRouter from "./routes/Review";
 
 // Import the models to ensure they are registered
 import './models/serviceOffering';
+import {authenticate} from "./middleware/authenticate";
 
 const app = express();
 
@@ -30,6 +31,8 @@ app.use(logger);
 
 app.use(express.json());
 app.use("/api/auth", AuthRouter);
+// authenticate users
+app.use(authenticate)
 app.use("/api/account", AccountRouter);
 app.use("/api/offerings", OfferingRouter);
 app.use("/api/requests", RequestRouter);

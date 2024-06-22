@@ -2,12 +2,15 @@ import jwt from 'jsonwebtoken';
 import Account from "../models/account";
 import {RequestHandler} from "express";
 import * as dotenv from 'dotenv'
-import {validateRequestBody} from "../middleware/validate";
 import bcrypt from 'bcrypt';
 import {ERRORS} from "../helpers/authHelper";
 import Review from "../models/review";
 //
 //
+
+// todo: sanity check:
+// the reviewer has to have used the service (or is the provider)
+// no other reviews has existed for this job
 export const submitReview:RequestHandler = async (req, res) => {
     try {
         // Assuming `req.user` is set by the `authenticate` middleware
