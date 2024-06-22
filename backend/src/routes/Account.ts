@@ -1,17 +1,11 @@
 import express from "express";
-import { signup, getProviderById, updateUserDetails, authenticate, deleteUser, login, logout } from "../controller/AccountController";
-
+import {getProviderById, updateAccountDetails, deleteAccount, getAccountDetails } from "../controller/AccountController";
+import {authenticate} from "../middleware/authenticate";
 
 const router = express.Router();
-router.post("/signup", signup);
-router.post("/login", login);
-router.get("/logout", logout);
-router.get("/authenticate", authenticate);
-router.post("/delete", deleteUser);
-
 router.get('/providers/:providerId', getProviderById);
-
-router.put('/accounts/:id', updateUserDetails);
-
+router.delete("/", authenticate, deleteAccount);
+router.put('/', authenticate, updateAccountDetails);
+router.get('/', authenticate, getAccountDetails);
 
 export default router;

@@ -76,7 +76,7 @@ const Navbar : React.FC<NavbarProps> = ({toggleDrawer, onChange, onSearch, searc
           <BlackButton className="py-2" text="Provide a Service" onClick={()=> console.log('Black button pressed')} />
           <RequestListButton className="h-6 w-6" onClick={handleMenuOpen} />
           <IoNotificationsOutline className="h-6 w-6" />
-          <Link to="/setprofile" className="text-current">
+          <Link to={isLoggedIn() ? "/setprofile" : "/login"} className="text-current">
             <CgProfile className="h-6 w-6" />
           </Link>
           <div className="h-6 w-0.5 bg-gray-800"></div>
