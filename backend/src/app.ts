@@ -8,9 +8,12 @@ import notFoundHandler from "./middleware/notFoundHandler";
 import AccountRouter from "./routes/Account";
 import OfferingRouter from "./routes/Offering";
 import RequestRouter from "./routes/Request";
+import ReviewRouter from "./routes/Review";
+
 
 // Import the models to ensure they are registered
 import './models/serviceOffering';
+import {authenticate} from "./controller/AccountController";
 
 const app = express();
 
@@ -26,9 +29,14 @@ app.use(cors(corsOptions));
 app.use(logger);
 
 app.use(express.json());
+//todo: auth middleware is here
+app.use(authenticate);
+
 app.use("/api/auth", AccountRouter);
 app.use("/api/offerings", OfferingRouter);
 app.use("/api/requests", RequestRouter);
+app.use("/api/reviews", ReviewRouter);
+
 
 app.get("/", async (req, res, next) => {
     try {

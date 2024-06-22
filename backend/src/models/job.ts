@@ -2,7 +2,7 @@ import mongoose, {Document, Schema} from 'mongoose';
 import {JobStatus, ServiceType} from './enums';
 
 export interface IJob extends Document {
-    jobId: string;
+    // jobId: string;
     serviceType: ServiceType;
     appointmentTime: Date;
     dateOfService: Date;
@@ -17,7 +17,7 @@ export interface IJob extends Document {
 }
 
 const JobSchema: Schema = new Schema({
-    jobId: {type: String, required: true},
+    // jobId: {type: String, required: true},
     serviceType: {type: String, enum: Object.values(ServiceType), required: true},
     appointmentTime: {type: Date, required: true},
     dateOfService: {type: Date, required: true},

@@ -172,7 +172,7 @@ export const authenticate: RequestHandler = async (req, res, next) => {
     }
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err: any, user: any) => {
         if (err) {
-            return res.status(403).json({error: "Forbidden"});
+            return res.status(403).json({error: "Forbidden", message:err});
         }
         (req as any).user = user;
         next();
