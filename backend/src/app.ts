@@ -13,6 +13,7 @@ import RequestRouter from "./routes/Request";
 // Import the models to ensure they are registered
 import './models/serviceOffering';
 import TimeSlotRouter from "./routes/TimeSlot";
+import ServiceRouter from "./routes/Service";
 
 const app = express();
 
@@ -32,7 +33,7 @@ app.use("/api/auth", AuthRouter);
 app.use("/api/account", AccountRouter);
 app.use("/api/offerings", OfferingRouter);
 app.use("/api/timeslots", TimeSlotRouter);
-
+app.use("/api/services", ServiceRouter);
 
 app.use("/api/requests", RequestRouter);
 
