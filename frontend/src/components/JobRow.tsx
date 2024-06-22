@@ -16,7 +16,7 @@ const JobRow: React.FC<JobRowProps> = ({ job, onViewDetails }) => {
     <TableRow>
       <TableCell>{job.serviceType}</TableCell>
       <TableCell>{JobStatus[job.status]}</TableCell>
-      <TableCell>{job.appointmentTime.toLocaleDateString()}</TableCell>
+      <TableCell>{job.appointmentStartTime.toLocaleDateString()}</TableCell>
       <TableCell>
         <BlackButton text="View" onClick={() => onViewDetails(job)}/>
       </TableCell>

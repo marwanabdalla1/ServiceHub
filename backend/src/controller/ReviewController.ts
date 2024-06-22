@@ -8,7 +8,7 @@ import Review from "../models/review";
 //
 //
 
-// todo: sanity check:
+// todo: sanity check: (add after job and request controllers are done)
 // the reviewer has to have used the service (or is the provider)
 // no other reviews has existed for this job
 export const submitReview:RequestHandler = async (req, res) => {
@@ -23,11 +23,11 @@ export const submitReview:RequestHandler = async (req, res) => {
         // Additional checks can be made here, e.g., user roles or specific permissions
 
         const reviewData = {
-            // reviewer: user.userId,  // or any other user identifier included in the token
-            reviewer : req.body.reviewer,
+            reviewer: user.userId,  // or any other user identifier included in the token
+            // reviewer : req.body.reviewer,
             content: req.body.content,
             rating: req.body.rating,
-            recipient: req.body.recipient,// Assuming reviews are for products
+            recipient: req.body.recipient,
             serviceOffering: req.body.serviceOffering,
             job: req.body.job,
         };

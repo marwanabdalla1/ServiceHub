@@ -5,11 +5,12 @@ import { ServiceOffering } from "./ServiceOffering";
 
 
 export class ServiceRequest {
-    serviceRequestId: string;
+    _id: string;
     requestStatus: RequestStatus;
-    createdOn: Date;
+    createdAt: Date; //automatically set by MongoDB
     serviceType: ServiceType;
-    appointmentTime: Date;
+    appointmentStartTime: Date;
+    appointmentEndTime: Date | undefined;
     uploads: File[];
     comment: string;
     serviceFee: number;
@@ -26,14 +27,15 @@ export class ServiceRequest {
 
 
     constructor(serviceRequestId: string, requestStatus: RequestStatus, createdOn: Date, serviceType: ServiceType, serviceOffering: ServiceOffering | undefined | null,
-        appointmentTime: Date, uploads: File[], comment: string, serviceFee: number, duration: number, job: Job | null, provider: Account, requestedBy: Account, rating: number,
+        appointmentStartTime: Date,  appointmentEndTime: undefined, uploads: File[], comment: string, serviceFee: number, duration: number, job: Job | null, provider: Account, requestedBy: Account, rating: number,
         profileImageUrl: string) {
-        this.serviceRequestId = serviceRequestId;
+        this._id = serviceRequestId;
         this.requestStatus = requestStatus;
-        this.createdOn = createdOn;
+        this.createdAt = createdOn;
         this.serviceType = serviceType;
         this.serviceOffering = serviceOffering
-        this.appointmentTime = appointmentTime;
+        this.appointmentStartTime = appointmentStartTime;
+        this.appointmentEndTime = appointmentEndTime;
         this.uploads = uploads;
         this.comment = comment;
         this.serviceFee = serviceFee;

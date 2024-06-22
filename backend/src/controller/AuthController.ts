@@ -100,6 +100,7 @@ export const login: RequestHandler = async (req, res, next) => {
     try {
         // Retrieve the user from the database
         const user = await Account.findOne({email: req.body.email}).select('+authentication.password +authentication.salt');
+
         if (!user) {
             return res.status(400).json({
                 error: "Bad Request",

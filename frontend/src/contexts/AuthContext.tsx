@@ -34,19 +34,32 @@ export const AccountProvider = ({children}: Props) => {
         setIsReady(true);
     }, []);
 
+
+    useEffect(() => {
+        if (token) {
+            axios.get('/api/account', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+                .then(response => {
+                    console.log("account:" , response.data)
+                    setAccount(response.data);
+                })
+                .catch(error => {
+                    console.error('Error fetching user data:', error);
+                });
+        }
+    }, [token]);
+
     function handleResponse(response: AxiosResponse<any>) {
         localStorage.setItem('token', response?.data.token);
-        const accountObj = {
-            _id: response?.data.id,
-            firstName: response?.data.firstName,
-            lastName: response?.data.lastName,
-            email: response?.data.email,
-            serviceOfferings: []
-        };
-        localStorage.setItem('account', JSON.stringify(accountObj));
+
+
+        // localStorage.setItem('account', JSON.stringify(response.data));
 
         setToken(response?.data.token!);
-        setAccount(accountObj!);
+        // setAccount(accountObj!);
     }
 
     const registerUser = async (event: React.FormEvent<HTMLFormElement>) => {

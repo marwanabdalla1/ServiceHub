@@ -12,11 +12,23 @@ interface RequestRowProps {
 }
 
 const RequestRow: React.FC<RequestRowProps> = ({ request, onViewDetails }) => {
-  return (
+    const formatDateTime = (date: any) => {
+        if (!(date instanceof Date)) date = new Date(date);
+        return date.toLocaleString('en-DE', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit', // hour in 2-digit format
+            minute: '2-digit', // minute in 2-digit format
+            hour12: false // use AM/PM
+        });
+    };
+
+    return (
     <TableRow>
       <TableCell>{request.serviceType}</TableCell>
       <TableCell>{RequestStatus[request.requestStatus]}</TableCell>
-      <TableCell>{request.appointmentTime.toLocaleDateString()}</TableCell>
+        <TableCell>{formatDateTime(request.appointmentStartTime)}</TableCell>
       <TableCell>
         <BlackButton text="View" onClick={() => onViewDetails(request)}/>
       </TableCell>
@@ -25,3 +37,6 @@ const RequestRow: React.FC<RequestRowProps> = ({ request, onViewDetails }) => {
 };
 
 export default RequestRow;
+
+
+

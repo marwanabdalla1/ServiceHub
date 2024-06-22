@@ -26,7 +26,7 @@ function ReviewAndConfirm({ onComplete, onBack , bookingDetails}: ReviewAndConfi
 
     const handleConfirmBooking = async() => {
 
-        const apiEndpoint = '/api/requests/new-service-request'
+        const apiEndpoint = '/api/requests'
 
 
         const requestData = {
@@ -57,7 +57,7 @@ function ReviewAndConfirm({ onComplete, onBack , bookingDetails}: ReviewAndConfi
         } catch(error: any) {
                 console.error('Error confirming booking:', error);
                 // Error handling
-            }
+        }
 
         // example from the signup page
         // const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {

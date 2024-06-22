@@ -52,13 +52,13 @@ const MediaCard: React.FC<MediaCardProps> = ({ job, onClose }) => {
         </div>
         <Divider sx={{marginBottom:'1rem'}}/>
         <Typography variant="body2">
-          Request ID: {job.jobId}
+          Request ID: {job._id}
         </Typography>
         <Typography variant="body2">
           Service Type: {job.serviceType}
         </Typography>
         <Typography variant="body2">
-          Appointment Time: {job.appointmentTime.toLocaleString()}
+          Appointment Time: {job.appointmentStartTime.toLocaleString()}
         </Typography>
         <Typography variant="body2" sx={{ marginBottom: '2rem'}}>
           Service Fee: {job.serviceFee}

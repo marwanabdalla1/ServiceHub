@@ -93,13 +93,13 @@ const NewTimeslotRequestMediaCard: React.FC<MediaCardProps> = ({ request, onClos
           </div>
           <Divider sx={{ marginBottom: '1rem' }} />
           <Typography variant="body2">
-            Request ID: {request.serviceRequestId}
+            Request ID: {request._id}
           </Typography>
           <Typography variant="body2">
             Service Type: {request.serviceType}
           </Typography>
           <Typography variant="body2">
-            Appointment Time: {request.appointmentTime.toLocaleString()}
+            Appointment Time: {request.appointmentStartTime.toLocaleString()}
           </Typography>
           <TextField
             label="est. duration (h)"
