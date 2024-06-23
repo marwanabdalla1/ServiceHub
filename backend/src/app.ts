@@ -15,7 +15,8 @@ import ReviewRouter from "./routes/Review";
 
 // Import the models to ensure they are registered
 import './models/serviceOffering';
-import {authenticate} from "./middleware/authenticate";
+import TimeSlotRouter from "./routes/TimeSlot";
+import ServiceRouter from "./routes/Service";
 
 const app = express();
 
@@ -36,6 +37,9 @@ app.use("/api/auth", AuthRouter);
 // app.use(authenticate)
 app.use("/api/account", AccountRouter);
 app.use("/api/offerings", OfferingRouter);
+app.use("/api/timeslots", TimeSlotRouter);
+app.use("/api/services", ServiceRouter);
+
 app.use("/api/requests", RequestRouter);
 app.use("/api/jobs", JobRouter);
 app.use("/api/reviews", ReviewRouter);

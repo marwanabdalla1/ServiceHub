@@ -2,6 +2,8 @@ import React, { useState, ChangeEvent } from 'react';
 import { Autocomplete, TextField, InputAdornment, Box, Grid } from '@mui/material';
 import LightBlueButton from '../components/inputs/BlueButton';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import axios from 'axios';
 
 interface FormData {
     selectedService: { title: string } | null;
@@ -16,11 +18,20 @@ interface FormData {
 function AddServicePage() {
     const navigate = useNavigate();
 
+    const {token} = useAuth();
+    console.log(token)
+
     const serviceTypes = [
-        { title: 'Bike Repair' }, { title: 'Moving' }, { title: 'Babysitting' }, 
-        { title: 'Tutoring' }, { title: 'Petsetting' }, { title: 'Landscaping' }, 
-        { title: 'Remodeling' }, { title: 'Cleaning' }
+        { title: 'Bike Repair' }, 
+        { title: 'Moving Services' }, 
+        { title: 'Baby Sitting' }, 
+        { title: 'Tutoring' }, 
+        { title: 'Pet Sitting' }, 
+        { title: 'Landscaping Services' }, 
+        { title: 'Home Remodeling' }, 
+        { title: 'House Cleaning' }
     ];
+    
     const paymentMethods = [
         { title: 'Cash' }, { title: 'Paypal' }, { title: 'Bank Transfer' }
     ];
@@ -70,7 +81,10 @@ function AddServicePage() {
         return Object.values(newErrors).every(error => !error);
     };
 
-    const handleSubmit = () => {
+
+   
+
+    const handleSubmit = async () => {
         if (validateForm()) {
             console.log('Submit button pressed');
             const submissionData = {
@@ -78,10 +92,22 @@ function AddServicePage() {
                 defaultSlotTime: Number(formData.defaultSlotTime),
                 travelTime: Number(formData.travelTime)
             };
+        try {
+            console.log(token)
+            const response = await axios.post('/api/services/add-new-service', submissionData, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            console.log(`Status: ${response.status}`);
+            console.log(response.data);
+        } catch (error) {
+            console.error('Error creating service:', error);
+        }
 
-            const { selectedService, travelTime } = submissionData;
-            navigate('/select-availability', { state: { selectedService, travelTime } });
-            console.log(submissionData);
+            // const { selectedService, travelTime } = submissionData;
+            // // navigate('/select-availability', { state: { selectedService, travelTime } });
+            // console.log(submissionData);
         } else {
             console.log('Form validation failed');
         }
