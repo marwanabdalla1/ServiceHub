@@ -38,6 +38,24 @@ export const AccountProvider = ({children}: Props) => {
         setIsReady(true);
     }, []);
 
+
+    useEffect(() => {
+        if (token) {
+            axios.get('/api/account', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+                .then(response => {
+                    console.log("account:" , response.data)
+                    setAccount(response.data);
+                })
+                .catch(error => {
+                    console.error('Error fetching user data:', error);
+                });
+        }
+    }, [token]);
+
     function handleResponse(response: AxiosResponse<any>) {
         localStorage.setItem('token', response?.data.token);
         localStorage.setItem('isProvider', response?.data.isProvider);
