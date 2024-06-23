@@ -30,6 +30,7 @@ export const AccountProvider = ({children}: Props) => {
 
 
 
+
     useEffect(() => {
         // const account = localStorage.getItem('account');
         const token = localStorage.getItem('token');
