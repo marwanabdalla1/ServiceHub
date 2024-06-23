@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, dateFnsLocalizer, SlotInfo, EventProps } from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
+import './calendarStyles.css'; 
 import { format, startOfWeek, parseISO, getDay, startOfDay, endOfDay } from 'date-fns';
 import { enUS } from '@mui/material/locale';
 import { Dialog, Button, DialogActions, DialogContent, DialogTitle, Box } from '@mui/material';
@@ -193,12 +194,13 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration, createdById }:
                 events={availability}
                 startAccessor="start"
                 endAccessor="end"
-                style={{ height: 500 }}
+                style={{ height: 500}}
                 selectable
                 onSelectSlot={handleSelect}
                 onSelectEvent={handleSelectTimeSlot}
                 onRangeChange={handleRangeChange}
                 eventPropGetter={eventPropGetter}
+                className="bg-black-300" // Apply Tailwind class here
             />
             <Dialog open={deleteDialog} onClose={handleClose}>
                 <DialogTitle>Delete Slot?</DialogTitle>
