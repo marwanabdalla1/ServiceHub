@@ -5,6 +5,7 @@ import Button from '@mui/material/Button';
 import { ServiceRequest as Request } from '../models/ServiceRequest';
 import BlackButton from './inputs/blackbutton';
 import { ServiceType, RequestStatus } from '../models/enums';
+import {formatDateTime} from "../utils/dateUtils";
 
 interface RequestRowProps {
   request: Request;
@@ -12,17 +13,7 @@ interface RequestRowProps {
 }
 
 const RequestRow: React.FC<RequestRowProps> = ({ request, onViewDetails }) => {
-    const formatDateTime = (date: any) => {
-        if (!(date instanceof Date)) date = new Date(date);
-        return date.toLocaleString('en-DE', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit', // hour in 2-digit format
-            minute: '2-digit', // minute in 2-digit format
-            hour12: false // use AM/PM
-        });
-    };
+
 
     return (
     <TableRow>

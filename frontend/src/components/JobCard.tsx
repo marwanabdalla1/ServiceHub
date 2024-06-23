@@ -13,14 +13,20 @@ import { JobStatus } from '../models/enums';
 interface MediaCardProps {
   job: Job;
   onClose: () => void;
+  onComplete: (job: Job) => void;
+  onCancel: (job: Job) => void;
+
 }
 
-const MediaCard: React.FC<MediaCardProps> = ({ job, onClose }) => {
+const MediaCard: React.FC<MediaCardProps> = ({ job, onClose, onComplete, onCancel }) => {
   const renderButton = () => {
     switch (job.status) {
       case JobStatus.open:
         return (
-          <BlackButton text="Mark as completed" onClick={onClose} />
+          <>
+          <BlackButton text="Mark as completed" onClick={() => onComplete(job)} sx={{ marginRight:"1rem" }}/>
+          <BlackButton text="Cancel Job" onClick={() => onCancel(job)} sx={{ marginRight:"1rem" }}/>
+          </>
         );
       default:
         return (
