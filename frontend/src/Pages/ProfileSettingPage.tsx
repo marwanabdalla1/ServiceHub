@@ -17,7 +17,8 @@ type FieldType = {
 function UserProfile(): React.ReactElement {
 
     const [account, setAccount] = useState<any>(null);
-    const {token} = useAuth();
+    const {token, isProvider, isPremium, logoutUser} = useAuth();
+
 
     /**
      * Custom hook to skip the first render of a component
@@ -44,11 +45,13 @@ function UserProfile(): React.ReactElement {
     useSkipFirstEffect(() => {
         (async () => {
             try {
+                console.log("token: " + token + '\n' + isProvider + '\n' + isPremium);
                 const response = await axios.get('/api/account', { // replace with your backend endpoint
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
                 });
+                console.log("token: " + token + '\n' + isProvider + '\n' + isPremium);
                 console.log(`Status: ${response.status}`);
                 console.log(response.data);
 
@@ -61,7 +64,6 @@ function UserProfile(): React.ReactElement {
             }
         })();
     }, [account]);
-
 
 
     const [editMode, setEditMode] = useState<EditModeType>({
@@ -124,7 +126,7 @@ function UserProfile(): React.ReactElement {
 
         // Send a PUT request to the backend
         try {
-            const response = await axios.put('/api/account', updatedAccount, { // replace with your backend endpoint
+            const response = await axios.put('/api/account', updatedAccount, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -150,6 +152,22 @@ function UserProfile(): React.ReactElement {
 
     const handleAddServiceClick = () => {
         navigate('/addservice');
+    };
+
+    const handleDeleteAccount = async () => {
+        try {
+            const response = await axios.delete('/api/account', { // replace with your backend endpoint
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            console.log(`Status: ${response.status}`);
+            console.log(response.data);
+            navigate('/login');
+
+        } catch (error) {
+            console.error('Error updating account details:', error);
+        }
     };
 
     const renderField = (label: string, field: string) => {
@@ -194,6 +212,7 @@ function UserProfile(): React.ReactElement {
                     {renderField("Phone Number", "phone")}
                     {renderField("Address", "address")}
                     {renderField("Description", "description")}
+                    <Button onClick={logoutUser}>Logout</Button>
                     <Divider sx={{my: 2}}/>
                     <Typography variant="h6" gutterBottom component="div"
                                 sx={{fontWeight: 'bold', fontSize: '24px', color: '#007BFF'}}>
@@ -220,6 +239,7 @@ function UserProfile(): React.ReactElement {
                         <LightBlueFileButton text="Upload" onFileChange={handleFileUpload(setCertificate)}
                                              sx={{width: '100px'}}/>
                     </Box>
+                    <Button onClick={handleDeleteAccount} sx={{backgroundColor: 'red', color: 'white', mt: 2}}>Delete Account</Button>
                 </Box>
             </Paper>
         </Container>
