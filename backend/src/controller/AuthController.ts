@@ -41,7 +41,7 @@ export const signup: RequestHandler = async (req, res, next) => {
         // Hash the user's password
         const hashedPassword = await bcrypt.hash(req.body.password, 10);
         // create a user object
-        const account = {
+        const new_account = {
             firstName: req.body.firstName,
             lastName: req.body.lastName,
             email: req.body.email,
@@ -52,7 +52,7 @@ export const signup: RequestHandler = async (req, res, next) => {
         };
 
         // create the user in the database
-        const retAccount = await Account.create(account);
+        const account = await Account.create(new_account);
         // generate a JWT token
         if (!process.env.ACCESS_TOKEN_SECRET) {
             return res.status(500).json({
@@ -60,10 +60,14 @@ export const signup: RequestHandler = async (req, res, next) => {
                 message: "Access token secret not found."
             });
         }
-        const token = jwt.sign({userId: retAccount._id}, process.env.ACCESS_TOKEN_SECRET);
+        const token = jwt.sign({userId: account._id}, process.env.ACCESS_TOKEN_SECRET);
         // send the token to the user
         res.setHeader('Authorization', 'Bearer ' + token);
-        res.status(201).json(retAccount);
+        res.status(201).json({
+            token,
+            isProvider: account.isProvider,
+            isPremium: account.isPremium
+        });
     } catch (err: any) {
         let message = '';
         if (err instanceof Error) {
@@ -99,16 +103,15 @@ export const login: RequestHandler = async (req, res, next) => {
 
     try {
         // Retrieve the user from the database
-        const user = await Account.findOne({email: req.body.email}).select('+authentication.password +authentication.salt');
-
-        if (!user) {
+        const account = await Account.findOne({email: req.body.email}).select('+authentication.password +authentication.salt');
+        if (!account) {
             return res.status(400).json({
                 error: "Bad Request",
                 message: "User not found."
             });
         }
 
-        if (!user.password) {
+        if (!account.password) {
             return res.status(400).json({
                 error: "Bad Request",
                 message: "User authentication data not found."
@@ -116,7 +119,7 @@ export const login: RequestHandler = async (req, res, next) => {
         }
 
         // Verify the user's password
-        const isValidPassword = await bcrypt.compare(req.body.password, user.password);
+        const isValidPassword = await bcrypt.compare(req.body.password, account.password);
         if (!isValidPassword) {
             // Handle invalid password
             return res.status(401).json({error: "Invalid password"});
@@ -129,10 +132,14 @@ export const login: RequestHandler = async (req, res, next) => {
                 message: "Access token secret not found."
             });
         }
-        const token = jwt.sign({userId: user._id}, process.env.ACCESS_TOKEN_SECRET);
+        const token = jwt.sign({userId: account._id}, process.env.ACCESS_TOKEN_SECRET);
         // Send the token to the user
         res.setHeader('Authorization', 'Bearer ' + token);
-        return res.status(200).json({token});
+        return res.status(200).json({
+            token,
+            isProvider: account.isProvider,
+            isPremium: account.isPremium
+        });
 
     } catch (err: any) {
         let message = '';
