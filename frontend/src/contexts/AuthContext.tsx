@@ -7,6 +7,7 @@ import {toast} from 'react-toastify';
 
 type AccountContextType = {
     token: string | null;
+    account: Account | null;
     isPremium: boolean;
     isProvider: boolean;
     registerUser: (event: React.FormEvent<HTMLFormElement>) => Promise<void>;
@@ -25,6 +26,8 @@ export const AccountProvider = ({children}: Props) => {
     const [isPremium, setIsPremium] = useState<boolean>(false);
     const [isProvider, setIsProvider] = useState<boolean>(false);
     const [isReady, setIsReady] = useState<boolean>(false);
+    const [account, setAccount] = useState<Account | null>(null);
+
 
 
     useEffect(() => {
@@ -69,7 +72,7 @@ export const AccountProvider = ({children}: Props) => {
     const registerUser = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
-        const account = {
+        const newaccount = {
             firstName: data.get('firstName'),
             lastName: data.get('lastName'),
             email: data.get('email'),
@@ -77,7 +80,7 @@ export const AccountProvider = ({children}: Props) => {
         };
 
         try {
-            const response = await axios.post('/api/auth/signup', account);
+            const response = await axios.post('/api/auth/signup', newaccount);
             if (response) {
                 handleResponse(response);
                 toast.success('User registered successfully');
@@ -142,7 +145,7 @@ export const AccountProvider = ({children}: Props) => {
 
     return (
         <AccountContext.Provider
-            value={{token, isProvider, isPremium, registerUser, loginUser, logoutUser, isLoggedIn}}>
+            value={{token, account, isProvider, isPremium, registerUser, loginUser, logoutUser, isLoggedIn}}>
             {isReady ? children : null}
         </AccountContext.Provider>
     );
