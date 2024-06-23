@@ -1,10 +1,11 @@
 import express from "express";
 import { getEvents, saveEvents, extendFixedSlots, deleteTimeslot} from "../controller/TimeSlotController";
+import {authenticate} from "../middleware/authenticate";
 
 const TimeSlotRouter = express.Router();
 
-TimeSlotRouter.get("/", getEvents);
-TimeSlotRouter.post("/", saveEvents);
-TimeSlotRouter.post("/extend",extendFixedSlots)
-TimeSlotRouter.delete("/", deleteTimeslot);
+TimeSlotRouter.get("/", authenticate, getEvents);
+TimeSlotRouter.post("/", authenticate, saveEvents);
+TimeSlotRouter.post("/extend", authenticate, extendFixedSlots)
+TimeSlotRouter.delete("/", authenticate, deleteTimeslot);
 export default TimeSlotRouter;

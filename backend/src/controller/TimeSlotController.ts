@@ -1,6 +1,6 @@
 import { RequestHandler } from 'express';
 import moment from 'moment';
-import Timeslot, { ITimeslot } from '../models/timeslot'; // Adjust the path as necessary
+import Timeslot, { ITimeslot } from '../models/timeslot'; 
 
 // Function to generate weekly instances (existing code)
 function generateWeeklyInstances(events: ITimeslot[], startDate: moment.Moment, endDate: moment.Moment) {
@@ -48,16 +48,17 @@ function generateWeeklyInstances(events: ITimeslot[], startDate: moment.Moment, 
     return weekInstances;
 }
 
-// New Endpoint to Extend Fixed Slots (existing code)
+// New Endpoint to Extend Fixed Slots (updated code)
 export const extendFixedSlots: RequestHandler = async (req, res, next) => {
     try {
-        const { start, end, createdById } = req.body;
+        const userId = (req as any).user.userId;// Assuming userId is available in the request (e.g., from authentication middleware)
+        const { start, end } = req.body;
         const startDate = moment(start).subtract(1, 'week');
         const endDate = moment(end).subtract(1, 'week');
 
         // Fetch existing fixed events within the one-week range before the start and end dates
         const fixedEvents = await Timeslot.find({ 
-            createdById, 
+            createdById: userId, 
             isFixed: true,
             start: { $gte: startDate.toDate() },
             end: { $lte: endDate.toDate() }
@@ -73,7 +74,7 @@ export const extendFixedSlots: RequestHandler = async (req, res, next) => {
             end: instance.end,
             isFixed: instance.isFixed,
             isBooked: instance.isBooked,
-            createdById: instance.createdById
+            createdById: userId
         })));
 
         res.status(201).json({ message: "Extended fixed slots successfully" });
@@ -89,22 +90,23 @@ export const extendFixedSlots: RequestHandler = async (req, res, next) => {
     }
 };
 
-// Delete Timeslot Endpoint (existing code)
+// Delete Timeslot Endpoint (updated code)
 export const deleteTimeslot: RequestHandler = async (req, res, next) => {
     try {
+        const userId = (req as any).user.userId;// Assuming userId is available in the request (e.g., from authentication middleware)
         const { event } = req.body;
         const start = new Date(event.start);
         const end = new Date(event.end);
-        const { createdById, title, isFixed } = event;
+        const { title, isFixed } = event;
 
         // Delete the specific event
-        await Timeslot.deleteOne({ start, end, createdById });
+        await Timeslot.deleteOne({ start, end, createdById: userId });
 
         // If the event is fixed, delete its future instances
         if (isFixed) {
             const futureStartDate = moment(start).add(1, 'week');
             await Timeslot.deleteMany({
-                createdById,
+                createdById: userId,
                 title,
                 start: { $gte: futureStartDate.toDate() }
             });
@@ -123,25 +125,25 @@ export const deleteTimeslot: RequestHandler = async (req, res, next) => {
     }
 };
 
-// Existing Get Events Controller (existing code)
+// Existing Get Events Controller (updated code)
 export const getEvents: RequestHandler = async (req, res, next) => {
-    const { createdById } = req.query;
+    const userId = (req as any).user.userId; // Assuming userId is available in the request (e.g., from authentication middleware)
     try {
-        const timeslots = await Timeslot.find({ createdById });
+        const timeslots = await Timeslot.find({ createdById: userId });
         res.json(timeslots);
     } catch (error: unknown) {
         const err = error as Error;
         res.status(500).json({ error: 'Internal Server Error', message: err.message });
     }
-}; 
+};
 
 // Updated Save Events Controller
 export const saveEvents: RequestHandler = async (req, res, next) => {
     try {
+        console.log(req)
+        const userId = (req as any).user.userId; // Assuming userId is available in the request (e.g., from authentication middleware)
         const { events } = req.body;
-        const createdById = events[0].createdById;
-
-
+        console.log('User ID:', userId);
         // Generate future instances for new fixed events
         const fixedEvents = events.filter((event: ITimeslot) => event.isFixed);
         let futureInstances: ITimeslot[] = [];
@@ -159,7 +161,7 @@ export const saveEvents: RequestHandler = async (req, res, next) => {
             end: event.end,
             isFixed: event.isFixed,
             isBooked: event.isBooked,
-            createdById: event.createdById
+            createdById: userId // Use userId from the token
         })), { ordered: false });
 
         res.status(201).json({ insertedEvents });

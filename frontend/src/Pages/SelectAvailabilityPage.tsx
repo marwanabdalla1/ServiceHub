@@ -16,7 +16,6 @@ const SelectAvailabilityPage: React.FC = () => {
                 </Typography>
             </Box>
             <AvailabilityCalendar
-                createdById='user12'
                 Servicetype={serviceType}
                 defaultSlotDuration={defaultSlotDuration}
                 // globalAvailabilities={globalAvailabilities}
