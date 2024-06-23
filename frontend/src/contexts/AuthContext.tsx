@@ -6,8 +6,9 @@ import axios, {AxiosResponse} from 'axios';
 import {toast} from 'react-toastify';
 
 type AccountContextType = {
-    account: Account | null;
     token: string | null;
+    isPremium: boolean;
+    isProvider: boolean;
     registerUser: (event: React.FormEvent<HTMLFormElement>) => Promise<void>;
     loginUser: (event: React.FormEvent<HTMLFormElement>) => Promise<void>;
     logoutUser: () => void;
@@ -21,14 +22,17 @@ const AccountContext = createContext<AccountContextType | undefined>(undefined);
 export const AccountProvider = ({children}: Props) => {
     const navigate = useNavigate();
     const [token, setToken] = useState<string | null>(null);
-    const [account, setAccount] = useState<Account | null>(null);
+    const [isPremium, setIsPremium] = useState<boolean>(false);
+    const [isProvider, setIsProvider] = useState<boolean>(false);
     const [isReady, setIsReady] = useState<boolean>(false);
 
+
     useEffect(() => {
-        const account = localStorage.getItem('account');
+        // const account = localStorage.getItem('account');
         const token = localStorage.getItem('token');
-        if (account && token) {
-            setAccount(JSON.parse(account));
+        const isProvider = localStorage.getItem('isProvider');
+        const isPremium = localStorage.getItem('isPremium');
+        if (token) {
             setToken(token);
         }
         setIsReady(true);
@@ -36,23 +40,17 @@ export const AccountProvider = ({children}: Props) => {
 
     function handleResponse(response: AxiosResponse<any>) {
         localStorage.setItem('token', response?.data.token);
-        const accountObj = {
-            _id: response?.data.id,
-            firstName: response?.data.firstName,
-            lastName: response?.data.lastName,
-            email: response?.data.email,
-            serviceOfferings: []
-        };
-        localStorage.setItem('account', JSON.stringify(accountObj));
+        localStorage.setItem('isProvider', response?.data.isProvider);
+        localStorage.setItem('isPremium', response?.data.isPremium);
 
         setToken(response?.data.token!);
-        setAccount(accountObj!);
+        setIsProvider(response?.data.isProvider);
+        setIsPremium(response?.data.isPremium);
     }
 
     const registerUser = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
-
         const account = {
             firstName: data.get('firstName'),
             lastName: data.get('lastName'),
@@ -107,23 +105,27 @@ export const AccountProvider = ({children}: Props) => {
         await axios.get('/api/auth/logout');
         // Clear the user's token and account information from local storage
         localStorage.removeItem('token');
-        localStorage.removeItem('account');
+        localStorage.removeItem('isProvider');
+        localStorage.removeItem('isPremium');
 
         // Clear the token and account state
         setToken(null);
-        setAccount(null);
+        setIsProvider(false);
+        setIsPremium(false);
 
         // Navigate the user back to the login page
         navigate('/login');
     };
 
     const isLoggedIn = () => {
-        return token !== null;
+        return token !== null && token !== undefined;
     };
 
+
     return (
-        <AccountContext.Provider value={{account, token, registerUser, loginUser, logoutUser,isLoggedIn}}>
-            {isReady ? children:null}
+        <AccountContext.Provider
+            value={{token, isProvider, isPremium, registerUser, loginUser, logoutUser, isLoggedIn}}>
+            {isReady ? children : null}
         </AccountContext.Provider>
     );
 };
