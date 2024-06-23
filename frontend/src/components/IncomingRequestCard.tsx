@@ -22,7 +22,8 @@ interface MediaCardProps {
 
 const IncomingRequestMediaCard: React.FC<MediaCardProps> = ({ request, onClose }) => {
   const [description, setDescription] = useState(request.comment);
-  const [appointmentTime, setAppointmentTime] = useState(request.appointmentTime);
+  const [appointmentStartTime, setAppointmentStartTime] = useState(request.appointmentStartTime);
+  const [appointmentEndTime, setAppointmentEndTime] = useState(request.appointmentEndTime);
   const [duration, setDuration] = useState(request.duration);
   const navigate = useNavigate();
   const { requestDetails } = useRequest();
@@ -90,13 +91,13 @@ const IncomingRequestMediaCard: React.FC<MediaCardProps> = ({ request, onClose }
         </div>
         <Divider sx={{ marginBottom: '1rem' }} />
         <Typography variant="body2">
-          Request ID: {request.serviceRequestId}
+          Request ID: {request._id}
         </Typography>
         <Typography variant="body2">
           Service Type: {request.serviceType}
         </Typography>
         <Typography variant="body2">
-          Appointment Time: {request.appointmentTime.toLocaleString()}
+          Appointment Time: {request.appointmentStartTime.toLocaleString()}
         </Typography>
         <TextField
           label="est. duration (h)"

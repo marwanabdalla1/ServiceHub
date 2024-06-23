@@ -5,6 +5,7 @@ import Button from '@mui/material/Button';
 import { ServiceRequest as Request } from '../models/ServiceRequest';
 import BlackButton from './inputs/blackbutton';
 import { ServiceType, RequestStatus } from '../models/enums';
+import {formatDateTime} from "../utils/dateUtils";
 
 interface RequestRowProps {
   request: Request;
@@ -12,11 +13,13 @@ interface RequestRowProps {
 }
 
 const RequestRow: React.FC<RequestRowProps> = ({ request, onViewDetails }) => {
-  return (
+
+
+    return (
     <TableRow>
       <TableCell>{request.serviceType}</TableCell>
       <TableCell>{RequestStatus[request.requestStatus]}</TableCell>
-      <TableCell>{request.appointmentTime.toLocaleDateString()}</TableCell>
+        <TableCell>{formatDateTime(request.appointmentStartTime)}</TableCell>
       <TableCell>
         <BlackButton text="View" onClick={() => onViewDetails(request)}/>
       </TableCell>
@@ -25,3 +28,6 @@ const RequestRow: React.FC<RequestRowProps> = ({ request, onViewDetails }) => {
 };
 
 export default RequestRow;
+
+
+

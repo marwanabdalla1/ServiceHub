@@ -9,6 +9,9 @@ import AccountRouter from "./routes/Account";
 import AuthRouter from "./routes/Auth";
 import OfferingRouter from "./routes/Offering";
 import RequestRouter from "./routes/Request";
+import JobRouter from "./routes/Job";
+import ReviewRouter from "./routes/Review";
+
 
 // Import the models to ensure they are registered
 import './models/serviceOffering';
@@ -30,12 +33,17 @@ app.use(logger);
 
 app.use(express.json());
 app.use("/api/auth", AuthRouter);
+// authenticate users
+// app.use(authenticate)
 app.use("/api/account", AccountRouter);
 app.use("/api/offerings", OfferingRouter);
 app.use("/api/timeslots", TimeSlotRouter);
 app.use("/api/services", ServiceRouter);
 
 app.use("/api/requests", RequestRouter);
+app.use("/api/jobs", JobRouter);
+app.use("/api/reviews", ReviewRouter);
+
 
 app.get("/", async (req, res, next) => {
     try {
