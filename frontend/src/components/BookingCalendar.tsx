@@ -8,7 +8,7 @@ import { Dialog, Button, DialogActions, DialogContent, DialogTitle, Box } from '
 import axios from 'axios';
 import moment from 'moment';
 import { useAuth } from '../contexts/AuthContext';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 const locales = {
     'en-US': enUS,
@@ -48,6 +48,7 @@ function BookingCalendar({ provider, request, Servicetype, defaultSlotDuration }
     const { token } = useAuth();
     const [oldTimeSlotStart, setOldTimeSlotStart] = useState<Date>(new Date());
     const [oldTimeSlotEnd, setOldTimeSlotEnd] = useState<Date>(new Date());
+    const navigate = useNavigate();
 
     console.log(token);
     useEffect(() => {
@@ -69,30 +70,39 @@ function BookingCalendar({ provider, request, Servicetype, defaultSlotDuration }
 
     const saveBooking = () => {
         console.log('Submitted token' + token)
-        axios.put('/api/timeslots', {
-            events: availability
-        }, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        }).then(response => {
-            const { insertedEvents } = response.data;
-            const savedEvents = insertedEvents.map((event: any) => ({
-                ...event,
-                start: new Date(event.start),
-                end: new Date(event.end)
-            }));
-            setAvailability(savedEvents);
-        }).catch(error => {
-            console.error("Error saving availability:", error);
-        });
+        try {
+
+            // update the request
+              const updateRequestData = {
+               appointmentStartTime: oldTimeSlotStart,
+               appointmentEndTime: oldTimeSlotEnd
+              };
+              console.log("selected request id:" , request, updateRequestData)
+              axios.put(`/api/requests/${request}`, updateRequestData, {
+                headers: {Authorization: `Bearer ${token}` }
+              });
+      
+           } catch (error) {
+            console.error('Error cancelling Request:', error);
+          }
+          navigate(`/jobs/requestHistory/`); 
     };
 
     const handleSelect = ({ start, end }: SlotInfo) => {
         
         const newTimeSlot: TimeSlot = { start, end, title: Servicetype, isFixed: false, isBooked: false, createdById: '' };
-        const isClashing = availability.some(TimeSlot => (newTimeSlot.start > TimeSlot.start && newTimeSlot.start < TimeSlot.end && newTimeSlot.end > TimeSlot.start && newTimeSlot.end < TimeSlot.end)
+        const isClashing = availability.some(TimeSlot => (newTimeSlot.start >= TimeSlot.start && newTimeSlot.start < TimeSlot.end && newTimeSlot.end > TimeSlot.start && newTimeSlot.end <= TimeSlot.end)
         );
+        availability.map((TimeSlot) => {
+            if(newTimeSlot.start >= TimeSlot.start 
+                && newTimeSlot.start < TimeSlot.end 
+                && newTimeSlot.end > TimeSlot.start 
+                && newTimeSlot.end <= TimeSlot.end) {
+                    setOldTimeSlotStart(newTimeSlot.start);
+                    setOldTimeSlotEnd(newTimeSlot.end);
+                }
+            });
+        
 
         if (!isClashing) {
             setClashDialogOpen(true);
@@ -104,7 +114,10 @@ function BookingCalendar({ provider, request, Servicetype, defaultSlotDuration }
             }
 
             const adjustedTimeSlot: TimeSlot = { start: start, end: adjustedEnd, title: Servicetype, isFixed: false, isBooked: false, createdById: '' };
+            setOldTimeSlotEnd(adjustedTimeSlot.end);
             setAvailability([...availability, adjustedTimeSlot]);
+            console.log("Start Time: " + oldTimeSlotStart);
+            console.log("End Time: " + oldTimeSlotEnd);
         }
     };
 
