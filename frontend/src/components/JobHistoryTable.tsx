@@ -23,6 +23,7 @@ import {ServiceOffering} from "../models/ServiceOffering";
 import {useAuth} from "../contexts/AuthContext";
 import {useEffect} from "react";
 import axios from "axios";
+import { useNavigate } from 'react-router-dom';
 
 
 
@@ -48,6 +49,7 @@ export default function JobHistoryTable() {
   const [selectedJob, setSelectedJob] = React.useState<Job | null>(null);
   const [jobs, setJobs] = React.useState<Job[]>([]);
   const {token, account} = useAuth();
+  const navigate = useNavigate();
 
   // todo: this probably can be combined/reused along with the request history table
   useEffect(() => {
@@ -126,6 +128,7 @@ export default function JobHistoryTable() {
                        onClose={() => setShowMediaCard(false)}
                        onComplete={() => console.log("job completed")}
                        onCancel = {() => console.log("job cancelled")}
+                       onReview={() => navigate("/customer_review") }
             />
           </div>
         )}
