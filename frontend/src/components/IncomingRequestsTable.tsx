@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
-import Box from '@mui/material/Box'; // Changed import
 import CardContent from '@mui/material/Box'; // Changed import
+import { Dialog, Button, DialogActions, DialogContent, DialogTitle, Box } from '@mui/material';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -14,7 +14,7 @@ import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import {ServiceRequest, ServiceRequest as Request} from '../models/ServiceRequest';
 import IncomingRequestRow from './IncomingRequestRow';
 import Modal from './inputs/Modal';
-import MediaCard from './RequestCard';
+import MediaCard from './IncomingRequestCard';
 
 import {ServiceType, RequestStatus, JobStatus} from '../models/enums'
 import {Account, bikeRepairService} from '../models/Account';
@@ -29,6 +29,7 @@ export default function IncomingRequestTable() {
     const [selectedRequest, setSelectedRequest] = React.useState<ServiceRequest | null>(null);
     const [serviceRequests, setServiceRequests] = React.useState<ServiceRequest[]>([]);
     const {token, account} = useAuth();
+    const [clashDialogOpen, setClashDialogOpen] = useState(false);
 
     const openModal = (request: Request) => {
         setSelectedRequest(request);
@@ -149,6 +150,10 @@ export default function IncomingRequestTable() {
 
       };
 
+      const handleClashDialogClose = () => {
+        setClashDialogOpen(false);
+    };
+
     useEffect(() => {
         console.log(token)
         if (token && account) {
@@ -203,6 +208,16 @@ export default function IncomingRequestTable() {
                         </TableContainer>
                     </Box>
                 </Box>
+                <Dialog open={clashDialogOpen} onClose={handleClashDialogClose}>
+                <DialogTitle>Time Slot Update Requested</DialogTitle>
+                <DialogContent>
+                    The consumer has been alerted of the need to select a new TimeSlot.
+                    Please update your availabilities accordingly.
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClashDialogClose}>OK</Button>
+                </DialogActions>
+            </Dialog>
                 {showMediaCard && selectedRequest && (
           <div style={{ position: 'relative', flexShrink: 0, width: 400, marginLeft: 2 }}>
             <MediaCard request={selectedRequest}
@@ -210,7 +225,8 @@ export default function IncomingRequestTable() {
                         onAccept={handleAccept}
                         onDecline={handleDecline }
                         onProposeNewTime={() => console.log('New Time: ')}
-                        onCancel={() => {}} />
+                        onCancel={() => {}}
+                        setClashDialogOpen={setClashDialogOpen} />
           </div>
         )}
             </Box>
