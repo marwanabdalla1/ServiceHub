@@ -38,6 +38,9 @@ import ResetPasswordSuccessPage from "./Pages/AuthPages/ForgetPasswordPages/Rese
 import {RecoveryProvider} from './contexts/RecoveryContext';
 
 // import SelectAvailabilityBooking_temp from "./Pages/SelectAvailabilityBooking_temp";
+import {ToastContainer} from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import {Slide} from "react-toastify";
 
 function App() {
 
@@ -46,17 +49,31 @@ function App() {
     }, []);
 
     return (
-        <BrowserRouter>
-            <BookingProvider>
-                <RequestProvider>
-                    <AccountProvider>
-                        <RecoveryProvider>
-                            <MainRoutes/>
-                        </RecoveryProvider>
-                    </AccountProvider>
-                </RequestProvider>
-            </BookingProvider>
-        </BrowserRouter>
+        <div>
+            <ToastContainer
+                position="top-right"
+                autoClose={3000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                transition={Slide}
+            />
+            <BrowserRouter>
+                <BookingProvider>
+                    <RequestProvider>
+                        <AccountProvider>
+                            <RecoveryProvider>
+                                <MainRoutes/>
+                            </RecoveryProvider>
+                        </AccountProvider>
+                    </RequestProvider>
+                </BookingProvider>
+            </BrowserRouter>
+        </div>
     );
 }
 
@@ -100,9 +117,9 @@ function MainRoutes() {
 
 
                 {/*booking*/}
-                <Route path="/offerings/:offeringId" element={<ProviderProfilePage />} />
-                <Route path="/offerings/:could /booking/:step" element={<BookingPage />} />
-                <Route path="/offerings/:requestId/confirm" element={<ConfirmationPage />} />
+                <Route path="/offerings/:offeringId" element={<ProviderProfilePage/>}/>
+                <Route path="/offerings/:could /booking/:step" element={<BookingPage/>}/>
+                <Route path="/offerings/:requestId/confirm" element={<ConfirmationPage/>}/>
 
                 {/*old ones*/}
                 {/*<Route path="/create-account-or-sign-in" element={<CreateAccountOrSignIn/>}/>*/}
@@ -110,9 +127,9 @@ function MainRoutes() {
                 {/*<Route path="/review-and-confirm" element={<ReviewAndConfirm/>}/>*/}
 
                 <Route path="/listsLandingPage" element={<ListsLandingPage/>}/>
-                <Route path="/update-timeslot/" element={<UpdateTimeslot/>} />
-                <Route path="/proposeNewTime" element={<ProposeNewtimePage />} />
-                <Route path="/write-reviews" element={<ReviewPage />} />
+                <Route path="/update-timeslot/" element={<UpdateTimeslot/>}/>
+                <Route path="/proposeNewTime" element={<ProposeNewtimePage/>}/>
+                <Route path="/write-reviews" element={<ReviewPage/>}/>
                 <Route path="/faq" element={<FAQPage/>}/>
 
 
