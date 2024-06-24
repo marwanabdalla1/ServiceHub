@@ -3,6 +3,7 @@ import { Account } from '../models/Account';
 import {ServiceOffering} from "../models/ServiceOffering";
 import {ServiceType} from "../models/enums";
 import {Review} from "../models/Review";
+import axios from "axios";
 
 export interface BookingDetails {
     location: string | undefined;     // Location of service
@@ -23,7 +24,7 @@ interface BookingContextProps {
     setSelectedServiceDetails: (serviceOffering: ServiceOffering, serviceType: ServiceType, price: number) => void;
     setTimeAndDuration: (startTime: Date, endTime: Date) => void;
     fetchAccountDetails: (offeringId: string) => Promise<Account>;
-    fetchOfferingDetails: (offeringId: string) => Promise<ServiceOffering>; // Rename for clarity
+    fetchOfferingDetails: (offeringId: string) => Promise<ServiceOffering> ; // Rename for clarity
 
 }
 
@@ -80,8 +81,8 @@ export const BookingProvider: React.FC<{ children: ReactNode }> = ({ children })
     };
 
     const fetchAccountDetails = async (offeringId: string): Promise<Account> => {
-        const offeringResponse = await fetch(`/api/offerings/${offeringId}`);
-        const offeringData = await offeringResponse.json();
+        const offeringResponse = await axios.get(`/api/offerings/${offeringId}`);
+        const offeringData = await offeringResponse.data;
         // console.log(offeringData);
 
         if (!offeringData.provider) {
@@ -89,19 +90,37 @@ export const BookingProvider: React.FC<{ children: ReactNode }> = ({ children })
         }
 
         // Fetch the provider details using the provider ID from the offering data
-        const providerResponse = await fetch(`/api/auth/providers/${offeringData.provider}`);
-        const providerData = await providerResponse.json();
+        const providerResponse = await axios.get(`/api/account/providers/${offeringData.provider}`);
+        console.log(providerResponse)
+        const providerData =  providerResponse.data;
 
         // console.log(providerData);
-        return providerData as Account;
+        return providerData;
     };
 
-    const fetchOfferingDetails = async (offeringId: string) => {
-        const response = await fetch(`/api/offerings/${offeringId}`);
-        const data = await response.json();
-        console.log(data);
-        return data as ServiceOffering;
+    // const fetchOfferingDetails = async (offeringId: string) => {
+    //     // try {
+    //         const response = await axios.get(`/api/offerings/${offeringId}`);
+    //         const data = response.data;
+    //         console.log("response text:", data);
+    //         return data;
+    //     // } catch(error: any) {
+    //         // console.log("error fetching  data: ", error);
+    //         // return null}
+    //     // }
+    // };
+
+    const fetchOfferingDetails = async (offeringId:string) => {
+        try {
+            const response = await axios.get(`/api/offerings/${offeringId}`);
+            console.log("response text:", response.data);
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching offering details:", error);
+            throw error;
+        }
     };
+
 
     return (
         <BookingContext.Provider value={{

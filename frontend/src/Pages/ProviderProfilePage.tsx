@@ -147,22 +147,31 @@ function ProviderProfilePage() {
     // const provider = mockProvider;
     const {offeringId} = useParams<{offeringId:string}>(); //use this to then make a request to the user with the id to get the user data
 
-    console.log("offeringId");
+    console.log("offeringId", offeringId);
 
     const navigate = useNavigate();
 
     useEffect(() => {
         const fetchData = async () => {
             if (offeringId) {
-                const fetchedOffering = await fetchOfferingDetails(offeringId);
-                setOffering(fetchedOffering);
-                const fetchedProvider = await fetchAccountDetails(offeringId);
-                setProvider(fetchedProvider);
+                try {
+                    const fetchedOffering = await fetchOfferingDetails(offeringId);
+                    setOffering(fetchedOffering);
+                } catch (error) {
+                    console.error("Failed to fetch offering details:", error);
+                }
+                try {
+                    const fetchedProvider = await fetchAccountDetails(offeringId); // Confirm this should use offeringId
+                    setProvider(fetchedProvider);
+                } catch (error) {
+                    console.error("Failed to fetch account details:", error);
+                }
             }
         };
 
+
         fetchData();
-    }, [offeringId, fetchAccountDetails, fetchOfferingDetails]);
+    }, [offeringId]);
 
     // go to the booking page
     const handleBookNow = () => {

@@ -86,6 +86,8 @@ function ReviewAndConfirm({ onComplete, onBack , bookingDetails}: ReviewAndConfi
         //         }
         //     };
 
+        // todo: book the timeslot here
+
         // Handle booking confirmation logic
         navigate('/confirmation'); // Navigate to a confirmation page or show a confirmation message
     };
