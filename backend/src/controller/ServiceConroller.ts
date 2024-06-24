@@ -16,7 +16,8 @@ export const addService = async (req: Request, res: Response, next: NextFunction
             description,
             certificate,
             defaultSlotTime,
-            travelTime
+            travelTime,
+            selectedPaymentMethods // Add this line to capture selectedPaymentMethods
         } = req.body;
 
         // Validate required fields
@@ -42,12 +43,13 @@ export const addService = async (req: Request, res: Response, next: NextFunction
             lastUpdatedOn: new Date(),
             // createdOn will be automatically set by the timestamps option
             certificate: {
-                name: certificate.name || '',
-                data: certificate.data || null,
-                contentType: certificate.contentType || ''
+                name: certificate?.name || '',
+                data: certificate?.data || null,
+                contentType: certificate?.contentType || ''
             },
             hourlyRate: Number(hourlyRate),
             description: description,
+            acceptedPaymentMethods: selectedPaymentMethods || [], // Save selectedPaymentMethods
             isCertified: Boolean, 
             location: account.location || 'Unknown location', // Use account's location if available
             provider: new Types.ObjectId(userId),
@@ -76,3 +78,72 @@ export const addService = async (req: Request, res: Response, next: NextFunction
         res.status(500).send('Internal Server Error');
     }
 }
+
+export const editService = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = (req as any).user.userId;
+        const serviceId = req.params.id;
+        console.log("User id", userId);
+        console.log("Service id", serviceId);
+        console.log(req.body);
+
+        const {
+            selectedService,
+            hourlyRate,
+            description,
+            certificate,
+            defaultSlotTime,
+            travelTime,
+            selectedPaymentMethods
+        } = req.body;
+
+        // Validate required fields
+        if (!selectedService || !hourlyRate || !description || !defaultSlotTime || !travelTime) {
+            return res.status(400).send('Missing required fields');
+        }
+
+        // Find the service offering
+        const serviceOffering = await ServiceOffering.findById(serviceId);
+        if (!serviceOffering) {
+            return res.status(404).send('Service offering not found');
+        }
+
+        // Validate if the service belongs to the user
+        if (!serviceOffering.provider.equals(userId)) {
+            return res.status(403).send('Unauthorized to edit this service offering');
+        }
+
+        // Map the selected service title to the enum value
+        const serviceType = Object.values(ServiceType).find(type => type === selectedService.title);
+        if (!serviceType) {
+            return res.status(400).send('Invalid service type');
+        }
+
+        // Update the ServiceOffering object
+        // serviceOffering.serviceType = serviceType; //it shouldn't update the service type
+        serviceOffering.hourlyRate = Number(hourlyRate);
+        serviceOffering.description = description;
+        serviceOffering.acceptedPaymentMethods = selectedPaymentMethods || [];
+        serviceOffering.baseDuration = defaultSlotTime;
+        serviceOffering.bufferTimeDuration = travelTime;
+        serviceOffering.lastUpdatedOn = new Date();
+        if (certificate) {
+            serviceOffering.certificate = {
+                name: certificate.name || '',
+                data: certificate.data || null,
+                contentType: certificate.contentType || ''
+            };
+        }
+
+        // Save the updated service offering to the database
+        const updatedServiceOffering = await serviceOffering.save();
+
+        res.status(200).send('Service offering updated successfully');
+    } catch (err) {
+        console.error('Error editing service:', err);
+        res.status(500).send('Internal Server Error');
+    }
+}
+
+
+//TODO: Add deleteService function here
