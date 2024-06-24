@@ -23,6 +23,7 @@ import {ServiceOffering} from "../models/ServiceOffering";
 import {useAuth} from "../contexts/AuthContext";
 import {useEffect} from "react";
 import axios from "axios";
+import { useNavigate } from 'react-router-dom';
 
 
 
@@ -47,7 +48,8 @@ export default function JobHistoryTable() {
   const [showMediaCard, setShowMediaCard] = React.useState(false);
   const [selectedJob, setSelectedJob] = React.useState<Job | null>(null);
   const [jobs, setJobs] = React.useState<Job[]>([]);
-  const {token, accountId} = useAuth();
+  const {token, account} = useAuth();
+  const navigate = useNavigate();
 
   // todo: this probably can be combined/reused along with the request history table
   useEffect(() => {
@@ -55,7 +57,7 @@ export default function JobHistoryTable() {
     if (token && account) {
       // console.log("this is the logged in account in request table:", account)
       // setLoading(true);
-      axios.get<Job[]>(`/api/jobs/provider/${accountId}`, {
+      axios.get<Job[]>(`/api/jobs/provider/${account._id}`, {
         headers: {Authorization: `Bearer ${token}` }
       })
           .then(response => {
@@ -70,7 +72,7 @@ export default function JobHistoryTable() {
             // setLoading(false);
           });
     }
-  }, [accountId]);
+  }, [account?._id]);
 
   const handleToggleMediaCard = (job: Job | null) => {
     setSelectedJob(job);
@@ -126,6 +128,7 @@ export default function JobHistoryTable() {
                        onClose={() => setShowMediaCard(false)}
                        onComplete={() => console.log("job completed")}
                        onCancel = {() => console.log("job cancelled")}
+                       onReview={() => navigate("/customer_review") }
             />
           </div>
         )}

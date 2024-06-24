@@ -1,5 +1,6 @@
 import * as React from 'react';
 import Card from '@mui/material/Card';
+import CloseIcon from '@mui/icons-material/Close';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
@@ -9,29 +10,43 @@ import BlackButton from './inputs/blackbutton';
 import Avatar from '@mui/material/Avatar';
 import { Divider } from '@mui/material';
 import { JobStatus } from '../models/enums';
+import { useAuth } from '../contexts/AuthContext';
 
 interface MediaCardProps {
   job: Job;
   onClose: () => void;
   onComplete: (job: Job) => void;
   onCancel: (job: Job) => void;
-
+  onReview: (job: Job) => void;
 }
 
-const MediaCard: React.FC<MediaCardProps> = ({ job, onClose, onComplete, onCancel }) => {
+const MediaCard: React.FC<MediaCardProps> = ({ job, onClose, onComplete, onCancel, onReview }) => {
+  const {token, isProvider, isPremium} = useAuth();
   const renderButton = () => {
-    switch (job.status) {
-      case JobStatus.open:
+    //Check whether user in sign-in context is a provider
+    if(job.status === JobStatus.open && isProvider ){
         return (
           <>
           <BlackButton text="Mark as completed" onClick={() => onComplete(job)} sx={{ marginRight:"1rem" }}/>
           <BlackButton text="Cancel Job" onClick={() => onCancel(job)} sx={{ marginRight:"1rem" }}/>
           </>
-        );
-      default:
+        );}
+        else if(job.status === JobStatus.open) {
+          return(<>
+          <BlackButton text="Cancel" onClick={onClose} />
+          </>);
+        }
+        else if (job.status === JobStatus.completed) {
+          return(<>
+            <BlackButton text="Write a review" onClick={() => onReview(job)} />
+          </>);
+        }
+    else {
+        console.log(job.status);
         return (
           <BlackButton text="Close" onClick={onClose} />
         );
+
     }
   };
   return (

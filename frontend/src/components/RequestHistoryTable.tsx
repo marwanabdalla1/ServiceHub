@@ -132,6 +132,48 @@ export default function RequestHistoryTable() {
 
   };
 
+  const handleCancel =  async() => {
+
+    if (!selectedRequest) {
+      console.error('No request selected');
+      return;
+    }
+
+
+    // get data from the request (selectedRequest)
+    const {requestStatus, job, _id, requestedBy, provider, ...rest} = selectedRequest;
+
+    try {
+
+      // update the request
+        const updateRequestData = {
+         requestStatus: RequestStatus.cancelled,
+        };
+        console.log("selected request id:" , selectedRequest._id, updateRequestData)
+        const updateResponse = await axios.put(`/api/requests/${selectedRequest._id}`, updateRequestData, {
+          headers: {Authorization: `Bearer ${token}` }
+        });
+        console.log('Request Updated:', updateResponse.data);
+
+
+        // Update local state to reflect these changes
+        const updatedServiceRequests = serviceRequests.map(req => {
+          if (req._id === selectedRequest._id) {
+            return { ...req, ...updateRequestData };
+          }
+          return req;
+        });
+
+        console.log(updatedServiceRequests);
+        setServiceRequests(updatedServiceRequests);
+        setShowMediaCard(false);
+     } catch (error) {
+      console.error('Error cancelling Request:', error);
+    }
+
+
+
+  };
 
   return (
     <Box sx={{ minWidth: 275, margin: 2 }}>
@@ -174,7 +216,8 @@ export default function RequestHistoryTable() {
                         onClose={() => setShowMediaCard(false)} 
                         onAccept={handleAccept}
                         onDecline={() => console.log('declined.') }
-                        onProposeNewTime={() => console.log('New Time: ')} />
+                        onProposeNewTime={() => console.log('New Time: ')}
+                        onCancel={handleCancel} />
           </div>
         )}
       </Box>
