@@ -47,7 +47,7 @@ export default function RequestHistoryTable() {
     if (token && account) {
       console.log("this is the logged in account in request table:", account)
       // setLoading(true);
-      axios.get<ServiceRequest[]>(`/api/requests/provider/${account._id}`, {
+      axios.get<ServiceRequest[]>(`/api/requests/requester/${account._id}`, {
         headers: {Authorization: `Bearer ${token}` }
       })
           .then(response => {
