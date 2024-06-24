@@ -50,10 +50,11 @@ export default function JobHistoryTable() {
   const [jobs, setJobs] = React.useState<Job[]>([]);
   const {token, account} = useAuth();
   const navigate = useNavigate();
+  const [provider, setProvider] = React.useState<Account | null>(null);
+  const [receiver, setReceiver] = React.useState<Account | null>(null);
 
   // todo: this probably can be combined/reused along with the request history table
   useEffect(() => {
-    console.log(token)
     if (token && account) {
       // console.log("this is the logged in account in request table:", account)
       // setLoading(true);
@@ -71,6 +72,8 @@ export default function JobHistoryTable() {
             // setError('Failed to load service requests');
             // setLoading(false);
           });
+
+
     }
   }, [account?._id]);
 
@@ -79,13 +82,72 @@ export default function JobHistoryTable() {
     setShowMediaCard(job !== null);
   };
 
+  useEffect(() => {
+    if (selectedJob) {
+      fetchProvider(selectedJob.provider);
+      fetchReceiver(selectedJob.receiver);
+    }
+  }, [selectedJob, token]);
+
+  const fetchProvider = (providerId: Account) => {
+    axios.get<Account>(`/api/account/providers/${providerId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(response => {
+        setProvider(response.data);
+      })
+      .catch(error => {
+        console.error('Failed to fetch provider:', error);
+        setProvider(null);
+      });
+  };
+
+  const fetchReceiver = (receiverId: Account) => {
+    axios.get<Account>(`/api/account/providers/${receiverId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(response => {
+        setReceiver(response.data);
+      })
+      .catch(error => {
+        console.error('Failed to fetch receiver:', error);
+        setReceiver(null);
+      });
+  };
+
   // handle completing the job
   const handleComplete =  async() => {
   //   sanity check: appointment time has to be in the past
 
-  //   todo: for completed jobs: revoke the completion!
+    if (!selectedJob) {
+      console.error('No job selected');
+      return;
+    }
 
-  }
+    try {
+
+      // update the job
+        const updateJobData = {
+          jobStatus: JobStatus.completed,
+        };
+        console.log("selected request id:" , selectedJob._id, updateJobData)
+        const updateJob = await axios.put(`/api/requests/${selectedJob._id}`, updateJobData, {
+          headers: {Authorization: `Bearer ${token}` }
+        });
+        console.log('Request Updated:', updateJob.data);
+
+        console.log(updateJob);
+        setJobs(updateJob.data);
+        setShowMediaCard(false);
+     } catch (error) {
+      console.error('Error completing job:', error);
+    }
+
+
+
+  };
+
+  //   todo: for completed jobs: revoke the completion!
 
   return (
     <Box sx={{ minWidth: 275, margin: 2 }}>
@@ -125,6 +187,8 @@ export default function JobHistoryTable() {
         {showMediaCard && selectedJob && (
           <div style={{ position: 'relative', flexShrink: 0, width: 400, marginLeft: 2 }}>
             <MediaCard job={selectedJob}
+                      provider={provider}
+                      receiver={receiver}
                        onClose={() => setShowMediaCard(false)}
                        onComplete={() => console.log("job completed")}
                        onCancel = {() => console.log("job cancelled")}
