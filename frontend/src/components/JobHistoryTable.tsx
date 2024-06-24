@@ -163,7 +163,7 @@ export default function JobHistoryTable() {
       console.error('No job selected');
       return;
     }
-    
+
     try {
 
       // update the job
@@ -193,6 +193,11 @@ export default function JobHistoryTable() {
 
 
   };
+
+  const handleReview = (job: Job) => {
+    navigate(`/customer_review/${job._id}`);
+  };
+  
 
   //   todo: for completed jobs: revoke the completion!
 
@@ -239,7 +244,7 @@ export default function JobHistoryTable() {
                        onClose={() => setShowMediaCard(false)}
                        onComplete={handleComplete}
                        onCancel = {handleCancel}
-                       onReview={() => navigate("/customer_review") }
+                       onReview={() => handleReview(selectedJob) }
             />
           </div>
         )}
