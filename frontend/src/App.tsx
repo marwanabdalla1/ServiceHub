@@ -4,7 +4,7 @@ import FilterPage from './Pages/FilterPage';
 import SignInPage from './Pages/LoginPage';
 import SignUpPage from './Pages/SignUpPage';
 import NavigationBar from './components/Navbar';
-import JobHistoryPage from './Pages/JobHistoryPage';
+import ReceivedServicesPage from './Pages/ReceivedServicesPage';
 import RequestHistoryPage from './Pages/RequestHistoryPage';
 import IncomingRequestsPage from './Pages/IncomingRequestsPage';
 import HomePage from './Pages/HomePage';
@@ -68,7 +68,7 @@ function MainRoutes() {
                 <Route path="/login" element={<SignInPage/>}/>
                 <Route path="/signup" element={<SignUpPage/>}/>
                 <Route path="/filter" element={<FilterPage/>}/>
-                <Route path="/jobs/jobHistory" element={<JobHistoryPage/>}/>
+                <Route path="/jobs/receivedServices" element={<ReceivedServicesPage/>}/>
                 <Route path="/jobs/requestHistory" element={<RequestHistoryPage/>}/>
                 <Route path="/jobs/offeredServices" element={<OfferedServicesPage/>}/>
                 <Route path="/incomingRequests" element={<IncomingRequestsPage/>}/>

@@ -159,9 +159,9 @@ const Navbar: React.FC<NavbarProps> = ({toggleDrawer, onChange, onSearch, search
                     horizontal: 'right',
                 }}
             >
-                <MenuItem component={Link} to="/jobs/jobHistory" onClick={handleMenuClose}>Job History</MenuItem>
-                <MenuItem component={Link} to="/jobs/requestHistory" onClick={handleMenuClose}>Request
-                    History</MenuItem>
+                <MenuItem component={Link} to="/jobs/receivedServices" onClick={handleMenuClose}>Received Services</MenuItem>
+                <MenuItem component={Link} to="/jobs/offeredServices" onClick={handleMenuClose}>Offered Services</MenuItem>
+                <MenuItem component={Link} to="/jobs/requestHistory" onClick={handleMenuClose}>Request History</MenuItem>
                 <MenuItem component={Link} to="/incomingRequests" onClick={handleMenuClose}>Incoming Requests</MenuItem>
             </Menu>
         </nav>

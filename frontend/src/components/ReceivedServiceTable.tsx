@@ -11,9 +11,9 @@ import Typography from '@mui/material/Typography';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
 import Link from '@mui/material/Link';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
-import MediaCard from './JobCard';
+import MediaCard from './ReceivedServiceCard';
 import { Job } from '../models/Job';
-import JobRow from './JobRow';
+import ReceivedServiceRow from './ReceivedServiceRow';
 import { Account } from '../models/Account';
 import account from '../models/Account';
 import { Timeslot } from '../models/Timeslot';
@@ -45,10 +45,10 @@ import { now } from 'moment';
 //   new Job('3', ServiceType.homeRemodeling, new Date('2024-05-13'), new Date('2024-05-13'),  '100', JobStatus.cancelled, 'Description 3', account,account, '../../images/profiles/profile1.png',  3,  new Timeslot(ServiceType.petSitting, new Date(), new Date(), true), serviceRequests[2], undefined),
 // ];
 
-export default function JobHistoryTable() {
+export default function ReceivedServiceTable() {
   const [showMediaCard, setShowMediaCard] = React.useState(false);
-  const [selectedJob, setSelectedJob] = React.useState<Job | null>(null);
-  const [jobs, setJobs] = React.useState<Job[]>([]);
+  const [selectedReceivedService, setSelectedReceivedService] = React.useState<Job | null>(null);
+  const [receivedServices, setReceivedServices] = React.useState<Job[]>([]);
   const {token, account} = useAuth();
   const navigate = useNavigate();
   const [provider, setProvider] = React.useState<Account | null>(null);
@@ -64,12 +64,12 @@ export default function JobHistoryTable() {
       })
           .then(response => {
             console.log("getting requests ...", response.data)
-            setJobs(response.data);
+            setReceivedServices(response.data);
             // setLoading(false);
           })
           .catch(error => {
             console.error('Failed to fetch service requests:', error);
-            setJobs([]);
+            setReceivedServices([]);
             // setError('Failed to load service requests');
             // setLoading(false);
           });
@@ -79,16 +79,16 @@ export default function JobHistoryTable() {
   }, [account?._id]);
 
   const handleToggleMediaCard = (job: Job | null) => {
-    setSelectedJob(job);
+    setSelectedReceivedService(job);
     setShowMediaCard(job !== null);
   };
 
   useEffect(() => {
-    if (selectedJob) {
-      fetchProvider(selectedJob.provider);
-      fetchReceiver(selectedJob.receiver);
+    if (selectedReceivedService) {
+      fetchProvider(selectedReceivedService.provider);
+      fetchReceiver(selectedReceivedService.receiver);
     }
-  }, [selectedJob, token]);
+  }, [selectedReceivedService, token]);
 
   const fetchProvider = (providerId: Account) => {
     axios.get<Account>(`/api/account/providers/${providerId}`, {
@@ -120,12 +120,12 @@ export default function JobHistoryTable() {
   const handleComplete =  async() => {
  
 
-    if (!selectedJob) {
+    if (!selectedReceivedService) {
       console.error('No job selected');
       return;
     }
  //   sanity check: appointment time has to be in the past
-    if (!selectedJob.appointmentEndTime || selectedJob.appointmentEndTime > new Date()){
+    if (!selectedReceivedService.appointmentEndTime || selectedReceivedService.appointmentEndTime > new Date()){
         //TODO: add modal to let user know
         console.error('The job cannot be completed, since its appointment is in the future.');
         return;
@@ -137,15 +137,15 @@ export default function JobHistoryTable() {
         const updateJobData = {
           jobStatus: JobStatus.completed,
         };
-        console.log("selected request id:" , selectedJob?._id, updateJobData)
-        const updateJob = await axios.put(`/api/jobs/${selectedJob?._id}`, updateJobData, {
+        console.log("selected request id:" , selectedReceivedService?._id, updateJobData)
+        const updateJob = await axios.put(`/api/jobs/${selectedReceivedService?._id}`, updateJobData, {
           headers: {Authorization: `Bearer ${token}` }
         });
         console.log('Request Updated:', updateJob.data);
 
         console.log(updateJob);
 
-        setJobs(updateJob.data);
+        setReceivedServices(updateJob.data);
         setShowMediaCard(false);
      } catch (error) {
       console.error('Error completing job:', error);
@@ -159,7 +159,7 @@ export default function JobHistoryTable() {
   const handleCancel =  async() => {
  
 
-    if (!selectedJob) {
+    if (!selectedReceivedService) {
       console.error('No job selected');
       return;
     }
@@ -170,20 +170,20 @@ export default function JobHistoryTable() {
         const updateJobData = {
           status: JobStatus.cancelled,
         };
-        console.log("selected request id:" , selectedJob?._id, updateJobData)
-        const updateJob = await axios.put(`/api/jobs/${selectedJob?._id}`, updateJobData, {
+        console.log("selected request id:" , selectedReceivedService?._id, updateJobData)
+        const updateJob = await axios.put(`/api/jobs/${selectedReceivedService?._id}`, updateJobData, {
           headers: {Authorization: `Bearer ${token}` }
         });
         console.log('Job Updated:', updateJob.data);
         // Update local state to reflect these changes
-        const updatedJobs = jobs.map(job => {
-          if (job._id === selectedJob._id) {
-            return { ...job, ...updateJobData };
+        const updatedJobs = receivedServices.map(receivedService => {
+          if (receivedService._id === selectedReceivedService._id) {
+            return { ...receivedService, ...updateJobData };
           }
-          return job;
+          return receivedService;
         });
 
-        setJobs(updatedJobs);
+        setReceivedServices(updatedJobs);
         
         setShowMediaCard(false);
      } catch (error) {
@@ -208,10 +208,10 @@ export default function JobHistoryTable() {
           <Link color="inherit" href="/" underline="hover">
             History
           </Link>
-          <Typography color="textPrimary">Job History</Typography>
+          <Typography color="textPrimary">Received Services</Typography>
         </Breadcrumbs>
         <Typography variant="h6" component="div" sx={{ marginBottom: '16px' }}>
-          Job History
+          Received Services
         </Typography>
       </Box>
       <Box style={{ display: 'flex' }}>
@@ -228,23 +228,23 @@ export default function JobHistoryTable() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {jobs.map((job) => (
-                    <JobRow key={job._id} job={job} onViewDetails={handleToggleMediaCard} />
+                  {receivedServices.map((receivedService) => (
+                    <ReceivedServiceRow key={receivedService._id} receivedService={receivedService} onViewDetails={handleToggleMediaCard} />
                   ))}
                 </TableBody>
               </Table>
             </TableContainer>
           </Box>
         </Box>
-        {showMediaCard && selectedJob && (
+        {showMediaCard && selectedReceivedService && (
           <div style={{ position: 'relative', flexShrink: 0, width: 400, marginLeft: 2 }}>
-            <MediaCard job={selectedJob}
+            <MediaCard receivedService={selectedReceivedService}
                       provider={provider}
                       receiver={receiver}
                        onClose={() => setShowMediaCard(false)}
                        onComplete={handleComplete}
                        onCancel = {handleCancel}
-                       onReview={() => handleReview(selectedJob) }
+                       onReview={() => handleReview(selectedReceivedService) }
             />
           </div>
         )}

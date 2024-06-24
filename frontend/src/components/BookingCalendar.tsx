@@ -25,9 +25,6 @@ const localizer = dateFnsLocalizer({
 export interface TimeSlot {
     start: Date;
     end: Date;
-    title: string;
-    isFixed?: boolean;  // Optional property to indicate if the TimeSlot is fixed
-    isBooked: boolean;
     createdById: string;
 }
 
@@ -44,10 +41,10 @@ function BookingCalendar({ provider, request, Servicetype, defaultSlotDuration }
     const [availability, setAvailability] = useState<TimeSlot[]>([]);
     const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot | null>(null);
     const [deleteDialog, setDeleteDialog] = useState(false);
-    const [clashDialogOpen, setClashDialogOpen] = useState(false);
+    const [notAvailableDialogOpen, setNotAvailableDialogOpen] = useState(false);
     const { token } = useAuth();
-    const [oldTimeSlotStart, setOldTimeSlotStart] = useState<Date>(new Date());
-    const [oldTimeSlotEnd, setOldTimeSlotEnd] = useState<Date>(new Date());
+    const [newTimeSlotStart, setNewTimeSlotStart] = useState<Date>(new Date());
+    const [newTimeSlotEnd, setNewTimeSlotEnd] = useState<Date>(new Date());
     const navigate = useNavigate();
 
     console.log(token);
@@ -74,8 +71,8 @@ function BookingCalendar({ provider, request, Servicetype, defaultSlotDuration }
 
             // update the request
               const updateRequestData = {
-               appointmentStartTime: oldTimeSlotStart,
-               appointmentEndTime: oldTimeSlotEnd
+               appointmentStartTime: newTimeSlotStart,
+               appointmentEndTime: newTimeSlotEnd
               };
               console.log("selected request id:" , request, updateRequestData)
               axios.put(`/api/requests/${request}`, updateRequestData, {
@@ -90,22 +87,22 @@ function BookingCalendar({ provider, request, Servicetype, defaultSlotDuration }
 
     const handleSelect = ({ start, end }: SlotInfo) => {
         
-        const newTimeSlot: TimeSlot = { start, end, title: Servicetype, isFixed: false, isBooked: false, createdById: '' };
-        const isClashing = availability.some(TimeSlot => (newTimeSlot.start >= TimeSlot.start && newTimeSlot.start < TimeSlot.end && newTimeSlot.end > TimeSlot.start && newTimeSlot.end <= TimeSlot.end)
+        const newTimeSlot: TimeSlot = { start, end, createdById: '' };
+        const isAvailable = availability.some(TimeSlot => (newTimeSlot.start >= TimeSlot.start && newTimeSlot.start < TimeSlot.end && newTimeSlot.end > TimeSlot.start && newTimeSlot.end <= TimeSlot.end)
         );
         availability.map((TimeSlot) => {
             if(newTimeSlot.start >= TimeSlot.start 
                 && newTimeSlot.start < TimeSlot.end 
                 && newTimeSlot.end > TimeSlot.start 
                 && newTimeSlot.end <= TimeSlot.end) {
-                    setOldTimeSlotStart(newTimeSlot.start);
-                    setOldTimeSlotEnd(newTimeSlot.end);
+                    setNewTimeSlotStart(newTimeSlot.start);
+                    setNewTimeSlotEnd(newTimeSlot.end);
                 }
             });
         
 
-        if (!isClashing) {
-            setClashDialogOpen(true);
+        if (!isAvailable) {
+            setNotAvailableDialogOpen(true);
         } else {
             let adjustedEnd = end;
 
@@ -113,11 +110,11 @@ function BookingCalendar({ provider, request, Servicetype, defaultSlotDuration }
                 adjustedEnd = new Date(start.getTime() + defaultSlotDuration * 60000);
             }
 
-            const adjustedTimeSlot: TimeSlot = { start: start, end: adjustedEnd, title: Servicetype, isFixed: false, isBooked: false, createdById: '' };
-            setOldTimeSlotEnd(adjustedTimeSlot.end);
+            const adjustedTimeSlot: TimeSlot = { start: start, end: adjustedEnd, createdById: '' };
+            setNewTimeSlotEnd(adjustedTimeSlot.end);
             setAvailability([...availability, adjustedTimeSlot]);
-            console.log("Start Time: " + oldTimeSlotStart);
-            console.log("End Time: " + oldTimeSlotEnd);
+            console.log("Start Time: " + newTimeSlotStart);
+            console.log("End Time: " + newTimeSlotEnd);
         }
     };
 
@@ -145,7 +142,7 @@ function BookingCalendar({ provider, request, Servicetype, defaultSlotDuration }
     const handleFixWeekly = () => {
         if (selectedTimeSlot) {
             const filteredAvailability = availability.filter(a => a.start !== selectedTimeSlot.start && a.end !== selectedTimeSlot.end);
-            const newTimeSlot: TimeSlot = { start: selectedTimeSlot.start, end: selectedTimeSlot.end, title: selectedTimeSlot.title, isFixed: true, isBooked: false, createdById: '' };
+            const newTimeSlot: TimeSlot = { start: selectedTimeSlot.start, end: selectedTimeSlot.end, createdById: '' };
             setAvailability([...filteredAvailability, newTimeSlot]);
             setDeleteDialog(false);
         }
@@ -155,8 +152,8 @@ function BookingCalendar({ provider, request, Servicetype, defaultSlotDuration }
         setDeleteDialog(false);
     };
 
-    const handleClashDialogClose = () => {
-        setClashDialogOpen(false);
+    const handleNotAvailableDialogClose = () => {
+        setNotAvailableDialogOpen(false);
     };
 
     const handleRangeChange = (range: RangeType) => {
@@ -214,11 +211,6 @@ function BookingCalendar({ provider, request, Servicetype, defaultSlotDuration }
         }
     };
 
-    const eventPropGetter = (event: TimeSlot) => {
-        const backgroundColor = event.isFixed ? 'purple' : 'blue';
-        return { style: { backgroundColor } };
-    };
-
     return (
         <div>
             <Calendar
@@ -233,27 +225,25 @@ function BookingCalendar({ provider, request, Servicetype, defaultSlotDuration }
                 onSelectSlot={handleSelect}
                 onSelectEvent={handleSelectTimeSlot}
                 onRangeChange={handleRangeChange}
-                eventPropGetter={eventPropGetter}
                 className="bg-black-300" // Apply Tailwind class here
             />
             <Dialog open={deleteDialog} onClose={handleClose}>
                 <DialogTitle>Delete Slot?</DialogTitle>
                 <DialogContent>
-                    {selectedTimeSlot && <p>{selectedTimeSlot.title}</p>}
+                    {selectedTimeSlot && true}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>Cancel</Button>
-                    <Button onClick={handleFixWeekly}>Repeat Weekly</Button>
                     <Button onClick={handleDelete} color="secondary">Delete</Button>
                 </DialogActions>
             </Dialog>
-            <Dialog open={clashDialogOpen} onClose={handleClashDialogClose}>
+            <Dialog open={notAvailableDialogOpen} onClose={handleNotAvailableDialogClose}>
                 <DialogTitle>TimeSlot Unavailable</DialogTitle>
                 <DialogContent>
                     The new TimeSlot does not coincide with an available TimeSlot.
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleClashDialogClose}>OK</Button>
+                    <Button onClick={handleNotAvailableDialogClose}>OK</Button>
                 </DialogActions>
             </Dialog>
             <Box display="flex" justifyContent="flex-end" sx={{ mt: 4 }}>
