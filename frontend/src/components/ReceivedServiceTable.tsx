@@ -199,7 +199,7 @@ export default function ReceivedServiceTable() {
   };
   
 
-  //   todo: for completed jobs: revoke the completion!
+
 
   return (
     <Box sx={{ minWidth: 275, margin: 2 }}>
@@ -244,7 +244,7 @@ export default function ReceivedServiceTable() {
                        onClose={() => setShowMediaCard(false)}
                        onComplete={handleComplete}
                        onCancel = {handleCancel}
-                       onReview={() => handleReview(selectedReceivedService) }
+                       onReview={() => navigate("/customer_review")}
             />
           </div>
         )}
