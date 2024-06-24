@@ -3,7 +3,7 @@ import Card from '@mui/material/Card';
 import CloseIcon from '@mui/icons-material/Close';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
-import { ServiceRequest as Request} from '../models/ServiceRequest';
+import { ServiceRequest as Request, ServiceRequest} from '../models/ServiceRequest';
 import { GoStarFill } from 'react-icons/go';
 import BlackButton from './inputs/blackbutton';
 import Avatar from '@mui/material/Avatar';
@@ -11,6 +11,7 @@ import { Divider } from '@mui/material';
 import { RequestStatus } from '../models/enums';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { Account } from '../models/Account';
 import axios from 'axios';
 
 interface MediaCardProps {
@@ -27,20 +28,12 @@ const MediaCard: React.FC<MediaCardProps> = ({ request, onClose, onAccept,onDecl
   const { account, token, isProvider } = useAuth();
   const navigate = useNavigate();
 
-  const handleProposeNewTime = () => {
-    navigate('/update-timeslot'); // Navigate to the calendar to select a new Timeslot
+  const handleProposeNewTime = (request: ServiceRequest) => {
+    navigate(`/change-booking-time/${request.provider}/${request._id}`); // Navigate to the calendar to select a new Timeslot
   }
   
   const renderButton = () => {
-    if( request.requestStatus === RequestStatus.pending && account?._id === request.provider._id) {
-        return (
-          <>
-          <BlackButton text="Accept" onClick={() => onAccept(request)} sx={{ marginRight:"1rem" }}/>
-          <BlackButton text="Decline" onClick={() => onDecline(request)} sx={{ marginRight: "1rem" }} />
-          <BlackButton text="Propose New Time" onClick={() => onProposeNewTime(request, new Date())}/>
-          </>
-        ); }
-        else if (request.requestStatus === RequestStatus.cancelled ){
+if (request.requestStatus === RequestStatus.cancelled ){
           console.log("No Actions possible for CANCELLED requests!");
         }
         else if (request.requestStatus === RequestStatus.declined ){
@@ -50,10 +43,11 @@ const MediaCard: React.FC<MediaCardProps> = ({ request, onClose, onAccept,onDecl
           return(<BlackButton text="Cancel Request" onClick={onCancel} sx={{ marginRight:"1rem" }}/>);
         }
          else {
+          console.log(request);
         return (
           <>
           <BlackButton text="Cancel Request" onClick={onCancel} sx={{ marginRight:"1rem" }}/>
-          <BlackButton text="Change Time" onClick={handleProposeNewTime} />
+          <BlackButton text="Change Time" onClick={() => handleProposeNewTime(request)} />
           </>
         );
     }

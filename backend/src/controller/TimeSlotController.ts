@@ -1,6 +1,6 @@
 import { RequestHandler } from 'express';
 import moment from 'moment';
-import Timeslot, { ITimeslot } from '../models/timeslot'; 
+import Timeslot, { ITimeslot } from '../models/timeslot';
 
 // Function to generate weekly instances (existing code)
 function generateWeeklyInstances(events: ITimeslot[], startDate: moment.Moment, endDate: moment.Moment) {
@@ -23,20 +23,20 @@ function generateWeeklyInstances(events: ITimeslot[], startDate: moment.Moment, 
                     second: moment(event.end).seconds()
                 }).toDate();
 
-                const exists = weekInstances.some(instance => 
-                    instance.start.getTime() === start.getTime() && 
-                    instance.end.getTime() === end.getTime() && 
+                const exists = weekInstances.some(instance =>
+                    instance.start.getTime() === start.getTime() &&
+                    instance.end.getTime() === end.getTime() &&
                     instance.createdById === event.createdById
                 );
 
                 if (!exists) {
-                    weekInstances.push({ 
-                        title: event.title, 
-                        start, 
-                        end, 
-                        isFixed: event.isFixed, 
-                        isBooked: event.isBooked, 
-                        createdById: event.createdById 
+                    weekInstances.push({
+                        title: event.title,
+                        start,
+                        end,
+                        isFixed: event.isFixed,
+                        isBooked: event.isBooked,
+                        createdById: event.createdById
                     } as ITimeslot);
                 }
             }
@@ -57,8 +57,8 @@ export const extendFixedSlots: RequestHandler = async (req, res, next) => {
         const endDate = moment(end).subtract(1, 'week');
 
         // Fetch existing fixed events within the one-week range before the start and end dates
-        const fixedEvents = await Timeslot.find({ 
-            createdById: userId, 
+        const fixedEvents = await Timeslot.find({
+            createdById: userId,
             isFixed: true,
             start: { $gte: startDate.toDate() },
             end: { $lte: endDate.toDate() }
@@ -125,6 +125,7 @@ export const deleteTimeslot: RequestHandler = async (req, res, next) => {
     }
 };
 
+
 // Existing Get Events Controller (updated code)
 export const getEvents: RequestHandler = async (req, res, next) => {
     const userId = (req as any).user.userId; // Assuming userId is available in the request (e.g., from authentication middleware)
@@ -174,5 +175,17 @@ export const saveEvents: RequestHandler = async (req, res, next) => {
             error: "Internal server error",
             message: message,
         });
+    }
+};
+
+// Existing Get Events Controller (updated code)
+export const getEventsByProvider: RequestHandler = async (req, res, next) => {
+    const { providerId } = req.params;
+    try {
+        const timeslots = await Timeslot.find({ createdById: providerId });
+        res.json(timeslots);
+    } catch (error: unknown) {
+        const err = error as Error;
+        res.status(500).json({ error: 'Internal Server Error', message: err.message });
     }
 };
