@@ -54,6 +54,7 @@ function UserProfile(): React.ReactElement {
                 console.log("token: " + token + '\n' + isProvider + '\n' + isPremium);
                 console.log(`Status: ${response.status}`);
                 console.log(response.data);
+                console.log(isProvider)
 
                 // Only update the account state if the new data is different
                 if (JSON.stringify(response.data) !== JSON.stringify(account)) {
@@ -65,6 +66,26 @@ function UserProfile(): React.ReactElement {
         })();
     }, [account]);
 
+    useEffect(() => {
+        // if (isProvider) { skip until the boolean isprovider is fixed
+        console.log(token)
+        axios.get('/api/offerings/myoffering', { 
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+        .then(response => {
+            console.log(`Status: ${response.status}`);
+            console.log(response.data);
+    
+            setServices(response.data);
+            console.log(services);
+        })
+        .catch(error => {
+            console.error('Error fetching services:', error);
+        });
+        // }
+    }, []);
 
     const [editMode, setEditMode] = useState<EditModeType>({
         firstName: false,
@@ -213,32 +234,24 @@ function UserProfile(): React.ReactElement {
                     {renderField("Address", "address")}
                     {renderField("Description", "description")}
                     <Button onClick={logoutUser}>Logout</Button>
-                    <Divider sx={{my: 2}}/>
-                    <Typography variant="h6" gutterBottom component="div"
-                                sx={{fontWeight: 'bold', fontSize: '24px', color: '#007BFF'}}>
-                        Service Provider Settings
-                    </Typography>
-                    <Box sx={{display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 0}}>
-                        <Typography variant="body1" sx={{fontWeight: 'bold'}}>Provided Services:</Typography>
-                        <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                            <Typography variant="body1">{fieldValue['service']}</Typography>
-                            <BlueButton text="Add Service" onClick={handleAddServiceClick} sx={{width: '150px'}}/>
-                        </Box>
-                    </Box>
-                    <Box sx={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        gap: 1
-                    }}>
-                        <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 1}}>
-                            <Typography variant="body1" sx={{fontWeight: 'bold'}}>Professional Certificate:</Typography>
-                            <Typography variant="body1">{certificate ? certificate.name : "Not provided"}</Typography>
-                        </Box>
-                        <LightBlueFileButton text="Upload" onFileChange={handleFileUpload(setCertificate)}
-                                             sx={{width: '100px'}}/>
-                    </Box>
+                    {/* {isProvider && ( */}
+                        <>
+                            <Divider sx={{my: 2}}/>
+                            <Typography variant="h6" gutterBottom component="div"
+                                        sx={{fontWeight: 'bold', fontSize: '24px', color: '#007BFF'}}>
+                                Service Provider Settings
+                            </Typography>
+                            <Box sx={{display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 0}}>
+                                <Typography variant="body1" sx={{fontWeight: 'bold'}}>Provided Services:</Typography>
+                                <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                                    <Typography variant="body1">
+                                        {services.length > 0 ? services.map(service => service.serviceType).join(', ') : "No services provided"}
+                                    </Typography>
+                                    <BlueButton text="Add Service" onClick={handleAddServiceClick} sx={{width: '150px'}}/>
+                                </Box>
+                            </Box>
+                        </>
+                    {/* )} */}
                     <Button onClick={handleDeleteAccount} sx={{backgroundColor: 'red', color: 'white', mt: 2}}>Delete Account</Button>
                 </Box>
             </Paper>

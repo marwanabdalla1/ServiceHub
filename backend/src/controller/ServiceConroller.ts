@@ -48,7 +48,7 @@ export const addService = async (req: Request, res: Response, next: NextFunction
             },
             hourlyRate: Number(hourlyRate),
             description: description,
-            isCertified: !!certificate.name, // Assuming if there's a certificate object, the service is certified
+            isCertified: Boolean, 
             location: account.location || 'Unknown location', // Use account's location if available
             provider: new Types.ObjectId(userId),
             baseDuration: defaultSlotTime,
