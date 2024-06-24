@@ -7,6 +7,7 @@ import {toast} from 'react-toastify';
 
 type AccountContextType = {
     token: string | null;
+    accountId: string | null;
     registerUser: (event: React.FormEvent<HTMLFormElement>) => Promise<void>;
     loginUser: (event: React.FormEvent<HTMLFormElement>) => Promise<void>;
     logoutUser: () => void;
@@ -22,22 +23,29 @@ const AccountContext = createContext<AccountContextType | undefined>(undefined);
 export const AccountProvider = ({children}: Props) => {
     const navigate = useNavigate();
     const [token, setToken] = useState<string | null>(null);
+    const [accountId, setAccountId] = useState<string | null>(null);
     const [isReady, setIsReady] = useState<boolean>(false);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
+        const accountId = localStorage.getItem('accountId');
         if (token) {
             setToken(token);
+        }
+        if (accountId) {
+            setAccountId(accountId);
         }
         setIsReady(true);
     }, []);
 
     function handleResponse(response: AxiosResponse<any>) {
         localStorage.setItem('token', response?.data.token);
+        localStorage.setItem('accountId', response?.data.accountId);
         localStorage.setItem('isProvider', response?.data.isProvider);
         localStorage.setItem('isPremium', response?.data.isPremium);
 
         setToken(response?.data.token!);
+        setAccountId(response?.data.accountId!);
     }
 
     const registerUser = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -97,11 +105,13 @@ export const AccountProvider = ({children}: Props) => {
         await axios.get('/api/auth/logout');
         // Clear the user's token and account information from local storage
         localStorage.removeItem('token');
+        localStorage.removeItem('accountId');
         localStorage.removeItem('isProvider');
         localStorage.removeItem('isPremium');
 
         // Clear the token and account state
         setToken(null);
+        setAccountId(null);
 
         // Navigate the user back to the login page
         navigate('/login');
@@ -122,7 +132,7 @@ export const AccountProvider = ({children}: Props) => {
 
     return (
         <AccountContext.Provider
-            value={{token, isProvider, isPremium, registerUser, loginUser, logoutUser, isLoggedIn}}>
+            value={{token, isProvider, isPremium, registerUser, loginUser, logoutUser, isLoggedIn, accountId}}>
             {isReady ? children : null}
         </AccountContext.Provider>
     );
