@@ -16,7 +16,7 @@ import { Account } from '../models/Account';
 import { useEffect } from 'react';
 
 interface MediaCardProps {
-  job: Job;
+  receivedService: Job;
   provider: Account | null;
   receiver: Account | null;
   onClose: () => void;
@@ -25,7 +25,7 @@ interface MediaCardProps {
   onReview: (job: Job) => void;
 }
 
-const MediaCard: React.FC<MediaCardProps> = ({ job, provider, receiver, onClose, onComplete, onCancel, onReview }) => {
+const MediaCard: React.FC<MediaCardProps> = ({ receivedService, provider, receiver, onClose, onComplete, onCancel, onReview }) => {
   const {account, token, } = useAuth();
   
 /*
@@ -47,16 +47,16 @@ const MediaCard: React.FC<MediaCardProps> = ({ job, provider, receiver, onClose,
   const renderButton = () => {
     //Check whether user in sign-in context is a provider
     console.log("Account ID: " + account?._id);
-    console.log("Receiver ID: " + job.receiver);
-    console.log(account?._id === job.receiver._id);
-      if(job.status === JobStatus.open && account?._id === receiver?._id ) {
+    console.log("Receiver ID: " + receivedService.receiver);
+    console.log(account?._id === receivedService.receiver._id);
+      if(receivedService.status === JobStatus.open && account?._id === receiver?._id ) {
           return(<>
-          <BlackButton text="Cancel Job" onClick={() => onCancel(job)} />
+          <BlackButton text="Cancel Job" onClick={() => onCancel(receivedService)} />
           </>);
         }
-        else if (job.status === JobStatus.completed) {
+        else if (receivedService.status === JobStatus.completed) {
           return(<>
-            <BlackButton text="Write a review" onClick={() => onReview(job)} />
+            <BlackButton text="Write a review" onClick={() => onReview(receivedService)} />
           </>);
         }
 
@@ -93,29 +93,29 @@ const MediaCard: React.FC<MediaCardProps> = ({ job, provider, receiver, onClose,
               <GoStarFill className='text-yellow-500'/>
             </div>
             <Typography variant="body2" color="text.secondary">
-              {job.rating}
+              {receivedService.rating}
             </Typography>
           </div>
         </div>
         <Divider sx={{marginBottom:'1rem'}}/>
         <Typography variant="body2">
-          Request ID: {job._id}
+          Request ID: {receivedService._id}
         </Typography>
         <Typography variant="body2">
-          Service Type: {job.serviceType}
+          Service Type: {receivedService.serviceType}
         </Typography>
         <Typography variant="body2">
-          Appointment Time: {job.appointmentStartTime.toLocaleString()}
+          Appointment Time: {receivedService.appointmentStartTime.toLocaleString()}
         </Typography>
         <Typography variant="body2" sx={{ marginBottom: '2rem'}}>
-          Service Fee: {job.serviceFee}
+          Service Fee: {receivedService.serviceFee}
         </Typography>
         <Typography variant="body2" sx={{marginBottom:'1rem'}}>
-          Status: {job.status}
+          Status: {receivedService.status}
         </Typography>
         <Divider sx={{marginBottom:'1rem'}}/>
         <Typography variant="body2" sx={{marginBottom:'1rem'}}>
-          Description: {job.description}
+          Description: {receivedService.description}
         </Typography>
         {renderButton()}
       </CardContent>
