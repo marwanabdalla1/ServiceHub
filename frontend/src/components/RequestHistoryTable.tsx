@@ -26,7 +26,7 @@ export default function RequestHistoryTable() {
   const [showMediaCard, setShowMediaCard] = React.useState(false);
   const [selectedRequest, setSelectedRequest] = React.useState<ServiceRequest | null>(null);
   const [serviceRequests, setServiceRequests] = React.useState<ServiceRequest[]>([]);
-  const {token, accountId} = useAuth();
+  const {token, account} = useAuth();
 
   // const providerId = account?._id;
 
@@ -47,7 +47,7 @@ export default function RequestHistoryTable() {
     if (token && account) {
       console.log("this is the logged in account in request table:", account)
       // setLoading(true);
-      axios.get<ServiceRequest[]>(`/api/requests/provider/${accountId}`, {
+      axios.get<ServiceRequest[]>(`/api/requests/requester/${account._id}`, {
         headers: {Authorization: `Bearer ${token}` }
       })
           .then(response => {
@@ -62,7 +62,7 @@ export default function RequestHistoryTable() {
             // setLoading(false);
           });
     }
-  }, [accountId]);
+  }, [account?._id]);
 
 
   const handleToggleMediaCard = (req: ServiceRequest | null) => {

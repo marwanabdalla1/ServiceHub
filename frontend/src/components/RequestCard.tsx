@@ -32,7 +32,7 @@ const MediaCard: React.FC<MediaCardProps> = ({ request, onClose, onAccept,onDecl
   }
   
   const renderButton = () => {
-    if( request.requestStatus === RequestStatus.pending && isProvider && JSON.stringify(account) === JSON.stringify(request.provider)) {
+    if( request.requestStatus === RequestStatus.pending && account?._id === request.provider._id) {
         return (
           <>
           <BlackButton text="Accept" onClick={() => onAccept(request)} sx={{ marginRight:"1rem" }}/>
@@ -47,7 +47,7 @@ const MediaCard: React.FC<MediaCardProps> = ({ request, onClose, onAccept,onDecl
           console.log("No Actions possible for DECLINED requests!");
         }
         else if (request.requestStatus === RequestStatus.accepted ){
-          console.log("No Actions possible for ACCEPTED requests!");
+          return(<BlackButton text="Cancel Request" onClick={onCancel} sx={{ marginRight:"1rem" }}/>);
         }
          else {
         return (

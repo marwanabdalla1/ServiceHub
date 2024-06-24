@@ -14,27 +14,21 @@ import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import {ServiceRequest, ServiceRequest as Request} from '../models/ServiceRequest';
 import IncomingRequestRow from './IncomingRequestRow';
 import Modal from './inputs/Modal';
-import IncomingRequestMediaCard from './IncomingRequestCard';
-import {RequestStatus, ServiceType} from '../models/enums';
+import MediaCard from './RequestCard';
+
+import {ServiceType, RequestStatus, JobStatus} from '../models/enums'
 import {Account, bikeRepairService} from '../models/Account';
-import {Job} from '../models/Job';
-import {ServiceOffering} from "../models/ServiceOffering";
+import {useEffect} from "react";
+import {useAuth} from "../contexts/AuthContext";
+import axios from "axios";
 
-
-
-
-const accounts: Account [] = [
-    new Account('11', 'Max', 'Mustermann', 'example.email@example.com', '', 3.5, [bikeRepairService])
-]
-const rows: Request[] = [
-    new ServiceRequest('1', RequestStatus.pending, new Date('2024-05-11'), ServiceType.bikeRepair, undefined, new Date('2024-05-11'), undefined,[], 'comment 1', 12, 30, null, accounts[0], undefined, accounts[0], 5, '../../images/profiles/profile3.png'),
-    new ServiceRequest('2', RequestStatus.pending, new Date('2024-05-12'), ServiceType.babySitting, undefined, new Date('2024-05-11'), undefined, [], 'comment 2', 13, 30, null, accounts[0], undefined, accounts[0], 4.99, '../../images/profiles/profile2.png'),
-    new ServiceRequest('3', RequestStatus.pending, new Date('2024-05-13'), ServiceType.houseCleaning, undefined, new Date('2024-05-11'), undefined, [], 'comment 3', 2001, 3, null, accounts[0], undefined, accounts[0], 4.5, '../../images/profiles/profile1.png'),
-];
 
 export default function IncomingRequestTable() {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
+    const [showMediaCard, setShowMediaCard] = React.useState(false);
+    const [selectedRequest, setSelectedRequest] = React.useState<ServiceRequest | null>(null);
+    const [serviceRequests, setServiceRequests] = React.useState<ServiceRequest[]>([]);
+    const {token, account} = useAuth();
 
     const openModal = (request: Request) => {
         setSelectedRequest(request);
@@ -44,6 +38,138 @@ export default function IncomingRequestTable() {
     const closeModal = () => {
         setIsModalOpen(false);
     };
+
+    const handleToggleMediaCard = (req: ServiceRequest | null) => {
+        setSelectedRequest(req);
+        setShowMediaCard(req !== null);
+      };
+
+      const handleAccept =  async() => {
+
+        if (!selectedRequest) {
+          console.error('No request selected');
+          return;
+        }
+
+
+        // get data from the request (selectedRequest)
+        const {requestStatus, job, _id, requestedBy, provider, ...rest} = selectedRequest;
+
+        const jobData = {
+          status: JobStatus.open,
+          request: selectedRequest._id,
+          receiver: selectedRequest.requestedBy._id,
+          provider: selectedRequest.provider._id,
+          ...rest,
+
+        }
+
+        console.log("job data at frontend:", jobData)
+
+
+        // post new job
+        try {
+          const jobResponse = await axios.post("api/jobs/", jobData, {
+            headers: {Authorization: `Bearer ${token}` }
+          });
+          console.log("job posted!", jobResponse);
+
+          // update the request
+          if (jobResponse.data && jobResponse.data._id) {
+            const updateRequestData = {
+              job: jobResponse.data._id, // or whatever the attribute is called in your database
+              requestStatus: RequestStatus.accepted,
+            };
+            console.log("selected request id:" , selectedRequest._id, updateRequestData)
+            const updateResponse = await axios.put(`/api/requests/${selectedRequest._id}`, updateRequestData, {
+              headers: {Authorization: `Bearer ${token}` }
+            });
+            console.log('Request Updated:', updateResponse.data);
+
+
+            // Update local state to reflect these changes
+            const updatedServiceRequests = serviceRequests.map(req => {
+              if (req._id === selectedRequest._id) {
+                return { ...req, ...updateRequestData, job: jobResponse.data._id };
+              }
+              return req;
+            });
+
+            console.log(updatedServiceRequests);
+            setServiceRequests(updatedServiceRequests);
+            setShowMediaCard(false);
+        } } catch (error) {
+          console.error('Error posting job:', error);
+        }
+
+
+
+      };
+
+      const handleDecline =  async() => {
+
+        if (!selectedRequest) {
+          console.error('No request selected');
+          return;
+        }
+
+
+        // get data from the request (selectedRequest)
+        const {requestStatus, job, _id, requestedBy, provider, ...rest} = selectedRequest;
+
+        try {
+
+          // update the request
+            const updateRequestData = {
+             requestStatus: RequestStatus.declined,
+            };
+            console.log("selected request id:" , selectedRequest._id, updateRequestData)
+            const updateResponse = await axios.put(`/api/requests/${selectedRequest._id}`, updateRequestData, {
+              headers: {Authorization: `Bearer ${token}` }
+            });
+            console.log('Request Updated:', updateResponse.data);
+
+
+            // Update local state to reflect these changes
+            const updatedServiceRequests = serviceRequests.map(req => {
+              if (req._id === selectedRequest._id) {
+                return { ...req, ...updateRequestData };
+              }
+              return req;
+            });
+
+            console.log(updatedServiceRequests);
+            setServiceRequests(updatedServiceRequests);
+            setShowMediaCard(false);
+         } catch (error) {
+          console.error('Error cancelling Request:', error);
+        }
+
+
+
+      };
+
+    useEffect(() => {
+        console.log(token)
+        if (token && account) {
+          console.log("this is the logged in account in request table:", account)
+          // setLoading(true);
+          axios.get<ServiceRequest[]>(`/api/requests/provider/incoming/${account._id}`, {
+            headers: {Authorization: `Bearer ${token}` }
+          })
+              .then(response => {
+                console.log("getting requests ...", response.data)
+                setServiceRequests(response.data);
+                // setLoading(false);
+              })
+              .catch(error => {
+                console.error('Failed to fetch service requests:', error);
+                setServiceRequests([]);
+                // setError('Failed to load service requests');
+                // setLoading(false);
+              });
+        }
+      }, [account?._id]);
 
     return (
         <Box sx={{minWidth: 275, margin: 2}}>
@@ -69,22 +195,24 @@ export default function IncomingRequestTable() {
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {rows.map((row) => (
-                                        <IncomingRequestRow key={row._id} request={row}
-                                                            onViewDetails={() => openModal(row)}/>
-                                    ))}
+                                {serviceRequests.map((request) => (
+                                    <IncomingRequestRow key={request._id} request={request} onViewDetails={handleToggleMediaCard} />
+                  ))}
                                 </TableBody>
                             </Table>
                         </TableContainer>
                     </Box>
                 </Box>
-                <Modal show={isModalOpen} onClose={closeModal}>
-                    <div className='modal-content'>
-                        <h3 className='modalTitle'>Request Detail</h3>
-                        {selectedRequest && <IncomingRequestMediaCard request={selectedRequest}
-                                                                      onClose={closeModal}/>}
-                    </div>
-                </Modal>
+                {showMediaCard && selectedRequest && (
+          <div style={{ position: 'relative', flexShrink: 0, width: 400, marginLeft: 2 }}>
+            <MediaCard request={selectedRequest}
+                        onClose={() => setShowMediaCard(false)}
+                        onAccept={handleAccept}
+                        onDecline={handleDecline }
+                        onProposeNewTime={() => console.log('New Time: ')}
+                        onCancel={() => {}} />
+          </div>
+        )}
             </Box>
         </Box>
     );
