@@ -17,7 +17,7 @@ type FieldType = {
 function UserProfile(): React.ReactElement {
 
     const [account, setAccount] = useState<any>(null);
-    const {token, isProvider, isPremium, logoutUser} = useAuth();
+    const {token, isProvider, isPremium, logoutUser, accountId} = useAuth();
 
 
     /**
@@ -45,13 +45,14 @@ function UserProfile(): React.ReactElement {
     useSkipFirstEffect(() => {
         (async () => {
             try {
-                console.log("token: " + token + '\n' + isProvider + '\n' + isPremium);
+                console.log("token: " + token + '\n' + "isProvider: " + isProvider() + '\n' + "isPremium: " + isPremium()+'\n Id: '+accountId);
+
                 const response = await axios.get('/api/account', { // replace with your backend endpoint
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
                 });
-                console.log("token: " + token + '\n' + isProvider + '\n' + isPremium);
+
                 console.log(`Status: ${response.status}`);
                 console.log(response.data);
                 console.log(isProvider)

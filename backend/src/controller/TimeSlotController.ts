@@ -7,7 +7,7 @@ function generateWeeklyInstances(events: ITimeslot[], startDate: moment.Moment, 
     const weekInstances: ITimeslot[] = [];
     events.forEach(event => {
         const dayOfWeek = moment(event.start).day();
-        let currentDate = moment(startDate).day(dayOfWeek); // Get the date for the specific day in the start date week
+        const currentDate = moment(startDate).day(dayOfWeek); // Get the date for the specific day in the start date week
 
         while (currentDate.isBefore(endDate)) {
             if (currentDate.isBetween(startDate, endDate, 'day', '[]')) {
