@@ -94,7 +94,7 @@ function CreateAccountOrSignIn({ onNext, onBack, bookingDetails }: CreateAccount
                         Log in
                     </Button>
                 </Box>
-                <Box sx={{ width: 250 }}>
+                <Box sx={{ width: '20%' }}>
                     <Card>
                         <CardContent sx={{ display: 'flex', alignItems: 'center' }}>
                             <Box>

@@ -41,8 +41,8 @@ function SelectTimeslot({ onNext, onBack, bookingDetails }: SelectTimeslotProps)
     //
     return (
         <Container>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-                <Box>
+            <Box sx={{ display: 'center', justifyContent: 'space-between', mt: 4 }}>
+                <Box sx={{width: '70%'}}>
                     <Typography variant="h6" gutterBottom>
                         Step 2 of 3
                     </Typography>
@@ -89,7 +89,7 @@ function SelectTimeslot({ onNext, onBack, bookingDetails }: SelectTimeslotProps)
                         // globalAvailabilities={globalAvailabilities}
                     />
                 </Box>
-                <Box sx={{width: 250}}>
+                <Box sx={{width: '20%'}}>
                     <Card>
                     <CardContent sx={{ display: 'flex', alignItems: 'center' }}>
                             <Box>

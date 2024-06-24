@@ -29,7 +29,7 @@ export interface TimeSlot {
     title: string;
     isFixed?: boolean;  // Optional property to indicate if the TimeSlot is fixed
     isBooked: boolean;
-    createdById: string;
+    createdById: string | undefined;
 }
 
 type RangeType = Date[] | { start: Date; end: Date };
@@ -41,7 +41,7 @@ interface ServiceScheduleProps {
 }
 
 function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, defaultTransitTime }: ServiceScheduleProps) {
-    const {bookingDetails} = useBooking();
+    const {bookingDetails, setTimeAndDuration} = useBooking();
     const providerId = bookingDetails.provider?._id;
 
     const [availability, setAvailability] = useState<TimeSlot[]>([]);
@@ -59,10 +59,10 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
 
 
     // todo: modify this to actual provider id
-    const temp_providerId = '66714d05e357cca1c8c449c1'
-    console.log(token);
+    // const providerId = "6670176384da135b691a27bd"
+    console.log(bookingDetails);
     useEffect(() => {
-        axios.get(`/api/timeslots/${temp_providerId}`, {
+        axios.get(`/api/timeslots/${providerId}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             },
@@ -178,8 +178,9 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
                 title: `${Servicetype}`,
                 isFixed: false,
                 isBooked: true,
-                createdById: temp_providerId
+                createdById: providerId,
             };
+            console.log("new time slot:", newTimeSlot)
             setSelectedTimeSlot(newTimeSlot);
         } else {
             setClashDialogOpen(true);
@@ -191,7 +192,7 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
             //     title: `${Servicetype} (including transit)`,
             //     isFixed: false,
             //     isBooked: true,
-            //     createdById: temp_providerId
+            //     createdById: providerId
             // };
             // setSelectedTimeSlotWithTransit(transitTimeSlot);
 
@@ -320,7 +321,7 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
                         'Authorization': `Bearer ${token}`
                     }
                 }).then(() => {
-                    axios.get(`/api/timeslots/${temp_providerId}`, {
+                    axios.get(`/api/timeslots/${providerId}`, {
                         headers: {
                             'Authorization': `Bearer ${token}`
                         },
@@ -341,7 +342,7 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
                     console.error("Error extending fixed slots:", error);
                 });
             } else {
-                axios.get(`/api/timeslots/${temp_providerId}`, {
+                axios.get(`/api/timeslots/${providerId}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     },
