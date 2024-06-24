@@ -48,7 +48,7 @@ const ServiceButton: React.FC<ServiceButtonProps> = ({ isLoggedIn, isProvider, i
 
 const Navbar: React.FC<NavbarProps> = ({ toggleDrawer, onChange, onSearch, search }) => {
     const { token, isLoggedIn, logoutUser, isProvider, isPremium } = useAuth();
-    console.log(isProvider);
+   
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [profileAnchorEl, setProfileAnchorEl] = useState<null | HTMLElement>(null);
 

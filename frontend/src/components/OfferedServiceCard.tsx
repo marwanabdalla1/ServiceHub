@@ -16,16 +16,17 @@ import { Account } from '../models/Account';
 import { useEffect } from 'react';
 
 interface MediaCardProps {
-  job: Job;
+  offeredService: Job;
   provider: Account | null;
   receiver: Account | null;
   onClose: () => void;
-  onComplete: (job: Job) => void;
-  onCancel: (job: Job) => void;
-  onReview: (job: Job) => void;
+  onComplete: (offeredService: Job) => void;
+  onCancel: (offeredService: Job) => void;
+  onReview: (offeredService: Job) => void;
+  onRevoke: (offeredService: Job) => void;
 }
 
-const MediaCard: React.FC<MediaCardProps> = ({ job, provider, receiver, onClose, onComplete, onCancel, onReview }) => {
+const MediaCard: React.FC<MediaCardProps> = ({ offeredService, provider, receiver, onClose, onComplete, onCancel, onReview, onRevoke }) => {
   const {account, token, } = useAuth();
   
 /*
@@ -47,19 +48,33 @@ const MediaCard: React.FC<MediaCardProps> = ({ job, provider, receiver, onClose,
   const renderButton = () => {
     //Check whether user in sign-in context is a provider
     console.log("Account ID: " + account?._id);
-    console.log("Receiver ID: " + job.receiver);
-    console.log(account?._id === job.receiver._id);
-      if(job.status === JobStatus.open && account?._id === receiver?._id ) {
+    console.log("Receiver ID: " + offeredService.receiver);
+    console.log(account?._id === offeredService.receiver._id);
+    if(offeredService.status === JobStatus.open && account?._id === provider?._id ){
+        return (
+          <>
+          <BlackButton text="Mark as Completed" onClick={() => onComplete(offeredService)} sx={{ marginRight:"1rem" }}/>
+          <BlackButton text="Cancel Service" onClick={() => onCancel(offeredService)} sx={{ marginRight:"1rem" }}/>
+          </>
+        );}
+      if(offeredService.status === JobStatus.open && account?._id === receiver?._id ) {
           return(<>
-          <BlackButton text="Cancel Job" onClick={() => onCancel(job)} />
+          <BlackButton text="Cancel Service" onClick={onClose} />
           </>);
         }
-        else if (job.status === JobStatus.completed) {
+        else if (offeredService.status === JobStatus.completed) {
           return(<>
-            <BlackButton text="Write a review" onClick={() => onReview(job)} />
+            <BlackButton text="Write a Review" onClick={() => onReview(offeredService)} sx={{ marginRight:"1rem" }} />
+            <BlackButton text="Revoke Completion" onClick={() => onRevoke(offeredService)} />
           </>);
         }
+    else {
+        console.log(offeredService.status);
+        return (
+          <BlackButton text="Close" onClick={onClose} />
+        );
 
+    }
   };
   return (
     <Card>
@@ -93,29 +108,29 @@ const MediaCard: React.FC<MediaCardProps> = ({ job, provider, receiver, onClose,
               <GoStarFill className='text-yellow-500'/>
             </div>
             <Typography variant="body2" color="text.secondary">
-              {job.rating}
+              {offeredService.rating}
             </Typography>
           </div>
         </div>
         <Divider sx={{marginBottom:'1rem'}}/>
         <Typography variant="body2">
-          Request ID: {job._id}
+          Request ID: {offeredService._id}
         </Typography>
         <Typography variant="body2">
-          Service Type: {job.serviceType}
+          Service Type: {offeredService.serviceType}
         </Typography>
         <Typography variant="body2">
-          Appointment Time: {job.appointmentStartTime.toLocaleString()}
+          Appointment Time: {offeredService.appointmentStartTime.toLocaleString()}
         </Typography>
         <Typography variant="body2" sx={{ marginBottom: '2rem'}}>
-          Service Fee: {job.serviceFee}
+          Service Fee: {offeredService.serviceFee}
         </Typography>
         <Typography variant="body2" sx={{marginBottom:'1rem'}}>
-          Status: {job.status}
+          Status: {offeredService.status}
         </Typography>
         <Divider sx={{marginBottom:'1rem'}}/>
         <Typography variant="body2" sx={{marginBottom:'1rem'}}>
-          Description: {job.description}
+          Description: {offeredService.description}
         </Typography>
         {renderButton()}
       </CardContent>

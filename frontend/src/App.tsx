@@ -26,6 +26,7 @@ import axios from "axios";
 import ProposeNewtimePage from './Pages/ProposeNewTimePage';
 import {AccountProvider} from "./contexts/AuthContext";
 import BookingPage from "./Pages/bookingSteps/BookingPage";
+import OfferedServicesPage from './Pages/OfferedServicesPage';
 
 function App() {
 
@@ -67,6 +68,7 @@ function MainRoutes() {
                 <Route path="/filter" element={<FilterPage/>}/>
                 <Route path="/jobs/jobHistory" element={<JobHistoryPage/>}/>
                 <Route path="/jobs/requestHistory" element={<RequestHistoryPage/>}/>
+                <Route path="/jobs/offeredServices" element={<OfferedServicesPage/>}/>
                 <Route path="/incomingRequests" element={<IncomingRequestsPage/>}/>
                 <Route path="/addservice" element={<AddServicePage/>}/>
                 <Route path="/provider-profile/:id" element={<ProviderProfilePage/>}/>

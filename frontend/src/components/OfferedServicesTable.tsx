@@ -11,9 +11,10 @@ import Typography from '@mui/material/Typography';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
 import Link from '@mui/material/Link';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
-import MediaCard from './JobCard';
+import MediaCard from './OfferedServiceCard';
 import { Job } from '../models/Job';
-import JobRow from './JobRow';
+//import JobRow from './JobRow';
+import OfferedServiceRows from './OfferedServiceRow';
 import { Account } from '../models/Account';
 import account from '../models/Account';
 import { Timeslot } from '../models/Timeslot';
@@ -25,27 +26,10 @@ import {useEffect} from "react";
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
 import { now } from 'moment';
+import OfferedServiceRow from './OfferedServiceRow';
 
 
-
-//Candidate for deletion
-// const serviceRequests: ServiceRequest[] = [
-//   new ServiceRequest('sr1', RequestStatus.accepted, new Date(), ServiceType.babySitting,  undefined, new Date(), undefined, [new File([], "empty.txt", { type: "text/plain" })],
-//   'something', 12, 30,  null, account, account, 5, '../../images/profiles/profile3.png'),
-//   new ServiceRequest('sr2', RequestStatus.declined, new Date(), ServiceType.bikeRepair, null, new Date(), undefined, [new File([], "empty.txt", { type: "text/plain" })],
-//   'somethingElse', 13, 30,  null, account, account, 5, '../../images/profiles/profile3.png'),
-//   new ServiceRequest('sr3', RequestStatus.pending, new Date(), ServiceType.homeRemodeling, null, new Date(), undefined,[new File([], "empty.txt", { type: "text/plain" })],
-//   'comment3', 14, 30, null, account, account, 5, '../../images/profiles/profile3.png')
-// ];
-//
-//
-// const rows: Job[] = [
-//   new Job('1', ServiceType.bikeRepair, new Date('2024-05-11'), new Date('2024-05-11'), '50', JobStatus.open, 'Description 1', account, account,'../../images/profiles/profile3.png', 4.99,  new Timeslot(ServiceType.babySitting, new Date(), new Date(), true), serviceRequests[0], undefined),
-//   new Job('2', ServiceType.petSitting, new Date('2024-05-12'), new Date('2024-05-11'), '30', JobStatus.completed, 'Description 2', account, account, '../../images/profiles/profile2.png', 5, new Timeslot(ServiceType.tutoring, new Date(), new Date(), true), serviceRequests[1], undefined),
-//   new Job('3', ServiceType.homeRemodeling, new Date('2024-05-13'), new Date('2024-05-13'),  '100', JobStatus.cancelled, 'Description 3', account,account, '../../images/profiles/profile1.png',  3,  new Timeslot(ServiceType.petSitting, new Date(), new Date(), true), serviceRequests[2], undefined),
-// ];
-
-export default function JobHistoryTable() {
+export default function OfferedServicesTable() {
   const [showMediaCard, setShowMediaCard] = React.useState(false);
   const [selectedJob, setSelectedJob] = React.useState<Job | null>(null);
   const [jobs, setJobs] = React.useState<Job[]>([]);
@@ -59,7 +43,7 @@ export default function JobHistoryTable() {
     if (token && account) {
       // console.log("this is the logged in account in request table:", account)
       // setLoading(true);
-      axios.get<Job[]>(`/api/jobs/requester/${account._id}`, {
+      axios.get<Job[]>(`/api/jobs/provider/${account._id}`, {
         headers: {Authorization: `Bearer ${token}` }
       })
           .then(response => {
@@ -135,17 +119,24 @@ export default function JobHistoryTable() {
 
       // update the job
         const updateJobData = {
-          jobStatus: JobStatus.completed,
+          status: JobStatus.completed,
         };
         console.log("selected request id:" , selectedJob?._id, updateJobData)
         const updateJob = await axios.put(`/api/jobs/${selectedJob?._id}`, updateJobData, {
           headers: {Authorization: `Bearer ${token}` }
         });
-        console.log('Request Updated:', updateJob.data);
+        console.log('Job Updated:', updateJob.data);
+        console.log("jobs: " + jobs[0]);
+        // Update local state to reflect these changes
+        const updatedJobs = jobs.map(job => {
+          if (job._id === selectedJob._id) {
+            return { ...job, ...updateJobData };
+          }
+          return job;
+        });
 
-        console.log(updateJob);
-
-        setJobs(updateJob.data);
+        setJobs(updatedJobs);
+        
         setShowMediaCard(false);
      } catch (error) {
       console.error('Error completing job:', error);
@@ -155,20 +146,26 @@ export default function JobHistoryTable() {
 
   };
 
-  // handle cancel the job
-  const handleCancel =  async() => {
+  // handle revoking completed job
+  const handleRevoke =  async() => {
  
 
     if (!selectedJob) {
       console.error('No job selected');
       return;
     }
-    
+ //   sanity check: appointment time has to be in the past
+    if (!selectedJob.appointmentEndTime || selectedJob.appointmentEndTime > new Date()){
+        //TODO: add modal to let user know
+        console.error('The job cannot be completed, since its appointment is in the future.');
+        return;
+    }
+
     try {
 
       // update the job
         const updateJobData = {
-          status: JobStatus.cancelled,
+          status: JobStatus.open,
         };
         console.log("selected request id:" , selectedJob?._id, updateJobData)
         const updateJob = await axios.put(`/api/jobs/${selectedJob?._id}`, updateJobData, {
@@ -201,12 +198,11 @@ export default function JobHistoryTable() {
       <Box>
         <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />} aria-label="breadcrumb" sx={{ marginBottom: '16px' }}>
           <Link color="inherit" href="/" underline="hover">
-            History
+            Offered Services
           </Link>
-          <Typography color="textPrimary">Job History</Typography>
         </Breadcrumbs>
         <Typography variant="h6" component="div" sx={{ marginBottom: '16px' }}>
-          Job History
+          Offered Services
         </Typography>
       </Box>
       <Box style={{ display: 'flex' }}>
@@ -224,7 +220,7 @@ export default function JobHistoryTable() {
                 </TableHead>
                 <TableBody>
                   {jobs.map((job) => (
-                    <JobRow key={job._id} job={job} onViewDetails={handleToggleMediaCard} />
+                    <OfferedServiceRow key={job._id} offeredService={job} onViewDetails={handleToggleMediaCard} />
                   ))}
                 </TableBody>
               </Table>
@@ -233,13 +229,14 @@ export default function JobHistoryTable() {
         </Box>
         {showMediaCard && selectedJob && (
           <div style={{ position: 'relative', flexShrink: 0, width: 400, marginLeft: 2 }}>
-            <MediaCard job={selectedJob}
+            <MediaCard offeredService={selectedJob}
                       provider={provider}
                       receiver={receiver}
                        onClose={() => setShowMediaCard(false)}
                        onComplete={handleComplete}
-                       onCancel = {handleCancel}
-                       onReview={() => navigate("/customer_review") }
+                       onCancel = {() => console.log("job cancelled")}
+                       onReview={() => navigate("/customer_review")}
+                      onRevoke={handleRevoke}
             />
           </div>
         )}
