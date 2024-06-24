@@ -7,13 +7,12 @@ import {toast} from 'react-toastify';
 
 type AccountContextType = {
     token: string | null;
-    account: Account | null;
-    isPremium: boolean;
-    isProvider: boolean;
     registerUser: (event: React.FormEvent<HTMLFormElement>) => Promise<void>;
     loginUser: (event: React.FormEvent<HTMLFormElement>) => Promise<void>;
     logoutUser: () => void;
     isLoggedIn: () => boolean;
+    isPremium: () => boolean;
+    isProvider: () => boolean;
 }
 
 type Props = { children: React.ReactNode };
@@ -23,42 +22,15 @@ const AccountContext = createContext<AccountContextType | undefined>(undefined);
 export const AccountProvider = ({children}: Props) => {
     const navigate = useNavigate();
     const [token, setToken] = useState<string | null>(null);
-    const [isPremium, setIsPremium] = useState<boolean>(false);
-    const [isProvider, setIsProvider] = useState<boolean>(false);
     const [isReady, setIsReady] = useState<boolean>(false);
-    const [account, setAccount] = useState<Account | null>(null);
-
-
-
 
     useEffect(() => {
-        // const account = localStorage.getItem('account');
         const token = localStorage.getItem('token');
-        const isProvider = localStorage.getItem('isProvider');
-        const isPremium = localStorage.getItem('isPremium');
         if (token) {
             setToken(token);
         }
         setIsReady(true);
     }, []);
-
-
-    useEffect(() => {
-        if (token) {
-            axios.get('/api/account', {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            })
-                .then(response => {
-                    console.log("account:" , response.data)
-                    setAccount(response.data);
-                })
-                .catch(error => {
-                    console.error('Error fetching user data:', error);
-                });
-        }
-    }, [token]);
 
     function handleResponse(response: AxiosResponse<any>) {
         localStorage.setItem('token', response?.data.token);
@@ -66,14 +38,12 @@ export const AccountProvider = ({children}: Props) => {
         localStorage.setItem('isPremium', response?.data.isPremium);
 
         setToken(response?.data.token!);
-        setIsProvider(response?.data.isProvider);
-        setIsPremium(response?.data.isPremium);
     }
 
     const registerUser = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
-        const newaccount = {
+        const account = {
             firstName: data.get('firstName'),
             lastName: data.get('lastName'),
             email: data.get('email'),
@@ -81,7 +51,7 @@ export const AccountProvider = ({children}: Props) => {
         };
 
         try {
-            const response = await axios.post('/api/auth/signup', newaccount);
+            const response = await axios.post('/api/auth/signup', account);
             if (response) {
                 handleResponse(response);
                 toast.success('User registered successfully');
@@ -132,8 +102,6 @@ export const AccountProvider = ({children}: Props) => {
 
         // Clear the token and account state
         setToken(null);
-        setIsProvider(false);
-        setIsPremium(false);
 
         // Navigate the user back to the login page
         navigate('/login');
@@ -143,10 +111,18 @@ export const AccountProvider = ({children}: Props) => {
         return token !== null && token !== undefined;
     };
 
+    const isPremium = () => {
+        return localStorage.getItem('isPremium') === 'true';
+    };
+
+    const isProvider = () => {
+        return localStorage.getItem('isProvider') === 'true';
+    };
+
 
     return (
         <AccountContext.Provider
-            value={{token, account, isProvider, isPremium, registerUser, loginUser, logoutUser, isLoggedIn}}>
+            value={{token, isProvider, isPremium, registerUser, loginUser, logoutUser, isLoggedIn}}>
             {isReady ? children : null}
         </AccountContext.Provider>
     );

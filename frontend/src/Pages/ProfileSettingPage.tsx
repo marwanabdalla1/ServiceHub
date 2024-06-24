@@ -45,13 +45,13 @@ function UserProfile(): React.ReactElement {
     useSkipFirstEffect(() => {
         (async () => {
             try {
-                console.log("token: " + token + '\n' + isProvider + '\n' + isPremium);
+                console.log("token: " + token + '\n' + "isProvider: " + isProvider() + '\n' + "isPremium: " + isPremium());
                 const response = await axios.get('/api/account', { // replace with your backend endpoint
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
                 });
-                console.log("token: " + token + '\n' + isProvider + '\n' + isPremium);
+
                 console.log(`Status: ${response.status}`);
                 console.log(response.data);
 
@@ -239,7 +239,8 @@ function UserProfile(): React.ReactElement {
                         <LightBlueFileButton text="Upload" onFileChange={handleFileUpload(setCertificate)}
                                              sx={{width: '100px'}}/>
                     </Box>
-                    <Button onClick={handleDeleteAccount} sx={{backgroundColor: 'red', color: 'white', mt: 2}}>Delete Account</Button>
+                    <Button onClick={handleDeleteAccount} sx={{backgroundColor: 'red', color: 'white', mt: 2}}>Delete
+                        Account</Button>
                 </Box>
             </Paper>
         </Container>
