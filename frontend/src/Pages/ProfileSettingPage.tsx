@@ -5,6 +5,7 @@ import LightBlueFileButton from "../components/inputs/BlueUploadButton";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from "../contexts/AuthContext";
 import axios from "axios";
+import {toast} from "react-toastify";
 
 type EditModeType = {
     [key: string]: boolean;
@@ -60,6 +61,12 @@ function UserProfile(): React.ReactElement {
         }
     };
 
+
+    /**
+     * Custom hook to skip the first render of a component
+     * @param effect
+     * @param deps
+     */
     function useSkipFirstEffect(effect: React.EffectCallback, deps?: React.DependencyList) {
         const isFirstRender = useRef(true);
 
@@ -73,6 +80,10 @@ function UserProfile(): React.ReactElement {
         }, deps);
     }
 
+    /**
+     * Fetch account details from the backend everytime the account state changes
+     *
+     */
     useSkipFirstEffect(() => {
         (async () => {
             try {
@@ -145,10 +156,42 @@ function UserProfile(): React.ReactElement {
     }, [account]);
 
     const [userImage, setUserImage] = useState<File | null>(null);
+    const [profileImage, setProfileImage] = useState<File | null>(null);
 
-    const handleFileUpload = (setFile: React.Dispatch<React.SetStateAction<File | null>>) => (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleProfileImageUpload = (setFile: React.Dispatch<React.SetStateAction<File | null>>) => (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files ? event.target.files[0] : null;
         setFile(file);
+        console.log("set file finished: ", file);
+        handleFileUpload(file, "profileImage").then(response => {
+            // Perform some action after the file upload is complete
+            toast('Profile image uploaded successfully', {type: 'success'})
+            console.log("file upload finished");
+        }).catch(error => {
+            toast('Error uploading profile image', {type: 'error'});
+            console.error('Error uploading profile image:', error);
+        });
+    };
+
+    const handleFileUpload = async (file: File | null, fileType: string) => {
+        if (!file) {
+            return;
+        }
+
+        console.log(`Uploading ${fileType}...`);
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await axios.post(`/api/file/upload/${fileType}`, formData, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            console.log(`Status: ${response.status}`);
+            console.log(response.data);
+        } catch (error) {
+            console.error('Error uploading file:', error);
+            }
     };
 
     const handleEditClick = (field: string) => {
@@ -271,12 +314,12 @@ function UserProfile(): React.ReactElement {
                 <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', fontSize: '24px', color: '#007BFF' }}>
                     Public Profile
                 </Typography>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: 3 }}>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
-                        <Avatar src={userImage ? URL.createObjectURL(userImage) : undefined}
-                            sx={{ width: 80, height: 80 }} />
+                <Box sx={{display: 'flex', flexDirection: 'column', gap: 3, p: 3}}>
+                    <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5}}>
+                        <Avatar src={profileImage ? URL.createObjectURL(profileImage) : undefined}
+                                sx={{width: 80, height: 80}}/>
                         <LightBlueFileButton text="Upload Profile Picture"
-                            onFileChange={handleFileUpload(setUserImage)} />
+                                             onFileChange={handleProfileImageUpload(setProfileImage)}/>
                     </Box>
                     {renderField("User ID", "userId")}
                     {renderField("First Name", "firstName")}

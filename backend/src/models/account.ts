@@ -8,7 +8,7 @@ export interface IAccount extends Document {
     phoneNumber: string;
     address: string;
     createdOn: Date;
-    profileImageUrl: string;
+    profileImageId: string;
     description: string;
     location: string;
     postal: string;

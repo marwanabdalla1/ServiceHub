@@ -38,6 +38,9 @@
     "moment": "^2.30.1",
     "moment": "^2.30.1",
     "mongoose": "^8.4.1",
-    "stripe": "^15.12.0"
+    "stripe": "^15.12.0",
+    "mongodb": "^5.9.1",
+    "mongoose": "^8.4.1",
+    "multer-gridfs-storage": "^5.0.2"
   }
 }

@@ -11,6 +11,7 @@ import OfferingRouter from "./routes/Offering";
 import RequestRouter from "./routes/Request";
 import JobRouter from "./routes/Job";
 import ReviewRouter from "./routes/Review";
+import FileRouter from "./routes/File";
 
 
 // Import the models to ensure they are registered
@@ -38,6 +39,9 @@ app.use(express.json());
 app.use("/api/auth", AuthRouter);
 // authenticate users
 // app.use(authenticate)
+
+// Routes
+app.use("/api/file", FileRouter);
 app.use("/api/account", AccountRouter);
 app.use("/api/offerings", OfferingRouter);
 app.use("/api/timeslots", TimeSlotRouter);
