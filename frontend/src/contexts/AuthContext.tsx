@@ -8,14 +8,10 @@ import {toast} from 'react-toastify';
 type AccountContextType = {
     token: string | null;
     account: Account | null;
-    // isPremium: boolean;
-    // isProvider: boolean;
     registerUser: (event: React.FormEvent<HTMLFormElement>) => Promise<void>;
     loginUser: (event: React.FormEvent<HTMLFormElement>) => Promise<void>;
     logoutUser: () => void;
     isLoggedIn: () => boolean;
-    isPremium: () => boolean;
-    isProvider: () => boolean;
 }
 
 type Props = { children: React.ReactNode };
@@ -29,8 +25,6 @@ export const AccountProvider = ({children}: Props) => {
     const [account, setAccount] = useState<Account | null>(null);
     // const [nextPath, setNextPath] = useState('/');  // Default to home
 
-
-
     useEffect(() => {
         // const account = localStorage.getItem('account');
         const token = localStorage.getItem('token');
@@ -39,25 +33,6 @@ export const AccountProvider = ({children}: Props) => {
         }
         setIsReady(true);
     }, []);
-
-
-    useEffect(() => {
-        if (token) {
-            axios.get('/api/account', {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            })
-                .then(response => {
-                    console.log("account:" , response.data)
-                    setAccount(response.data);
-                    localStorage.setItem('account', response?.data);
-                })
-                .catch(error => {
-                    console.error('Error fetching user data:', error);
-                });
-        }
-    }, [token]);
 
     function handleResponse(response: AxiosResponse<any>) {
         localStorage.setItem('token', response?.data.token);
@@ -69,6 +44,23 @@ export const AccountProvider = ({children}: Props) => {
         setToken(response?.data.token!);
         // setAccount(response.data);
     }
+
+    useEffect(() => {
+        if (token) {
+            axios.get('/api/account', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+                .then(response => {
+                    console.log("account:", response.data)
+                    setAccount(response.data);
+                })
+                .catch(error => {
+                    console.error('Error fetching user data:', error);
+                });
+        }
+    }, [token]);
 
     const registerUser = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
