@@ -108,10 +108,10 @@ function AddServicePage() {
             try {
                 let response;
                 if (isEditMode) {
-                    response = await axios.put(`/api/services/${serviceToEdit._id}`, submissionData, {
+                    response = await axios.put(`/api/services/edit-service/${serviceToEdit._id}`, submissionData, {
                         headers: {
                             'Authorization': `Bearer ${token}`
-                        }
+                        } 
                     });
                 } else {
                     response = await axios.post('/api/services/add-new-service', submissionData, {

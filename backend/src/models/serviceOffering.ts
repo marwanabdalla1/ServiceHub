@@ -29,7 +29,7 @@ const ServiceOfferingSchema: Schema = new Schema({
     serviceType: { type: String, enum: Object.values(ServiceType), required: true },
     lastUpdatedOn: { type: Date, required: true },
     // createdOn: { type: Date, required: true },
-    certificate: { name: String, data: Buffer, contentType: String },
+    certificate: { name: String, data: Buffer, contentType: String},
     hourlyRate: { type: Number, required: true },
     description: { type: String, required: false },
     isCertified: { type: Boolean, required: false },
@@ -43,6 +43,5 @@ const ServiceOfferingSchema: Schema = new Schema({
     reviewCount: { type: Number, required: true }
 }, { timestamps: true });
 
-// TODO Cascade delete service offerings when an account is deleted
 
 export default mongoose.model<IServiceOffering>('ServiceOffering', ServiceOfferingSchema);

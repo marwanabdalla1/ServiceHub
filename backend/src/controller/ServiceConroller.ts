@@ -4,6 +4,7 @@ import Account from '../models/account';
 import { Types } from 'mongoose';
 import { ServiceType } from '../models/enums'; // Assuming this is where your enum is defined
 
+
 export const addService = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userId = (req as any).user.userId;
@@ -17,7 +18,8 @@ export const addService = async (req: Request, res: Response, next: NextFunction
             certificate,
             defaultSlotTime,
             travelTime,
-            selectedPaymentMethods // Add this line to capture selectedPaymentMethods
+            selectedPaymentMethods,
+            isCertified // Capture isCertified from request body
         } = req.body;
 
         // Validate required fields
@@ -49,8 +51,8 @@ export const addService = async (req: Request, res: Response, next: NextFunction
             },
             hourlyRate: Number(hourlyRate),
             description: description,
-            acceptedPaymentMethods: selectedPaymentMethods || [], // Save selectedPaymentMethods
-            isCertified: Boolean, 
+            acceptedPaymentMethods: selectedPaymentMethods.map((method: { title: any; }) => method.title) || [],
+            isCertified: isCertified || false, // Correctly assign the isCertified field
             location: account.location || 'Unknown location', // Use account's location if available
             provider: new Types.ObjectId(userId),
             baseDuration: defaultSlotTime,
@@ -123,7 +125,8 @@ export const editService = async (req: Request, res: Response, next: NextFunctio
         // serviceOffering.serviceType = serviceType; //it shouldn't update the service type
         serviceOffering.hourlyRate = Number(hourlyRate);
         serviceOffering.description = description;
-        serviceOffering.acceptedPaymentMethods = selectedPaymentMethods || [];
+        serviceOffering.acceptedPaymentMethods = selectedPaymentMethods.map((method: { title: any; }) => method.title) || [],
+
         serviceOffering.baseDuration = defaultSlotTime;
         serviceOffering.bufferTimeDuration = travelTime;
         serviceOffering.lastUpdatedOn = new Date();
@@ -146,4 +149,46 @@ export const editService = async (req: Request, res: Response, next: NextFunctio
 }
 
 
-//TODO: Add deleteService function here
+
+export const deleteService = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = (req as any).user.userId;
+        const serviceId = req.params.id;
+        console.log("User id", userId);
+        console.log("Service id", serviceId);
+
+        // Find the service offering
+        const serviceOffering = await ServiceOffering.findById(serviceId);
+        if (!serviceOffering) {
+            return res.status(404).send('Service offering not found');
+        }
+
+        // Validate if the service belongs to the user
+        if (!serviceOffering.provider.equals(userId)) {
+            return res.status(403).send('Unauthorized to delete this service offering');
+        }
+
+        // Delete the service offering from the database
+        await serviceOffering.deleteOne();
+
+        // Remove the service offering ID from the user's account
+        const account = await Account.findById(userId);
+        if (!account) {
+            return res.status(404).send('Provider account not found');
+        }
+
+        const serviceOfferingIdStr = serviceId.toString();
+
+        // Manually remove the service offering ID from the array
+        account.serviceOfferings = account.serviceOfferings.filter(
+            (id) => id.toString() !== serviceOfferingIdStr
+        );
+
+        await account.save();
+
+        res.status(200).send('Service offering deleted successfully');
+    } catch (err) {
+        console.error('Error deleting service:', err);
+        res.status(500).send('Internal Server Error');
+    }
+}
