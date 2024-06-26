@@ -111,7 +111,7 @@ function ReviewAndConfirm({ onComplete, onBack , bookingDetails}: ReviewAndConfi
             console.log("Timeslot booked successfully", timeslotResponse);
 
             // update the request
-            const updatedRequestData = { timeslotId: timeslotResponse._id };
+            const updatedRequestData = { timeslot: timeslotResponse._id };
             await axios.patch(`/api/requests/${requestId}`, updatedRequestData, {
                 headers: {
                     'Authorization': `Bearer ${token}`

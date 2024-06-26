@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
 import moment from 'moment';
 import Timeslot, { ITimeslot } from '../models/timeslot';
-import mongoose from "mongoose";
+import mongoose, {Types} from "mongoose";
 
 // Function to generate weekly instances (existing code)
 function generateWeeklyInstances(events: ITimeslot[], startDate: moment.Moment, endDate: moment.Moment) {
@@ -235,8 +235,17 @@ export const getAvailabilityByProviderId: RequestHandler = async (req, res, next
     }
 
     try {
+        // handle both string and objectId
+        const providerIdConditions = [
+            { createdById: providerId }, // Assuming it's a string or matches the ObjectId format
+            { createdById: new Types.ObjectId(providerId) } // Explicitly cast to ObjectId
+        ];
+
         // Fetch all timeslots for the provider
-        const timeslots: ITimeslot[] = await Timeslot.find({ createdById: providerId, isBooked:false, }).lean();
+        const timeslots: ITimeslot[] = await Timeslot.find({
+            // createdById: providerId,
+            $or: providerIdConditions,
+            isBooked:false, }).lean();
 
         // Merge contiguous and overlapping timeslots
         // todo: replace/delete this once the mergeandclean is done
@@ -270,13 +279,14 @@ export const saveEvents: RequestHandler = async (req, res, next) => {
 
         // Insert new events
         const allEventsToInsert = [...events, ...futureInstances];
-        console.log('All events to insert:', allEventsToInsert);
+        // console.log('All events to insert:', allEventsToInsert);
         const insertedEvents = await Timeslot.insertMany(allEventsToInsert.map(event => ({
             title: event.title,
             start: event.start,
             end: event.end,
             isFixed: event.isFixed,
             isBooked: event.isBooked,
+            requestId: event.requestId,
             createdById: userId // Use userId from the token
         })), { ordered: false });
 
@@ -285,6 +295,7 @@ export const saveEvents: RequestHandler = async (req, res, next) => {
         let message = '';
         if (err instanceof Error) {
             message = err.message;
+            console.log(message)
         }
         return res.status(500).json({
             error: "Internal server error",

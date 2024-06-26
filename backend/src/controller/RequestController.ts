@@ -92,7 +92,7 @@ export const updateServiceRequest:RequestHandler = async (req: Request, res:Resp
     const {requestId} = req.params; //get request ID from parameter
     const updates = req.body;
 
-    console.log("update service request:", userId, requestId)
+    console.log("update service request: ", userId, requestId)
     console.log("request updates:", updates)
 
     const serviceRequest = await ServiceRequest.findById(requestId)
