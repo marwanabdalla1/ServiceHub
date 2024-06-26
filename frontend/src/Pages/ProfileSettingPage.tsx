@@ -209,6 +209,10 @@ function UserProfile(): React.ReactElement {
         }
     };
 
+    const handleViewScheduleClick = () => {
+        navigate('/select-availability'); // replace with the correct route to the schedule page
+    };
+
     const renderField = (label: string, field: string) => {
         return (
             <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 0 }}>
@@ -274,10 +278,11 @@ function UserProfile(): React.ReactElement {
                                         <Typography variant="body1">No services provided</Typography>
                                     )}
                                 </Box>
-                                <BlueButton text="Add Service" onClick={handleAddServiceClick} sx={{ width: '150px' }} />
+                                <BlueButton text="Add Service" onClick={handleAddServiceClick} sx={{ alignSelf: 'flex-start', width: 'auto', padding: '5px 10px' }} />
                             </Box>
                         </>
                     )}
+                    <BlueButton text="View My Schedule" onClick={handleViewScheduleClick} sx={{ backgroundColor: '#ADD8E6', color: 'white', mt: 2 }} />
                     <Button onClick={handleDeleteAccount} sx={{ backgroundColor: 'red', color: 'white', mt: 2 }}>Delete Account</Button>
                 </Box>
             </Paper>

@@ -70,7 +70,7 @@ function MainRoutes() {
                 <Route path="/incomingRequests" element={<IncomingRequestsPage/>}/>
                 <Route path="/addservice" element={<AddServicePage/>}/>
                 <Route path="/provider-profile/:id" element={<ProviderProfilePage/>}/>
-                <Route path="select-availability" element={<SelectAvailabilityPage/>}/>
+                <Route path="/select-availability" element={<SelectAvailabilityPage/>}/>
                 <Route path="/update-timeslot" element={<UpdateTimeslot/>}/>
 
 
