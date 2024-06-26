@@ -10,6 +10,7 @@ import moment from 'moment';
 import { useAuth } from '../contexts/AuthContext';
 import {BookingDetails, useBooking} from '../contexts/BookingContext';
 import {ServiceType} from "../models/enums";
+import {Timeslot} from "../models/Timeslot";
 
 const locales = {
     'en-US': enUS,
@@ -38,9 +39,10 @@ interface ServiceScheduleProps {
     Servicetype: ServiceType | undefined;
     defaultSlotDuration: number;
     defaultTransitTime: number;
+    onNext: () => void;
 }
 
-function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, defaultTransitTime }: ServiceScheduleProps) {
+function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, defaultTransitTime, onNext }: ServiceScheduleProps) {
     const {bookingDetails, setTimeAndDuration} = useBooking();
     const providerId = bookingDetails.provider?._id;
 
@@ -57,31 +59,28 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
     // const [previewEnd, setPreviewEnd] = useState<Date| null>(null);
 
 
+    const fetchAndSetAvailability = (options: {start: any, end: any} | undefined) => {
+        let params = {};
+        if (options !== undefined) {
+            const { start, end} = options;
+            params = { start: start, end: end,  transitTime: defaultTransitTime};
+        }
+        else{
+            params = {transitTime: defaultTransitTime}
+        }
 
-    // todo: modify this to actual provider id
-    // const providerId = "6670176384da135b691a27bd"
-    console.log(bookingDetails);
-    useEffect(() => {
         axios.get(`/api/timeslots/${providerId}`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            },
-            params: {transitTime:defaultTransitTime}
+            headers: { 'Authorization': `Bearer ${token}` },
+            params
         }).then(response => {
-            console.log("getting availability data from provider...", response.data)
-            // const events = response.data.map((event: any) => ({
-            //     ...event,
-            //     start: new Date(event.start),
-            //     end: new Date(event.end),
-            //     title: "Available",
-            //     isBooked: event.isBooked,
-            // }));
-            // setAvailability(events);
+            console.log("getting availability data from provider...", response.data);
+
             const events = response.data.filter((event: any) => { //filter those that are longer than the default duration
                 const startTime = new Date(event.start);
                 const endTime = new Date(event.end);
                 const durationInMinutes = (endTime.getTime() - startTime.getTime()) / 60000;
-                return durationInMinutes > defaultSlotDuration;
+                console.log(startTime, endTime, "duration in min:", durationInMinutes, defaultSlotDuration);
+                return durationInMinutes > 0 && durationInMinutes > defaultSlotDuration;
             }).map((event: any) => ({
                 ...event,
                 start: new Date(event.start),
@@ -89,11 +88,71 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
                 title: "Available",
                 isBooked: event.isBooked,
             }));
+
+            // const events = response.data
+            //     .map(event:any => ({
+            //         ...event,
+            //         start: new Date(event.start),
+            //         end: new Date(event.end),
+            //     }))
+            //     .filter(event => {
+            //         const durationInMinutes = (event.end.getTime() - event.start.getTime()) / 60000;
+            //         console.log(event.start, event.end, "duration in min:", durationInMinutes, defaultSlotDuration);
+            //         return durationInMinutes > 0 && durationInMinutes > defaultSlotDuration;
+            //     })
+            //     .map(event => ({
+            //         ...event,
+            //         title: "Available",
+            //         isBooked: event.isBooked,
+            //     }));
             setAvailability(events);
         }).catch(error => {
             console.error("Error fetching timeslots:", error);
         });
-    }, [token]);
+    };
+
+
+    useEffect(() => {
+        fetchAndSetAvailability(undefined);
+    }, [token, providerId, defaultTransitTime]);
+
+
+                    // const providerId = "6670176384da135b691a27bd"
+    console.log(bookingDetails);
+    // useEffect(() => {
+    //     axios.get(`/api/timeslots/${providerId}`, {
+    //         headers: {
+    //             'Authorization': `Bearer ${token}`
+    //         },
+    //         params: {transitTime:defaultTransitTime}
+    //     }).then(response => {
+    //         console.log("getting availability data from provider...", response.data)
+    //         // const events = response.data.map((event: any) => ({
+    //         //     ...event,
+    //         //     start: new Date(event.start),
+    //         //     end: new Date(event.end),
+    //         //     title: "Available",
+    //         //     isBooked: event.isBooked,
+    //         // }));
+    //         // setAvailability(events);
+    //         const events = response.data.filter((event: any) => { //filter those that are longer than the default duration
+    //             const startTime = new Date(event.start);
+    //             const endTime = new Date(event.end);
+    //             const durationInMinutes = (endTime.getTime() - startTime.getTime()) / 60000;
+    //             console.log(startTime, endTime, "duration in min:", durationInMinutes, defaultSlotDuration);
+    //             return durationInMinutes > 0 && durationInMinutes > defaultSlotDuration;
+    //         }).map((event: any) => ({
+    //             ...event,
+    //             start: new Date(event.start),
+    //             end: new Date(event.end),
+    //             title: "Available",
+    //             isBooked: event.isBooked,
+    //         }));
+    //         setAvailability(events);
+    //     }).catch(error => {
+    //         console.error("Error fetching timeslots:", error);
+    //     });
+    // }, [token]);
 
     // const saveAvailability = () => {
     //     console.log('Submitted token' + token)
@@ -229,35 +288,22 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
         const start = new Date(selectedTimeSlot.start.getTime() - defaultTransitTime * 60000);
         const end = new Date(selectedTimeSlot.end.getTime() + defaultTransitTime * 60000);
 
-        const timeSlotWithTransit = {
-            ...selectedTimeSlot,
-            start,
-            end,
-            isBooked: true, // Now set as booked
-            // requestId: //todo: can only be added once the request is created
-        };
+        const timeSlotWithTransit = new Timeslot (selectedTimeSlot.title, start, end, false, true, undefined, selectedTimeSlot.createdById)
+        // {
+        //     ...selectedTimeSlot,
+        //     start,
+        //     end,
+        //     isBooked: true, // Now set as booked
+        //     // requestId: //todo: can only be added once the request is created
+        // };
 
-        bookTimeSlot(timeSlotWithTransit);
+        setTimeAndDuration(timeSlotWithTransit);
+        onNext();
     };
 
 
 
 
-
-
-    const bookTimeSlot = (timeSlot: TimeSlot) => {
-        axios.post('/api/timeslots/book', timeSlot, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        }).then(response => {
-            // Update local state with new timeslots after booking
-            console.log("timeslot booked successfully", response.data)
-            // fetchAvailability();
-        }).catch(error => {
-            console.error("Error booking timeslot:", error);
-        });
-    };
 
 
     // const handleDelete = () => {
@@ -321,48 +367,50 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
                         'Authorization': `Bearer ${token}`
                     }
                 }).then(() => {
-                    axios.get(`/api/timeslots/${providerId}`, {
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        },
-                        params: {transitTime:defaultTransitTime}
-                    }).then(response => {
-                        const events = response.data.map((event: any) => ({
-                            ...event,
-                            start: new Date(event.start),
-                            end: new Date(event.end),
-                            title: "Available",
-                            isBooked: event.isBooked,
-                        }));
-                        setAvailability(events);
+                    // axios.get(`/api/timeslots/${providerId}`, {
+                    //     headers: {
+                    //         'Authorization': `Bearer ${token}`
+                    //     },
+                    //     params: {transitTime:defaultTransitTime}
+                    // }).then(response => {
+                    //     const events = response.data.map((event: any) => ({
+                    //         ...event,
+                    //         start: new Date(event.start),
+                    //         end: new Date(event.end),
+                    //         title: "Available",
+                    //         isBooked: event.isBooked,
+                    //     }));
+                    //     setAvailability(events);
+                    fetchAndSetAvailability(undefined);
                     }).catch(error => {
                         console.error("Error fetching timeslots:", error);
                     });
-                }).catch(error => {
-                    console.error("Error extending fixed slots:", error);
-                });
+                // }).catch(error => {
+                //     console.error("Error extending fixed slots:", error);
+                // });
             } else {
-                axios.get(`/api/timeslots/${providerId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    },
-                    params: {
-                        start: start,
-                        end: end,
-                        transitTime:defaultTransitTime
-                    }
-                }).then(response => {
-                    const events = response.data.map((event: any) => ({
-                        ...event,
-                        start: new Date(event.start),
-                        end: new Date(event.end),
-                        title: "Available",
-                        isBooked: event.isBooked,
-                    }));
-                    setAvailability(events);
-                }).catch(error => {
-                    console.error("Error fetching timeslots:", error);
-                });
+                fetchAndSetAvailability({start, end});
+                // axios.get(`/api/timeslots/${providerId}`, {
+                //     headers: {
+                //         'Authorization': `Bearer ${token}`
+                //     },
+                //     params: {
+                //         start: start,
+                //         end: end,
+                //         transitTime:defaultTransitTime
+                //     }
+                // }).then(response => {
+                //     const events = response.data.map((event: any) => ({
+                //         ...event,
+                //         start: new Date(event.start),
+                //         end: new Date(event.end),
+                //         title: "Available",
+                //         isBooked: event.isBooked,
+                //     }));
+                //     setAvailability(events);
+                // }).catch(error => {
+                //     console.error("Error fetching timeslots:", error);
+                // });
             }
         }
     };

@@ -17,13 +17,13 @@ const SelectAvailabilityBooking_temp: React.FC = () => {
                     Book from provider
                 </Typography>
             </Box>
-            <AvailabilityCalendarBooking
-                Servicetype={serviceType}
-                defaultSlotDuration={defaultSlotDuration}
-                defaultTransitTime={defaultTransitTime}
-                // globalAvailabilities={globalAvailabilities}
+            {/*<AvailabilityCalendarBooking*/}
+            {/*    Servicetype={serviceType}*/}
+            {/*    defaultSlotDuration={defaultSlotDuration}*/}
+            {/*    defaultTransitTime={defaultTransitTime}*/}
+            {/*    // globalAvailabilities={globalAvailabilities}*/}
 
-            />
+            {/*/>*/}
             
         </Container>
     );

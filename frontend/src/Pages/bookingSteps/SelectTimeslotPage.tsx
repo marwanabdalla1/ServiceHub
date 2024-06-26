@@ -51,7 +51,7 @@ function SelectTimeslot({ onNext, onBack, bookingDetails }: SelectTimeslotProps)
                     </Typography>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
                         <Button variant="outlined" onClick={onBack}>Back</Button>
-                        <Button variant="contained" onClick={onNext}>Next</Button>
+                        {/*<Button variant="contained" onClick={onNext}>Next</Button>*/}
                     </Box>
                     {/*<Grid container spacing={2}>*/}
                     {/*    /!* Sample dates *!/*/}
@@ -86,6 +86,7 @@ function SelectTimeslot({ onNext, onBack, bookingDetails }: SelectTimeslotProps)
                         Servicetype={bookingDetails?.serviceType}
                         defaultSlotDuration={bookingDetails.serviceOffering?.baseDuration || 60}
                         defaultTransitTime={bookingDetails.serviceOffering?.bufferTimeDuration || 30}
+                        onNext={onNext}
                         // globalAvailabilities={globalAvailabilities}
                     />
                 </Box>

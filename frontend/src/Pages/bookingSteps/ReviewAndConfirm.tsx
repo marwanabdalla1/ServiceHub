@@ -4,6 +4,8 @@ import { useBooking, BookingDetails } from '../../contexts/BookingContext';
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
 import {RequestStatus} from "../../models/enums";
+import {useAuth} from "../../contexts/AuthContext";
+import {Timeslot} from "../../models/Timeslot";
 
 
 
@@ -17,11 +19,45 @@ function ReviewAndConfirm({ onComplete, onBack , bookingDetails}: ReviewAndConfi
     // const { bookingDetails } = useBooking();
     const navigate = useNavigate();
     const [comment, setComment] = useState('');
+    const { token } = useAuth();
 
 
     // Handle changes in the TextField
     const handleCommentChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setComment(event.target.value);
+    };
+
+
+    // const bookTimeSlot = (timeSlot: any) => {
+    //     axios.post('/api/timeslots/book', timeSlot, {
+    //         headers: {
+    //             'Authorization': `Bearer ${token}`
+    //         }
+    //     }).then(response => {
+    //         // Update local state with new timeslots after booking
+    //         console.log("timeslot booked successfully", response.data)
+    //         // fetchAvailability();
+    //     }).catch(error => {
+    //         console.error("Error booking timeslot:", error);
+    //     });
+    // };
+
+    const bookTimeSlot = (timeSlot: any): Promise<any> => {
+        return new Promise((resolve, reject) => {
+            axios.post('/api/timeslots/book', timeSlot, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+                .then(response => {
+                    console.log("timeslot booked successfully", response.data);
+                    resolve(response.data);  // Resolve the promise with the response data
+                })
+                .catch(error => {
+                    console.error("Error booking timeslot:", error);
+                    reject(error);  // Reject the promise if there's an error
+                });
+        });
     };
 
     const handleConfirmBooking = async() => {
@@ -32,16 +68,17 @@ function ReviewAndConfirm({ onComplete, onBack , bookingDetails}: ReviewAndConfi
         const requestData = {
             requestStatus: RequestStatus.pending, // Set default or transformed values
             serviceType: bookingDetails.serviceType,
-            appointmentStartTime: Date.now(), //todo: update the actual time
-            appointmentEndTime: Date.now(),
+            timeSlot: bookingDetails.timeSlot, //this includes transit time
+            appointmentStartTime: bookingDetails.timeSlot?.start,
+            appointmentEndTime: bookingDetails.timeSlot?.end,
             // uploads: [], //bookingDetails.uploads? || [],
             comment: comment || " ",
             serviceFee: bookingDetails.price, // Assuming the frontend uses 'fee' and backend expects 'serviceFee'
             serviceOffering: bookingDetails.serviceOffering?._id, // Adjust field names as needed
             job: undefined,
             provider: bookingDetails.provider?._id,
-            // requestedBy: bookingDetails.requestedBy?._id,
-            requestedBy: "666eda4dda888fe359668b63",
+            requestedBy: bookingDetails.requestedBy?._id,
+            // requestedBy: "666eda4dda888fe359668b63",
             // rating:  0, // Set default if not provided //no rating for the request, only for jobs
             profileImageUrl: "URL placeholder "
         };
@@ -50,14 +87,44 @@ function ReviewAndConfirm({ onComplete, onBack , bookingDetails}: ReviewAndConfi
         console.log(requestData)
 
 
-        // post this
         try {
-            const response = await axios.post(apiEndpoint, requestData);
+            // post the request
+            const response = await axios.post(apiEndpoint, requestData, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            const requestId = response.data._id;
             console.log('Booking confirmed:', response.data);
+
+
+            const timeSlotWithRequest = {
+                ...bookingDetails.timeSlot,
+                // title: bookingDetails.timeSlot?.title,
+                requestId: requestId,
+            };
+
+
+
+            // post the timeslot into timeslot table
+            const timeslotResponse = await bookTimeSlot(timeSlotWithRequest);
+            console.log("Timeslot booked successfully", timeslotResponse);
+
+            // update the request
+            const updatedRequestData = { timeslotId: timeslotResponse._id };
+            await axios.patch(`/api/requests/${requestId}`, updatedRequestData, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            console.log('Request updated with timeslot ID:', timeslotResponse._id);
+
         } catch(error: any) {
                 console.error('Error confirming booking:', error);
                 // Error handling
         }
+
+
 
         // example from the signup page
         // const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -120,7 +187,7 @@ function ReviewAndConfirm({ onComplete, onBack , bookingDetails}: ReviewAndConfi
                                 <strong>Service:</strong> {bookingDetails.serviceType}
                             </Typography>
                             <Typography variant="body1">
-                                <strong>Date:</strong> {bookingDetails.startTime ? bookingDetails.startTime.toLocaleString() : 'No date set'}
+                                <strong>Date:</strong> {bookingDetails.timeSlot?.start ? bookingDetails.timeSlot?.start.toLocaleString() : 'No date set'}
                             </Typography>
                             <Typography variant="body1">
                                 <strong>Price:</strong> {bookingDetails.price}
@@ -158,7 +225,7 @@ function ReviewAndConfirm({ onComplete, onBack , bookingDetails}: ReviewAndConfi
                                     {bookingDetails.location}
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary">
-                                    {bookingDetails.startTime ? bookingDetails.startTime.toLocaleString() : 'No date set'}
+                                    {bookingDetails.timeSlot?.start ? bookingDetails.timeSlot?.start.toLocaleString() : 'No date set'}
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary">
                                     {bookingDetails.serviceOffering?.serviceType}

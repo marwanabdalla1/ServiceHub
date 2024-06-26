@@ -228,7 +228,7 @@ export const getAvailabilityByProviderId: RequestHandler = async (req, res, next
     // const userId = (req as any).user.userId; // consumer id
     const {providerId} = req.params;
     const transitTime = parseInt(req.query.transitTime as string); // Get the transit time from query params
-    console.log(transitTime)
+    console.log(req.query, "transit Time: ", transitTime)
     if (isNaN(transitTime)) {
         console.log("invalid transit time!")
         return res.status(400).json({ error: 'Invalid transit time provided' });
