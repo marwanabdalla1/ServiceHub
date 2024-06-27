@@ -11,9 +11,9 @@ import Typography from '@mui/material/Typography';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
 import Link from '@mui/material/Link';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
-import MediaCard from './JobCard';
+import MediaCard from './ReceivedServiceCard';
 import { Job } from '../models/Job';
-import JobRow from './JobRow';
+import ReceivedServiceRow from './ReceivedServiceRow';
 import { Account } from '../models/Account';
 import account from '../models/Account';
 import { Timeslot } from '../models/Timeslot';
@@ -23,6 +23,8 @@ import {ServiceOffering} from "../models/ServiceOffering";
 import {useAuth} from "../contexts/AuthContext";
 import {useEffect} from "react";
 import axios from "axios";
+import { useNavigate } from 'react-router-dom';
+import { now } from 'moment';
 
 
 
@@ -43,47 +45,161 @@ import axios from "axios";
 //   new Job('3', ServiceType.homeRemodeling, new Date('2024-05-13'), new Date('2024-05-13'),  '100', JobStatus.cancelled, 'Description 3', account,account, '../../images/profiles/profile1.png',  3,  new Timeslot(ServiceType.petSitting, new Date(), new Date(), true), serviceRequests[2], undefined),
 // ];
 
-export default function JobHistoryTable() {
+export default function ReceivedServiceTable() {
   const [showMediaCard, setShowMediaCard] = React.useState(false);
-  const [selectedJob, setSelectedJob] = React.useState<Job | null>(null);
-  const [jobs, setJobs] = React.useState<Job[]>([]);
-  const {token, accountId} = useAuth();
+  const [selectedReceivedService, setSelectedReceivedService] = React.useState<Job | null>(null);
+  const [receivedServices, setReceivedServices] = React.useState<Job[]>([]);
+  const {token, account} = useAuth();
+  const navigate = useNavigate();
+  const [provider, setProvider] = React.useState<Account | null>(null);
+  const [receiver, setReceiver] = React.useState<Account | null>(null);
 
   // todo: this probably can be combined/reused along with the request history table
   useEffect(() => {
-    console.log(token)
     if (token && account) {
       // console.log("this is the logged in account in request table:", account)
       // setLoading(true);
-      axios.get<Job[]>(`/api/jobs/provider/${accountId}`, {
+      axios.get<Job[]>(`/api/jobs/requester/${account._id}`, {
         headers: {Authorization: `Bearer ${token}` }
       })
           .then(response => {
             console.log("getting requests ...", response.data)
-            setJobs(response.data);
+            setReceivedServices(response.data);
             // setLoading(false);
           })
           .catch(error => {
             console.error('Failed to fetch service requests:', error);
-            setJobs([]);
+            setReceivedServices([]);
             // setError('Failed to load service requests');
             // setLoading(false);
           });
+
+
     }
-  }, [accountId]);
+  }, [account?._id]);
 
   const handleToggleMediaCard = (job: Job | null) => {
-    setSelectedJob(job);
+    setSelectedReceivedService(job);
     setShowMediaCard(job !== null);
+  };
+
+  useEffect(() => {
+    if (selectedReceivedService) {
+      fetchProvider(selectedReceivedService.provider);
+      fetchReceiver(selectedReceivedService.receiver);
+    }
+  }, [selectedReceivedService, token]);
+
+  const fetchProvider = (providerId: Account) => {
+    axios.get<Account>(`/api/account/providers/${providerId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(response => {
+        setProvider(response.data);
+      })
+      .catch(error => {
+        console.error('Failed to fetch provider:', error);
+        setProvider(null);
+      });
+  };
+
+  const fetchReceiver = (receiverId: Account) => {
+    axios.get<Account>(`/api/account/providers/${receiverId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(response => {
+        setReceiver(response.data);
+      })
+      .catch(error => {
+        console.error('Failed to fetch receiver:', error);
+        setReceiver(null);
+      });
   };
 
   // handle completing the job
   const handleComplete =  async() => {
-  //   sanity check: appointment time has to be in the past
+ 
 
-  //   todo: for completed jobs: revoke the completion!
+    if (!selectedReceivedService) {
+      console.error('No job selected');
+      return;
+    }
+ //   sanity check: appointment time has to be in the past
+    if (!selectedReceivedService.appointmentEndTime || selectedReceivedService.appointmentEndTime > new Date()){
+        //TODO: add modal to let user know
+        console.error('The job cannot be completed, since its appointment is in the future.');
+        return;
+    }
 
-  }
+    try {
+
+      // update the job
+        const updateJobData = {
+          jobStatus: JobStatus.completed,
+        };
+        console.log("selected request id:" , selectedReceivedService?._id, updateJobData)
+        const updateJob = await axios.put(`/api/jobs/${selectedReceivedService?._id}`, updateJobData, {
+          headers: {Authorization: `Bearer ${token}` }
+        });
+        console.log('Request Updated:', updateJob.data);
+
+        console.log(updateJob);
+
+        setReceivedServices(updateJob.data);
+        setShowMediaCard(false);
+     } catch (error) {
+      console.error('Error completing job:', error);
+    }
+
+
+
+  };
+
+  // handle cancel the job
+  const handleCancel =  async() => {
+ 
+
+    if (!selectedReceivedService) {
+      console.error('No job selected');
+      return;
+    }
+
+    try {
+
+      // update the job
+        const updateJobData = {
+          status: JobStatus.cancelled,
+        };
+        console.log("selected request id:" , selectedReceivedService?._id, updateJobData)
+        const updateJob = await axios.put(`/api/jobs/${selectedReceivedService?._id}`, updateJobData, {
+          headers: {Authorization: `Bearer ${token}` }
+        });
+        console.log('Job Updated:', updateJob.data);
+        // Update local state to reflect these changes
+        const updatedJobs = receivedServices.map(receivedService => {
+          if (receivedService._id === selectedReceivedService._id) {
+            return { ...receivedService, ...updateJobData };
+          }
+          return receivedService;
+        });
+
+        setReceivedServices(updatedJobs);
+        
+        setShowMediaCard(false);
+     } catch (error) {
+      console.error('Error completing job:', error);
+    }
+
+
+
+  };
+
+  const handleReview = (job: Job) => {
+    navigate(`/customer_review/${job._id}`);
+  };
+  
+
+
 
   return (
     <Box sx={{ minWidth: 275, margin: 2 }}>
@@ -92,10 +208,10 @@ export default function JobHistoryTable() {
           <Link color="inherit" href="/" underline="hover">
             History
           </Link>
-          <Typography color="textPrimary">Job History</Typography>
+          <Typography color="textPrimary">Received Services</Typography>
         </Breadcrumbs>
         <Typography variant="h6" component="div" sx={{ marginBottom: '16px' }}>
-          Job History
+          Received Services
         </Typography>
       </Box>
       <Box style={{ display: 'flex' }}>
@@ -112,20 +228,23 @@ export default function JobHistoryTable() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {jobs.map((job) => (
-                    <JobRow key={job._id} job={job} onViewDetails={handleToggleMediaCard} />
+                  {receivedServices.map((receivedService) => (
+                    <ReceivedServiceRow key={receivedService._id} receivedService={receivedService} onViewDetails={handleToggleMediaCard} />
                   ))}
                 </TableBody>
               </Table>
             </TableContainer>
           </Box>
         </Box>
-        {showMediaCard && selectedJob && (
+        {showMediaCard && selectedReceivedService && (
           <div style={{ position: 'relative', flexShrink: 0, width: 400, marginLeft: 2 }}>
-            <MediaCard job={selectedJob}
+            <MediaCard receivedService={selectedReceivedService}
+                      provider={provider}
+                      receiver={receiver}
                        onClose={() => setShowMediaCard(false)}
-                       onComplete={() => console.log("job completed")}
-                       onCancel = {() => console.log("job cancelled")}
+                       onComplete={handleComplete}
+                       onCancel = {handleCancel}
+                       onReview={() => navigate("/customer_review")}
             />
           </div>
         )}

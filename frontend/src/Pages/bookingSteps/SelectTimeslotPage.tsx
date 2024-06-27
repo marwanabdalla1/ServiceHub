@@ -1,7 +1,7 @@
 import React from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Container, Box, Typography, Card, CardContent, Grid, Button } from '@mui/material';
-import { useBooking, BookingDetails } from '../../contexts/BookingContext';
+import {Link, useNavigate, useParams} from 'react-router-dom';
+import {Container, Box, Typography, Card, CardContent, Grid, Button} from '@mui/material';
+import {useBooking, BookingDetails} from '../../contexts/BookingContext';
 import {Account} from "../../models/Account";
 import AvailabilityCalendarBooking from "../../components/AvailabilityCalendarBooking";
 
@@ -12,11 +12,10 @@ interface SelectTimeslotProps {
     bookingDetails: BookingDetails;
 }
 
-function SelectTimeslot({ onNext, onBack, bookingDetails }: SelectTimeslotProps) {
-    const {setProvider,
-    setRequestedBy, setSelectedServiceDetails, setTimeAndDuration } = useBooking();
+function SelectTimeslot({onNext, onBack, bookingDetails}: SelectTimeslotProps) {
+    const {setProvider, setRequestedBy, setSelectedServiceDetails, setTimeAndDuration} = useBooking();
     const navigate = useNavigate();
-    const { id } = useParams(); //use this to then make a post request to the user with the id to get the user data
+    const {id} = useParams(); //use this to then make a post request to the user with the id to get the user data
 
     // review-and-confirm/:id
 
@@ -41,7 +40,7 @@ function SelectTimeslot({ onNext, onBack, bookingDetails }: SelectTimeslotProps)
     //
     return (
         <Container>
-            <Box sx={{ display: 'center', justifyContent: 'space-between', mt: 4 }}>
+            <Box sx={{display: 'center', justifyContent: 'space-between', mt: 4}}>
                 <Box sx={{width: '70%'}}>
                     <Typography variant="h6" gutterBottom>
                         Step 2 of 3
@@ -49,7 +48,7 @@ function SelectTimeslot({ onNext, onBack, bookingDetails }: SelectTimeslotProps)
                     <Typography variant="h4" gutterBottom>
                         Select time
                     </Typography>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+                    <Box sx={{display: 'flex', justifyContent: 'space-between', mt: 2}}>
                         <Button variant="outlined" onClick={onBack}>Back</Button>
                         {/*<Button variant="contained" onClick={onNext}>Next</Button>*/}
                     </Box>
@@ -77,7 +76,7 @@ function SelectTimeslot({ onNext, onBack, bookingDetails }: SelectTimeslotProps)
 
                     {/*    ))}*/}
                     {/*</Box>*/}
-                    <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mt: 4, mb: 4 }}>
+                    <Box display="flex" alignItems="center" justifyContent="space-between" sx={{mt: 4, mb: 4}}>
                         <Typography variant="h4">
                             Book from provider
                         </Typography>
@@ -92,7 +91,7 @@ function SelectTimeslot({ onNext, onBack, bookingDetails }: SelectTimeslotProps)
                 </Box>
                 <Box sx={{width: '20%'}}>
                     <Card>
-                    <CardContent sx={{ display: 'flex', alignItems: 'center' }}>
+                        <CardContent sx={{display: 'flex', alignItems: 'center'}}>
                             <Box>
                                 <Typography variant="h6">{bookingDetails.provider?.lastName}</Typography>
                                 <Typography variant="body2" color="text.secondary">

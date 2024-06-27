@@ -4,7 +4,7 @@ import FilterPage from './Pages/FilterPage';
 import SignInPage from './Pages/LoginPage';
 import SignUpPage from './Pages/SignUpPage';
 import NavigationBar from './components/Navbar';
-import JobHistoryPage from './Pages/JobHistoryPage';
+import ReceivedServicesPage from './Pages/ReceivedServicesPage';
 import RequestHistoryPage from './Pages/RequestHistoryPage';
 import IncomingRequestsPage from './Pages/IncomingRequestsPage';
 import HomePage from './Pages/HomePage';
@@ -26,6 +26,8 @@ import axios from "axios";
 import ProposeNewtimePage from './Pages/ProposeNewTimePage';
 import {AccountProvider} from "./contexts/AuthContext";
 import BookingPage from "./Pages/bookingSteps/BookingPage";
+import OfferedServicesPage from './Pages/OfferedServicesPage';
+import ChangeBookingTimePage from './Pages/ChangeBookingTimePage';
 // import SelectAvailabilityBooking_temp from "./Pages/SelectAvailabilityBooking_temp";
 
 function App() {
@@ -62,16 +64,18 @@ function MainRoutes() {
             <Routes>
                 <Route path="/" element={<HomePage/>}/>
                 <Route path="/setprofile" element={<ProfileSettingPage/>}/>
-                <Route path="/customer_review" element={<ReviewPage/>}/>
+                <Route path="/customer_review/:git " element={<ReviewPage/>}/>
                 <Route path="/login" element={<SignInPage/>}/>
                 <Route path="/signup" element={<SignUpPage/>}/>
                 <Route path="/filter" element={<FilterPage/>}/>
-                <Route path="/jobs/jobHistory" element={<JobHistoryPage/>}/>
+                <Route path="/jobs/receivedServices" element={<ReceivedServicesPage/>}/>
                 <Route path="/jobs/requestHistory" element={<RequestHistoryPage/>}/>
+                <Route path="/jobs/offeredServices" element={<OfferedServicesPage/>}/>
                 <Route path="/incomingRequests" element={<IncomingRequestsPage/>}/>
                 <Route path="/addservice" element={<AddServicePage/>}/>
                 <Route path="/provider-profile/:id" element={<ProviderProfilePage/>}/>
                 <Route path="/select-availability" element={<SelectAvailabilityPage/>}/>
+                <Route path="/change-booking-time/:providerId/:requestId" element={<ChangeBookingTimePage/>}/>
                 {/*<Route path="/select-availability-booking" element={<SelectAvailabilityBooking_temp/>}/>*/}
 
                 <Route path="/update-timeslot" element={<UpdateTimeslot/>}/>

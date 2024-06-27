@@ -1,14 +1,18 @@
 import * as React from 'react';
 import Card from '@mui/material/Card';
+import CloseIcon from '@mui/icons-material/Close';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
-//import Button from '@mui/material/Button';
-import { ServiceRequest as Request} from '../models/ServiceRequest';
+import { ServiceRequest as Request, ServiceRequest} from '../models/ServiceRequest';
 import { GoStarFill } from 'react-icons/go';
 import BlackButton from './inputs/blackbutton';
 import Avatar from '@mui/material/Avatar';
 import { Divider } from '@mui/material';
 import { RequestStatus } from '../models/enums';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { Account } from '../models/Account';
+import axios from 'axios';
 
 interface MediaCardProps {
   request: Request;
@@ -16,27 +20,54 @@ interface MediaCardProps {
   onAccept: (request: Request) => void;
   onDecline: (request: Request) => void;
   onProposeNewTime: (request: Request, newTime: Date) => void;
+  onCancel: () => void;
 }
 
-const MediaCard: React.FC<MediaCardProps> = ({ request, onClose, onAccept,onDecline, onProposeNewTime }) => {
+const MediaCard: React.FC<MediaCardProps> = ({ request, onClose, onAccept,onDecline, onProposeNewTime, onCancel }) => {
+  
+  const { account, token} = useAuth();
+  const navigate = useNavigate();
+
+  const handleProposeNewTime = (request: ServiceRequest) => {
+    navigate(`/change-booking-time/${request.provider}/${request._id}`); // Navigate to the calendar to select a new Timeslot
+  }
+  
   const renderButton = () => {
-    switch (request.requestStatus) {
-      case RequestStatus.pending:
+if (request.requestStatus === RequestStatus.cancelled ){
+          console.log("No Actions possible for CANCELLED requests!");
+        }
+        else if (request.requestStatus === RequestStatus.declined ){
+          console.log("No Actions possible for DECLINED requests!");
+        }
+        else if (request.requestStatus === RequestStatus.accepted ){
+          return(<BlackButton text="Cancel Request" onClick={onCancel} sx={{ marginRight:"1rem" }}/>);
+        }
+         else {
+          console.log(request);
         return (
           <>
-          <BlackButton text="Accept" onClick={() => onAccept(request)} sx={{ marginRight:"1rem" }}/>
-          <BlackButton text="Decline" onClick={() => onDecline(request)} sx={{ marginRight: "1rem" }} />
-          <BlackButton text="Propose New Time" onClick={() => onProposeNewTime(request, new Date())}/>
+          <BlackButton text="Cancel Request" onClick={onCancel} sx={{ marginRight:"1rem" }}/>
+          <BlackButton text="Change Time" onClick={() => handleProposeNewTime(request)} />
           </>
-        );
-      default:
-        return (
-          <BlackButton text="Close" onClick={onClose} />
         );
     }
   };
   return (
     <Card>
+      <button
+        style={{
+          position: 'absolute',
+          top: '0.5rem',
+          right: '0.5rem',
+          background: 'transparent',
+          border: 'none',
+          cursor: 'pointer'
+        }}
+        onClick={onClose}
+        aria-label="close"
+      >
+        <CloseIcon />
+      </button>
       <CardContent>
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem' }}>
           <Avatar alt={request.requestedBy.firstName + " " + request.requestedBy.lastName} src={request.profileImageUrl} sx={{ width: 100, height: 100, marginRight: '1rem' }} />
