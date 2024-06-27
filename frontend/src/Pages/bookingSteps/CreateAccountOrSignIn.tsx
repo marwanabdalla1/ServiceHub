@@ -60,12 +60,15 @@ function CreateAccountOrSignIn({ onNext, onBack, bookingDetails }: CreateAccount
     //     };
     // };
 
+
+    // todo: make these navigate back to the booking page!
     const handleSignUpClick = () => {
         navigate('/signup');
     };
 
     const handleLoginClick = () => {
         navigate('/login');
+        // loginUser()
     };
 
     if (!account || !token){
