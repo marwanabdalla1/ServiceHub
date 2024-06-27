@@ -8,12 +8,18 @@ import { useAuth } from '../contexts/AuthContext';
 const stripePromise = loadStripe('pk_test_51NEdzDChuUsrK8kGX1Wcu8TazsmDPprhV212alFOg78GS9W3FW8JLv1S6FyJnirCaj4f5UevhfUetfDSxIvATSHp003QYXNJYT'); 
 
 const BecomeProPage = () => {
-  const {account} = useAuth();
+  const {token, account} = useAuth();
   const userid = account?._id;
-
+console.log(token)
   const handleJoinNow = async () => {
     try {
-      const response = await axios.post('/api/becomepro/payment', { client_reference_id: userid });
+     
+      const response = await axios.post('/api/becomepro/payment', 
+        {}, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+    });
       const sessionId = response.data.id;
       const stripe = await stripePromise;
 

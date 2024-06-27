@@ -33,7 +33,7 @@ app.use(cors(corsOptions));
 // Middleware for logging
 app.use(logger);
 
-app.use("/api/webhook", express.raw({ type: 'application/json' }), WebhookRouter); //DON'T MOVE THIS LINE AFTER EXPRESS.JSON
+app.use("/webhook", express.raw({ type: 'application/json' }), WebhookRouter); //DON'T MOVE THIS LINE AFTER EXPRESS.JSON
 app.use(express.json());
 app.use("/api/auth", AuthRouter);
 // authenticate users

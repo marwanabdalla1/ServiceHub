@@ -5,6 +5,7 @@ import LightBlueFileButton from "../components/inputs/BlueUploadButton";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from "../contexts/AuthContext";
 import axios from "axios";
+import { sub } from 'date-fns';
 
 type EditModeType = {
     [key: string]: boolean;
@@ -21,6 +22,27 @@ function UserProfile(): React.ReactElement {
     const [services, setServices] = useState<any[]>([]);
     const [openDialog, setOpenDialog] = useState(false);
     const [serviceToDelete, setServiceToDelete] = useState<string | null>(null);
+    const [subscriptions, setSubscriptions] = useState<any[]>([]);
+    const {account :userAccount  } = useAuth();
+    const client_reference_id = userAccount?._id;
+
+    const fetchSubscriptionData = async (clientReferenceId: string) => {
+      try {
+        const response = await axios.get('/api/becomepro/subscription', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        console.log(`Status: ${response.status}`);
+        console.log(response.data);
+
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching subscription data:', error);
+        throw error;
+      }
+    };
 
     function useSkipFirstEffect(effect: React.EffectCallback, deps?: React.DependencyList) {
         const isFirstRender = useRef(true);
@@ -46,12 +68,15 @@ function UserProfile(): React.ReactElement {
                     }
                 });
 
-                console.log(`Status: ${response.status}`);
-                console.log(response.data);
-                console.log(isProvider)
 
                 if (JSON.stringify(response.data) !== JSON.stringify(account)) {
                     setAccount(response.data);
+                }
+
+                // Fetch subscription data
+                if (client_reference_id) {
+                    const subscriptionData = await fetchSubscriptionData(client_reference_id);
+                    setSubscriptions(subscriptionData);
                 }
             } catch (error) {
                 console.error('Error fetching account details:', error);
@@ -60,18 +85,14 @@ function UserProfile(): React.ReactElement {
     }, [account]);
 
     useEffect(() => {
-        console.log(token)
         axios.get('/api/offerings/myoffering', {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
         })
             .then(response => {
-                console.log(`Status: ${response.status}`);
-                console.log(response.data);
 
                 setServices(response.data || []);
-                console.log(services);
             })
             .catch(error => {
                 console.error('Error fetching services:', error);
@@ -210,7 +231,7 @@ function UserProfile(): React.ReactElement {
     };
 
     const handleViewScheduleClick = () => {
-        navigate('/select-availability'); // replace with the correct route to the schedule page
+        navigate('/select-availability');
     };
 
     const renderField = (label: string, field: string) => {
@@ -272,6 +293,9 @@ function UserProfile(): React.ReactElement {
                                                 <Typography variant="body1">{service.serviceType}</Typography>
                                                 <Button onClick={() => handleEditServiceClick(service)}>Edit</Button>
                                                 <Button onClick={() => handleOpenDialog(service._id)} sx={{ color: 'red' }}>Delete</Button>
+                                                {subscriptions.map((subscription) => (
+                                                  <Typography variant="body1" key={subscription.id}>{subscription.id}</Typography>
+                                                ))}
                                             </Box>
                                         ))
                                     ) : (
@@ -286,7 +310,6 @@ function UserProfile(): React.ReactElement {
                     <Button onClick={handleDeleteAccount} sx={{ backgroundColor: 'red', color: 'white', mt: 2 }}>Delete Account</Button>
                 </Box>
             </Paper>
-
             <Dialog open={openDialog} onClose={handleCloseDialog}>
                 <DialogTitle>{"Confirm Delete"}</DialogTitle>
                 <DialogContent>

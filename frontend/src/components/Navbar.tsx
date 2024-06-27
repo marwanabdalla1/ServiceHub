@@ -32,6 +32,9 @@ const ServiceButton: React.FC<ServiceButtonProps> = ({isLoggedIn, isProvider, is
     };
 
     const getLinkDestination = () => {
+        if (isProvider && !isPremium) {
+            return "/becomepro";
+        }
         return isLoggedIn ? "/addservice" : "/login";
     };
 
@@ -47,10 +50,11 @@ const ServiceButton: React.FC<ServiceButtonProps> = ({isLoggedIn, isProvider, is
 };
 
 const Navbar: React.FC<NavbarProps> = ({toggleDrawer, onChange, onSearch, search}) => {
-    const {token, isLoggedIn, logoutUser, isProvider, isPremium} = useAuth();
-    console.log("token: " + token + '\n' + "isProvider: " + isProvider() + '\n' + "isPremium: " + isPremium() );
+    const {token, isLoggedIn, logoutUser, isProvider, account} = useAuth();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [profileAnchorEl, setProfileAnchorEl] = useState<null | HTMLElement>(null);
+    const isPremium = account?.isPremium || false;
+    console.log("token: " + token + '\n' + "isProvider: " + isProvider() + '\n' + "isPremium: " + isPremium );
 
     const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
@@ -113,7 +117,7 @@ const Navbar: React.FC<NavbarProps> = ({toggleDrawer, onChange, onSearch, search
                     <ServiceButton
                         isLoggedIn={isLoggedIn()}
                         isProvider={isProvider()}
-                        isPremium={isPremium()}
+                        isPremium={isPremium}
                     />
                     <RequestListButton className="h-6 w-6" onClick={handleMenuOpen}/>
                     <IoNotificationsOutline className="h-6 w-6"/>

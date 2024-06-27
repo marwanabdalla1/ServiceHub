@@ -111,7 +111,7 @@ export const getServiceOfferingById = async (req: Request, res: Response) => {
 export const getServiceOfferingsByUser = async (req: Request, res: Response) => { //The authenticated version of the getOfferings function (uses token)
     try {
         console.log("getting offerings")
-        console.log(req)
+        // console.log(req)
         const userId = (req as any).user.userId;
         const offerings = await ServiceOffering.find({ provider: userId });
         console.log(offerings)
