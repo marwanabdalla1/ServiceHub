@@ -12,6 +12,8 @@ type AccountContextType = {
     loginUser: (event: React.FormEvent<HTMLFormElement>) => Promise<void>;
     logoutUser: () => void;
     isLoggedIn: () => boolean;
+    isPremium: () => boolean;
+    isProvider: () => boolean;
 }
 
 type Props = { children: React.ReactNode };
@@ -23,6 +25,7 @@ export const AccountProvider = ({children}: Props) => {
     const [token, setToken] = useState<string | null>(null);
     const [isReady, setIsReady] = useState<boolean>(false);
     const [account, setAccount] = useState<Account | null>(null);
+
     // const [nextPath, setNextPath] = useState('/');  // Default to home
 
     useEffect(() => {

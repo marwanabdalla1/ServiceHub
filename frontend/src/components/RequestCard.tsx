@@ -25,7 +25,7 @@ interface MediaCardProps {
 
 const MediaCard: React.FC<MediaCardProps> = ({ request, onClose, onAccept,onDecline, onProposeNewTime, onCancel }) => {
   
-  const { account, token, isProvider } = useAuth();
+  const { account, token} = useAuth();
   const navigate = useNavigate();
 
   const handleProposeNewTime = (request: ServiceRequest) => {
