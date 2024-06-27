@@ -22,6 +22,7 @@ export const authenticate: RequestHandler = async (req, res, next) => {
 
     // Verify the token
     if (!process.env.ACCESS_TOKEN_SECRET) {
+        console.log("Access token secret not found")
         return res.status(500).json({
             error: "Internal server error",
             message: "Access token secret not found."
@@ -29,14 +30,16 @@ export const authenticate: RequestHandler = async (req, res, next) => {
     }
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err: any, user: any) => {
         if (err) {
+            console.log("Invalid token")
             return res.status(403).json({error: "Forbidden"});
         }
         // Check if the userId is included in the payload of the verified token
         if (!user.userId) {
+            console.log("Invalid token payload")
             return res.status(403).json({error: "Forbidden", message: "Invalid token payload"});
         }
-
         (req as any).user = user;
+        console.log("User authenticated")
         next();
     });
 };
