@@ -17,7 +17,7 @@ type FieldType = {
 function UserProfile(): React.ReactElement {
 
     const [account, setAccount] = useState<any>(null);
-    const { token, isProvider, isPremium, logoutUser, accountId } = useAuth();
+    const { token, isProvider, isPremium, logoutUser } = useAuth();
     const [services, setServices] = useState<any[]>([]);
     const [openDialog, setOpenDialog] = useState(false);
     const [serviceToDelete, setServiceToDelete] = useState<string | null>(null);
@@ -38,7 +38,7 @@ function UserProfile(): React.ReactElement {
     useSkipFirstEffect(() => {
         (async () => {
             try {
-                console.log("token: " + token + '\n' + "isProvider: " + isProvider() + '\n' + "isPremium: " + isPremium() + '\n Id: ' + accountId);
+                console.log("token: " + token + '\n' + "isProvider: " + isProvider() + '\n' + "isPremium: " + isPremium() );
 
                 const response = await axios.get('/api/account', { // replace with your backend endpoint
                     headers: {

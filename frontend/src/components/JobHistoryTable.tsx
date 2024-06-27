@@ -47,7 +47,7 @@ export default function JobHistoryTable() {
   const [showMediaCard, setShowMediaCard] = React.useState(false);
   const [selectedJob, setSelectedJob] = React.useState<Job | null>(null);
   const [jobs, setJobs] = React.useState<Job[]>([]);
-  const {token, accountId} = useAuth();
+  const {token} = useAuth();
 
   // todo: this probably can be combined/reused along with the request history table
   useEffect(() => {
@@ -55,7 +55,7 @@ export default function JobHistoryTable() {
     if (token && account) {
       // console.log("this is the logged in account in request table:", account)
       // setLoading(true);
-      axios.get<Job[]>(`/api/jobs/provider/${accountId}`, {
+      axios.get<Job[]>(`/api/jobs/provider/}`, {
         headers: {Authorization: `Bearer ${token}` }
       })
           .then(response => {
@@ -70,7 +70,7 @@ export default function JobHistoryTable() {
             // setLoading(false);
           });
     }
-  }, [accountId]);
+  }, []);
 
   const handleToggleMediaCard = (job: Job | null) => {
     setSelectedJob(job);

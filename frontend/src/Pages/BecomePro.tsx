@@ -3,11 +3,13 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 import BlackButton from '../components/inputs/blackbutton';
 import { loadStripe } from '@stripe/stripe-js';
 import axios from 'axios';
+import { useAuth } from '../contexts/AuthContext';
 
 const stripePromise = loadStripe('pk_test_51NEdzDChuUsrK8kGX1Wcu8TazsmDPprhV212alFOg78GS9W3FW8JLv1S6FyJnirCaj4f5UevhfUetfDSxIvATSHp003QYXNJYT'); 
 
 const BecomeProPage = () => {
-  const userid = '123';
+  const {account} = useAuth();
+  const userid = account?._id;
 
   const handleJoinNow = async () => {
     try {
