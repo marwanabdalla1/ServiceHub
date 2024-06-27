@@ -107,6 +107,28 @@ function UserProfile(): React.ReactElement {
         })();
     }, [account]);
 
+    const fetchProfileData = async () => {
+        try {
+            // Fetch profile image
+            const profileImageResponse = await axios.get(`/api/file/profileImage`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                responseType: 'blob' // Important because the data is an image
+            });
+
+            // Set the profile image state
+            setProfileImage(profileImageResponse.data);
+
+        } catch (error) {
+            console.error('Error fetching profile data:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchProfileData().then(r => console.log('Profile data fetched'));
+    }, []);
+
     useEffect(() => {
         axios.get('/api/offerings/myoffering', {
             headers: {
@@ -155,7 +177,6 @@ function UserProfile(): React.ReactElement {
         }
     }, [account]);
 
-    const [userImage, setUserImage] = useState<File | null>(null);
     const [profileImage, setProfileImage] = useState<File | null>(null);
 
     const handleProfileImageUpload = (setFile: React.Dispatch<React.SetStateAction<File | null>>) => (event: React.ChangeEvent<HTMLInputElement>) => {
