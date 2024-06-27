@@ -26,6 +26,7 @@ import axios from "axios";
 import ProposeNewtimePage from './Pages/ProposeNewTimePage';
 import {AccountProvider} from "./contexts/AuthContext";
 import BookingPage from "./Pages/bookingSteps/BookingPage";
+// import SelectAvailabilityBooking_temp from "./Pages/SelectAvailabilityBooking_temp";
 
 function App() {
 
@@ -71,6 +72,8 @@ function MainRoutes() {
                 <Route path="/addservice" element={<AddServicePage/>}/>
                 <Route path="/provider-profile/:id" element={<ProviderProfilePage/>}/>
                 <Route path="/select-availability" element={<SelectAvailabilityPage/>}/>
+                {/*<Route path="/select-availability-booking" element={<SelectAvailabilityBooking_temp/>}/>*/}
+
                 <Route path="/update-timeslot" element={<UpdateTimeslot/>}/>
 
 

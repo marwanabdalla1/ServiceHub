@@ -1,6 +1,7 @@
 import { RequestHandler } from 'express';
 import moment from 'moment';
-import Timeslot, { ITimeslot } from '../models/timeslot'; 
+import Timeslot, { ITimeslot } from '../models/timeslot';
+import mongoose, {Types} from "mongoose";
 
 // Function to generate weekly instances (existing code)
 function generateWeeklyInstances(events: ITimeslot[], startDate: moment.Moment, endDate: moment.Moment) {
@@ -137,6 +138,130 @@ export const getEvents: RequestHandler = async (req, res, next) => {
     }
 };
 
+
+
+// merge overlapping timeslots
+const mergeAndCleanTimeslots = async (providerId: string) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+        const timeslots: ITimeslot[] = await Timeslot.find({
+            createdById: providerId,
+            isBooked: false
+        }).session(session);
+
+        if (!timeslots.length) {
+            await session.commitTransaction();
+            session.endSession();
+            return;
+        }
+
+        // Sort timeslots by start time
+        timeslots.sort((a, b) => a.start.getTime() - b.start.getTime());
+
+        const merged = [];
+        let last = timeslots[0];
+
+        // loop through the timeslots to find overlapping ones
+        for (let i = 1; i < timeslots.length; i++) {
+            if (timeslots[i].start <= last.end) {
+                last.end = new Date(Math.max(last.end.getTime(), timeslots[i].end.getTime()));
+                // Mark the current timeslot for deletion since it's merged
+                await Timeslot.findByIdAndDelete(timeslots[i]._id, { session });
+            } else {
+                merged.push(last);
+                last = timeslots[i];
+            }
+        }
+        merged.push(last); // Push the last processed timeslot
+
+        // Ensure the last timeslot has the updated end time in the database
+        await Timeslot.findByIdAndUpdate(last._id, { end: last.end }, { session });
+
+        await session.commitTransaction();
+        session.endSession();
+        return merged; // Optional: return the merged timeslots for verification/testing
+    } catch (error) {
+        await session.abortTransaction();
+        session.endSession();
+        throw error;
+    }
+};
+
+
+
+
+// helper functions to help getting the avilability of provider
+const mergeTimeslots = (timeslots: ITimeslot[]) => {
+    if (!timeslots.length) return [];
+
+    // Sort timeslots by start time
+    timeslots.sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+
+    const merged = [timeslots[0]];
+    for (let i = 1; i < timeslots.length; i++) {
+        let last = merged[merged.length - 1];
+        if (new Date(timeslots[i].start).getTime() <= new Date(last.end).getTime()) {
+            // There is overlap, or they are contiguous
+            last.end = new Date(Math.max(new Date(last.end).getTime(), new Date(timeslots[i].end).getTime()));
+        } else {
+            merged.push(timeslots[i]);
+        }
+    }
+
+    return merged;
+
+};
+
+const adjustForTransit = (timeslots: ITimeslot[], transitTime: number) => {
+
+    return timeslots.map(slot => ({
+        ...slot,
+        start: new Date(new Date(slot.start).getTime() + transitTime * 60000),
+        end: new Date(new Date(slot.end).getTime() - transitTime * 60000)
+    }));
+};
+
+
+// get events by user ID (i.e. of a provider)
+export const getAvailabilityByProviderId: RequestHandler = async (req, res, next) => {
+    // const userId = (req as any).user.userId; // consumer id
+    const {providerId} = req.params;
+    const transitTime = parseInt(req.query.transitTime as string); // Get the transit time from query params
+    console.log(req.query, "transit Time: ", transitTime)
+    if (isNaN(transitTime)) {
+        console.log("invalid transit time!")
+        return res.status(400).json({ error: 'Invalid transit time provided' });
+    }
+
+    try {
+        // handle both string and objectId
+        const providerIdConditions = [
+            { createdById: providerId }, // Assuming it's a string or matches the ObjectId format
+            { createdById: new Types.ObjectId(providerId) } // Explicitly cast to ObjectId
+        ];
+
+        // Fetch all timeslots for the provider
+        const timeslots: ITimeslot[] = await Timeslot.find({
+            // createdById: providerId,
+            $or: providerIdConditions,
+            isBooked:false, }).lean();
+
+        // Merge contiguous and overlapping timeslots
+        // todo: replace/delete this once the mergeandclean is done
+        const mergedTimeslots: ITimeslot[] = mergeTimeslots(timeslots);
+
+        // Adjust for transit time
+        const adjustedTimeslots = adjustForTransit(mergedTimeslots, transitTime);
+
+        // console.log("adjusted timeslots:", adjustedTimeslots);
+        res.json(adjustedTimeslots);
+    } catch (error: any) {
+        console.error("Error fetching timeslots:", error);
+        res.status(500).json({ error: 'Internal Server Error', message: error.message });
+    }
+};
+
 // Updated Save Events Controller
 export const saveEvents: RequestHandler = async (req, res, next) => {
     try {
@@ -154,13 +279,14 @@ export const saveEvents: RequestHandler = async (req, res, next) => {
 
         // Insert new events
         const allEventsToInsert = [...events, ...futureInstances];
-        console.log('All events to insert:', allEventsToInsert);
+        // console.log('All events to insert:', allEventsToInsert);
         const insertedEvents = await Timeslot.insertMany(allEventsToInsert.map(event => ({
             title: event.title,
             start: event.start,
             end: event.end,
             isFixed: event.isFixed,
             isBooked: event.isBooked,
+            requestId: event.requestId,
             createdById: userId // Use userId from the token
         })), { ordered: false });
 
@@ -169,6 +295,7 @@ export const saveEvents: RequestHandler = async (req, res, next) => {
         let message = '';
         if (err instanceof Error) {
             message = err.message;
+            console.log(message)
         }
         return res.status(500).json({
             error: "Internal server error",
@@ -176,3 +303,100 @@ export const saveEvents: RequestHandler = async (req, res, next) => {
         });
     }
 };
+
+// export const bookTimeslot: RequestHandler = async (req, res, next) => {
+//     const userId = (req as any).user.userId; // consumer id
+//
+//     const { start, end, title, isFixed, isBooked, createdById } = req.body;
+//
+//     try {
+//         const newTimeslot = await Timeslot.create({
+//             start,
+//             end,
+//             title,
+//             isFixed,
+//             isBooked,
+//             createdById,  // This should be the userId of the user making the booking
+//         });
+//
+//         res.status(201).json(newTimeslot);
+//
+//     //     then:
+//     } catch (error: any) {
+//         console.error("Error saving new timeslot:", error);
+//         res.status(500).json({ message: "Failed to book timeslot", error: error.message });
+//     }
+// };
+
+export const bookTimeslot: RequestHandler = async (req, res) => {
+    // const userId = (req as any).user.userId; // consumer id
+    console.log(req.body)
+    const { start, end, title, isFixed, isBooked, createdById } = req.body;
+    const session = await mongoose.startSession();
+    try {
+        session.startTransaction();
+
+        // Create the new timeslot for the booking
+        const newTimeslot = new Timeslot({
+            start,
+            end,
+            title,
+            isFixed,
+            isBooked,
+            createdById,
+            // requestId,
+        });
+
+        // Find overlapping timeslots
+        const overlappingSlots = await Timeslot.find({
+            createdById: createdById,
+            end: { $gt: start },
+            start: { $lt: end },
+            isBooked: false // assuming only unbooked slots are modifiable
+        }).session(session);
+
+        console.log("overlaps: ", overlappingSlots);
+        // Adjust timeslots based on the booked time
+        for (const slot of overlappingSlots) {
+            if (new Date(slot.start) < new Date(start) && new Date(slot.end) > new Date(end)) {
+                // Split the timeslot into two parts before and after the booked slot
+                await Timeslot.create([{
+                    start: slot.start,
+                    end: start,
+                    title: "available",
+                    isFixed: false, //todo: not sure if this should be true if the original timeslot is fixed
+                    createdById: slot.createdById,
+                    isBooked: false
+                }, {
+                    start: end,
+                    end: slot.end,
+                    title: "available",
+                    isFixed: false,
+                    createdById: slot.createdById,
+                    isBooked: false
+                }], { session });
+                // Remove the original slot
+                await Timeslot.findByIdAndDelete(slot._id, { session });
+            } else {
+                // Adjust existing slot start or end
+                if (new Date(slot.end) > new Date(end)) {
+                    slot.start = end;
+                } else if (new Date(slot.start) < new Date(start)) {
+                    slot.end = start;
+                }
+                await slot.save({ session });
+            }
+        }
+
+        await newTimeslot.save({ session });
+        await session.commitTransaction();
+        res.status(201).json(newTimeslot);
+    } catch (error: any) {
+        await session.abortTransaction();
+        console.error("Failed to book timeslot:", error);
+        res.status(500).json({ message: "Failed to book timeslot", error: error.message });
+    } finally {
+        session.endSession();
+    }
+};
+

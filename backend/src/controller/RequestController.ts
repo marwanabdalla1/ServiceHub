@@ -22,7 +22,7 @@ function errorHandler(req: Request, res: Response, requiredProperties: string[])
 export const createServiceRequest:RequestHandler = async (req: Request, res: Response) => {
     const user = (req as any).user;
 
-    console.log("request body:" + req.body)
+    console.log("request body:" + JSON.stringify(req.body), "userID: ", user.userId)
     const error = errorHandler(req, res, [
         "requestStatus",
         "serviceType",
@@ -53,9 +53,10 @@ export const createServiceRequest:RequestHandler = async (req: Request, res: Res
 
     try {
         // Extract fields from req.body and possibly validate or transform them
-        const requestBody = req.body; // Simplified, assuming body has all required fields
+        const {timeSlot, ...requestBody} = req.body;
+        // const requestBody = req.body; // Simplified, assuming body has all required fields
 
-        console.log("request body:" + requestBody)
+        console.log("request body: " + requestBody)
         let newServiceRequest = await ServiceRequest.create(requestBody);
 
 
@@ -91,7 +92,7 @@ export const updateServiceRequest:RequestHandler = async (req: Request, res:Resp
     const {requestId} = req.params; //get request ID from parameter
     const updates = req.body;
 
-    console.log(userId, requestId)
+    console.log("update service request: ", userId, requestId)
     console.log("request updates:", updates)
 
     const serviceRequest = await ServiceRequest.findById(requestId)

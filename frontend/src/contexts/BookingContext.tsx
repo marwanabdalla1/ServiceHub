@@ -3,17 +3,19 @@ import { Account } from '../models/Account';
 import {ServiceOffering} from "../models/ServiceOffering";
 import {ServiceType} from "../models/enums";
 import {Review} from "../models/Review";
+import axios from "axios";
+import {Timeslot} from "../models/Timeslot";
 
 export interface BookingDetails {
     location: string | undefined;     // Location of service
-    // serviceType: string;      // Type of service
-    startTime: Date | undefined;         // Time of appointment
+    // startTime: Date | undefined;         // Time of appointment
     price: number | undefined;        // Price of service
     provider: Account | undefined;     // Service provider
     requestedBy: Account | undefined;  // User who requested the service
-    endTime?: Date | null;     // endtime/duration of the service
+    // endTime?: Date | null;     // endtime/duration of the service
     serviceOffering: ServiceOffering | undefined;
     serviceType: ServiceType | undefined;
+    timeSlot: Timeslot | undefined
 }
 
 interface BookingContextProps {
@@ -21,9 +23,9 @@ interface BookingContextProps {
     setProvider: (provider: Account) => void;
     setRequestedBy: (user: Account) => void;
     setSelectedServiceDetails: (serviceOffering: ServiceOffering, serviceType: ServiceType, price: number) => void;
-    setTimeAndDuration: (startTime: Date, endTime: Date) => void;
+    setTimeAndDuration: (timeslot: any) => void;
     fetchAccountDetails: (offeringId: string) => Promise<Account>;
-    fetchOfferingDetails: (offeringId: string) => Promise<ServiceOffering>; // Rename for clarity
+    fetchOfferingDetails: (offeringId: string) => Promise<ServiceOffering> ; // Rename for clarity
 
 }
 
@@ -52,8 +54,7 @@ const BookingContext = createContext<BookingContextProps | undefined>(undefined)
 export const BookingProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [bookingDetails, setBookingDetails] = useState<BookingDetails>({
         // service: '',
-        startTime: undefined,
-        endTime: undefined,
+        timeSlot: undefined,
         location: undefined,
         price: undefined,
         provider: undefined,
@@ -75,13 +76,13 @@ export const BookingProvider: React.FC<{ children: ReactNode }> = ({ children })
         setBookingDetails(prevDetails => ({ ...prevDetails, serviceOffering, serviceType, price }));
     };
 
-    const setTimeAndDuration = (startTime: Date, endTime: Date) => {
-        setBookingDetails(prevDetails => ({ ...prevDetails, startTime, endTime }));
+    const setTimeAndDuration = (timeslot: any) => {
+        setBookingDetails(prevDetails => ({ ...prevDetails, timeSlot: timeslot }));
     };
 
     const fetchAccountDetails = async (offeringId: string): Promise<Account> => {
-        const offeringResponse = await fetch(`/api/offerings/${offeringId}`);
-        const offeringData = await offeringResponse.json();
+        const offeringResponse = await axios.get(`/api/offerings/${offeringId}`);
+        const offeringData = await offeringResponse.data;
         // console.log(offeringData);
 
         if (!offeringData.provider) {
@@ -89,19 +90,37 @@ export const BookingProvider: React.FC<{ children: ReactNode }> = ({ children })
         }
 
         // Fetch the provider details using the provider ID from the offering data
-        const providerResponse = await fetch(`/api/auth/providers/${offeringData.provider}`);
-        const providerData = await providerResponse.json();
+        const providerResponse = await axios.get(`/api/account/providers/${offeringData.provider}`);
+        console.log(providerResponse)
+        const providerData =  providerResponse.data;
 
         // console.log(providerData);
-        return providerData as Account;
+        return providerData;
     };
 
-    const fetchOfferingDetails = async (offeringId: string) => {
-        const response = await fetch(`/api/offerings/${offeringId}`);
-        const data = await response.json();
-        console.log(data);
-        return data as ServiceOffering;
+    // const fetchOfferingDetails = async (offeringId: string) => {
+    //     // try {
+    //         const response = await axios.get(`/api/offerings/${offeringId}`);
+    //         const data = response.data;
+    //         console.log("response text:", data);
+    //         return data;
+    //     // } catch(error: any) {
+    //         // console.log("error fetching  data: ", error);
+    //         // return null}
+    //     // }
+    // };
+
+    const fetchOfferingDetails = async (offeringId:string) => {
+        try {
+            const response = await axios.get(`/api/offerings/${offeringId}`);
+            console.log("response text:", response.data);
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching offering details:", error);
+            throw error;
+        }
     };
+
 
     return (
         <BookingContext.Provider value={{

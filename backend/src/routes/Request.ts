@@ -10,7 +10,7 @@ import {authenticate} from "../middleware/authenticate";
 const router = express.Router();
 
 router.post('/', authenticate, createServiceRequest);
-router.put('/:requestId', authenticate, updateServiceRequest);
+router.patch('/:requestId', authenticate, updateServiceRequest);
 router.get('/provider/:providerId', authenticate, getServiceRequestsByProvider);
 
 

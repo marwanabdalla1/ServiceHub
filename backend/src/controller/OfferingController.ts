@@ -93,9 +93,11 @@ const filterAccounts = (accounts: any[], filters: any) => {
 
 
 export const getServiceOfferingById = async (req: Request, res: Response) => {
-    // const offeringId = req.params.offeringId;
+    console.log("Full URL:", req.protocol + '://' + req.get('host') + req.originalUrl);
+    const {offeringId} = req.params;
+    console.log("params:", req.params);
     try {
-        const offering = await ServiceOffering.findById(req.params.offeringId)//.populate('provider');
+        const offering = await ServiceOffering.findById(offeringId)//.populate('provider');
         console.log("finding service...")
         if (!offering) {
             return res.status(404).json({ message: 'Service offering not found' });
