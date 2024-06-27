@@ -1,10 +1,10 @@
 import jwt from 'jsonwebtoken';
 import Account from "../models/account";
-import { RequestHandler } from "express";
+import {RequestHandler} from "express";
 import * as dotenv from 'dotenv'
-import { validateRequestBody } from "../helpers/validate";
+import {validateRequestBody} from "../helpers/validate";
 import bcrypt from 'bcrypt';
-import { ERRORS } from "../helpers/authHelper";
+import {ERRORS} from "../helpers/authHelper";
 
 dotenv.config();
 
@@ -30,7 +30,7 @@ export const signup: RequestHandler = async (req, res, next) => {
         // Check if email already exists
         const emailExists = await Account.findOne({
             email: req.body.email,
-        }).collation({ locale: "en", strength: 2 });
+        }).collation({locale: "en", strength: 2});
         if (emailExists) {
             return res.status(400).json({
                 error: ERRORS.userAlreadyExists,
@@ -60,7 +60,7 @@ export const signup: RequestHandler = async (req, res, next) => {
                 message: "Access token secret not found."
             });
         }
-        const token = jwt.sign({ userId: account._id }, process.env.ACCESS_TOKEN_SECRET);
+        const token = jwt.sign({userId: account._id}, process.env.ACCESS_TOKEN_SECRET);
         // send the token to the user
         res.setHeader('Authorization', 'Bearer ' + token);
         res.status(201).json({
@@ -104,7 +104,7 @@ export const login: RequestHandler = async (req, res, next) => {
 
     try {
         // Retrieve the user from the database
-        const account = await Account.findOne({ email: req.body.email }).select('+authentication.password +authentication.salt');
+        const account = await Account.findOne({email: req.body.email}).select('+authentication.password +authentication.salt');
         if (!account) {
             return res.status(400).json({
                 error: "Bad Request",
@@ -123,7 +123,7 @@ export const login: RequestHandler = async (req, res, next) => {
         const isValidPassword = await bcrypt.compare(req.body.password, account.password);
         if (!isValidPassword) {
             // Handle invalid password
-            return res.status(401).json({ error: "Invalid password" });
+            return res.status(401).json({error: "Invalid password"});
         }
 
         // User is authenticated, generate a JWT token
@@ -133,7 +133,7 @@ export const login: RequestHandler = async (req, res, next) => {
                 message: "Access token secret not found."
             });
         }
-        const token = jwt.sign({ userId: account._id }, process.env.ACCESS_TOKEN_SECRET);
+        const token = jwt.sign({userId: account._id}, process.env.ACCESS_TOKEN_SECRET);
         // Send the token to the user
         res.setHeader('Authorization', 'Bearer ' + token);
         return res.status(200).json({
@@ -162,5 +162,5 @@ export const login: RequestHandler = async (req, res, next) => {
  */
 export const logout: RequestHandler = (req, res) => {
     // Clear the JWT token from the client side
-    res.status(200).json({ message: "Logged out successfully" });
+    res.status(200).json({message: "Logged out successfully"});
 };
