@@ -1,0 +1,59 @@
+/*!*.rbc-calendar *!*/
+/*.rbc-row-bg .rbc-bg-events-container {*/
+/*  !*margin: 0;*!*/
+/*  height: 100%;*/
+/*  width: 100%;*/
+/*  !*border: 0;*!*/
+/*  !*border-radius: 0;*!*/
+/*  !*overflow: hidden;*!*/
+/*  !*background-color: #000000; !* Ensure this is visible *!*!*/
+/*}*/
+
+/* Specific adjustments for background event containers */
+.rbc-background-event {
+  padding: 0 !important;
+  width: 110% !important; /* Makes the background events span the full width */
+  margin: 0;   /* Removes any margins */
+  border: none !important;   /* No borders */
+  border-radius: 0 !important;/* No rounded corners */
+  background-color: mistyrose !important;
+  color: black !important;
+  display: flex !important;              /* Enables flexbox layout */
+  align-items: center !important;        /* Centers content vertically */
+  justify-content: center !important;    /* Centers content horizontally */
+  text-align: center !important;         /* Ensures text is centered if it wraps */
+  overflow: hidden !important;           /* Avoids any overflow outside the container */
+  font-weight: bold;
+}
+
+.rbc-background-event .rbc-event-label {
+  display: none; /* Hides event (times) */
+}
+/* Ensure background events themselves are also styled appropriately */
+/*.rbc-calendar .rbc-background-event  {*/
+/*  width: 100% !important;  !* Full width for each individual background event *!*/
+/*  margin: 0 !important;*/
+/*  border: none !important;*/
+/*  border-radius: 0 !important;*/
+/*}*/
+
+
+
+
+.rbc-time-slot {
+  background-color: #f0f0f0; /* Very light grey */
+}
+
+
+
+/*!* Ensure the time slot group has minimal padding to allow full height utilization *!*/
+/*.rbc-timeslot-group {*/
+/*  min-height: 0 !important;   !* Removes minimum height restriction if any *!*/
+/*  padding: 0 !important;      !* Removes padding inside the slot group *!*/
+/*}*/
+
+/*!* Adjust the event wrapper to ensure no additional spaces are present *!*/
+/*.rbc-event {*/
+/*  margin: 0 !important;*/
+/*  border-radius: 0 !important;*/
+/*}*/

@@ -6,8 +6,11 @@ import ServiceOffering from "../models/serviceOffering";
 
 export const getOfferings = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { type, priceRange, locations, isLicensed, searchTerm } = req.query;
+        const userId = (req as any).user;// Assuming userId is available in the request (e.g., from authentication middleware)
+        console.log('User id ' + userId)
+        console.log("Getting offerings");
 
+        const { type, priceRange, locations, isLicensed, searchTerm } = req.query;
         const filters = {
             type,
             priceRange: priceRange ? (priceRange as string).split(',').map(Number) : [],
@@ -16,15 +19,30 @@ export const getOfferings = async (req: Request, res: Response, next: NextFuncti
             searchTerm
         };
 
-        // Fetch all accounts from the database
-        const accounts = await Account.find().populate('serviceOfferings').exec();
+        if ((req as any).user && (req as any).user.userId) {
+            // If the request is authenticated, get offerings for the specific user
+            const userId = (req as any).user.userId;
+            console.log(`Fetching offerings for user ID: ${userId}`);
 
-        // Filter accounts using the helper function due to bug in mongo not able to handle nested queries
-        const filteredAccounts = filterAccounts(accounts, filters);
+            const userOfferings = await ServiceOffering.find({ provider: userId });
+            console.log('User offerings:', userOfferings);
 
-        console.log('Accounts found:', filteredAccounts.length); 
-        res.json(filteredAccounts);
-    } catch (err) {
+            if (!userOfferings || userOfferings.length === 0) {
+                return res.status(404).json({ message: 'No service offerings found for the authenticated user' });
+            }
+
+            return res.json(userOfferings);
+        } else {
+            // If the request is not authenticated, fetch all offerings and apply filters
+            console.log("Fetching all offerings with filters:", filters);
+
+            const accounts = await Account.find().populate('serviceOfferings').exec();
+            const filteredAccounts = filterAccounts(accounts, filters);
+
+            console.log('Filtered accounts found:', filteredAccounts.length);
+            return res.json(filteredAccounts);
+        }
+    } catch (err: any) {
         console.error('Error fetching data:', err);
         res.status(500).send('Internal Server Error');
     }
@@ -75,9 +93,11 @@ const filterAccounts = (accounts: any[], filters: any) => {
 
 
 export const getServiceOfferingById = async (req: Request, res: Response) => {
-    // const offeringId = req.params.offeringId;
+    console.log("Full URL:", req.protocol + '://' + req.get('host') + req.originalUrl);
+    const {offeringId} = req.params;
+    console.log("params:", req.params);
     try {
-        const offering = await ServiceOffering.findById(req.params.offeringId)//.populate('provider');
+        const offering = await ServiceOffering.findById(offeringId)//.populate('provider');
         console.log("finding service...")
         if (!offering) {
             return res.status(404).json({ message: 'Service offering not found' });
@@ -87,4 +107,22 @@ export const getServiceOfferingById = async (req: Request, res: Response) => {
         res.status(500).json({ message: err.message });
     }
 };
+
+export const getServiceOfferingsByUser = async (req: Request, res: Response) => { //The authenticated version of the getOfferings function (uses token)
+    try {
+        console.log("getting offerings")
+        console.log(req)
+        const userId = (req as any).user.userId;
+        const offerings = await ServiceOffering.find({ provider: userId });
+        console.log(offerings)
+        if (!offerings) {
+            return res.status(404).json({ message: 'No service offerings found' });
+        }
+        res.json(offerings);
+
+    }
+    catch (err: any) {
+        res.status(500).json({ message: err.message });
+    }
+}
 

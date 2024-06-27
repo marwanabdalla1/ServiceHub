@@ -6,7 +6,7 @@ const SelectAvailabilityPage: React.FC = () => {
     const [defaultSlotDuration, setDefaultSlotDuration] = useState(60); // Placeholder for the default slot duration
     // const [globalAvailabilities, setGlobalAvailabilities] = useState<Event[]>([{start: Date.now(), end: Date.now(), title: "Event"}]); // Placeholder for the global availabilities [e.g. tutor availabilities]
 
-    
+     
 
     return (
         <Container maxWidth="lg">
@@ -16,7 +16,6 @@ const SelectAvailabilityPage: React.FC = () => {
                 </Typography>
             </Box>
             <AvailabilityCalendar
-                createdById='user12'
                 Servicetype={serviceType}
                 defaultSlotDuration={defaultSlotDuration}
                 // globalAvailabilities={globalAvailabilities}

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, dateFnsLocalizer, SlotInfo } from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
+import './calendarStyles.css'; 
 import { format, startOfWeek, parseISO, getDay, startOfDay, endOfDay } from 'date-fns';
 import { enUS } from '@mui/material/locale';
 import { Dialog, Button, DialogActions, DialogContent, DialogTitle, Box } from '@mui/material';
 import axios from 'axios';
 import moment from 'moment';
+import { useAuth } from '../contexts/AuthContext';
 
 const locales = {
     'en-US': enUS,
@@ -33,20 +35,19 @@ type RangeType = Date[] | { start: Date; end: Date };
 interface ServiceScheduleProps {
     Servicetype: string;
     defaultSlotDuration: number;
-    createdById: string;
 }
 
-function AvailabilityCalendar({ Servicetype, defaultSlotDuration, createdById }: ServiceScheduleProps) {
+function AvailabilityCalendar({ Servicetype, defaultSlotDuration }: ServiceScheduleProps) {
     const [availability, setAvailability] = useState<TimeSlot[]>([]);
     const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot | null>(null);
-    const [DeleteDialog, setDeleteDialog] = useState(false);
+    const [deleteDialog, setDeleteDialog] = useState(false);
     const [clashDialogOpen, setClashDialogOpen] = useState(false);
-
+    const { token } = useAuth();
+    console.log(token);
     useEffect(() => {
-        // Fetch current timeslots from the database
         axios.get('/api/timeslots', {
-            params: {
-                createdById: createdById
+            headers: {
+                'Authorization': `Bearer ${token}`
             }
         }).then(response => {
             const events = response.data.map((event: any) => ({
@@ -58,22 +59,31 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration, createdById }:
         }).catch(error => {
             console.error("Error fetching timeslots:", error);
         });
-    }, [createdById]);
+    }, [token]);
 
     const saveAvailability = () => {
-        console.log("Saving availability:", availability);
+        console.log('Submitted token' + token)
         axios.post('/api/timeslots', {
             events: availability
+        }, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
         }).then(response => {
-            console.log("Availability saved:", response.data);
+            const { insertedEvents } = response.data;
+            const savedEvents = insertedEvents.map((event: any) => ({
+                ...event,
+                start: new Date(event.start),
+                end: new Date(event.end)
+            }));
+            setAvailability(savedEvents);
         }).catch(error => {
             console.error("Error saving availability:", error);
         });
     };
 
     const handleSelect = ({ start, end }: SlotInfo) => {
-        const newTimeSlot: TimeSlot = { start, end, title: Servicetype, isFixed: false, isBooked: false, createdById };
-        console.log('New time slot:', newTimeSlot);
+        const newTimeSlot: TimeSlot = { start, end, title: Servicetype, isFixed: false, isBooked: false, createdById: '' };
         const isClashing = availability.some(TimeSlot =>
             (newTimeSlot.start < TimeSlot.end && newTimeSlot.end > TimeSlot.start)
         );
@@ -86,15 +96,24 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration, createdById }:
                 adjustedEnd = new Date(start.getTime() + defaultSlotDuration * 60000);
             }
 
-            const adjustedTimeSlot: TimeSlot = { start: start, end: adjustedEnd, title: Servicetype, isFixed: false, isBooked: false, createdById };
+            const adjustedTimeSlot: TimeSlot = { start: start, end: adjustedEnd, title: Servicetype, isFixed: false, isBooked: false, createdById: '' };
             setAvailability([...availability, adjustedTimeSlot]);
         }
     };
 
     const handleDelete = () => {
         if (selectedTimeSlot) {
-            setAvailability(availability.filter(a => a.start !== selectedTimeSlot.start && a.end !== selectedTimeSlot.end));
-            setDeleteDialog(false);
+            axios.delete('/api/timeslots', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                data: { event: selectedTimeSlot }
+            }).then(() => {
+                setAvailability(availability.filter(a => a.start !== selectedTimeSlot.start && a.end !== selectedTimeSlot.end));
+                setDeleteDialog(false);
+            }).catch(error => {
+                console.error("Error deleting timeslot:", error);
+            });
         }
     };
 
@@ -102,43 +121,42 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration, createdById }:
         setSelectedTimeSlot(TimeSlot);
         setDeleteDialog(true);
     };
-    
+
     const handleFixWeekly = () => {
         if (selectedTimeSlot) {
             const filteredAvailability = availability.filter(a => a.start !== selectedTimeSlot.start && a.end !== selectedTimeSlot.end);
-            const newTimeSlot: TimeSlot = { start: selectedTimeSlot.start, end: selectedTimeSlot.end, title: selectedTimeSlot.title, isFixed: true, isBooked: false, createdById };
+            const newTimeSlot: TimeSlot = { start: selectedTimeSlot.start, end: selectedTimeSlot.end, title: selectedTimeSlot.title, isFixed: true, isBooked: false, createdById: '' };
             setAvailability([...filteredAvailability, newTimeSlot]);
             setDeleteDialog(false);
         }
     };
-    
+
     const handleClose = () => {
         setDeleteDialog(false);
     };
-    
+
     const handleClashDialogClose = () => {
         setClashDialogOpen(false);
     };
-    
+
     const handleRangeChange = (range: RangeType) => {
         if (Array.isArray(range)) {
             const start = startOfDay(range[0]);
             const end = endOfDay(range[range.length - 1]);
-            console.log(`Range changed: ${start.toISOString()} - ${end.toISOString()}`);
-    
-            // Check if we need to extend fixed slots
+
             const lastDate = new Date(Math.max(...availability.map(slot => slot.end.getTime())));
             if (end > lastDate) {
-                console.log(end, lastDate);
                 axios.post('/api/timeslots/extend', {
                     start: lastDate,
                     end: moment(lastDate).add(6, 'months').toDate(),
-                    createdById: createdById
+                }, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
                 }).then(() => {
-                    // Fetch events again after extending
                     axios.get('/api/timeslots', {
-                        params: {
-                            createdById: createdById
+                        headers: {
+                            'Authorization': `Bearer ${token}`
                         }
                     }).then(response => {
                         const events = response.data.map((event: any) => ({
@@ -154,12 +172,13 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration, createdById }:
                     console.error("Error extending fixed slots:", error);
                 });
             } else {
-                // Fetch events in the new range
                 axios.get('/api/timeslots', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
                     params: {
                         start: start.toISOString(),
-                        end: end.toISOString(),
-                        createdById: createdById
+                        end: end.toISOString()
                     }
                 }).then(response => {
                     const events = response.data.map((event: any) => ({
@@ -174,7 +193,12 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration, createdById }:
             }
         }
     };
-    
+
+    const eventPropGetter = (event: TimeSlot) => {
+        const backgroundColor = event.isFixed ? 'purple' : 'blue';
+        return { style: { backgroundColor } };
+    };
+
     return (
         <div>
             <Calendar
@@ -189,11 +213,13 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration, createdById }:
                 onSelectSlot={handleSelect}
                 onSelectEvent={handleSelectTimeSlot}
                 onRangeChange={handleRangeChange}
+                eventPropGetter={eventPropGetter}
+                className="bg-black-300" // Apply Tailwind class here
             />
-            <Dialog open={DeleteDialog} onClose={handleClose}>
+            <Dialog open={deleteDialog} onClose={handleClose}>
                 <DialogTitle>Delete Slot?</DialogTitle>
                 <DialogContent>
-                    {selectedTimeSlot && <p> {selectedTimeSlot.title}</p>}
+                    {selectedTimeSlot && <p>{selectedTimeSlot.title}</p>}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>Cancel</Button>

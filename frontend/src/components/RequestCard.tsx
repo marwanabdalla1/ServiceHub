@@ -24,9 +24,9 @@ const MediaCard: React.FC<MediaCardProps> = ({ request, onClose, onAccept,onDecl
       case RequestStatus.pending:
         return (
           <>
-          <BlackButton text="Accept" onClick={onClose} sx={{ marginRight:"1rem" }}/>
-          <BlackButton text="Decline" onClick={onClose} sx={{ marginRight: "1rem" }} />
-          <BlackButton text="Propose New Time" onClick={onClose}/>
+          <BlackButton text="Accept" onClick={() => onAccept(request)} sx={{ marginRight:"1rem" }}/>
+          <BlackButton text="Decline" onClick={() => onDecline(request)} sx={{ marginRight: "1rem" }} />
+          <BlackButton text="Propose New Time" onClick={() => onProposeNewTime(request, new Date())}/>
           </>
         );
       default:
@@ -59,13 +59,13 @@ const MediaCard: React.FC<MediaCardProps> = ({ request, onClose, onAccept,onDecl
         </div>
         <Divider sx={{marginBottom:'1rem'}}/>
         <Typography variant="body2">
-          Request ID: {request.serviceRequestId}
+          Request ID: {request._id}
         </Typography>
         <Typography variant="body2">
           Service Type: {request.serviceType}
         </Typography>
         <Typography variant="body2">
-          Appointment Time: {request.appointmentTime.toLocaleString()}
+          Appointment Time: {request.appointmentStartTime.toLocaleString()}
         </Typography>
         <Typography variant="body2" sx={{ marginBottom: '2rem'}}>
           Service Fee: {request.serviceFee}

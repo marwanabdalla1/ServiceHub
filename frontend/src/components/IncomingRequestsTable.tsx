@@ -11,7 +11,7 @@ import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
-import {ServiceRequest as Request} from '../models/ServiceRequest';
+import {ServiceRequest, ServiceRequest as Request} from '../models/ServiceRequest';
 import IncomingRequestRow from './IncomingRequestRow';
 import Modal from './inputs/Modal';
 import IncomingRequestMediaCard from './IncomingRequestCard';
@@ -21,49 +21,15 @@ import {Job} from '../models/Job';
 import {ServiceOffering} from "../models/ServiceOffering";
 
 
-function createRequest(
-    serviceRequestId: string,
-    requestStatus: RequestStatus,
-    createdOn: Date,
-    serviceType: ServiceType,
-    serviceOffering: ServiceOffering | undefined,
-    appointmentTime: Date,
-    uploads: File[],
-    comment: string,
-    serviceFee: number,
-    duration: number,
-    job: Job | null,
-    provider: Account,
-    requestedBy: Account,
-    rating: number,
-    profileImageUrl: string,
-): Request {
-    return {
-        serviceRequestId,
-        requestStatus,
-        createdOn,
-        serviceType,
-        serviceOffering,
-        appointmentTime,
-        uploads,
-        comment,
-        serviceFee,
-        duration,
-        job,
-        provider,
-        requestedBy,
-        rating,
-        profileImageUrl,
-    };
-}
+
 
 const accounts: Account [] = [
     new Account('11', 'Max', 'Mustermann', 'example.email@example.com', '', 3.5, [bikeRepairService])
 ]
 const rows: Request[] = [
-    createRequest('1', RequestStatus.pending, new Date('2024-05-11'), ServiceType.bikeRepair, undefined, new Date('2024-05-11'), [], 'comment 1', 12, 30, null, accounts[0], accounts[0], 5, '../../images/profiles/profile3.png'),
-    createRequest('2', RequestStatus.pending, new Date('2024-05-12'), ServiceType.babySitting, undefined, new Date('2024-05-11'), [], 'comment 2', 13, 30, null, accounts[0], accounts[0], 4.99, '../../images/profiles/profile2.png'),
-    createRequest('3', RequestStatus.pending, new Date('2024-05-13'), ServiceType.houseCleaning, undefined, new Date('2024-05-11'), [], 'comment 3', 2001, 3, null, accounts[0], accounts[0], 4.5, '../../images/profiles/profile1.png'),
+    new ServiceRequest('1', RequestStatus.pending, new Date('2024-05-11'), ServiceType.bikeRepair, undefined, new Date('2024-05-11'), undefined,[], 'comment 1', 12, 30, null, accounts[0], undefined, accounts[0], 5, '../../images/profiles/profile3.png'),
+    new ServiceRequest('2', RequestStatus.pending, new Date('2024-05-12'), ServiceType.babySitting, undefined, new Date('2024-05-11'), undefined, [], 'comment 2', 13, 30, null, accounts[0], undefined, accounts[0], 4.99, '../../images/profiles/profile2.png'),
+    new ServiceRequest('3', RequestStatus.pending, new Date('2024-05-13'), ServiceType.houseCleaning, undefined, new Date('2024-05-11'), undefined, [], 'comment 3', 2001, 3, null, accounts[0], undefined, accounts[0], 4.5, '../../images/profiles/profile1.png'),
 ];
 
 export default function IncomingRequestTable() {
@@ -104,7 +70,7 @@ export default function IncomingRequestTable() {
                                 </TableHead>
                                 <TableBody>
                                     {rows.map((row) => (
-                                        <IncomingRequestRow key={row.serviceRequestId} request={row}
+                                        <IncomingRequestRow key={row._id} request={row}
                                                             onViewDetails={() => openModal(row)}/>
                                     ))}
                                 </TableBody>

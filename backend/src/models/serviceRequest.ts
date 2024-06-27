@@ -1,5 +1,6 @@
 import mongoose, {Document, Schema, Types} from 'mongoose';
 import {RequestStatus, ServiceType} from './enums';
+import timeslot from "./timeslot";
 
 interface IUpload {
     name: string;
@@ -22,6 +23,7 @@ export interface IServiceRequest extends Document {
     provider:Types.ObjectId; // Reference to an Account document
     requestedBy: Types.ObjectId; // Reference to an Account document
     // rating: number;
+    timeslot: Types.ObjectId;
     profileImageUrl: string;
 }
 
@@ -39,10 +41,12 @@ const ServiceRequestSchema: Schema = new Schema({
     job: {type: Schema.Types.ObjectId, ref: 'Job', required: false},
     provider: {type: Schema.Types.ObjectId, ref: 'Account', required: true},
     requestedBy: {type: Schema.Types.ObjectId, ref: 'Account', required: true},
+    timeslot: {type: Schema.Types.ObjectId, ref: 'Timeslot', required: false},
     // rating: {type: Number, required: true}, //todo: is this needed? rating should only be tied with job and not request
     profileImageUrl: {type: String, required: true},
 }, {
     timestamps: true // automatically generates created and last updated timestamps
 });
+
 
 export default mongoose.model<IServiceRequest>('ServiceRequest', ServiceRequestSchema);

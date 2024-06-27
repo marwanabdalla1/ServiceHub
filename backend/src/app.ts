@@ -6,12 +6,17 @@ import errorHandler from "./middleware/errorHandler";
 import logger from "./middleware/logger";
 import notFoundHandler from "./middleware/notFoundHandler";
 import AccountRouter from "./routes/Account";
+import AuthRouter from "./routes/Auth";
 import OfferingRouter from "./routes/Offering";
 import RequestRouter from "./routes/Request";
+import JobRouter from "./routes/Job";
+import ReviewRouter from "./routes/Review";
+
 
 // Import the models to ensure they are registered
 import './models/serviceOffering';
 import TimeSlotRouter from "./routes/TimeSlot";
+import ServiceRouter from "./routes/Service";
 import PaymentRouter from "./routes/PaymentRouter";
 import WebhookRouter from "./routes/WebhookRouter";
 
@@ -20,7 +25,7 @@ const app = express();
 // Configure CORS for connecting backend and frontend
 const corsOptions = {
     origin: 'http://localhost:3000',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed methods
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], // Allowed methods
     optionsSuccessStatus: 200
 };
 
@@ -30,12 +35,18 @@ app.use(logger);
 
 app.use("/api/webhook", express.raw({ type: 'application/json' }), WebhookRouter); //DON'T MOVE THIS LINE AFTER EXPRESS.JSON
 app.use(express.json());
-app.use("/api/auth", AccountRouter);
+app.use("/api/auth", AuthRouter);
+// authenticate users
+// app.use(authenticate)
+app.use("/api/account", AccountRouter);
 app.use("/api/offerings", OfferingRouter);
 app.use("/api/timeslots", TimeSlotRouter);
-app.use("/api/becomepro", PaymentRouter);
+app.use("/api/services", ServiceRouter);app.use("/api/becomepro", PaymentRouter);
 
 app.use("/api/requests", RequestRouter);
+app.use("/api/jobs", JobRouter);
+app.use("/api/reviews", ReviewRouter);
+
 
 app.get("/", async (req, res, next) => {
     try {
