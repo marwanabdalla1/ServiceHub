@@ -1,6 +1,6 @@
 import express from "express";
-import { getProviderById, updateAccountDetails, deleteAccount, getAccountDetails } from "../controller/AccountController";
-import { authenticate } from "../middleware/authenticate";
+import {getProviderById, updateAccountDetails, deleteAccount, getAccountDetails } from "../controller/AccountController";
+import {authenticate} from "../middleware/authenticate";
 
 const router = express.Router();
 router.get('/providers/:providerId', getProviderById);

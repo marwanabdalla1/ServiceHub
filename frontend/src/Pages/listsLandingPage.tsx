@@ -1,5 +1,5 @@
 import React from 'react';
-import JobHistoryPage from './ReceivedServicesPage';
+import JobHistoryPage from './JobHistoryPage';
 import RequestHistoryPage from './RequestHistoryPage';
 import { Account } from '../models/Account';
 import account from '../models/Account';

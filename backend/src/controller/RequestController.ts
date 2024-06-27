@@ -1,8 +1,8 @@
-import { Request, Response, NextFunction, RequestHandler } from 'express';
+import {Request, Response, NextFunction, RequestHandler} from 'express';
 import Account from '../models/account';
 import ServiceOffering from "../models/serviceOffering";
 import ServiceRequest, { IServiceRequest } from "../models/serviceRequest";
-import { Document } from 'mongoose';
+import {Document} from 'mongoose';
 
 
 
@@ -19,7 +19,7 @@ function errorHandler(req: Request, res: Response, requiredProperties: string[])
     return false;
 }
 
-export const createServiceRequest: RequestHandler = async (req: Request, res: Response) => {
+export const createServiceRequest:RequestHandler = async (req: Request, res: Response) => {
     const user = (req as any).user;
 
     console.log("request body:" + JSON.stringify(req.body), "userID: ", user.userId)
@@ -74,7 +74,7 @@ export const createServiceRequest: RequestHandler = async (req: Request, res: Re
 };
 
 // also update the requestHistory arrays in the account
-async function updateUserRequestHistory(userId: string, requestId: string) {
+async function updateUserRequestHistory(userId:string, requestId:string) {
     try {
         await Account.findByIdAndUpdate(userId, {
             $push: { requestHistory: requestId }
@@ -86,10 +86,10 @@ async function updateUserRequestHistory(userId: string, requestId: string) {
 }
 
 
-export const updateServiceRequest: RequestHandler = async (req: Request, res: Response) => {
+export const updateServiceRequest:RequestHandler = async (req: Request, res:Response)=> {
     // Get the userId from the JWT token
     const userId = (req as any).user.userId;
-    const { requestId } = req.params; //get request ID from parameter
+    const {requestId} = req.params; //get request ID from parameter
     const updates = req.body;
 
     console.log("update service request: ", userId, requestId)
@@ -108,7 +108,7 @@ export const updateServiceRequest: RequestHandler = async (req: Request, res: Re
 
     try {
         // Update the user in the database using the userId from the JWT token
-        const updatedRequest = await ServiceRequest.findByIdAndUpdate(requestId, updates, { new: true, upsert: true, strict: true });
+        const updatedRequest = await ServiceRequest.findByIdAndUpdate(requestId, updates, { new: true, upsert:true, strict:true});
         // if (!updatedRequest) {
         //     return res.status(404).send({ message: 'User not found' });
         // }
@@ -123,7 +123,7 @@ export const updateServiceRequest: RequestHandler = async (req: Request, res: Re
 //get all requests of a provider
 // In serviceRequestController.js
 
-export const getServiceRequestsByProvider: RequestHandler = async (req, res) => {
+export const getServiceRequestsByProvider:RequestHandler = async (req, res) => {
     try {
 
 
@@ -132,7 +132,7 @@ export const getServiceRequestsByProvider: RequestHandler = async (req, res) => 
 
         //make sure only the provider him/herself can get this
         if (userId !== providerId) {
-            console.log("userId: ", userId, "\n providerId: ", providerId)
+            console.log ("userId: ", userId, "\n providerId: ", providerId)
             return res.status(403).json({ message: "Unauthorized access." });
         }
 
@@ -140,70 +140,6 @@ export const getServiceRequestsByProvider: RequestHandler = async (req, res) => 
             .populate([
                 { path: 'requestedBy', select: 'firstName lastName' }, // Exclude _id
                 { path: 'provider', select: 'firstName lastName' },
-            ])
-            .exec();
-
-        if (serviceRequests.length === 0) {
-            return res.status(404).json({ message: "No service requests found for this provider." });
-        }
-
-        res.status(200).json(serviceRequests);
-    } catch (error: any) {
-        console.error("Failed to retrieve service requests:", error);
-        res.status(500).json({ message: "Internal server error", error: error.message });
-    }
-};
-
-//get all requests of a provider
-// In serviceRequestController.js
-
-export const getIncomingServiceRequestsByProvider: RequestHandler = async (req, res) => {
-    try {
-
-
-        const { providerId } = req.params; // Extract the provider ID from the URL parameter
-        const userId = (req as any).user.userId;
-
-        //make sure only the provider him/herself can get this
-        if (userId !== providerId) {
-            console.log("userId: ", userId, "\n providerId: ", providerId)
-            return res.status(403).json({ message: "Unauthorized access." });
-        }
-
-        const serviceRequests = await ServiceRequest.find({ provider: providerId, requestStatus: "pending" })
-            .populate([
-                { path: 'requestedBy', select: 'firstName lastName' }, // Exclude _id
-                { path: 'provider', select: 'firstName lastName' },
-            ])
-            .exec();
-
-        if (serviceRequests.length === 0) {
-            return res.status(404).json({ message: "No service requests found for this provider." });
-        }
-
-        res.status(200).json(serviceRequests);
-    } catch (error: any) {
-        console.error("Failed to retrieve service requests:", error);
-        res.status(500).json({ message: "Internal server error", error: error.message });
-    }
-};
-
-export const getServiceRequestsByRequester: RequestHandler = async (req, res) => {
-    try {
-
-
-        const { requesterId } = req.params; // Extract the provider ID from the URL parameter
-        const userId = (req as any).user.userId;
-
-        //make sure only the provider him/herself can get this
-        if (userId !== requesterId) {
-            console.log("userId: ", userId, "\n requesterId: ", requesterId)
-            return res.status(403).json({ message: "Unauthorized access." });
-        }
-
-        const serviceRequests = await ServiceRequest.find({ requestedBy: requesterId })
-            .populate([
-                { path: 'requestedBy', select: 'firstName lastName' }
             ])
             .exec();
 

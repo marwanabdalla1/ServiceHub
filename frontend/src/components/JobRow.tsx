@@ -1,0 +1,28 @@
+import * as React from 'react';
+import TableRow from '@mui/material/TableRow';
+import TableCell from '@mui/material/TableCell';
+import Button from '@mui/material/Button';
+import { Job } from '../models/Job';
+import BlackButton from './inputs/blackbutton';
+import { ServiceType, JobStatus } from '../models/enums';
+import {formatDateTime} from "../utils/dateUtils";
+
+interface JobRowProps {
+  job: Job;
+  onViewDetails: (job: Job) => void;
+}
+
+const JobRow: React.FC<JobRowProps> = ({ job, onViewDetails }) => {
+  return (
+    <TableRow>
+      <TableCell>{job.serviceType}</TableCell>
+      <TableCell>{JobStatus[job.status]}</TableCell>
+      <TableCell>{formatDateTime(job.appointmentStartTime)}</TableCell>
+      <TableCell>
+        <BlackButton text="View" onClick={() => onViewDetails(job)}/>
+      </TableCell>
+    </TableRow>
+  );
+};
+
+export default JobRow;

@@ -1,23 +1,9 @@
-import React, {useEffect, useRef, useState} from 'react';
-import {
-    Container,
-    Typography,
-    TextField,
-    Button,
-    Box,
-    Paper,
-    Avatar,
-    Divider,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle
-} from '@mui/material';
+import React, { useEffect, useRef, useState } from 'react';
+import { Container, Typography, TextField, Button, Box, Paper, Avatar, Divider, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import BlueButton from "../components/inputs/BlueButton";
 import LightBlueFileButton from "../components/inputs/BlueUploadButton";
-import {useNavigate} from 'react-router-dom';
-import {useAuth} from "../contexts/AuthContext";
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from "../contexts/AuthContext";
 import axios from "axios";
 
 type EditModeType = {
@@ -31,7 +17,7 @@ type FieldType = {
 function UserProfile(): React.ReactElement {
 
     const [account, setAccount] = useState<any>(null);
-    const { token, isProvider, isPremium, logoutUser} = useAuth();
+    const { token, isProvider, isPremium, logoutUser, accountId } = useAuth();
     const [services, setServices] = useState<any[]>([]);
     const [openDialog, setOpenDialog] = useState(false);
     const [serviceToDelete, setServiceToDelete] = useState<string | null>(null);
@@ -52,7 +38,7 @@ function UserProfile(): React.ReactElement {
     useSkipFirstEffect(() => {
         (async () => {
             try {
-                console.log("token: " + token + '\n');
+                console.log("token: " + token + '\n' + "isProvider: " + isProvider() + '\n' + "isPremium: " + isPremium() + '\n Id: ' + accountId);
 
                 const response = await axios.get('/api/account', { // replace with your backend endpoint
                     headers: {
@@ -134,15 +120,15 @@ function UserProfile(): React.ReactElement {
     };
 
     const handleEditClick = (field: string) => {
-        setEditMode(prevState => ({...prevState, [field]: !prevState[field]}));
+        setEditMode(prevState => ({ ...prevState, [field]: !prevState[field] }));
     };
 
     const handleFieldChange = (field: string, newValue: string) => {
-        setFieldValue(prevState => ({...prevState, [field]: newValue}));
+        setFieldValue(prevState => ({ ...prevState, [field]: newValue }));
     };
 
     const handleFieldSave = async (field: string) => {
-        const updatedAccount = {...account, [field]: fieldValue[field]};
+        const updatedAccount = { ...account, [field]: fieldValue[field] };
 
         try {
             const response = await axios.put('/api/account', updatedAccount, {
@@ -173,7 +159,7 @@ function UserProfile(): React.ReactElement {
     };
 
     const handleEditServiceClick = (service: any) => {
-        navigate('/addservice', {state: {service}});
+        navigate('/addservice', { state: { service } });
     };
 
     const handleDeleteServiceClick = async () => {
@@ -229,9 +215,9 @@ function UserProfile(): React.ReactElement {
 
     const renderField = (label: string, field: string) => {
         return (
-            <Box sx={{display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 0}}>
-                <Typography variant="body1" sx={{fontWeight: 'bold'}}>{label}:</Typography>
-                <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 0 }}>
+                <Typography variant="body1" sx={{ fontWeight: 'bold' }}>{label}:</Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     {field === 'userId' || !editMode[field] ? (
                         <Typography variant="body1">{fieldValue[field]}</Typography>
                     ) : (
@@ -250,17 +236,17 @@ function UserProfile(): React.ReactElement {
     };
 
     return (
-        <Container component="main" maxWidth="md" sx={{mt: 4, backgroundColor: '#f5f5f5', borderRadius: '20px'}}>
-            <Paper variant="outlined" sx={{p: 3, borderRadius: '20px'}}>
-                <Typography variant="h6" gutterBottom sx={{fontWeight: 'bold', fontSize: '24px', color: '#007BFF'}}>
+        <Container component="main" maxWidth="md" sx={{ mt: 4, backgroundColor: '#f5f5f5', borderRadius: '20px' }}>
+            <Paper variant="outlined" sx={{ p: 3, borderRadius: '20px' }}>
+                <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', fontSize: '24px', color: '#007BFF' }}>
                     Public Profile
                 </Typography>
-                <Box sx={{display: 'flex', flexDirection: 'column', gap: 3, p: 3}}>
-                    <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5}}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: 3 }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
                         <Avatar src={userImage ? URL.createObjectURL(userImage) : undefined}
-                                sx={{width: 80, height: 80}}/>
+                            sx={{ width: 80, height: 80 }} />
                         <LightBlueFileButton text="Upload Profile Picture"
-                                             onFileChange={handleFileUpload(setUserImage)}/>
+                            onFileChange={handleFileUpload(setUserImage)} />
                     </Box>
                     {renderField("User ID", "userId")}
                     {renderField("First Name", "firstName")}
@@ -272,42 +258,32 @@ function UserProfile(): React.ReactElement {
                     <Button onClick={logoutUser}>Logout</Button>
                     {isProvider() && (
                         <>
-                            <Divider sx={{my: 2}}/>
+                            <Divider sx={{ my: 2 }} />
                             <Typography variant="h6" gutterBottom component="div"
-                                        sx={{fontWeight: 'bold', fontSize: '24px', color: '#007BFF'}}>
+                                sx={{ fontWeight: 'bold', fontSize: '24px', color: '#007BFF' }}>
                                 Service Provider Settings
                             </Typography>
-                            <Box sx={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                justifyContent: 'space-between',
-                                gap: 0
-                            }}>
-                                <Typography variant="body1" sx={{fontWeight: 'bold'}}>Provided Services:</Typography>
-                                <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
+                            <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 0 }}>
+                                <Typography variant="body1" sx={{ fontWeight: 'bold' }}>Provided Services:</Typography>
+                                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                                     {services.length > 0 ? (
                                         services.map(service => (
-                                            <Box key={service._id}
-                                                 sx={{display: 'flex', alignItems: 'center', gap: 1, my: 1}}>
+                                            <Box key={service._id} sx={{ display: 'flex', alignItems: 'center', gap: 1, my: 1 }}>
                                                 <Typography variant="body1">{service.serviceType}</Typography>
                                                 <Button onClick={() => handleEditServiceClick(service)}>Edit</Button>
-                                                <Button onClick={() => handleOpenDialog(service._id)}
-                                                        sx={{color: 'red'}}>Delete</Button>
+                                                <Button onClick={() => handleOpenDialog(service._id)} sx={{ color: 'red' }}>Delete</Button>
                                             </Box>
                                         ))
                                     ) : (
                                         <Typography variant="body1">No services provided</Typography>
                                     )}
                                 </Box>
-                                <BlueButton text="Add Service" onClick={handleAddServiceClick}
-                                            sx={{alignSelf: 'flex-start', width: 'auto', padding: '5px 10px'}}/>
+                                <BlueButton text="Add Service" onClick={handleAddServiceClick} sx={{ alignSelf: 'flex-start', width: 'auto', padding: '5px 10px' }} />
                             </Box>
                         </>
                     )}
-                    <BlueButton text="View My Schedule" onClick={handleViewScheduleClick}
-                                sx={{backgroundColor: '#ADD8E6', color: 'white', mt: 2}}/>
-                    <Button onClick={handleDeleteAccount} sx={{backgroundColor: 'red', color: 'white', mt: 2}}>Delete
-                        Account</Button>
+                    <BlueButton text="View My Schedule" onClick={handleViewScheduleClick} sx={{ backgroundColor: '#ADD8E6', color: 'white', mt: 2 }} />
+                    <Button onClick={handleDeleteAccount} sx={{ backgroundColor: 'red', color: 'white', mt: 2 }}>Delete Account</Button>
                 </Box>
             </Paper>
 

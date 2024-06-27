@@ -26,7 +26,7 @@ export default function RequestHistoryTable() {
   const [showMediaCard, setShowMediaCard] = React.useState(false);
   const [selectedRequest, setSelectedRequest] = React.useState<ServiceRequest | null>(null);
   const [serviceRequests, setServiceRequests] = React.useState<ServiceRequest[]>([]);
-  const {token, account} = useAuth();
+  const {token, accountId} = useAuth();
 
   // const providerId = account?._id;
 
@@ -47,7 +47,7 @@ export default function RequestHistoryTable() {
     if (token && account) {
       console.log("this is the logged in account in request table:", account)
       // setLoading(true);
-      axios.get<ServiceRequest[]>(`/api/requests/requester/${account._id}`, {
+      axios.get<ServiceRequest[]>(`/api/requests/provider/${accountId}`, {
         headers: {Authorization: `Bearer ${token}` }
       })
           .then(response => {
@@ -62,7 +62,7 @@ export default function RequestHistoryTable() {
             // setLoading(false);
           });
     }
-  }, [account?._id]);
+  }, [accountId]);
 
 
   const handleToggleMediaCard = (req: ServiceRequest | null) => {
@@ -132,48 +132,6 @@ export default function RequestHistoryTable() {
 
   };
 
-  const handleCancel =  async() => {
-
-    if (!selectedRequest) {
-      console.error('No request selected');
-      return;
-    }
-
-
-    // get data from the request (selectedRequest)
-    const {requestStatus, job, _id, requestedBy, provider, ...rest} = selectedRequest;
-
-    try {
-
-      // update the request
-        const updateRequestData = {
-         requestStatus: RequestStatus.cancelled,
-        };
-        console.log("selected request id:" , selectedRequest._id, updateRequestData)
-        const updateResponse = await axios.put(`/api/requests/${selectedRequest._id}`, updateRequestData, {
-          headers: {Authorization: `Bearer ${token}` }
-        });
-        console.log('Request Updated:', updateResponse.data);
-
-
-        // Update local state to reflect these changes
-        const updatedServiceRequests = serviceRequests.map(req => {
-          if (req._id === selectedRequest._id) {
-            return { ...req, ...updateRequestData };
-          }
-          return req;
-        });
-
-        console.log(updatedServiceRequests);
-        setServiceRequests(updatedServiceRequests);
-        setShowMediaCard(false);
-     } catch (error) {
-      console.error('Error cancelling Request:', error);
-    }
-
-
-
-  };
 
   return (
     <Box sx={{ minWidth: 275, margin: 2 }}>
@@ -216,8 +174,7 @@ export default function RequestHistoryTable() {
                         onClose={() => setShowMediaCard(false)} 
                         onAccept={handleAccept}
                         onDecline={() => console.log('declined.') }
-                        onProposeNewTime={() => console.log('New Time: ')}
-                        onCancel={handleCancel} />
+                        onProposeNewTime={() => console.log('New Time: ')} />
           </div>
         )}
       </Box>

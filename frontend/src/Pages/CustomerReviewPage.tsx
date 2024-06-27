@@ -3,10 +3,8 @@ import {Container, Box, Typography, Card, CardContent, Avatar, Button, TextField
 import Rating from '@mui/material/Rating';
 import {appointments, bobBikerAppointment} from '../models/Appointment';
 import AppointmentCard from '../components/AppointmentCard';
-import { useParams } from 'react-router-dom';
 
 const ReviewPage: React.FC = () => {
-    const { jobId } = useParams();
     const [rating, setRating] = React.useState<number | null>(0);
 
     const handleRatingChange = (event: React.SyntheticEvent, newValue: number | null) => {
