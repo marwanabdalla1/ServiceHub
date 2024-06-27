@@ -15,169 +15,171 @@ import MediaCard from './RequestCard';
 import {ServiceRequest} from '../models/ServiceRequest';
 import RequestRow from './RequestRow'
 import {ServiceType, RequestStatus, JobStatus} from '../models/enums'
-import account, { Account, bikeRepairService } from '../models/Account';
-import { Job } from '../models/Job';
+import account, {Account, bikeRepairService} from '../models/Account';
+import {Job} from '../models/Job';
 import {ServiceOffering} from "../models/ServiceOffering";
 import axios from "axios";
 import {useEffect} from "react";
 import {useAuth} from "../contexts/AuthContext";
 
 export default function RequestHistoryTable() {
-  const [showMediaCard, setShowMediaCard] = React.useState(false);
-  const [selectedRequest, setSelectedRequest] = React.useState<ServiceRequest | null>(null);
-  const [serviceRequests, setServiceRequests] = React.useState<ServiceRequest[]>([]);
-  const {token, accountId} = useAuth();
+    const [showMediaCard, setShowMediaCard] = React.useState(false);
+    const [selectedRequest, setSelectedRequest] = React.useState<ServiceRequest | null>(null);
+    const [serviceRequests, setServiceRequests] = React.useState<ServiceRequest[]>([]);
+    const {token, account} = useAuth();
 
-  // const providerId = account?._id;
+    // const providerId = account?._id;
 
-  // useEffect(() => {
-  //   // get all the requests of this provider
-  //   axios.get(`/api/requests/provider/${providerId}`)
-  //       .then(response => {
-  //         setServiceRequests(response.data);
-  //       })
-  //       .catch(error => {
-  //         console.error('Failed to fetch service requests:', error);
-  //         setServiceRequests([]); // Consider how to handle errors, possibly setting an error state
-  //       });
-  // }, [providerId]); // This effect depends on `providerId`
+    // useEffect(() => {
+    //   // get all the requests of this provider
+    //   axios.get(`/api/requests/provider/${providerId}`)
+    //       .then(response => {
+    //         setServiceRequests(response.data);
+    //       })
+    //       .catch(error => {
+    //         console.error('Failed to fetch service requests:', error);
+    //         setServiceRequests([]); // Consider how to handle errors, possibly setting an error state
+    //       });
+    // }, [providerId]); // This effect depends on `providerId`
 
-  useEffect(() => {
-    console.log(token)
-    if (token && account) {
-      console.log("this is the logged in account in request table:", account)
-      // setLoading(true);
-      axios.get<ServiceRequest[]>(`/api/requests/provider/${accountId}`, {
-        headers: {Authorization: `Bearer ${token}` }
-      })
-          .then(response => {
-            console.log("getting requests ...", response.data)
-            setServiceRequests(response.data);
-            // setLoading(false);
-          })
-          .catch(error => {
-            console.error('Failed to fetch service requests:', error);
-            setServiceRequests([]);
-            // setError('Failed to load service requests');
-            // setLoading(false);
-          });
-    }
-  }, [accountId]);
-
-
-  const handleToggleMediaCard = (req: ServiceRequest | null) => {
-    setSelectedRequest(req);
-    setShowMediaCard(req !== null);
-  };
-
-  const handleAccept =  async() => {
-
-    if (!selectedRequest) {
-      console.error('No request selected');
-      return;
-    }
+    useEffect(() => {
+        console.log(token)
+        if (token && account) {
+            console.log("this is the logged in account in request table:", account)
+            // setLoading(true);
+            axios.get<ServiceRequest[]>(`/api/requests/provider/${account._id}`, {
+                headers: {Authorization: `Bearer ${token}`}
+            })
+                .then(response => {
+                    console.log("getting requests ...", response.data)
+                    setServiceRequests(response.data);
+                    // setLoading(false);
+                })
+                .catch(error => {
+                    console.error('Failed to fetch service requests:', error);
+                    setServiceRequests([]);
+                    // setError('Failed to load service requests');
+                    // setLoading(false);
+                });
+        }
+    }, [account?._id]);
 
 
-    // get data from the request (selectedRequest)
-    const {requestStatus, job, _id, requestedBy, provider, ...rest} = selectedRequest;
+    const handleToggleMediaCard = (req: ServiceRequest | null) => {
+        setSelectedRequest(req);
+        setShowMediaCard(req !== null);
+    };
 
-    const jobData = {
-      status: JobStatus.open,
-      request: selectedRequest._id,
-      receiver: selectedRequest.requestedBy._id,
-      provider: selectedRequest.provider._id,
-      ...rest,
+    const handleAccept = async () => {
 
-    }
-
-    console.log("job data at frontend:", jobData)
+        if (!selectedRequest) {
+            console.error('No request selected');
+            return;
+        }
 
 
-    // post new job
-    try {
-      const jobResponse = await axios.post("api/jobs/", jobData, {
-        headers: {Authorization: `Bearer ${token}` }
-      });
-      console.log("job posted!", jobResponse);
+        // get data from the request (selectedRequest)
+        const {requestStatus, job, _id, requestedBy, provider, ...rest} = selectedRequest;
 
-      // update the request
-      if (jobResponse.data && jobResponse.data._id) {
-        const updateRequestData = {
-          job: jobResponse.data._id, // or whatever the attribute is called in your database
-          requestStatus: RequestStatus.accepted,
-        };
-        console.log("selected request id:" , selectedRequest._id, updateRequestData)
-        const updateResponse = await axios.put(`/api/requests/${selectedRequest._id}`, updateRequestData, {
-          headers: {Authorization: `Bearer ${token}` }
-        });
-        console.log('Request Updated:', updateResponse.data);
+        const jobData = {
+            status: JobStatus.open,
+            request: selectedRequest._id,
+            receiver: selectedRequest.requestedBy._id,
+            provider: selectedRequest.provider._id,
+            ...rest,
+
+        }
+
+        console.log("job data at frontend:", jobData)
 
 
-        // Update local state to reflect these changes
-        const updatedServiceRequests = serviceRequests.map(req => {
-          if (req._id === selectedRequest._id) {
-            return { ...req, ...updateRequestData, job: jobResponse.data._id };
-          }
-          return req;
-        });
+        // post new job
+        try {
+            const jobResponse = await axios.post("api/jobs/", jobData, {
+                headers: {Authorization: `Bearer ${token}`}
+            });
+            console.log("job posted!", jobResponse);
 
-        console.log(updatedServiceRequests);
-        setServiceRequests(updatedServiceRequests);
-        setShowMediaCard(false);
-    } } catch (error) {
-      console.error('Error posting job:', error);
-    }
+            // update the request
+            if (jobResponse.data && jobResponse.data._id) {
+                const updateRequestData = {
+                    job: jobResponse.data._id, // or whatever the attribute is called in your database
+                    requestStatus: RequestStatus.accepted,
+                };
+                console.log("selected request id:", selectedRequest._id, updateRequestData)
+                const updateResponse = await axios.put(`/api/requests/${selectedRequest._id}`, updateRequestData, {
+                    headers: {Authorization: `Bearer ${token}`}
+                });
+                console.log('Request Updated:', updateResponse.data);
 
 
+                // Update local state to reflect these changes
+                const updatedServiceRequests = serviceRequests.map(req => {
+                    if (req._id === selectedRequest._id) {
+                        return {...req, ...updateRequestData, job: jobResponse.data._id};
+                    }
+                    return req;
+                });
 
-  };
+                console.log(updatedServiceRequests);
+                setServiceRequests(updatedServiceRequests);
+                setShowMediaCard(false);
+            }
+        } catch (error) {
+            console.error('Error posting job:', error);
+        }
 
 
-  return (
-    <Box sx={{ minWidth: 275, margin: 2 }}>
-      <Box>
-        <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />} aria-label="breadcrumb" sx={{ marginBottom: '16px' }}>
-          <Link color="inherit" href="/" underline="hover">
-            History
-          </Link>
-          <Typography color="textPrimary">Request History</Typography>
-        </Breadcrumbs>
-        <Typography variant="h6" component="div" sx={{ marginBottom: '16px' }}>
-          Request History
-        </Typography>
-      </Box>
-      <Box style={{ display: 'flex' }}>
-        <Box sx={{ flexGrow: 1, marginRight: 2 }}>
-          <Box>
-            <TableContainer component={Paper} sx={{ overflow: 'auto' }}>
-              <Table sx={{ minWidth: 650 }} aria-label="simple table">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Type</TableCell>
-                    <TableCell>Status</TableCell>
-                    <TableCell>Appointment Date</TableCell>
-                    <TableCell></TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {serviceRequests.map((request) => (
-                    <RequestRow key={request._id} request={request} onViewDetails={handleToggleMediaCard} />
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Box>
+    };
+
+
+    return (
+        <Box sx={{minWidth: 275, margin: 2}}>
+            <Box>
+                <Breadcrumbs separator={<NavigateNextIcon fontSize="small"/>} aria-label="breadcrumb"
+                             sx={{marginBottom: '16px'}}>
+                    <Link color="inherit" href="/" underline="hover">
+                        History
+                    </Link>
+                    <Typography color="textPrimary">Request History</Typography>
+                </Breadcrumbs>
+                <Typography variant="h6" component="div" sx={{marginBottom: '16px'}}>
+                    Request History
+                </Typography>
+            </Box>
+            <Box style={{display: 'flex'}}>
+                <Box sx={{flexGrow: 1, marginRight: 2}}>
+                    <Box>
+                        <TableContainer component={Paper} sx={{overflow: 'auto'}}>
+                            <Table sx={{minWidth: 650}} aria-label="simple table">
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>Type</TableCell>
+                                        <TableCell>Status</TableCell>
+                                        <TableCell>Appointment Date</TableCell>
+                                        <TableCell></TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {serviceRequests.map((request) => (
+                                        <RequestRow key={request._id} request={request}
+                                                    onViewDetails={handleToggleMediaCard}/>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    </Box>
+                </Box>
+                {showMediaCard && selectedRequest && (
+                    <div style={{position: 'relative', flexShrink: 0, width: 400, marginLeft: 2}}>
+                        <MediaCard request={selectedRequest}
+                                   onClose={() => setShowMediaCard(false)}
+                                   onAccept={handleAccept}
+                                   onDecline={() => console.log('declined.')}
+                                   onProposeNewTime={() => console.log('New Time: ')}/>
+                    </div>
+                )}
+            </Box>
         </Box>
-        {showMediaCard && selectedRequest && (
-          <div style={{ position: 'relative', flexShrink: 0, width: 400, marginLeft: 2 }}>
-            <MediaCard request={selectedRequest} 
-                        onClose={() => setShowMediaCard(false)} 
-                        onAccept={handleAccept}
-                        onDecline={() => console.log('declined.') }
-                        onProposeNewTime={() => console.log('New Time: ')} />
-          </div>
-        )}
-      </Box>
-    </Box>
-  );
+    );
 }
