@@ -26,13 +26,13 @@ const storage = new GridFsStorage({
 });
 
 let bucket: GridFSBucket;
-MongoClient.connect(env.MONGO_CONNECTION_STRING!)
+MongoClient.connect(env.MONGO_CONNECTION_STRING!,)
     .then((client: MongoClient) => {
         // Successfully connected to MongoDB
         console.log("Connected successfully to MongoDB");
 
         // Access the specific database
-        const db = client.db('SEBA22');
+        const db = client.db('ServiceHub');
         console.log("Database connected: " + db.databaseName);
 
         // Setup the GridFS bucket
@@ -62,11 +62,10 @@ MongoClient.connect(env.MONGO_CONNECTION_STRING!)
 
 const upload = multer({storage});
 
-export const uploadFile: RequestHandler = async (req, res) => {
+export const uploadProfileImage: RequestHandler = async (req, res) => {
     try {
         const userId = (req as any).user.userId;
         const user = await Account.findById(userId);
-        const fileType = req.params.fileType; // 'profileImage' or 'certificate'
 
         if (!user) {
             return res.status(404).json({
@@ -83,17 +82,15 @@ export const uploadFile: RequestHandler = async (req, res) => {
                 });
             }
 
-            let updates = {};
-
-            if (fileType === 'profileImage') {
-                // TODO: delete old profile image
-                const profileImageId = (req.file as MulterFile).id.toString();
-                updates = {profileImageId: profileImageId};
-
-            } else if (fileType === 'certificate') {
-                // TODO
+            if (user.get('profileImageId') != "") {
+                const _id = new ObjectId(user.get('profileImageId'));
+                bucket.delete(_id).then(() => {
+                    console.log("Profile Image deleted successfully");
+                });
             }
-            console.log("updates: ", updates);
+            const profileImageId = (req.file as MulterFile).id.toString();
+            const updates = {profileImageId: profileImageId};
+
             const updatedUser = await Account.findOneAndUpdate({_id: userId}, updates, {
                 new: true,
                 upsert: true,
@@ -105,8 +102,6 @@ export const uploadFile: RequestHandler = async (req, res) => {
             console.log("user: ", updatedUser);
             return res.status(200).json(req.file);
         });
-
-
     } catch (err: any) {
         let message = '';
         if (err instanceof Error) {
@@ -119,11 +114,10 @@ export const uploadFile: RequestHandler = async (req, res) => {
     }
 }
 
-export const getFile: RequestHandler = async (req, res) => {
+export const getProfileImage: RequestHandler = async (req, res) => {
     try {
         const userId = (req as any).user.userId;
         const user = await Account.findById(userId);
-        const fileType = req.params.fileType; // 'profileImage' or 'certificate'
 
         if (!user) {
             return res.status(404).json({
@@ -131,39 +125,31 @@ export const getFile: RequestHandler = async (req, res) => {
                 message: "User not found."
             });
         }
-
-        if (fileType === 'profileImage') {
-            console.log("user.profileImageId: ", user.get('profileImageId'));
-
-            try {
-                // const _id = new ObjectId(user.get('profileImageId'));
-                const _id = new ObjectId("667a680e807dd388ca77ec34");
-                console.log("_id: ", _id);
-
-                const downloadStream = bucket.openDownloadStream(_id);
-
-                console.log('Download stream:', downloadStream); // Log the result of the openDownloadStream call
-
-                downloadStream.on('data', (chunk) => {
-                    res.write(chunk);
-                });
-
-                downloadStream.on('error', function (error) {
-                    console.error("Error downloading file:", error);
-                    return res.status(404).json({error: 'File not found'});
-                });
-
-                downloadStream.on('end', () => {
-                    res.end();
-                });
-
-            } catch (error) {
-                console.error("Error with ObjectId conversion:", error);
-                return res.status(400).json({error: 'Invalid image ID provided'});
+        try {
+            if (user.get('profileImageId') === "") {
+                return;
             }
-        } else if (fileType === 'certificate') {
-            // TODO
+            const _id = new ObjectId(user.get('profileImageId'));
+
+            const downloadStream = bucket.openDownloadStream(_id);
+
+            downloadStream.on('data', (chunk) => {
+                res.write(chunk);
+            });
+
+            downloadStream.on('error', function (error) {
+                return res.status(404).json({error: 'File not found'});
+            });
+
+            downloadStream.on('end', () => {
+                res.end();
+            });
+
+        } catch (error) {
+            console.error("Error with ObjectId conversion:", error);
+            return res.status(400).json({error: 'Invalid image ID provided'});
         }
+
     } catch (error) {
         return res.status(400).json({error: 'Invalid File ID'});
     }
@@ -200,27 +186,27 @@ export const getFileById: RequestHandler = async (req, res) => {
 
 }
 
-export const deleteFileById: RequestHandler = async (req, res) => {
+export const deleteProfileImage: RequestHandler = async (req, res) => {
     try {
         const userId = (req as any).user.userId;
-        const fileId = req.params.fileId;
         const user = await Account.findById(userId);
-        const fileType = req.params.fileType; // 'profileImage' or 'certificate'
         if (!user) {
             return res.status(404).json({
                 error: "Not Found",
                 message: "User not found."
             });
         }
-        const _id = new ObjectId(user.profileImageId);
-        bucket.delete(_id).then(() => {
-            if (fileType === 'profileImage') {
-                user.profileImageId = '';
-                user.save();
-                return res.status(200).json({message: 'Profile Image deleted successfully'});
-            } else if (fileType === 'certificate') {
-                // TODO
+        const _id = new ObjectId(user.get('profileImageId'));
+        bucket.delete(_id).then(async () => {
+            const updatedUser = await Account.findOneAndUpdate({_id: userId}, {profileImageId: ""}, {
+                new: true,
+                upsert: true,
+                strict: false
+            });
+            if (!updatedUser) {
+                return res.status(404).send({message: 'User not found'});
             }
+            return res.status(200).json({message: 'Profile Image deleted successfully'});
         });
     } catch (error) {
         return res.status(400).json({error: 'Invalid File ID'});

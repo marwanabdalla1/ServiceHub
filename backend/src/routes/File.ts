@@ -1,11 +1,11 @@
 import express from "express";
 import {authenticate} from "../middleware/authenticate";
-import {deleteFileById, getFile, getFileById, uploadFile} from "../controller/FileController";
+import {deleteProfileImage, getProfileImage, getFileById, uploadProfileImage} from "../controller/FileController";
 
 const router = express.Router();
-router.post('/upload/:fileType', authenticate, uploadFile);
+router.post('/upload/profileImage', authenticate, uploadProfileImage);
 router.get('/:fileType/:fileId', authenticate, getFileById);
-router.get('/:fileType/', authenticate, getFile);
-router.delete('/:fileType/:fileId', authenticate, deleteFileById);
+router.get('/profileImage/', authenticate, getProfileImage);
+router.delete('/profileImage', authenticate, deleteProfileImage);
 
 export default router;

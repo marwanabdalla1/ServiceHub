@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Container, Typography, TextField, Button, Box, Paper, Avatar, Divider, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import { Container, Typography, TextField, Button, Box, Paper, Avatar, Divider, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton } from '@mui/material';
 import BlueButton from "../components/inputs/BlueButton";
 import LightBlueFileButton from "../components/inputs/BlueUploadButton";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from "../contexts/AuthContext";
 import axios from "axios";
 import {toast} from "react-toastify";
+import DeleteIcon from '@mui/icons-material/Delete';
 
 type EditModeType = {
     [key: string]: boolean;
@@ -193,6 +194,16 @@ function UserProfile(): React.ReactElement {
         });
     };
 
+    const handleProfileImageDelete = async () => {
+        await axios.delete(`/api/file/profileImage/`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        // set the image to the default profile image
+        setProfileImage(null);
+    };
+
     const handleFileUpload = async (file: File | null, fileType: string) => {
         if (!file) {
             return;
@@ -202,8 +213,19 @@ function UserProfile(): React.ReactElement {
         const formData = new FormData();
         formData.append('file', file);
 
+        let url = '';
+
+        if (fileType === 'profileImage') {
+            url = '/api/file/upload/profileImage';
+        } else if (fileType === 'certificate') {
+            // TODO: Define the endpoint for certificate upload
+        } else {
+            console.error('Invalid file type:', fileType);
+            return;
+        }
+
         try {
-            const response = await axios.post(`/api/file/upload/${fileType}`, formData, {
+            const response = await axios.post(url, formData, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -337,6 +359,9 @@ function UserProfile(): React.ReactElement {
                 </Typography>
                 <Box sx={{display: 'flex', flexDirection: 'column', gap: 3, p: 3}}>
                     <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5}}>
+                        <IconButton onClick={handleProfileImageDelete} size="small" sx={{alignSelf: 'flex-end'}}>
+                            <DeleteIcon/>
+                        </IconButton>
                         <Avatar src={profileImage ? URL.createObjectURL(profileImage) : undefined}
                                 sx={{width: 80, height: 80}}/>
                         <LightBlueFileButton text="Upload Profile Picture"
