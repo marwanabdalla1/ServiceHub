@@ -1,20 +1,14 @@
 import mongoose, { Document, Schema, Types } from 'mongoose';
 import { ServiceType } from './enums';
 
-interface ICertificate {
-    name: string;
-    data: Buffer;
-    contentType: string;
-}
-
 export interface IServiceOffering extends Document {
     serviceType: ServiceType;
     lastUpdatedOn: Date;
     createdOn: Date;
-    certificate: ICertificate;
+    certificateId: string;
     hourlyRate: number;
     description: string;
-    isCertified: boolean;
+    // isCertified: boolean;
     location: string;
     provider: Types.ObjectId; // Reference to an Account document
     baseDuration: number;
@@ -29,10 +23,10 @@ const ServiceOfferingSchema: Schema = new Schema({
     serviceType: { type: String, enum: Object.values(ServiceType), required: true },
     lastUpdatedOn: { type: Date, required: true },
     // createdOn: { type: Date, required: true },
-    certificate: { name: String, data: Buffer, contentType: String},
+    certificateId: { type: String, required: false},
     hourlyRate: { type: Number, required: true },
     description: { type: String, required: false },
-    isCertified: { type: Boolean, required: false },
+    // isCertified: { type: Boolean, required: false },
     location: { type: String, required: true },
     provider: { type: Schema.Types.ObjectId, ref: 'Account', required: true },
     baseDuration: { type: Number, required: true },

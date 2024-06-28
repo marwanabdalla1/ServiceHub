@@ -1,8 +1,8 @@
-import { Request, Response, NextFunction } from 'express';
+import {Request, Response, NextFunction} from 'express';
 import ServiceOffering from "../models/serviceOffering";
 import Account from '../models/account';
-import { Types } from 'mongoose';
-import { ServiceType } from '../models/enums'; // Assuming this is where your enum is defined
+import {Types} from 'mongoose';
+import {ServiceType} from '../models/enums'; // Assuming this is where your enum is defined
 
 
 export const addService = async (req: Request, res: Response, next: NextFunction) => {
@@ -15,15 +15,13 @@ export const addService = async (req: Request, res: Response, next: NextFunction
             selectedService,
             hourlyRate,
             description,
-            certificate,
             defaultSlotTime,
             travelTime,
             selectedPaymentMethods,
-            isCertified // Capture isCertified from request body
         } = req.body;
 
-        // Validate required fields
-        if (!selectedService || !hourlyRate || !description || !defaultSlotTime || !travelTime) {
+        // Validate required fields (description is optional, should be validated separately)
+        if (!selectedService || !hourlyRate || !defaultSlotTime || !travelTime) {
             return res.status(400).send('Missing required fields');
         }
 
@@ -43,16 +41,9 @@ export const addService = async (req: Request, res: Response, next: NextFunction
         const newServiceOffering = new ServiceOffering({
             serviceType: serviceType,
             lastUpdatedOn: new Date(),
-            // createdOn will be automatically set by the timestamps option
-            certificate: {
-                name: certificate?.name || '',
-                data: certificate?.data || null,
-                contentType: certificate?.contentType || ''
-            },
             hourlyRate: Number(hourlyRate),
             description: description,
             acceptedPaymentMethods: selectedPaymentMethods.map((method: { title: any; }) => method.title) || [],
-            isCertified: isCertified || false, // Correctly assign the isCertified field
             location: account.location || 'Unknown location', // Use account's location if available
             provider: new Types.ObjectId(userId),
             baseDuration: defaultSlotTime,
@@ -74,7 +65,8 @@ export const addService = async (req: Request, res: Response, next: NextFunction
         account.serviceOfferings.push(savedServiceOffering._id as Types.ObjectId);
         await account.save();
 
-        res.status(201).send('Service offering added successfully');
+        // Return the saved service offering;
+        res.status(201).send(savedServiceOffering);
     } catch (err) {
         console.error('Error adding service:', err);
         res.status(500).send('Internal Server Error');
@@ -93,14 +85,13 @@ export const editService = async (req: Request, res: Response, next: NextFunctio
             selectedService,
             hourlyRate,
             description,
-            certificate,
             defaultSlotTime,
             travelTime,
             selectedPaymentMethods
         } = req.body;
 
         // Validate required fields
-        if (!selectedService || !hourlyRate || !description || !defaultSlotTime || !travelTime) {
+        if (!selectedService || !hourlyRate || !defaultSlotTime || !travelTime) {
             return res.status(400).send('Missing required fields');
         }
 
@@ -125,18 +116,13 @@ export const editService = async (req: Request, res: Response, next: NextFunctio
         // serviceOffering.serviceType = serviceType; //it shouldn't update the service type
         serviceOffering.hourlyRate = Number(hourlyRate);
         serviceOffering.description = description;
-        serviceOffering.acceptedPaymentMethods = selectedPaymentMethods.map((method: { title: any; }) => method.title) || [],
+        serviceOffering.acceptedPaymentMethods = selectedPaymentMethods.map((method: {
+            title: any;
+        }) => method.title) || [],
 
-        serviceOffering.baseDuration = defaultSlotTime;
+            serviceOffering.baseDuration = defaultSlotTime;
         serviceOffering.bufferTimeDuration = travelTime;
         serviceOffering.lastUpdatedOn = new Date();
-        if (certificate) {
-            serviceOffering.certificate = {
-                name: certificate.name || '',
-                data: certificate.data || null,
-                contentType: certificate.contentType || ''
-            };
-        }
 
         // Save the updated service offering to the database
         const updatedServiceOffering = await serviceOffering.save();
@@ -147,8 +133,6 @@ export const editService = async (req: Request, res: Response, next: NextFunctio
         res.status(500).send('Internal Server Error');
     }
 }
-
-
 
 export const deleteService = async (req: Request, res: Response, next: NextFunction) => {
     try {

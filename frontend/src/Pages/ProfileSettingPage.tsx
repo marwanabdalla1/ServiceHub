@@ -23,6 +23,7 @@ function UserProfile(): React.ReactElement {
     const [services, setServices] = useState<any[]>([]);
     const [openDialog, setOpenDialog] = useState(false);
     const [serviceToDelete, setServiceToDelete] = useState<string | null>(null);
+    const [profileImage, setProfileImage] = useState<File | null>(null);
     const [subscriptions, setSubscriptions] = useState<any[]>([]);
     const { account: userAccount } = useAuth();
     const isProvider = userAccount?.isProvider;
@@ -115,10 +116,9 @@ function UserProfile(): React.ReactElement {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 },
-                responseType: 'blob' // Important because the data is an image
+                responseType: 'blob'
             });
 
-            // Set the profile image state
             setProfileImage(profileImageResponse.data);
 
         } catch (error) {
@@ -178,8 +178,6 @@ function UserProfile(): React.ReactElement {
         }
     }, [account]);
 
-    const [profileImage, setProfileImage] = useState<File | null>(null);
-
     const handleProfileImageUpload = (setFile: React.Dispatch<React.SetStateAction<File | null>>) => (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files ? event.target.files[0] : null;
         setFile(file);
@@ -234,19 +232,19 @@ function UserProfile(): React.ReactElement {
             console.log(response.data);
         } catch (error) {
             console.error('Error uploading file:', error);
-            }
+        }
     };
 
     const handleEditClick = (field: string) => {
-        setEditMode(prevState => ({ ...prevState, [field]: !prevState[field] }));
+        setEditMode(prevState => ({...prevState, [field]: !prevState[field]}));
     };
 
     const handleFieldChange = (field: string, newValue: string) => {
-        setFieldValue(prevState => ({ ...prevState, [field]: newValue }));
+        setFieldValue(prevState => ({...prevState, [field]: newValue}));
     };
 
     const handleFieldSave = async (field: string) => {
-        const updatedAccount = { ...account, [field]: fieldValue[field] };
+        const updatedAccount = {...account, [field]: fieldValue[field]};
 
         try {
             const response = await axios.put('/api/account', updatedAccount, {
@@ -275,12 +273,19 @@ function UserProfile(): React.ReactElement {
     };
 
     const handleEditServiceClick = (service: any) => {
-        navigate('/addservice', { state: { service } });
+        navigate('/addservice', {state: {service}});
     };
 
     const handleDeleteServiceClick = async () => {
         if (serviceToDelete) {
             try {
+                // delete the corresponding certificate
+                await axios.delete(`/api/certificate/${serviceToDelete}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
                 const response = await axios.delete(`/api/services/delete-service/${serviceToDelete}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`

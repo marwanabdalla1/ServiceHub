@@ -5,7 +5,6 @@ import express, {RequestHandler} from "express";
 import Account from "../models/account";
 import {MongoClient, GridFSBucket, ObjectId} from "mongodb";
 
-
 interface MulterFile extends Express.Multer.File {
     id: ObjectId;
 }
@@ -18,7 +17,7 @@ const storage = new GridFsStorage({
             const filename = `file-${Date.now()}${file.originalname}`;
             const fileInfo = {
                 filename: filename,
-                bucketName: 'uploads'
+                bucketName: 'profileImages'
             };
             resolve(fileInfo);
         });
@@ -28,31 +27,9 @@ const storage = new GridFsStorage({
 let bucket: GridFSBucket;
 MongoClient.connect(env.MONGO_CONNECTION_STRING!,)
     .then((client: MongoClient) => {
-        // Successfully connected to MongoDB
-        console.log("Connected successfully to MongoDB");
-
-        // Access the specific database
         const db = client.db('ServiceHub');
-        console.log("Database connected: " + db.databaseName);
-
-        // Setup the GridFS bucket
         bucket = new GridFSBucket(db, {
-            bucketName: 'uploads'
-        });
-        console.log("GridFS Bucket is set up with the bucket name: 'uploads'");
-
-        // Additional check: List the first file in the bucket to confirm connection
-        bucket.find({}).limit(1).toArray().then((files) => {
-            if (files.length > 0) {
-                console.log("Successfully found files in GridFS, example file:", files[0]);
-            } else {
-                console.log("No files found in GridFS, but the bucket is correctly set up.");
-            }
-        }).catch((err) => {
-            if (err) {
-                console.error("Error listing files from GridFS: ", err);
-                return;
-            }
+            bucketName: 'profileImages'
         });
     })
     .catch((err: Error) => {
@@ -138,7 +115,7 @@ export const getProfileImage: RequestHandler = async (req, res) => {
             });
 
             downloadStream.on('error', function (error) {
-                return res.status(404).json({error: 'File not found'});
+                return;
             });
 
             downloadStream.on('end', () => {
@@ -153,37 +130,6 @@ export const getProfileImage: RequestHandler = async (req, res) => {
     } catch (error) {
         return res.status(400).json({error: 'Invalid File ID'});
     }
-}
-
-export const getFileById: RequestHandler = async (req, res) => {
-    try {
-        const userId = (req as any).user.userId;
-        const user = await Account.findById(userId);
-        const fileType = req.params.fileType; // 'profileImage' or 'certificate'
-        const fileId = req.params.fileId;
-
-        if (!user) {
-            return res.status(404).json({
-                error: "Not Found",
-                message: "User not found."
-            });
-        }
-
-        if (fileType === 'profileImage') {
-            const _id = new ObjectId(fileId);
-
-            const downloadStream = bucket.openDownloadStream(_id);
-            downloadStream.on('error', function (error) {
-                return res.status(404).json({error: 'File not found'});
-            });
-            downloadStream.pipe(res);
-        } else if (fileType === 'certificate') {
-            // TODO
-        }
-    } catch (error) {
-        return res.status(400).json({error: 'Invalid File ID'});
-    }
-
 }
 
 export const deleteProfileImage: RequestHandler = async (req, res) => {

@@ -11,13 +11,15 @@ import OfferingRouter from "./routes/Offering";
 import RequestRouter from "./routes/Request";
 import JobRouter from "./routes/Job";
 import ReviewRouter from "./routes/Review";
-import FileRouter from "./routes/File";
+import ProfileImageRouter from "./routes/ProfileImage";
+import CertificateRouter from "./routes/Certificate";
 
 
 // Import the models to ensure they are registered
 import './models/serviceOffering';
 import TimeSlotRouter from "./routes/TimeSlot";
 import ServiceRouter from "./routes/Service";
+import ProfileImage from "./routes/ProfileImage";
 import PaymentRouter from "./routes/PaymentRouter";
 import WebhookRouter from "./routes/WebhookRouter";
 
@@ -41,11 +43,13 @@ app.use("/api/auth", AuthRouter);
 // app.use(authenticate)
 
 // Routes
-app.use("/api/file", FileRouter);
+app.use("/api/file", ProfileImageRouter);
+app.use("/api/certificate", CertificateRouter);
 app.use("/api/account", AccountRouter);
 app.use("/api/offerings", OfferingRouter);
 app.use("/api/timeslots", TimeSlotRouter);
-app.use("/api/services", ServiceRouter);app.use("/api/becomepro", PaymentRouter);
+app.use("/api/services", ServiceRouter);
+app.use("/api/becomepro", PaymentRouter);
 
 app.use("/api/requests", RequestRouter);
 app.use("/api/jobs", JobRouter);
