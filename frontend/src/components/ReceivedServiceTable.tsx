@@ -16,16 +16,15 @@ import { Job } from '../models/Job';
 import ReceivedServiceRow from './ReceivedServiceRow';
 import { Account } from '../models/Account';
 import account from '../models/Account';
-import { Timeslot } from '../models/Timeslot';
-import { ServiceRequest } from '../models/ServiceRequest';
-import { RequestStatus, ServiceType, JobStatus } from '../models/enums';
+import {Timeslot} from '../models/Timeslot';
+import {ServiceRequest} from '../models/ServiceRequest';
+import {RequestStatus, ServiceType, JobStatus} from '../models/enums';
 import {ServiceOffering} from "../models/ServiceOffering";
 import {useAuth} from "../contexts/AuthContext";
 import {useEffect} from "react";
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
 import { now } from 'moment';
-
 
 
 //Candidate for deletion

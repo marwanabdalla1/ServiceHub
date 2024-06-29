@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Container, Box, Typography, Card, CardContent, TextField, Button, Grid } from '@mui/material';
 import { useBooking, BookingDetails } from '../../contexts/BookingContext';
 import axios from "axios";
+import {useAuth} from "../../contexts/AuthContext";
 
 
 interface UpdateProfileProps {
@@ -28,6 +29,7 @@ interface UserDetails {
 function UpdateProfile({ onNext, onBack, bookingDetails}: UpdateProfileProps) {
     // const { bookingDetails } = useBooking();
     const navigate = useNavigate();
+    const { token } = useAuth();
 
     // Initialize state directly from bookingDetails.requestedBy
     const [userDetails, setUserDetails] = useState<UserDetails>({
@@ -40,6 +42,9 @@ function UpdateProfile({ onNext, onBack, bookingDetails}: UpdateProfileProps) {
         // email: bookingDetails.requestedBy?.email || '',
         phoneNumber: bookingDetails.requestedBy?.phoneNumber || ''
     });
+
+    console.log("requested by:", bookingDetails.requestedBy)
+
 
     const [editMode, setEditMode] = useState(false);
     const [isModified, setIsModified] = useState(false);
@@ -58,10 +63,12 @@ function UpdateProfile({ onNext, onBack, bookingDetails}: UpdateProfileProps) {
 
 
     const handleSaveProfile = async() => {
-        const apiEndpoint = `/api/auth/accounts/${bookingDetails.requestedBy?._id}`
+        const apiEndpoint = '/api/account/'
         console.log(userDetails)
         try {
-            const response = await axios.put(apiEndpoint, userDetails);
+            const response = await axios.put(apiEndpoint, userDetails, {
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
             console.log('User updated:', response.data);
             onNext();
         } catch (error) {
@@ -211,7 +218,7 @@ function UpdateProfile({ onNext, onBack, bookingDetails}: UpdateProfileProps) {
                                     {bookingDetails.location}
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary">
-                                    {bookingDetails.startTime ? bookingDetails.startTime.toLocaleString() : 'No date set'}
+                                    {bookingDetails.timeSlot?.start ? bookingDetails.timeSlot?.start.toLocaleString() : 'No date set'}
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary">
                                     {bookingDetails.serviceOffering?.serviceType}

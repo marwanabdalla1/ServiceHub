@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, {Schema, Document, Types} from 'mongoose';
 
 export interface ITimeslot extends Document {
     title: string;
@@ -6,7 +6,8 @@ export interface ITimeslot extends Document {
     end: Date;
     isFixed: boolean;
     isBooked: boolean;
-    createdById: string;
+    requestId?: Types.ObjectId;
+    createdById: Types.ObjectId;
 }
 
 const TimeslotSchema: Schema = new Schema({
@@ -15,10 +16,12 @@ const TimeslotSchema: Schema = new Schema({
     end: { type: Date, required: true },
     isFixed: { type: Boolean, required: true },
     isBooked: { type: Boolean, required: true },
-    createdById: { type: String, required: true }
-});
+    requestId: { type: Schema.Types.ObjectId, ref: "ServiceRequest", required: false  }, //only required if it is booked
+    createdById: { type: Schema.Types.ObjectId, ref: "Account", required: true },
 
-TimeslotSchema.index({ title: 1, start: 1, end: 1, isFixed: 1, isBooked: 1, createdById: 1 }, { unique: true });
+}, {timestamps: true});
+
+TimeslotSchema.index({ title: 1, start: 1, end: 1, isFixed: 1, isBooked: 1, requestId:1, createdById: 1 }, { unique: true });
 
 const Timeslot = mongoose.model<ITimeslot>('Timeslot', TimeslotSchema);
 

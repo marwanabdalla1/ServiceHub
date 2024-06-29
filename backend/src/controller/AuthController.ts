@@ -65,8 +65,9 @@ export const signup: RequestHandler = async (req, res, next) => {
         res.setHeader('Authorization', 'Bearer ' + token);
         res.status(201).json({
             token,
+            accountId: account._id,
             isProvider: account.isProvider,
-            isPremium: account.isPremium
+            isPremium: account.isPremium,
         });
     } catch (err: any) {
         let message = '';
@@ -137,6 +138,7 @@ export const login: RequestHandler = async (req, res, next) => {
         res.setHeader('Authorization', 'Bearer ' + token);
         return res.status(200).json({
             token,
+            accountId: account._id,
             isProvider: account.isProvider,
             isPremium: account.isPremium
         });

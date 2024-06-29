@@ -15,8 +15,8 @@ import MediaCard from './RequestCard';
 import {ServiceRequest} from '../models/ServiceRequest';
 import RequestRow from './RequestRow'
 import {ServiceType, RequestStatus, JobStatus} from '../models/enums'
-import account, { Account, bikeRepairService } from '../models/Account';
-import { Job } from '../models/Job';
+import account, {Account, bikeRepairService} from '../models/Account';
+import {Job} from '../models/Job';
 import {ServiceOffering} from "../models/ServiceOffering";
 import axios from "axios";
 import {useEffect} from "react";

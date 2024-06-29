@@ -31,104 +31,104 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import {useBooking} from "../contexts/BookingContext";
 
 
-const mockProvider: ServiceProvider = {
-    _id: '1',
-    firstName: 'Bob',
-    lastName: 'Biker',
-    serviceOfferings: [new ServiceOffering('offering0',
-        ServiceType.bikeRepair, new Date(), new Date(), new File([], "empty.txt", { type: "text/plain" }), 15, 'desc0', true,
-    'Munich', account, 1, 0.5, [], 3, 4.5)],
-    location: 'Munich',
-    availability: [
-        {
-            dayOfWeek: DaysOfWeek.Thursday,
-            timeslots: [
-                {title: ServiceType.bikeRepair, start: new Date('2024-05-11T15:00:00'), end: new Date('2024-05-11T20:00:00'), isFixed: false}
-            ]
-        },
-        {
-            dayOfWeek: DaysOfWeek.Friday,
-            timeslots: [
-                {title: ServiceType.babySitting, start: new Date('2024-05-11T15:00:00'), end: new Date('2024-05-11T20:00:00'), isFixed: true}
-            ]
-        },
-        {
-            dayOfWeek: DaysOfWeek.Saturday,
-            timeslots: [
-                {title: ServiceType.petSitting, start: new Date('2024-05-11T15:00:00'), end: new Date('2024-05-11T20:00:00'), isFixed: true}
-            ]
-        },
-        {
-            dayOfWeek: DaysOfWeek.Sunday,
-            timeslots: [
-                {title: ServiceType.homeRemodeling, start: new Date('2024-05-11T15:00:00'), end: new Date('2024-05-11T20:00:00'), isFixed: false}
-            ]
-        }
-    ],
-    
-    reviews: [
-        {
-            reviewId: '1',
-            rating: 5,
-            content: 'Very friendly, great service. I can definitely recommend!',
-            createdOn: new Date('2024-05-03'),
-            reviewer: account,
-            recipient: account,
-            service: bikeRepairService
-        },
-        {
-            reviewId: '2',
-            rating: 5,
-            content: 'Bob is very competent and quick in his work. I will definitely be using him for all my bike repairs from now on.',
-            createdOn: new Date('2024-05-03'),
-            reviewer: account,
-            recipient: account,
-            service: bikeRepairService
-        },
-        {
-            reviewId: '3',
-            rating: 5,
-            content: 'Great Service!',
-            createdOn: new Date('2024-05-03'),
-            reviewer: account,
-            recipient: account,
-            service: bikeRepairService
-        },
-        {
-            reviewId: '4',
-            rating: 4,
-            content: 'Good',
-            createdOn: new Date('2024-05-03'),
-            reviewer: account,
-            recipient: account,
-            service: bikeRepairService
-        },
-        {
-            reviewId: '5',
-            rating: 4,
-            content: 'Good',
-            createdOn: new Date('2024-05-03'),
-            reviewer: account,
-            recipient: account,
-            service: bikeRepairService
-        },
-
-    ],
-    rating: 4.6,
-    reviewCount: 5,
-    description: 'Having tinkered with bikes since I was 16, I\'ve got the skills to fix yours up good as new.',
-    email: 'bob.biker@biking.com',
-    address: 'Biking Avenue',
-    createdOn: new Date(),
-    phoneNumber: '07775000',
-    isProvider: true,
-    profileImageUrl: '/images/profiles/profile2.png',
-    isPremium: false,
-    notifications: [],
-    requestHistory: [],
-    jobHistory: []
-
-};
+// const mockProvider: ServiceProvider = {
+//     _id: '1',
+//     firstName: 'Bob',
+//     lastName: 'Biker',
+//     serviceOfferings: [new ServiceOffering('offering0',
+//         ServiceType.bikeRepair, new Date(), new Date(), new File([], "empty.txt", { type: "text/plain" }), 15, 'desc0', true,
+//     'Munich', account, 1, 0.5, [], 3, 4.5)],
+//     location: 'Munich',
+//     availability: [
+//         {
+//             dayOfWeek: DaysOfWeek.Thursday,
+//             timeslots: [
+//                 {title: ServiceType.bikeRepair, start: new Date('2024-05-11T15:00:00'), end: new Date('2024-05-11T20:00:00'), isFixed: false}
+//             ]
+//         },
+//         {
+//             dayOfWeek: DaysOfWeek.Friday,
+//             timeslots: [
+//                 {title: ServiceType.babySitting, start: new Date('2024-05-11T15:00:00'), end: new Date('2024-05-11T20:00:00'), isFixed: true}
+//             ]
+//         },
+//         {
+//             dayOfWeek: DaysOfWeek.Saturday,
+//             timeslots: [
+//                 {title: ServiceType.petSitting, start: new Date('2024-05-11T15:00:00'), end: new Date('2024-05-11T20:00:00'), isFixed: true}
+//             ]
+//         },
+//         {
+//             dayOfWeek: DaysOfWeek.Sunday,
+//             timeslots: [
+//                 {title: ServiceType.homeRemodeling, start: new Date('2024-05-11T15:00:00'), end: new Date('2024-05-11T20:00:00'), isFixed: false}
+//             ]
+//         }
+//     ],
+//
+//     reviews: [
+//         {
+//             reviewId: '1',
+//             rating: 5,
+//             content: 'Very friendly, great service. I can definitely recommend!',
+//             createdOn: new Date('2024-05-03'),
+//             reviewer: account,
+//             recipient: account,
+//             service: bikeRepairService
+//         },
+//         {
+//             reviewId: '2',
+//             rating: 5,
+//             content: 'Bob is very competent and quick in his work. I will definitely be using him for all my bike repairs from now on.',
+//             createdOn: new Date('2024-05-03'),
+//             reviewer: account,
+//             recipient: account,
+//             service: bikeRepairService
+//         },
+//         {
+//             reviewId: '3',
+//             rating: 5,
+//             content: 'Great Service!',
+//             createdOn: new Date('2024-05-03'),
+//             reviewer: account,
+//             recipient: account,
+//             service: bikeRepairService
+//         },
+//         {
+//             reviewId: '4',
+//             rating: 4,
+//             content: 'Good',
+//             createdOn: new Date('2024-05-03'),
+//             reviewer: account,
+//             recipient: account,
+//             service: bikeRepairService
+//         },
+//         {
+//             reviewId: '5',
+//             rating: 4,
+//             content: 'Good',
+//             createdOn: new Date('2024-05-03'),
+//             reviewer: account,
+//             recipient: account,
+//             service: bikeRepairService
+//         },
+//
+//     ],
+//     rating: 4.6,
+//     reviewCount: 5,
+//     description: 'Having tinkered with bikes since I was 16, I\'ve got the skills to fix yours up good as new.',
+//     email: 'bob.biker@biking.com',
+//     address: 'Biking Avenue',
+//     createdOn: new Date(),
+//     phoneNumber: '07775000',
+//     isProvider: true,
+//     profileImageUrl: '/images/profiles/profile2.png',
+//     isPremium: false,
+//     notifications: [],
+//     requestHistory: [],
+//     jobHistory: []
+//
+// };
 
 const daysOfWeekToString = (day: DaysOfWeek): string => {
     return DaysOfWeek[day];
@@ -147,22 +147,31 @@ function ProviderProfilePage() {
     // const provider = mockProvider;
     const {offeringId} = useParams<{offeringId:string}>(); //use this to then make a request to the user with the id to get the user data
 
-    console.log("offeringId");
+    console.log("offeringId", offeringId);
 
     const navigate = useNavigate();
 
     useEffect(() => {
         const fetchData = async () => {
             if (offeringId) {
-                const fetchedOffering = await fetchOfferingDetails(offeringId);
-                setOffering(fetchedOffering);
-                const fetchedProvider = await fetchAccountDetails(offeringId);
-                setProvider(fetchedProvider);
+                try {
+                    const fetchedOffering = await fetchOfferingDetails(offeringId);
+                    setOffering(fetchedOffering);
+                } catch (error) {
+                    console.error("Failed to fetch offering details:", error);
+                }
+                try {
+                    const fetchedProvider = await fetchAccountDetails(offeringId); // Confirm this should use offeringId
+                    setProvider(fetchedProvider);
+                } catch (error) {
+                    console.error("Failed to fetch account details:", error);
+                }
             }
         };
 
+
         fetchData();
-    }, [offeringId, fetchAccountDetails, fetchOfferingDetails]);
+    }, [offeringId]);
 
     // go to the booking page
     const handleBookNow = () => {

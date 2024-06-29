@@ -34,6 +34,7 @@ export const deleteAccount: RequestHandler = async (req, res, next) => {
         });
     }
 }
+// TODO Cascade delete service offerings when an account is deleted
 
 
 /**

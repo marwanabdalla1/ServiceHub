@@ -163,7 +163,7 @@ export default function IncomingRequestTable() {
             headers: {Authorization: `Bearer ${token}` }
           })
               .then(response => {
-                console.log("getting requests ...", response.data)
+                cnsole.log("getting requests ...", response.data)
                 setServiceRequests(response.data);
                 // setLoading(false);
               })

@@ -28,6 +28,7 @@ import {AccountProvider} from "./contexts/AuthContext";
 import BookingPage from "./Pages/bookingSteps/BookingPage";
 import OfferedServicesPage from './Pages/OfferedServicesPage';
 import ChangeBookingTimePage from './Pages/ChangeBookingTimePage';
+// import SelectAvailabilityBooking_temp from "./Pages/SelectAvailabilityBooking_temp";
 
 function App() {
 
@@ -75,6 +76,8 @@ function MainRoutes() {
                 <Route path="/provider-profile/:id" element={<ProviderProfilePage/>}/>
                 <Route path="/select-availability" element={<SelectAvailabilityPage/>}/>
                 <Route path="/change-booking-time/:providerId/:requestId" element={<ChangeBookingTimePage/>}/>
+                {/*<Route path="/select-availability-booking" element={<SelectAvailabilityBooking_temp/>}/>*/}
+
                 <Route path="/update-timeslot" element={<UpdateTimeslot/>}/>
 
 

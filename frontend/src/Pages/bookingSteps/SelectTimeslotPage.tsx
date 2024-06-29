@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Container, Box, Typography, Card, CardContent, Grid, Button } from '@mui/material';
 import { useBooking, BookingDetails } from '../../contexts/BookingContext';
 import {Account} from "../../models/Account";
+import AvailabilityCalendarBooking from "../../components/AvailabilityCalendarBooking";
 
 
 interface SelectTimeslotProps {
@@ -40,17 +41,17 @@ function SelectTimeslot({ onNext, onBack, bookingDetails }: SelectTimeslotProps)
     //
     return (
         <Container>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-                <Box>
+            <Box sx={{ display: 'center', justifyContent: 'space-between', mt: 4 }}>
+                <Box sx={{width: '70%'}}>
                     <Typography variant="h6" gutterBottom>
-                        Step 1 of 3
+                        Step 2 of 3
                     </Typography>
                     <Typography variant="h4" gutterBottom>
                         Select time
                     </Typography>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
                         <Button variant="outlined" onClick={onBack}>Back</Button>
-                        <Button variant="contained" onClick={onNext}>Next</Button>
+                        {/*<Button variant="contained" onClick={onNext}>Next</Button>*/}
                     </Box>
                     {/*<Grid container spacing={2}>*/}
                     {/*    /!* Sample dates *!/*/}
@@ -76,8 +77,20 @@ function SelectTimeslot({ onNext, onBack, bookingDetails }: SelectTimeslotProps)
 
                     {/*    ))}*/}
                     {/*</Box>*/}
+                    <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mt: 4, mb: 4 }}>
+                        <Typography variant="h4">
+                            Book from provider
+                        </Typography>
+                    </Box>
+                    <AvailabilityCalendarBooking
+                        Servicetype={bookingDetails?.serviceType}
+                        defaultSlotDuration={bookingDetails.serviceOffering?.baseDuration || 60}
+                        defaultTransitTime={bookingDetails.serviceOffering?.bufferTimeDuration || 30}
+                        onNext={onNext}
+                        // globalAvailabilities={globalAvailabilities}
+                    />
                 </Box>
-                <Box sx={{width: 250}}>
+                <Box sx={{width: '20%'}}>
                     <Card>
                     <CardContent sx={{ display: 'flex', alignItems: 'center' }}>
                             <Box>
