@@ -118,6 +118,8 @@ export const cancelSubscription: RequestHandler = async (req, res) => {
     const subscriptionId = subscriptions.data[0].id;
     await stripe.subscriptions.cancel(subscriptionId);
     console.log('Subscription cancelled for customer ID:', stripeId);
+    account.isPremium = false;
+    await account.save();
     res.json({ message: 'Subscription cancelled successfully' });
   } catch (error) {
     console.error('Error cancelling subscription:', error);

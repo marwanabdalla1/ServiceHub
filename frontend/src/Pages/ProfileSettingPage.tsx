@@ -44,7 +44,7 @@ function UserProfile(): React.ReactElement {
     //TODO: Implement cancelSubscription backend
     const cancelSubscription = async (subscriptionId: string) => {
         try {
-            const response = await axios.post(`/api/becomepro/subscription/${subscriptionId}/cancel`, {}, {
+            const response = await axios.post(`/api/becomepro/subscription/cancel`, {}, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
