@@ -79,8 +79,24 @@ function AddServicePage() {
                 responseType: 'blob'
             });
             setCertificate(certificateResponse.data);
+            console.log('Certificate fetched:', certificateResponse.data)
         } catch (error) {
             console.error('Error fetching certificate:', error);
+        }
+    };
+
+    const handleDeleteCertificate = async () => {
+        try {
+            // Delete certificate
+            const response = await axios.delete(`/api/certificate/${serviceToEdit._id}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            console.log('Certificate deleted:', response.data);
+            setCertificate(null); // Reset the certificate state
+        } catch (error) {
+            console.error('Error deleting certificate:', error);
         }
     };
 
@@ -262,6 +278,26 @@ function AddServicePage() {
                             <p className="font-bold mb-2">
                                 Upload professional certificate to your service (optional)
                             </p>
+                            {certificate && (
+                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                    <div>The service is already certificated</div>
+                                    <div>
+                                        <a
+                                            href={URL.createObjectURL(certificate)}
+                                            download
+                                            style={{marginRight: '10px'}}
+                                        >
+                                            Download
+                                        </a>
+                                        <button
+                                            onClick={handleDeleteCertificate}
+                                            style={{ color: 'red', textDecoration: 'underline' }}
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                             <TextField
                                 type="file"
                                 variant="outlined"
@@ -274,9 +310,6 @@ function AddServicePage() {
                                 }}
                                 onChange={handleFileChange}
                             />
-                            {certificate && (
-                                <img src={URL.createObjectURL(certificate)} alt="Certificate"/>
-                            )}
                         </Box>
                     </Grid>
                 </Grid>

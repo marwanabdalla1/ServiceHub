@@ -216,7 +216,7 @@ function UserProfile(): React.ReactElement {
         if (fileType === 'profileImage') {
             url = '/api/file/upload/profileImage';
         } else if (fileType === 'certificate') {
-            // TODO: Define the endpoint for certificate upload
+            url = '/api/file/upload/certificate';
         } else {
             console.error('Invalid file type:', fileType);
             return;
@@ -286,6 +286,7 @@ function UserProfile(): React.ReactElement {
                     }
                 });
 
+                // delete the service
                 const response = await axios.delete(`/api/services/delete-service/${serviceToDelete}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`

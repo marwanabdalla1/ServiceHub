@@ -39,11 +39,17 @@ MongoClient.connect(env.MONGO_CONNECTION_STRING!,)
 
 const upload = multer({storage});
 
+/**
+ * Uploads a profile image for the user
+ * @param req
+ * @param res
+ */
 export const uploadProfileImage: RequestHandler = async (req, res) => {
     try {
         const userId = (req as any).user.userId;
         const user = await Account.findById(userId);
 
+        // Check if the user exists
         if (!user) {
             return res.status(404).json({
                 error: "Not Found",
@@ -59,6 +65,7 @@ export const uploadProfileImage: RequestHandler = async (req, res) => {
                 });
             }
 
+            // Delete the previous profile image if it exists
             if (user.get('profileImageId') != "") {
                 const _id = new ObjectId(user.get('profileImageId'));
                 bucket.delete(_id).then(() => {
@@ -91,6 +98,11 @@ export const uploadProfileImage: RequestHandler = async (req, res) => {
     }
 }
 
+/**
+ * Gets the profile image for the user
+ * @param req
+ * @param res
+ */
 export const getProfileImage: RequestHandler = async (req, res) => {
     try {
         const userId = (req as any).user.userId;
@@ -132,6 +144,12 @@ export const getProfileImage: RequestHandler = async (req, res) => {
     }
 }
 
+
+/**
+ * Deletes the profile image for the user
+ * @param req
+ * @param res
+ */
 export const deleteProfileImage: RequestHandler = async (req, res) => {
     try {
         const userId = (req as any).user.userId;

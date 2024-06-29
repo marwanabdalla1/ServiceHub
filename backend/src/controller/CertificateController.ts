@@ -40,11 +40,17 @@ MongoClient.connect(env.MONGO_CONNECTION_STRING!,)
 
 const upload = multer({storage});
 
+/**
+ * Upload a certificate for a service
+ * @param req
+ * @param res
+ */
 export const uploadCertificate: RequestHandler = async (req, res) => {
     try {
         const serviceId = req.params.serviceId;
         const service = await ServiceOffering.findById(serviceId);
 
+        // Check if the service exists
         if (!service) {
             console.log("Service not found");
             return res.status(404).json({
@@ -60,16 +66,17 @@ export const uploadCertificate: RequestHandler = async (req, res) => {
                     message: "Invalid file."
                 });
             }
+            // Delete the old certificate if it exists
             if (service.get('certificateId') != "" && service.get('certificateId') != null && service.get('certificateId') != undefined) {
-                console.log(service.get('certificateId'));
                 const _id = new ObjectId(service.get('certificateId'));
                 bucket.delete(_id).then(() => {
                     console.log("Certificate deleted successfully");
                 });
             }
+
+            // Save the new certificate
             const certificateId = (req.file as MulterFile).id.toString();
             const updates = {certificateId: certificateId};
-
             const updatedService = await ServiceOffering.findOneAndUpdate({_id: serviceId}, updates, {
                 new: true,
                 upsert: true,
@@ -92,12 +99,17 @@ export const uploadCertificate: RequestHandler = async (req, res) => {
     }
 }
 
+/**
+ * Get a certificate for a service
+ * @param req
+ * @param res
+ */
 export const getCertificate: RequestHandler = async (req, res) => {
     try {
         const serviceId = req.params.serviceId;
-        console.log(serviceId);
         const service = await ServiceOffering.findById(serviceId);
-        console.log(service);
+
+        // Check if the service exists
         if (!service) {
             console.log("Service not found");
             return res.status(404).json({
@@ -106,6 +118,7 @@ export const getCertificate: RequestHandler = async (req, res) => {
             });
         }
         try {
+            // Check if the certificate exists
             if (service.get('certificateId') === "") {
                 return;
             }
@@ -135,16 +148,25 @@ export const getCertificate: RequestHandler = async (req, res) => {
     }
 }
 
+/**
+ * Delete a certificate for a service
+ * @param req
+ * @param res
+ */
 export const deleteCertificate: RequestHandler = async (req, res) => {
     try {
         const serviceId = req.params.serviceId;
         const service = await ServiceOffering.findById(serviceId);
+
+        // Check if the service exists
         if (!service) {
             return res.status(404).json({
                 error: "Not Found",
                 message: "Service not found."
             });
         }
+
+        // Check if the certificate exists
         if (service.get('certificateId') === "" || service.get('certificateId') === null || service.get('certificateId') === undefined) {
             return;
         }
