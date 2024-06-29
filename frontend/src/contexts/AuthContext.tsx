@@ -8,8 +8,6 @@ import {toast} from 'react-toastify';
 type AccountContextType = {
     token: string | null;
     account: Account | null;
-    // isPremium: boolean;
-    // isProvider: boolean;
     registerUser: (event: React.FormEvent<HTMLFormElement>) => Promise<void>;
     loginUser: (event: React.FormEvent<HTMLFormElement>) => Promise<void>;
     logoutUser: () => void;
