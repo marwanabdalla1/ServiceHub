@@ -5,7 +5,6 @@ import LightBlueFileButton from "../components/inputs/BlueUploadButton";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from "../contexts/AuthContext";
 import axios from "axios";
-import { sub } from 'date-fns';
 
 type EditModeType = {
     [key: string]: boolean;
@@ -23,27 +22,42 @@ function UserProfile(): React.ReactElement {
     const [openDialog, setOpenDialog] = useState(false);
     const [serviceToDelete, setServiceToDelete] = useState<string | null>(null);
     const [subscriptions, setSubscriptions] = useState<any[]>([]);
-    const {account :userAccount  } = useAuth();
+    const { account: userAccount } = useAuth();
     const isProvider = userAccount?.isProvider;
     const isPremium = userAccount?.isPremium;
     const client_reference_id = userAccount?._id;
-    console.log(services)
+
     const fetchSubscriptionData = async (clientReferenceId: string) => {
-      try {
-        const response = await axios.get('/api/becomepro/subscription', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
+        try {
+            const response = await axios.get('/api/becomepro/subscription', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
 
-        console.log(`Status: ${response.status}`);
-        console.log(response.data);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching subscription data:', error);
+            throw error;
+        }
+    };
+    //TODO: Implement cancelSubscription backend
+    const cancelSubscription = async (subscriptionId: string) => {
+        try {
+            const response = await axios.post(`/api/becomepro/subscription/${subscriptionId}/cancel`, {}, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
 
-        return response.data;
-      } catch (error) {
-        console.error('Error fetching subscription data:', error);
-        throw error;
-      }
+            console.log(`Status: ${response.status}`);
+            console.log(response.data);
+
+            // Update the subscriptions state after cancellation
+            setSubscriptions(subscriptions.map(sub => sub.id === subscriptionId ? { ...sub, status: 'canceled' } : sub));
+        } catch (error) {
+            console.error('Error cancelling subscription:', error);
+        }
     };
 
     function useSkipFirstEffect(effect: React.EffectCallback, deps?: React.DependencyList) {
@@ -62,20 +76,16 @@ function UserProfile(): React.ReactElement {
     useSkipFirstEffect(() => {
         (async () => {
             try {
-                console.log("token: " + token + '\n' + "isProvider: " + isProvider + '\n' + "isPremium: " + isPremium );
-
-                const response = await axios.get('/api/account', { // replace with your backend endpoint
+                const response = await axios.get('/api/account', {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
                 });
 
-
                 if (JSON.stringify(response.data) !== JSON.stringify(account)) {
                     setAccount(response.data);
                 }
 
-                // Fetch subscription data
                 if (client_reference_id) {
                     const subscriptionData = await fetchSubscriptionData(client_reference_id);
                     setSubscriptions(subscriptionData);
@@ -93,7 +103,6 @@ function UserProfile(): React.ReactElement {
             }
         })
             .then(response => {
-
                 setServices(response.data || []);
             })
             .catch(error => {
@@ -159,8 +168,6 @@ function UserProfile(): React.ReactElement {
                     'Authorization': `Bearer ${token}`
                 }
             });
-            console.log(`Status: ${response.status}`);
-            console.log(response.data);
 
             setAccount(response.data);
         } catch (error) {
@@ -170,7 +177,7 @@ function UserProfile(): React.ReactElement {
 
     const handleKeyPress = (event: React.KeyboardEvent, field: string) => {
         if (event.key === 'Enter') {
-            handleFieldSave(field).then(r => console.log('Field saved'));
+            handleFieldSave(field).then(() => console.log('Field saved'));
             handleEditClick(field);
         }
     };
@@ -193,8 +200,6 @@ function UserProfile(): React.ReactElement {
                         'Authorization': `Bearer ${token}`
                     }
                 });
-                console.log(`Status: ${response.status}`);
-                console.log(response.data);
 
                 setServices(services.filter(service => service._id !== serviceToDelete));
             } catch (error) {
@@ -223,10 +228,8 @@ function UserProfile(): React.ReactElement {
                     'Authorization': `Bearer ${token}`
                 }
             });
-            console.log(`Status: ${response.status}`);
-            console.log(response.data);
-            navigate('/login');
 
+            navigate('/login');
         } catch (error) {
             console.error('Error deleting account:', error);
         }
@@ -256,6 +259,10 @@ function UserProfile(): React.ReactElement {
                 </Box>
             </Box>
         );
+    };
+
+    const getFormattedDate = (timestamp: number) => {
+        return new Date(timestamp * 1000).toLocaleDateString();
     };
 
     return (
@@ -295,9 +302,6 @@ function UserProfile(): React.ReactElement {
                                                 <Typography variant="body1">{service.serviceType}</Typography>
                                                 <Button onClick={() => handleEditServiceClick(service)}>Edit</Button>
                                                 <Button onClick={() => handleOpenDialog(service._id)} sx={{ color: 'red' }}>Delete</Button>
-                                                {subscriptions.map((subscription) => (
-                                                  <Typography variant="body1" key={subscription.id}>{subscription.id}</Typography>
-                                                ))}
                                             </Box>
                                         ))
                                     ) : (
@@ -308,6 +312,23 @@ function UserProfile(): React.ReactElement {
                             </Box>
                         </>
                     )}
+                    <Box sx={{ mt: 3 }}>
+                        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Subscription Information:</Typography>
+                        {subscriptions.length > 0 ? (
+                            subscriptions.map((subscription) => (
+                                <Box key={subscription.id} sx={{ display: 'flex', flexDirection: 'column', mt: 2 }}>
+                                    <Typography variant="body1"><strong>Subscription ID:</strong> {subscription.id}</Typography>
+                                    <Typography variant="body1"><strong>Status:</strong> {subscription.status}</Typography>
+                                    <Typography variant="body1"><strong>Expiration Date:</strong> {getFormattedDate(subscription.current_period_end)}</Typography>
+                                    {subscription.status !== 'canceled' && (
+                                        <Button onClick={() => cancelSubscription(subscription.id)} sx={{ mt: 1, color: 'red' }}>Cancel Subscription</Button>
+                                    )}
+                                </Box>
+                            ))
+                        ) : (
+                            <Typography variant="body1">No active subscriptions</Typography>
+                        )}
+                    </Box>
                     <BlueButton text="View My Schedule" onClick={handleViewScheduleClick} sx={{ backgroundColor: '#ADD8E6', color: 'white', mt: 2 }} />
                     <Button onClick={handleDeleteAccount} sx={{ backgroundColor: 'red', color: 'white', mt: 2 }}>Delete Account</Button>
                 </Box>
