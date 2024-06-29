@@ -118,7 +118,7 @@ export const getJobsByProvider: RequestHandler = async(req, res) => {
         // Fetch all jobs where the 'provider' field matches 'providerId'
         const jobs = await Job.find({ provider: providerId })
             .populate([
-                { path: 'receiver', select: 'firstName lastName' }, // Exclude _id
+                { path: 'receiver', select: 'firstName lastName' }, // todo: also include profile pic
                 { path: 'provider', select: 'firstName lastName' },
             ])
             .exec();

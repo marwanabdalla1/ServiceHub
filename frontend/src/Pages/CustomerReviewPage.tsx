@@ -1,5 +1,5 @@
 import React, {useEffect} from 'react';
-import {Container, Box, Typography, Card, CardContent, Avatar, Button, TextField} from '@mui/material';
+import {Container, Box, Typography, Card, CardContent, Avatar, Button, TextField, Link as MuiLink} from '@mui/material';
 import Rating from '@mui/material/Rating';
 import {appointments, bobBikerAppointment} from '../models/Appointment';
 import AppointmentCard from '../components/AppointmentCard';
@@ -174,7 +174,6 @@ const ReviewPage: React.FC = () => {
         //                             mr: 2
         //                         }}
         //
-        //                         /*todo: also need to include their profile when GET (in controller)*/
         //                         src={job?.provider.profileImageUrl}
         //                     />
         //                     <Box>
@@ -223,6 +222,28 @@ const ReviewPage: React.FC = () => {
         <Container>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
                 <Box sx={{ width: '65%' }}>
+                    <CardContent sx={{display: 'flex', alignItems: 'center', mb: 2}}>
+                        <Avatar
+                            sx={{
+                                width: 56,
+                                height: 56,
+                                mr: 2
+                            }}
+
+                            /*todo: also need to include their profile when GET (in controller)*/
+                            // src={job?.provider.profileImageUrl}
+                        />
+                        <Box>
+                            <Typography
+                                variant="h6">{job?.provider.firstName} {job?.provider.lastName}</Typography>
+                            <Typography variant="body2" color="text.secondary">
+                                {job?.serviceType}, {new Date(job?.appointmentStartTime).toLocaleString()}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                                Job ID: {job?._id}
+                            </Typography>
+                        </Box>
+                    </CardContent>
                     {review && !isEditing ? (
                         <>
                             <Typography variant="h5" gutterBottom>
@@ -249,28 +270,7 @@ const ReviewPage: React.FC = () => {
                                 {review ? 'Edit your review' : 'Write a review'} for {job?.provider.firstName}
                             </Typography>
                             <Card>
-                                <CardContent sx={{display: 'flex', alignItems: 'center', mb: 2}}>
-                                    <Avatar
-                                        sx={{
-                                            width: 56,
-                                            height: 56,
-                                            mr: 2
-                                        }}
 
-                                        /*todo: also need to include their profile when GET (in controller)*/
-                                        // src={job?.provider.profileImageUrl}
-                                    />
-                                    <Box>
-                                        <Typography
-                                            variant="h6">{job?.provider.firstName} {job?.provider.lastName}</Typography>
-                                       <Typography variant="body2" color="text.secondary">
-                                           {job?.serviceType}, {new Date(job?.appointmentStartTime).toLocaleString()}
-                                       </Typography>
-                                        <Typography variant="body2" color="text.secondary">
-                                            Job ID: {job?._id}
-                                        </Typography>
-                                    </Box>
-                                </CardContent>
                                 <CardContent>
                                     <Rating
                                         name="service-rating"
@@ -295,6 +295,12 @@ const ReviewPage: React.FC = () => {
                             </Card>
                         </>
                     )}
+                    {/*todo: replace with actual email*/}
+                    <Typography variant="body2" sx={{ mt: 2, textAlign: 'center' }}>
+                        Something wrong? <MuiLink href="mailto:support@example.com" underline="hover">
+                        Contact us
+                    </MuiLink>
+                    </Typography>
                 </Box>
             </Box>
         </Container>
