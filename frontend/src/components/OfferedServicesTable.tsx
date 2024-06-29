@@ -13,7 +13,6 @@ import Link from '@mui/material/Link';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import MediaCard from './OfferedServiceCard';
 import { Job } from '../models/Job';
-//import JobRow from './JobRow';
 import OfferedServiceRows from './OfferedServiceRow';
 import { Account } from '../models/Account';
 import account from '../models/Account';
@@ -87,8 +86,8 @@ export default function OfferedServicesTable() {
       });
   };
 
-  const fetchReceiver = (receiverId: Account) => {
-    axios.get<Account>(`/api/account/providers/${receiverId}`, {
+  const fetchReceiver = (requetserId: Account) => {
+    axios.get<Account>(`/api/account/requester/${requetserId}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(response => {
@@ -128,14 +127,14 @@ export default function OfferedServicesTable() {
         console.log('Job Updated:', updateJob.data);
         console.log("jobs: " + jobs[0]);
         // Update local state to reflect these changes
-        const updatedJobs = jobs.map(job => {
+        const updatedOfferedServices = jobs.map(job => {
           if (job._id === selectedJob._id) {
             return { ...job, ...updateJobData };
           }
           return job;
         });
 
-        setJobs(updatedJobs);
+        setJobs(updatedOfferedServices);
         
         setShowMediaCard(false);
      } catch (error) {
@@ -154,33 +153,27 @@ export default function OfferedServicesTable() {
       console.error('No job selected');
       return;
     }
- //   sanity check: appointment time has to be in the past
-    if (!selectedJob.appointmentEndTime || selectedJob.appointmentEndTime > new Date()){
-        //TODO: add modal to let user know
-        console.error('The job cannot be completed, since its appointment is in the future.');
-        return;
-    }
 
     try {
 
       // update the job
-        const updateJobData = {
+        const updateOfferedServiceData = {
           status: JobStatus.open,
         };
-        console.log("selected request id:" , selectedJob?._id, updateJobData)
-        const updateJob = await axios.put(`/api/jobs/${selectedJob?._id}`, updateJobData, {
+        console.log("selected job id:" , selectedJob?._id, updateOfferedServiceData)
+        const updateJob = await axios.put(`/api/jobs/${selectedJob?._id}`, updateOfferedServiceData, {
           headers: {Authorization: `Bearer ${token}` }
         });
         console.log('Job Updated:', updateJob.data);
         // Update local state to reflect these changes
-        const updatedJobs = jobs.map(job => {
+        const updatedOfferedServices = jobs.map(job => {
           if (job._id === selectedJob._id) {
-            return { ...job, ...updateJobData };
+            return { ...job, ...updateOfferedServiceData };
           }
           return job;
         });
 
-        setJobs(updatedJobs);
+        setJobs(updatedOfferedServices);
         
         setShowMediaCard(false);
      } catch (error) {
@@ -191,7 +184,44 @@ export default function OfferedServicesTable() {
 
   };
 
-  //   todo: for completed jobs: revoke the completion!
+  const handleCancel =  async() => {
+    
+    if (!selectedJob) {
+      console.error('No job selected');
+      return;
+    }
+
+    try {
+
+      // update the request
+        const updateOfferedServiceData = {
+         JobStatus: JobStatus.cancelled,
+        };
+        console.log("selected job id:" , selectedJob?._id, updateOfferedServiceData)
+        const updateResponse = await axios.put(`/api/jobs/${selectedJob?._id}`, updateOfferedServiceData, {
+          headers: {Authorization: `Bearer ${token}` }
+        });
+        console.log('Job Updated:', updateResponse.data);
+
+
+        // Update local state to reflect these changes
+        const updatedOfferedServices = jobs.map(job => {
+          if (job._id === selectedJob._id) {
+            return { ...job, ...updateOfferedServiceData };
+          }
+          return job;
+        });
+
+        console.log(updatedOfferedServices);
+        setJobs(updatedOfferedServices);
+        setShowMediaCard(false);
+     } catch (error) {
+      console.error('Error cancelling Request:', error);
+    }
+
+
+
+  };
 
   return (
     <Box sx={{ minWidth: 275, margin: 2 }}>
@@ -234,7 +264,7 @@ export default function OfferedServicesTable() {
                       receiver={receiver}
                        onClose={() => setShowMediaCard(false)}
                        onComplete={handleComplete}
-                       onCancel = {() => console.log("job cancelled")}
+                       onCancel = {handleCancel}
                        onReview={() => navigate("/customer_review")}
                       onRevoke={handleRevoke}
             />

@@ -179,7 +179,7 @@ try {
     
     
         // get data from the request (selectedRequest)
-        const {requestStatus, job, _id, requestedBy, provider, ...rest} = selectedRequest;
+        //const {requestStatus, job, _id, requestedBy, provider, ...rest} = selectedRequest;
     
         try {
     
@@ -285,9 +285,9 @@ try {
           <div style={{ position: 'relative', flexShrink: 0, width: 400, marginLeft: 2 }}>
             <MediaCard request={selectedRequest} 
                         onClose={() => setShowMediaCard(false)} 
-                        onAccept={() => handleAccept}
-                        onDecline={() => handleDecline }
-                        onCancel={() => {}}
+                        onAccept={handleAccept}
+                        onDecline={handleDecline }
+                        onCancel={handleCancel}
                         setClashDialogOpen={setClashDialogOpen} />
           </div>
         )}

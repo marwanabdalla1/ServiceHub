@@ -18,16 +18,16 @@ import { formatDateTime } from '../utils/dateUtils';
 interface MediaCardProps {
   request: Request;
   onClose: () => void;
-  onAccept: () => void;
-  onDecline: () => void;
-  onCancel: () => void;
+  onAccept: (request: Request) => void;
+  onDecline: (request: Request) => void;
+  onCancel: (request: Request) => void;
   setClashDialogOpen: (open: boolean) => void;
 }
 
 const MediaCard: React.FC<MediaCardProps> = ({ request, onClose, onAccept,onDecline, onCancel, setClashDialogOpen }) => {
   
-  const { account, token, isProvider } = useAuth();
-  const navigate = useNavigate();
+  //const { account, token, isProvider } = useAuth();
+  //const navigate = useNavigate();
 
   
   const renderButton = () => {
@@ -38,13 +38,13 @@ if (request.requestStatus === RequestStatus.cancelled ){
           console.log("No Actions possible for DECLINED requests!");
         }
         else if (request.requestStatus === RequestStatus.accepted ){
-          return(<BlackButton text="Cancel Request" onClick={onCancel} sx={{ marginRight:"1rem" }}/>);
+          return(<BlackButton text="Cancel Request" onClick={() => onCancel (request)} sx={{ marginRight:"1rem" }}/>);
         }
         else if (request.requestStatus === RequestStatus.pending ){
           return(
             <>
-            <BlackButton text="Decline Request" onClick={onDecline} sx={{ marginRight:"1rem" }}/>
-            <BlackButton text="Accept Request" onClick={onAccept} sx={{ marginRight:"1rem" }}/>
+            <BlackButton text="Decline Request" onClick={() => onDecline (request)} sx={{ marginRight:"1rem" }}/>
+            <BlackButton text="Accept Request" onClick={() => onAccept (request)} sx={{ marginRight:"1rem" }}/>
             <BlackButton text="Request Time Change" onClick={() => setClashDialogOpen(true)} sx={{ marginTop:"1rem" }} />
             </>
           );
@@ -53,7 +53,7 @@ if (request.requestStatus === RequestStatus.cancelled ){
           console.log(request);
         return (
           <>
-          <BlackButton text="Cancel Request" onClick={onCancel} sx={{ marginRight:"1rem" }}/>
+          <BlackButton text="Cancel Request" onClick={() => onCancel (request)} sx={{ marginRight:"1rem" }}/>
           <BlackButton text="Request Time Change" onClick={() => setClashDialogOpen(true)} />
           </>
         );

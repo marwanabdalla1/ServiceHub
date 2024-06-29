@@ -1,6 +1,6 @@
 // Purpose: Contains the functions for handling requests to the /account endpoint.
 import Account from "../models/account";
-import {RequestHandler} from "express";
+import { RequestHandler } from "express";
 import * as dotenv from 'dotenv'
 
 dotenv.config();
@@ -42,15 +42,36 @@ export const deleteAccount: RequestHandler = async (req, res, next) => {
  * @param req
  * @param res
  */
-export const getProviderById:RequestHandler = async (req, res) => {
+export const getProviderById: RequestHandler = async (req, res) => {
     try {
         console.log(req.params)
         const account = await Account.findById(req.params.providerId);
         if (!account) {
-            return res.status(404).json({ message: 'Account not found! '+ req.params.providerId });
+            return res.status(404).json({ message: 'Account not found! ' + req.params.providerId });
         }
-        else if (!account.isProvider){
-            return res.status(400).json({message: 'This is NOT a provider!'})
+        else if (!account.isProvider) {
+            return res.status(400).json({ message: 'This is NOT a provider!' })
+        }
+        res.json(account);
+    } catch (err: any) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
+/**
+ * get user by id
+ * @param req
+ * @param res
+ */
+export const getRequesterById: RequestHandler = async (req, res) => {
+    try {
+        console.log(req.params)
+        const account = await Account.findById(req.params.requesterId);
+        if (!account) {
+            return res.status(404).json({ message: 'Account not found! ' + req.params.requesterId });
+        }
+        else if (!account.isProvider) {
+            return res.status(400).json({ message: 'This is NOT a provider!' })
         }
         res.json(account);
     } catch (err: any) {
@@ -63,14 +84,14 @@ export const getProviderById:RequestHandler = async (req, res) => {
  * @param req
  * @param res
  */
-export const updateAccountDetails: RequestHandler = async(req, res) => {
+export const updateAccountDetails: RequestHandler = async (req, res) => {
     // Get the userId from the JWT token
     const userId = (req as any).user.userId;
     const updates = req.body;
 
     try {
         // Update the user in the database using the userId from the JWT token
-        const updatedUser = await Account.findOneAndUpdate({_id: userId}, updates, { new: true, upsert:true, strict:false});
+        const updatedUser = await Account.findOneAndUpdate({ _id: userId }, updates, { new: true, upsert: true, strict: false });
         if (!updatedUser) {
             return res.status(404).send({ message: 'User not found' });
         }
