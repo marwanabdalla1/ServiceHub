@@ -2,7 +2,7 @@ import mongoose, {Document, Schema, Types} from 'mongoose';
 import {starCount} from './enums';
 
 export interface IReview extends Document {
-    rating: starCount;
+    rating: number;
     content: string;
     recipient: Types.ObjectId; // Reference to an Account document
     reviewer: Types.ObjectId; // Reference to an Account document
@@ -11,7 +11,7 @@ export interface IReview extends Document {
 }
 
 const ReviewSchema: Schema = new Schema({
-    rating: {type: String, enum: Object.values(starCount), required: true},
+    rating: {type: Number, required: true},
     content: {type: String, required: true},
     recipient: {type: Schema.Types.ObjectId, ref: 'Account', required: true},
     reviewer: {type: Schema.Types.ObjectId, ref: 'Account', required: true},

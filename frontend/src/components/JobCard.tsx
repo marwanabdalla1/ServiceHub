@@ -29,13 +29,13 @@ const MediaCard: React.FC<MediaCardProps> = ({ job, onClose, onComplete, onCance
           <BlackButton text="Cancel Job" onClick={() => onCancel(job)} sx={{ marginRight:"1rem" }}/>
 
           {/*  todo: delete this later*/}
-          <BlackButton text="Write Review" onClick={() => onReview(job)} sx={{ marginRight: "1rem" }} />
+          <BlackButton text="Review" onClick={() => onReview(job)} sx={{ marginRight: "1rem" }} />
           </>
         );
       case JobStatus.completed:
         return (
             <>
-              <BlackButton text="Write Review" onClick={() => onReview(job)} sx={{ marginRight: "1rem" }} />
+              <BlackButton text="Review" onClick={() => onReview(job)} sx={{ marginRight: "1rem" }} />
               <BlackButton text="Close" onClick={onClose} />
             </>
         );

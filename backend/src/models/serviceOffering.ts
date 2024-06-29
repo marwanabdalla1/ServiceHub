@@ -17,6 +17,7 @@ export interface IServiceOffering extends Document {
     reviews: Types.ObjectId[]; // Reference to Review documents
     rating: number;
     reviewCount: number;
+    totalRating: number; //sum of all ratings
 }
 
 const ServiceOfferingSchema: Schema = new Schema({
@@ -34,6 +35,7 @@ const ServiceOfferingSchema: Schema = new Schema({
     acceptedPaymentMethods: { type: [String], required: false }, // New field
     reviews: [{ type: Schema.Types.ObjectId, ref: 'Review', required: true }],
     rating: { type: Number, required: true },
+    totalRating: { type: Number, required: true },
     reviewCount: { type: Number, required: true }
 }, { timestamps: true });
 
