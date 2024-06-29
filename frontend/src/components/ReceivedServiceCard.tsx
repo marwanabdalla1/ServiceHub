@@ -100,9 +100,6 @@ const MediaCard: React.FC<MediaCardProps> = ({ receivedService, provider, receiv
         </div>
         <Divider sx={{marginBottom:'1rem'}}/>
         <Typography variant="body2">
-          Request ID: {receivedService._id}
-        </Typography>
-        <Typography variant="body2">
           Service Type: {receivedService.serviceType}
         </Typography>
         <Typography variant="body2">

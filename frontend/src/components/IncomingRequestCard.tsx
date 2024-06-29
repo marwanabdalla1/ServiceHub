@@ -97,9 +97,6 @@ if (request.requestStatus === RequestStatus.cancelled ){
         </div>
         <Divider sx={{marginBottom:'1rem'}}/>
         <Typography variant="body2">
-          Request ID: {request._id}
-        </Typography>
-        <Typography variant="body2">
           Service Type: {request.serviceType}
         </Typography>
         <Typography variant="body2">
