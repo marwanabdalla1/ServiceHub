@@ -15,10 +15,11 @@ interface MediaCardProps {
   onClose: () => void;
   onComplete: (job: Job) => void;
   onCancel: (job: Job) => void;
+  onReview: (job: Job) => void;
 
 }
 
-const MediaCard: React.FC<MediaCardProps> = ({ job, onClose, onComplete, onCancel }) => {
+const MediaCard: React.FC<MediaCardProps> = ({ job, onClose, onComplete, onCancel, onReview }) => {
   const renderButton = () => {
     switch (job.status) {
       case JobStatus.open:
@@ -26,7 +27,17 @@ const MediaCard: React.FC<MediaCardProps> = ({ job, onClose, onComplete, onCance
           <>
           <BlackButton text="Mark as completed" onClick={() => onComplete(job)} sx={{ marginRight:"1rem" }}/>
           <BlackButton text="Cancel Job" onClick={() => onCancel(job)} sx={{ marginRight:"1rem" }}/>
+
+          {/*  todo: delete this later*/}
+          <BlackButton text="Write Review" onClick={() => onReview(job)} sx={{ marginRight: "1rem" }} />
           </>
+        );
+      case JobStatus.completed:
+        return (
+            <>
+              <BlackButton text="Write Review" onClick={() => onReview(job)} sx={{ marginRight: "1rem" }} />
+              <BlackButton text="Close" onClick={onClose} />
+            </>
         );
       default:
         return (
