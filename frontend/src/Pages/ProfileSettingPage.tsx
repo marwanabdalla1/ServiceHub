@@ -18,14 +18,16 @@ type FieldType = {
 function UserProfile(): React.ReactElement {
 
     const [account, setAccount] = useState<any>(null);
-    const { token, isProvider, isPremium, logoutUser } = useAuth();
+    const { token, logoutUser } = useAuth();
     const [services, setServices] = useState<any[]>([]);
     const [openDialog, setOpenDialog] = useState(false);
     const [serviceToDelete, setServiceToDelete] = useState<string | null>(null);
     const [subscriptions, setSubscriptions] = useState<any[]>([]);
     const {account :userAccount  } = useAuth();
+    const isProvider = userAccount?.isProvider;
+    const isPremium = userAccount?.isPremium;
     const client_reference_id = userAccount?._id;
-
+    console.log(services)
     const fetchSubscriptionData = async (clientReferenceId: string) => {
       try {
         const response = await axios.get('/api/becomepro/subscription', {
@@ -60,7 +62,7 @@ function UserProfile(): React.ReactElement {
     useSkipFirstEffect(() => {
         (async () => {
             try {
-                console.log("token: " + token + '\n' + "isProvider: " + isProvider() + '\n' + "isPremium: " + isPremium() );
+                console.log("token: " + token + '\n' + "isProvider: " + isProvider + '\n' + "isPremium: " + isPremium );
 
                 const response = await axios.get('/api/account', { // replace with your backend endpoint
                     headers: {
@@ -277,7 +279,7 @@ function UserProfile(): React.ReactElement {
                     {renderField("Address", "address")}
                     {renderField("Description", "description")}
                     <Button onClick={logoutUser}>Logout</Button>
-                    {isProvider() && (
+                    {isProvider && (
                         <>
                             <Divider sx={{ my: 2 }} />
                             <Typography variant="h6" gutterBottom component="div"
