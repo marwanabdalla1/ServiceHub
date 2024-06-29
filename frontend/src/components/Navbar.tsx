@@ -50,11 +50,12 @@ const ServiceButton: React.FC<ServiceButtonProps> = ({isLoggedIn, isProvider, is
 };
 
 const Navbar: React.FC<NavbarProps> = ({toggleDrawer, onChange, onSearch, search}) => {
-    const {token, isLoggedIn, logoutUser, isProvider, account} = useAuth();
+    const {token, isLoggedIn, logoutUser, account} = useAuth();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [profileAnchorEl, setProfileAnchorEl] = useState<null | HTMLElement>(null);
     const isPremium = account?.isPremium || false;
-    console.log("token: " + token + '\n' + "isProvider: " + isProvider() + '\n' + "isPremium: " + isPremium );
+    const isProvider = account?.isProvider || false;
+    console.log("token: " + token + '\n' + "isProvider: " + isProvider + '\n' + "isPremium: " + isPremium );
 
     const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
@@ -116,7 +117,7 @@ const Navbar: React.FC<NavbarProps> = ({toggleDrawer, onChange, onSearch, search
                 <div className="flex items-center space-x-4 m-4">
                     <ServiceButton
                         isLoggedIn={isLoggedIn()}
-                        isProvider={isProvider()}
+                        isProvider={isProvider}
                         isPremium={isPremium}
                     />
                     <RequestListButton className="h-6 w-6" onClick={handleMenuOpen}/>
