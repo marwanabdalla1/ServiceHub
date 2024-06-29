@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import CardContent from '@mui/material/Box'; // Changed import
+import CardContent from '@mui/material/Box';
 import { Dialog, Button, DialogActions, DialogContent, DialogTitle, Box } from '@mui/material';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -54,58 +54,78 @@ export default function IncomingRequestTable() {
     
     
         // get data from the request (selectedRequest)
-        const {requestStatus, job, _id, requestedBy, provider, ...rest} = selectedRequest;
+const { requestStatus, job, _id, requestedBy, provider, ...rest } = selectedRequest;
+
+const jobData = {
+  status: JobStatus.open,
+  request: selectedRequest._id,
+  receiver: selectedRequest.requestedBy._id,
+  provider: selectedRequest.provider._id,
+  ...rest,
+};
+
+console.log("job data at frontend:", jobData);
+
+// post new job
+try {
+  const jobResponse = await axios.post("api/jobs/", jobData, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  console.log("job posted!", jobResponse);
+
+  // update the request
+  if (jobResponse.data && jobResponse.data._id) {
+    const updateRequestData = {
+      job: jobResponse.data._id,
+      requestStatus: RequestStatus.accepted,
+    };
+    console.log("selected request id:", selectedRequest._id, updateRequestData);
     
-        const jobData = {
-          status: JobStatus.open,
-          request: selectedRequest._id,
-          receiver: selectedRequest.requestedBy._id,
-          provider: selectedRequest.provider._id,
-          ...rest,
-    
-        }
-    
-        console.log("job data at frontend:", jobData)
-    
-    
-        // post new job
-        try {
-          const jobResponse = await axios.post("api/jobs/", jobData, {
-            headers: {Authorization: `Bearer ${token}` }
-          });
-          console.log("job posted!", jobResponse);
-    
-          // update the request
-          if (jobResponse.data && jobResponse.data._id) {
-            const updateRequestData = {
-              job: jobResponse.data._id, // or whatever the attribute is called in your database
-              requestStatus: RequestStatus.accepted,
-            };
-            console.log("selected request id:" , selectedRequest._id, updateRequestData)
-            const updateResponse = await axios.put(`/api/requests/${selectedRequest._id}`, updateRequestData, {
-              headers: {Authorization: `Bearer ${token}` }
-            });
-            console.log('Request Updated:', updateResponse.data);
-    
-    
-            // Update local state to reflect these changes
-            const updatedServiceRequests = serviceRequests.map(req => {
-              if (req._id === selectedRequest._id) {
-                return { ...req, ...updateRequestData, job: jobResponse.data._id };
-              }
-              return req;
-            });
-    
-            console.log(updatedServiceRequests);
-            setServiceRequests(updatedServiceRequests);
-            setShowMediaCard(false);
-        } } catch (error) {
-          console.error('Error posting job:', error);
-        }
-    
-    
-    
-      };
+    const updateResponse = await axios.put(`/api/requests/${selectedRequest._id}`, updateRequestData, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    console.log('Request Updated:', updateResponse.data);
+
+    // Update local state to reflect these changes
+    const updatedServiceRequests = serviceRequests.map(req => {
+      if (req._id === selectedRequest._id) {
+        return { ...req, ...updateRequestData, job: jobResponse.data._id };
+      }
+      return req;
+    });
+
+    console.log(updatedServiceRequests);
+    setServiceRequests(updatedServiceRequests);
+    setShowMediaCard(false);
+
+    // Prepare notification data
+    const notificationData = {
+      isViewed: false,
+      content: "Your service request has been accepted",
+      serviceRequest: selectedRequest._id,
+      job: jobResponse.data._id,
+      recipient: selectedRequest.requestedBy,
+      ...rest,
+    };
+
+    console.log("notification data at frontend:", notificationData);
+
+    // generate new notification
+    try {
+      const notification = await axios.post("api/notification/", notificationData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      console.log("Notification sent!", notification);
+
+      
+    } catch (notificationError) {
+      console.error('Error sending notification:', notificationError);
+    }
+  }
+} catch (error) {
+  console.error('Error posting job:', error);
+} }
+
     
       const handleDecline =  async() => {
     
@@ -123,6 +143,49 @@ export default function IncomingRequestTable() {
           // update the request
             const updateRequestData = {
              requestStatus: RequestStatus.declined,
+            };
+            console.log("selected request id:" , selectedRequest._id, updateRequestData)
+            const updateResponse = await axios.put(`/api/requests/${selectedRequest._id}`, updateRequestData, {
+              headers: {Authorization: `Bearer ${token}` }
+            });
+            console.log('Request Updated:', updateResponse.data);
+    
+    
+            // Update local state to reflect these changes
+            const updatedServiceRequests = serviceRequests.map(req => {
+              if (req._id === selectedRequest._id) {
+                return { ...req, ...updateRequestData };
+              }
+              return req;
+            });
+    
+            console.log(updatedServiceRequests);
+            setServiceRequests(updatedServiceRequests);
+            setShowMediaCard(false);
+         } catch (error) {
+          console.error('Error declining Request:', error);
+        }
+    
+    
+    
+      };
+
+      const handleCancel =  async() => {
+    
+        if (!selectedRequest) {
+          console.error('No request selected');
+          return;
+        }
+    
+    
+        // get data from the request (selectedRequest)
+        const {requestStatus, job, _id, requestedBy, provider, ...rest} = selectedRequest;
+    
+        try {
+    
+          // update the request
+            const updateRequestData = {
+             requestStatus: RequestStatus.cancelled,
             };
             console.log("selected request id:" , selectedRequest._id, updateRequestData)
             const updateResponse = await axios.put(`/api/requests/${selectedRequest._id}`, updateRequestData, {
@@ -163,7 +226,7 @@ export default function IncomingRequestTable() {
             headers: {Authorization: `Bearer ${token}` }
           })
               .then(response => {
-                cnsole.log("getting requests ...", response.data)
+                console.log("getting requests ...", response.data)
                 setServiceRequests(response.data);
                 // setLoading(false);
               })
@@ -222,9 +285,8 @@ export default function IncomingRequestTable() {
           <div style={{ position: 'relative', flexShrink: 0, width: 400, marginLeft: 2 }}>
             <MediaCard request={selectedRequest} 
                         onClose={() => setShowMediaCard(false)} 
-                        onAccept={handleAccept}
-                        onDecline={handleDecline }
-                        onProposeNewTime={() => console.log('New Time: ')}
+                        onAccept={() => handleAccept}
+                        onDecline={() => handleDecline }
                         onCancel={() => {}}
                         setClashDialogOpen={setClashDialogOpen} />
           </div>

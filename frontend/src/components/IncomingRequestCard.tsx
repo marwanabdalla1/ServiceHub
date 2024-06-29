@@ -13,18 +13,18 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Account } from '../models/Account';
 import axios from 'axios';
+import { formatDateTime } from '../utils/dateUtils';
 
 interface MediaCardProps {
   request: Request;
   onClose: () => void;
-  onAccept: (request: Request) => void;
-  onDecline: (request: Request) => void;
-  onProposeNewTime: (request: Request, newTime: Date) => void;
+  onAccept: () => void;
+  onDecline: () => void;
   onCancel: () => void;
   setClashDialogOpen: (open: boolean) => void;
 }
 
-const MediaCard: React.FC<MediaCardProps> = ({ request, onClose, onAccept,onDecline, onProposeNewTime, onCancel, setClashDialogOpen }) => {
+const MediaCard: React.FC<MediaCardProps> = ({ request, onClose, onAccept,onDecline, onCancel, setClashDialogOpen }) => {
   
   const { account, token, isProvider } = useAuth();
   const navigate = useNavigate();
@@ -39,6 +39,15 @@ if (request.requestStatus === RequestStatus.cancelled ){
         }
         else if (request.requestStatus === RequestStatus.accepted ){
           return(<BlackButton text="Cancel Request" onClick={onCancel} sx={{ marginRight:"1rem" }}/>);
+        }
+        else if (request.requestStatus === RequestStatus.pending ){
+          return(
+            <>
+            <BlackButton text="Decline Request" onClick={onDecline} sx={{ marginRight:"1rem" }}/>
+            <BlackButton text="Accept Request" onClick={onAccept} sx={{ marginRight:"1rem" }}/>
+            <BlackButton text="Request Time Change" onClick={() => setClashDialogOpen(true)} sx={{ marginTop:"1rem" }} />
+            </>
+          );
         }
          else {
           console.log(request);
@@ -94,7 +103,7 @@ if (request.requestStatus === RequestStatus.cancelled ){
           Service Type: {request.serviceType}
         </Typography>
         <Typography variant="body2">
-          Appointment Time: {request.appointmentStartTime.toLocaleString()}
+          Appointment Time: {formatDateTime(request.appointmentStartTime)}
         </Typography>
         <Typography variant="body2" sx={{ marginBottom: '2rem'}}>
           Service Fee: {request.serviceFee}

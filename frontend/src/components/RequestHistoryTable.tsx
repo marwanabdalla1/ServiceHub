@@ -90,7 +90,7 @@ export default function RequestHistoryTable() {
 
     }
 
-    console.log("job data at frontend:", jobData)
+    console.log("job data in frontend:", jobData)
 
 
     // post new job
