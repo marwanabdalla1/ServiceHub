@@ -430,10 +430,7 @@ function UserProfile(): React.ReactElement {
                             </Box>
                         </>
                     )}
-                    <BlueButton text="View My Schedule" onClick={handleViewScheduleClick}
-                                sx={{backgroundColor: '#ADD8E6', color: 'white', mt: 2}}/>
-                    <Button onClick={handleDeleteAccount} sx={{backgroundColor: 'red', color: 'white', mt: 2}}>Delete
-                        Account</Button>
+
                     <Box sx={{ mt: 3 }}>
                         <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Subscription Information:</Typography>
                         {subscriptions.length > 0 ? (
