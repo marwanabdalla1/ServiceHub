@@ -17,10 +17,48 @@ type FieldType = {
 function UserProfile(): React.ReactElement {
 
     const [account, setAccount] = useState<any>(null);
-    const { token, isProvider, isPremium, logoutUser } = useAuth();
+    const { token, logoutUser } = useAuth();
     const [services, setServices] = useState<any[]>([]);
     const [openDialog, setOpenDialog] = useState(false);
     const [serviceToDelete, setServiceToDelete] = useState<string | null>(null);
+    const [subscriptions, setSubscriptions] = useState<any[]>([]);
+    const { account: userAccount } = useAuth();
+    const isProvider = userAccount?.isProvider;
+    const isPremium = userAccount?.isPremium;
+    const client_reference_id = userAccount?._id;
+
+    const fetchSubscriptionData = async (clientReferenceId: string) => {
+        try {
+            const response = await axios.get('/api/becomepro/subscription', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching subscription data:', error);
+            throw error;
+        }
+    };
+    //TODO: Implement cancelSubscription backend
+    const cancelSubscription = async (subscriptionId: string) => {
+        try {
+            const response = await axios.post(`/api/becomepro/subscription/cancel`, {}, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            console.log(`Status: ${response.status}`);
+            console.log(response.data);
+
+            // Update the subscriptions state after cancellation
+            setSubscriptions(subscriptions.map(sub => sub.id === subscriptionId ? { ...sub, status: 'canceled' } : sub));
+        } catch (error) {
+            console.error('Error cancelling subscription:', error);
+        }
+    };
 
     function useSkipFirstEffect(effect: React.EffectCallback, deps?: React.DependencyList) {
         const isFirstRender = useRef(true);
@@ -38,20 +76,19 @@ function UserProfile(): React.ReactElement {
     useSkipFirstEffect(() => {
         (async () => {
             try {
-                console.log("token: " + token + '\n' + "isProvider: " + isProvider() + '\n' + "isPremium: " + isPremium());
-
-                const response = await axios.get('/api/account', { // replace with your backend endpoint
+                const response = await axios.get('/api/account', {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
                 });
 
-                console.log(`Status: ${response.status}`);
-                console.log(response.data);
-                console.log(isProvider)
-
                 if (JSON.stringify(response.data) !== JSON.stringify(account)) {
                     setAccount(response.data);
+                }
+
+                if (client_reference_id) {
+                    const subscriptionData = await fetchSubscriptionData(client_reference_id);
+                    setSubscriptions(subscriptionData);
                 }
             } catch (error) {
                 console.error('Error fetching account details:', error);
@@ -60,18 +97,13 @@ function UserProfile(): React.ReactElement {
     }, [account]);
 
     useEffect(() => {
-        console.log(token)
         axios.get('/api/offerings/myoffering', {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
         })
             .then(response => {
-                console.log(`Status: ${response.status}`);
-                console.log(response.data);
-
                 setServices(response.data || []);
-                console.log(services);
             })
             .catch(error => {
                 console.error('Error fetching services:', error);
@@ -136,8 +168,6 @@ function UserProfile(): React.ReactElement {
                     'Authorization': `Bearer ${token}`
                 }
             });
-            console.log(`Status: ${response.status}`);
-            console.log(response.data);
 
             setAccount(response.data);
         } catch (error) {
@@ -147,7 +177,7 @@ function UserProfile(): React.ReactElement {
 
     const handleKeyPress = (event: React.KeyboardEvent, field: string) => {
         if (event.key === 'Enter') {
-            handleFieldSave(field).then(r => console.log('Field saved'));
+            handleFieldSave(field).then(() => console.log('Field saved'));
             handleEditClick(field);
         }
     };
@@ -170,8 +200,6 @@ function UserProfile(): React.ReactElement {
                         'Authorization': `Bearer ${token}`
                     }
                 });
-                console.log(`Status: ${response.status}`);
-                console.log(response.data);
 
                 setServices(services.filter(service => service._id !== serviceToDelete));
             } catch (error) {
@@ -200,17 +228,15 @@ function UserProfile(): React.ReactElement {
                     'Authorization': `Bearer ${token}`
                 }
             });
-            console.log(`Status: ${response.status}`);
-            console.log(response.data);
-            navigate('/login');
 
+            navigate('/login');
         } catch (error) {
             console.error('Error deleting account:', error);
         }
     };
 
     const handleViewScheduleClick = () => {
-        navigate('/select-availability'); // replace with the correct route to the schedule page
+        navigate('/select-availability');
     };
 
     const renderField = (label: string, field: string) => {
@@ -235,6 +261,10 @@ function UserProfile(): React.ReactElement {
         );
     };
 
+    const getFormattedDate = (timestamp: number) => {
+        return new Date(timestamp * 1000).toLocaleDateString();
+    };
+
     return (
         <Container component="main" maxWidth="md" sx={{ mt: 4, backgroundColor: '#f5f5f5', borderRadius: '20px' }}>
             <Paper variant="outlined" sx={{ p: 3, borderRadius: '20px' }}>
@@ -256,7 +286,7 @@ function UserProfile(): React.ReactElement {
                     {renderField("Address", "address")}
                     {renderField("Description", "description")}
                     <Button onClick={logoutUser}>Logout</Button>
-                    {isProvider() && (
+                    {isProvider && (
                         <>
                             <Divider sx={{ my: 2 }} />
                             <Typography variant="h6" gutterBottom component="div"
@@ -282,11 +312,27 @@ function UserProfile(): React.ReactElement {
                             </Box>
                         </>
                     )}
+                    <Box sx={{ mt: 3 }}>
+                        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Subscription Information:</Typography>
+                        {subscriptions.length > 0 ? (
+                            subscriptions.map((subscription) => (
+                                <Box key={subscription.id} sx={{ display: 'flex', flexDirection: 'column', mt: 2 }}>
+                                    <Typography variant="body1"><strong>Subscription ID:</strong> {subscription.id}</Typography>
+                                    <Typography variant="body1"><strong>Status:</strong> {subscription.status}</Typography>
+                                    <Typography variant="body1"><strong>Expiration Date:</strong> {getFormattedDate(subscription.current_period_end)}</Typography>
+                                    {subscription.status !== 'canceled' && (
+                                        <Button onClick={() => cancelSubscription(subscription.id)} sx={{ mt: 1, color: 'red' }}>Cancel Subscription</Button>
+                                    )}
+                                </Box>
+                            ))
+                        ) : (
+                            <Typography variant="body1">No active subscriptions</Typography>
+                        )}
+                    </Box>
                     <BlueButton text="View My Schedule" onClick={handleViewScheduleClick} sx={{ backgroundColor: '#ADD8E6', color: 'white', mt: 2 }} />
                     <Button onClick={handleDeleteAccount} sx={{ backgroundColor: 'red', color: 'white', mt: 2 }}>Delete Account</Button>
                 </Box>
             </Paper>
-
             <Dialog open={openDialog} onClose={handleCloseDialog}>
                 <DialogTitle>{"Confirm Delete"}</DialogTitle>
                 <DialogContent>

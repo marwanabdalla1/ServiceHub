@@ -17,6 +17,8 @@ import ReviewRouter from "./routes/Review";
 import './models/serviceOffering';
 import TimeSlotRouter from "./routes/TimeSlot";
 import ServiceRouter from "./routes/Service";
+import PaymentRouter from "./routes/PaymentRouter";
+import WebhookRouter from "./routes/WebhookRouter";
 
 const app = express();
 
@@ -31,6 +33,7 @@ app.use(cors(corsOptions));
 // Middleware for logging
 app.use(logger);
 
+app.use("/webhook", express.raw({ type: 'application/json' }), WebhookRouter); //DON'T MOVE THIS LINE AFTER EXPRESS.JSON
 app.use(express.json());
 app.use("/api/auth", AuthRouter);
 // authenticate users
@@ -38,7 +41,7 @@ app.use("/api/auth", AuthRouter);
 app.use("/api/account", AccountRouter);
 app.use("/api/offerings", OfferingRouter);
 app.use("/api/timeslots", TimeSlotRouter);
-app.use("/api/services", ServiceRouter);
+app.use("/api/services", ServiceRouter);app.use("/api/becomepro", PaymentRouter);
 
 app.use("/api/requests", RequestRouter);
 app.use("/api/jobs", JobRouter);
