@@ -15,7 +15,7 @@ const FAQAccordion: React.FC<FAQAccordionProps> = ({ question, answer }) => {
                 aria-controls="panel1a-content"
                 id="panel1a-header"
             >
-                <Typography style={{ fontStyle: 'italic' }}>{question}</Typography>
+                <Typography style={{ /*fontStyle: 'italic'*/ }}>{question}</Typography>
             </AccordionSummary>
             <AccordionDetails>
                 <Typography>
