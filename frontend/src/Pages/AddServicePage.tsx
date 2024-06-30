@@ -280,7 +280,7 @@ function AddServicePage() {
                             </p>
                             {certificate && (
                                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    <div>The service is already certificated</div>
+                                    <div>Certificate uploaded</div>
                                     <div>
                                         <a
                                             href={URL.createObjectURL(certificate)}
@@ -306,7 +306,7 @@ function AddServicePage() {
                                     shrink: true,
                                 }}
                                 inputProps={{
-                                    accept: 'image/*',
+                                    accept: 'application/pdf',
                                 }}
                                 onChange={handleFileChange}
                             />

@@ -76,7 +76,12 @@ export const uploadCertificate: RequestHandler = async (req, res) => {
 
             // Save the new certificate
             const certificateId = (req.file as MulterFile).id.toString();
-            const updates = {certificateId: certificateId};
+
+            // Update the service offering with the new certificate
+            // TODO: Check if the service is already certified -> isCertified check should not be here
+            const updates = {certificateId: certificateId, isCertified: true};
+
+
             const updatedService = await ServiceOffering.findOneAndUpdate({_id: serviceId}, updates, {
                 new: true,
                 upsert: true,
@@ -119,9 +124,10 @@ export const getCertificate: RequestHandler = async (req, res) => {
         }
         try {
             // Check if the certificate exists
-            if (service.get('certificateId') === "") {
+            if (service.get('certificateId') === "" || service.get('certificateId') === null || service.get('certificateId') === undefined) {
                 return;
             }
+
             const _id = new ObjectId(service.get('certificateId'));
 
             const downloadStream = bucket.openDownloadStream(_id);
@@ -167,12 +173,16 @@ export const deleteCertificate: RequestHandler = async (req, res) => {
         }
 
         // Check if the certificate exists
+        // No matter iscertified is true or false, the certificate can be deleted
         if (service.get('certificateId') === "" || service.get('certificateId') === null || service.get('certificateId') === undefined) {
             return;
         }
         const _id = new ObjectId(service.get('certificateId'));
         bucket.delete(_id).then(async () => {
-            const updateService = await ServiceOffering.findOneAndUpdate({_id: serviceId}, {certificateId: ""}, {
+            const updateService = await ServiceOffering.findOneAndUpdate({_id: serviceId}, {
+                certificateId: "",
+                isCertified: false
+            }, {
                 new: true,
                 upsert: true,
                 strict: false

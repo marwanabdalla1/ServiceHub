@@ -66,10 +66,12 @@ export const uploadProfileImage: RequestHandler = async (req, res) => {
             }
 
             // Delete the previous profile image if it exists
-            if (user.get('profileImageId') != "") {
+            if (user.get('profileImageId') != ""&& user.get('profileImageId') != null && user.get('profileImageId') != undefined) {
+                console.log("Profile Image exists with ID: ", user.get('profileImageId'));
                 const _id = new ObjectId(user.get('profileImageId'));
                 bucket.delete(_id).then(() => {
                     console.log("Profile Image deleted successfully");
+
                 });
             }
             const profileImageId = (req.file as MulterFile).id.toString();
@@ -98,53 +100,69 @@ export const uploadProfileImage: RequestHandler = async (req, res) => {
     }
 }
 
+
+async function getProfileImage(userId: string, res: express.Response) {
+    const user = await Account.findById(userId);
+
+    if (!user) {
+        return res.status(404).json({
+            error: "Not Found",
+            message: "User not found."
+        });
+    }
+    try {
+        if (user.get('profileImageId') === ""|| user.get('profileImageId') === null || user.get('profileImageId') === undefined){
+            console.log("No profile image found for user: ", user.get('firstName'));
+            return res.status(404).json({error: 'No profile image found for user'});
+        }
+        const _id = new ObjectId(user.get('profileImageId'));
+        console.log("Profile Image ID: ", _id);
+
+        const downloadStream = bucket.openDownloadStream(_id);
+
+        downloadStream.on('data', (chunk) => {
+            res.write(chunk);
+        });
+
+        downloadStream.on('error', function (error) {
+            return;
+        });
+
+        downloadStream.on('end', () => {
+            res.end();
+        });
+
+    } catch (error) {
+        console.error("Error with ObjectId conversion:", error);
+        return res.status(400).json({error: 'Invalid image ID provided'});
+    }
+}
+
 /**
  * Gets the profile image for the user
  * @param req
  * @param res
  */
-export const getProfileImage: RequestHandler = async (req, res) => {
+export const getProfileImageByAuth: RequestHandler = async (req, res) => {
     try {
         const userId = (req as any).user.userId;
-        const user = await Account.findById(userId);
-
-        if (!user) {
-            return res.status(404).json({
-                error: "Not Found",
-                message: "User not found."
-            });
-        }
-        try {
-            if (user.get('profileImageId') === "") {
-                return;
-            }
-            const _id = new ObjectId(user.get('profileImageId'));
-
-            const downloadStream = bucket.openDownloadStream(_id);
-
-            downloadStream.on('data', (chunk) => {
-                res.write(chunk);
-            });
-
-            downloadStream.on('error', function (error) {
-                return;
-            });
-
-            downloadStream.on('end', () => {
-                res.end();
-            });
-
-        } catch (error) {
-            console.error("Error with ObjectId conversion:", error);
-            return res.status(400).json({error: 'Invalid image ID provided'});
-        }
+        await getProfileImage(userId, res);
 
     } catch (error) {
         return res.status(400).json({error: 'Invalid File ID'});
     }
 }
 
+export const getProfileImageByUserId: RequestHandler = async (req, res) => {
+    try {
+        const userId = req.params.userId
+        console.log("User ID: ", userId);
+        await getProfileImage(userId, res);
 
+    } catch (error) {
+        return res.status(400).json({error: 'Invalid File ID'});
+    }
+}
 /**
  * Deletes the profile image for the user
  * @param req

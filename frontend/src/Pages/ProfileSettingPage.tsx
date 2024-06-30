@@ -1,9 +1,24 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Container, Typography, TextField, Button, Box, Paper, Avatar, Divider, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton } from '@mui/material';
+import React, {useEffect, useRef, useState} from 'react';
+import {
+    Container,
+    Typography,
+    TextField,
+    Button,
+    Box,
+    Paper,
+    Avatar,
+    Divider,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    IconButton
+} from '@mui/material';
 import BlueButton from "../components/inputs/BlueButton";
 import LightBlueFileButton from "../components/inputs/BlueUploadButton";
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from "../contexts/AuthContext";
+import {useNavigate} from 'react-router-dom';
+import {useAuth} from "../contexts/AuthContext";
 import axios from "axios";
 import {toast} from "react-toastify";
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -388,25 +403,37 @@ function UserProfile(): React.ReactElement {
                                 sx={{ fontWeight: 'bold', fontSize: '24px', color: '#007BFF' }}>
                                 Service Provider Settings
                             </Typography>
-                            <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 0 }}>
-                                <Typography variant="body1" sx={{ fontWeight: 'bold' }}>Provided Services:</Typography>
-                                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                            <Box sx={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'space-between',
+                                gap: 0
+                            }}>
+                                <Typography variant="body1" sx={{fontWeight: 'bold'}}>Provided Services:</Typography>
+                                <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
                                     {services.length > 0 ? (
                                         services.map(service => (
-                                            <Box key={service._id} sx={{ display: 'flex', alignItems: 'center', gap: 1, my: 1 }}>
+                                            <Box key={service._id}
+                                                 sx={{display: 'flex', alignItems: 'center', gap: 1, my: 1}}>
                                                 <Typography variant="body1">{service.serviceType}</Typography>
                                                 <Button onClick={() => handleEditServiceClick(service)}>Edit</Button>
-                                                <Button onClick={() => handleOpenDialog(service._id)} sx={{ color: 'red' }}>Delete</Button>
+                                                <Button onClick={() => handleOpenDialog(service._id)}
+                                                        sx={{color: 'red'}}>Delete</Button>
                                             </Box>
                                         ))
                                     ) : (
                                         <Typography variant="body1">No services provided</Typography>
                                     )}
                                 </Box>
-                                <BlueButton text="Add Service" onClick={handleAddServiceClick} sx={{ alignSelf: 'flex-start', width: 'auto', padding: '5px 10px' }} />
+                                <BlueButton text="Add Service" onClick={handleAddServiceClick}
+                                            sx={{alignSelf: 'flex-start', width: 'auto', padding: '5px 10px'}}/>
                             </Box>
                         </>
                     )}
+                    <BlueButton text="View My Schedule" onClick={handleViewScheduleClick}
+                                sx={{backgroundColor: '#ADD8E6', color: 'white', mt: 2}}/>
+                    <Button onClick={handleDeleteAccount} sx={{backgroundColor: 'red', color: 'white', mt: 2}}>Delete
+                        Account</Button>
                     <Box sx={{ mt: 3 }}>
                         <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Subscription Information:</Typography>
                         {subscriptions.length > 0 ? (

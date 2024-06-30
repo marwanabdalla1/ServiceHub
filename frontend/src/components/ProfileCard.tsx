@@ -8,14 +8,44 @@ import Typography from '@mui/material/Typography';
 import { Account } from '../models/Account';
 import { GoStarFill } from "react-icons/go";
 import { Link } from 'react-router-dom';
+import {useEffect, useState} from "react";
+import axios from "axios";
 
 export default function MediaCard({ user }: { user: Account }) {
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
+  console.log("User: ", user);
+  useEffect(() => {
+    const fetchProfileImage = async () => {
+      try {
+        // Fetch profile image
+        console.log("User ID: ", user._id);
+        const profileImageResponse = await axios.get(`/api/file/profileImage/${user._id}`, {
+          responseType: 'blob'
+        });
+        console.log("hello");
+
+        if (profileImageResponse.status === 200) {
+          console.log("Profile image response: ", profileImageResponse);
+          setProfileImageUrl(URL.createObjectURL(profileImageResponse.data));
+          user.profileImageUrl = URL.createObjectURL(profileImageResponse.data);
+        }
+      } catch (error) {
+        console.error('Error fetching profile image:', error);
+      }
+    };
+
+    fetchProfileImage().then(r => {
+      console.log("Fetch image successfully");
+      return r;
+    });
+  }, [user._id]);
+
   return (
     <div className='border margin-4'>
       <Card sx={{ maxWidth: 345 }}>
         <CardMedia
           sx={{ height: 220 }}
-          image={user.profileImageUrl}
+          image={profileImageUrl? profileImageUrl : user.profileImageUrl}
           title="Service Image"
         />
         <CardContent>
