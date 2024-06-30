@@ -14,6 +14,7 @@ interface FilterState {
 }
 
 function FilterPage() {
+  //TODO: Implement sorting on client side after fetching data
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [filterState, setFilterState] = useState<FilterState>({
     type: '',
