@@ -8,7 +8,7 @@ export interface IAccount extends Document {
     phoneNumber: string;
     address: string;
     createdOn: Date;
-    profileImageUrl: string;
+    profileImageId: string;
     description: string;
     location: string;
     postal: string;
@@ -35,7 +35,7 @@ const accountSchema: Schema = new Schema({
     country: { type: String, required: false },
     stripeId: { type: String, required: false },
     createdOn: { type: Date, required: false, default: Date.now },
-    profileImageUrl: String,
+    profileImageId: String,
     description: String,
     location: String,
     isProvider: { type: Boolean, required: true, default: false },

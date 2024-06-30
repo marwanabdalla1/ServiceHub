@@ -12,17 +12,18 @@ import Breadcrumbs from '@mui/material/Breadcrumbs';
 import Link from '@mui/material/Link';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import MediaCard from './JobCard';
-import {Job} from '../models/Job';
+import { Job } from '../models/Job';
 import JobRow from './JobRow';
-import {Account} from '../models/Account';
+import { Account } from '../models/Account';
 import account from '../models/Account';
-import {Timeslot} from '../models/Timeslot';
-import {ServiceRequest} from '../models/ServiceRequest';
-import {RequestStatus, ServiceType, JobStatus} from '../models/enums';
+import { Timeslot } from '../models/Timeslot';
+import { ServiceRequest } from '../models/ServiceRequest';
+import { RequestStatus, ServiceType, JobStatus } from '../models/enums';
 import {ServiceOffering} from "../models/ServiceOffering";
 import {useAuth} from "../contexts/AuthContext";
 import {useEffect} from "react";
 import axios from "axios";
+
 
 
 //Candidate for deletion

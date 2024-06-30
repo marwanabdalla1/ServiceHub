@@ -114,7 +114,7 @@ export const getServiceOfferingsByUser = async (req: Request, res: Response) => 
         // console.log(req)
         const userId = (req as any).user.userId;
         const offerings = await ServiceOffering.find({ provider: userId });
-        console.log(offerings)
+        // console.log(offerings)
         if (!offerings) {
             return res.status(404).json({ message: 'No service offerings found' });
         }

@@ -1,10 +1,27 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Container, Typography, TextField, Button, Box, Paper, Avatar, Divider, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import React, {useEffect, useRef, useState} from 'react';
+import {
+    Container,
+    Typography,
+    TextField,
+    Button,
+    Box,
+    Paper,
+    Avatar,
+    Divider,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    IconButton
+} from '@mui/material';
 import BlueButton from "../components/inputs/BlueButton";
 import LightBlueFileButton from "../components/inputs/BlueUploadButton";
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from "../contexts/AuthContext";
+import {useNavigate} from 'react-router-dom';
+import {useAuth} from "../contexts/AuthContext";
 import axios from "axios";
+import {toast} from "react-toastify";
+import DeleteIcon from '@mui/icons-material/Delete';
 
 type EditModeType = {
     [key: string]: boolean;
@@ -21,6 +38,7 @@ function UserProfile(): React.ReactElement {
     const [services, setServices] = useState<any[]>([]);
     const [openDialog, setOpenDialog] = useState(false);
     const [serviceToDelete, setServiceToDelete] = useState<string | null>(null);
+    const [profileImage, setProfileImage] = useState<File | null>(null);
     const [subscriptions, setSubscriptions] = useState<any[]>([]);
     const { account: userAccount } = useAuth();
     const isProvider = userAccount?.isProvider;
@@ -60,6 +78,12 @@ function UserProfile(): React.ReactElement {
         }
     };
 
+
+    /**
+     * Custom hook to skip the first render of a component
+     * @param effect
+     * @param deps
+     */
     function useSkipFirstEffect(effect: React.EffectCallback, deps?: React.DependencyList) {
         const isFirstRender = useRef(true);
 
@@ -73,6 +97,10 @@ function UserProfile(): React.ReactElement {
         }, deps);
     }
 
+    /**
+     * Fetch account details from the backend everytime the account state changes
+     *
+     */
     useSkipFirstEffect(() => {
         (async () => {
             try {
@@ -95,6 +123,27 @@ function UserProfile(): React.ReactElement {
             }
         })();
     }, [account]);
+
+    const fetchProfileData = async () => {
+        try {
+            // Fetch profile image
+            const profileImageResponse = await axios.get(`/api/file/profileImage`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                responseType: 'blob'
+            });
+
+            setProfileImage(profileImageResponse.data);
+
+        } catch (error) {
+            console.error('Error fetching profile data:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchProfileData().then(r => console.log('Profile data fetched'));
+    }, []);
 
     useEffect(() => {
         axios.get('/api/offerings/myoffering', {
@@ -144,23 +193,73 @@ function UserProfile(): React.ReactElement {
         }
     }, [account]);
 
-    const [userImage, setUserImage] = useState<File | null>(null);
-
-    const handleFileUpload = (setFile: React.Dispatch<React.SetStateAction<File | null>>) => (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleProfileImageUpload = (setFile: React.Dispatch<React.SetStateAction<File | null>>) => (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files ? event.target.files[0] : null;
         setFile(file);
+        console.log("set file finished: ", file);
+        handleFileUpload(file, "profileImage").then(response => {
+            // Perform some action after the file upload is complete
+            toast('Profile image uploaded successfully', {type: 'success'})
+            console.log("file upload finished");
+        }).catch(error => {
+            toast('Error uploading profile image', {type: 'error'});
+            console.error('Error uploading profile image:', error);
+        });
+    };
+
+    const handleProfileImageDelete = async () => {
+        await axios.delete(`/api/file/profileImage/`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        // set the image to the default profile image
+        setProfileImage(null);
+    };
+
+    const handleFileUpload = async (file: File | null, fileType: string) => {
+        if (!file) {
+            return;
+        }
+
+        console.log(`Uploading ${fileType}...`);
+        const formData = new FormData();
+        formData.append('file', file);
+
+        let url = '';
+
+        if (fileType === 'profileImage') {
+            url = '/api/file/upload/profileImage';
+        } else if (fileType === 'certificate') {
+            url = '/api/file/upload/certificate';
+        } else {
+            console.error('Invalid file type:', fileType);
+            return;
+        }
+
+        try {
+            const response = await axios.post(url, formData, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            console.log(`Status: ${response.status}`);
+            console.log(response.data);
+        } catch (error) {
+            console.error('Error uploading file:', error);
+        }
     };
 
     const handleEditClick = (field: string) => {
-        setEditMode(prevState => ({ ...prevState, [field]: !prevState[field] }));
+        setEditMode(prevState => ({...prevState, [field]: !prevState[field]}));
     };
 
     const handleFieldChange = (field: string, newValue: string) => {
-        setFieldValue(prevState => ({ ...prevState, [field]: newValue }));
+        setFieldValue(prevState => ({...prevState, [field]: newValue}));
     };
 
     const handleFieldSave = async (field: string) => {
-        const updatedAccount = { ...account, [field]: fieldValue[field] };
+        const updatedAccount = {...account, [field]: fieldValue[field]};
 
         try {
             const response = await axios.put('/api/account', updatedAccount, {
@@ -189,12 +288,20 @@ function UserProfile(): React.ReactElement {
     };
 
     const handleEditServiceClick = (service: any) => {
-        navigate('/addservice', { state: { service } });
+        navigate('/addservice', {state: {service}});
     };
 
     const handleDeleteServiceClick = async () => {
         if (serviceToDelete) {
             try {
+                // delete the corresponding certificate
+                await axios.delete(`/api/certificate/${serviceToDelete}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                // delete the service
                 const response = await axios.delete(`/api/services/delete-service/${serviceToDelete}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -271,12 +378,15 @@ function UserProfile(): React.ReactElement {
                 <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', fontSize: '24px', color: '#007BFF' }}>
                     Public Profile
                 </Typography>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: 3 }}>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
-                        <Avatar src={userImage ? URL.createObjectURL(userImage) : undefined}
-                            sx={{ width: 80, height: 80 }} />
+                <Box sx={{display: 'flex', flexDirection: 'column', gap: 3, p: 3}}>
+                    <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5}}>
+                        <IconButton onClick={handleProfileImageDelete} size="small" sx={{alignSelf: 'flex-end'}}>
+                            <DeleteIcon/>
+                        </IconButton>
+                        <Avatar src={profileImage ? URL.createObjectURL(profileImage) : undefined}
+                                sx={{width: 80, height: 80}}/>
                         <LightBlueFileButton text="Upload Profile Picture"
-                            onFileChange={handleFileUpload(setUserImage)} />
+                                             onFileChange={handleProfileImageUpload(setProfileImage)}/>
                     </Box>
                     {renderField("User ID", "userId")}
                     {renderField("First Name", "firstName")}
@@ -293,25 +403,34 @@ function UserProfile(): React.ReactElement {
                                 sx={{ fontWeight: 'bold', fontSize: '24px', color: '#007BFF' }}>
                                 Service Provider Settings
                             </Typography>
-                            <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 0 }}>
-                                <Typography variant="body1" sx={{ fontWeight: 'bold' }}>Provided Services:</Typography>
-                                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                            <Box sx={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'space-between',
+                                gap: 0
+                            }}>
+                                <Typography variant="body1" sx={{fontWeight: 'bold'}}>Provided Services:</Typography>
+                                <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
                                     {services.length > 0 ? (
                                         services.map(service => (
-                                            <Box key={service._id} sx={{ display: 'flex', alignItems: 'center', gap: 1, my: 1 }}>
+                                            <Box key={service._id}
+                                                 sx={{display: 'flex', alignItems: 'center', gap: 1, my: 1}}>
                                                 <Typography variant="body1">{service.serviceType}</Typography>
                                                 <Button onClick={() => handleEditServiceClick(service)}>Edit</Button>
-                                                <Button onClick={() => handleOpenDialog(service._id)} sx={{ color: 'red' }}>Delete</Button>
+                                                <Button onClick={() => handleOpenDialog(service._id)}
+                                                        sx={{color: 'red'}}>Delete</Button>
                                             </Box>
                                         ))
                                     ) : (
                                         <Typography variant="body1">No services provided</Typography>
                                     )}
                                 </Box>
-                                <BlueButton text="Add Service" onClick={handleAddServiceClick} sx={{ alignSelf: 'flex-start', width: 'auto', padding: '5px 10px' }} />
+                                <BlueButton text="Add Service" onClick={handleAddServiceClick}
+                                            sx={{alignSelf: 'flex-start', width: 'auto', padding: '5px 10px'}}/>
                             </Box>
                         </>
                     )}
+
                     <Box sx={{ mt: 3 }}>
                         <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Subscription Information:</Typography>
                         {subscriptions.length > 0 ? (

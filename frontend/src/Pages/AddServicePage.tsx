@@ -1,356 +1,324 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Container, Typography, TextField, Button, Box, Paper, Avatar, Divider, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
-import BlueButton from "../components/inputs/BlueButton";
-import LightBlueFileButton from "../components/inputs/BlueUploadButton";
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from "../contexts/AuthContext";
-import axios from "axios";
+import React, {useState, ChangeEvent, useEffect} from 'react';
+import {Autocomplete, TextField, InputAdornment, Box, Grid} from '@mui/material';
+import LightBlueButton from '../components/inputs/BlueButton';
+import {useNavigate, useLocation} from 'react-router-dom';
+import {useAuth} from '../contexts/AuthContext';
+import axios from 'axios';
 
-type EditModeType = {
-    [key: string]: boolean;
-};
+interface FormData {
+    selectedService: { title: string } | null;
+    hourlyRate: string;
+    selectedPaymentMethods: Array<{ title: string }>;
+    description: string;
+    certificateId: string | null;
+    defaultSlotTime: string;
+    travelTime: string;
+}
 
-type FieldType = {
-    [key: string]: string;
-};
-
-function UserProfile(): React.ReactElement {
-
-    const [account, setAccount] = useState<any>(null);
-    const { token, logoutUser } = useAuth();
-    const [services, setServices] = useState<any[]>([]);
-    const [openDialog, setOpenDialog] = useState(false);
-    const [serviceToDelete, setServiceToDelete] = useState<string | null>(null);
-    const [subscriptions, setSubscriptions] = useState<any[]>([]);
-    const { account: userAccount } = useAuth();
-    const isProvider = userAccount?.isProvider;
-    const isPremium = userAccount?.isPremium;
-    const client_reference_id = userAccount?._id;
-
-    const fetchSubscriptionData = async (clientReferenceId: string) => {
-        try {
-            const response = await axios.get('/api/becomepro/subscription', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            return response.data;
-        } catch (error) {
-            console.error('Error fetching subscription data:', error);
-            throw error;
-        }
-    };
-
-    const cancelSubscription = async () => {
-        try {
-            const response = await axios.post('/api/subscription/cancel', {}, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            console.log(`Status: ${response.status}`);
-            console.log(response.data);
-
-            // Update the subscriptions state after cancellation
-            setSubscriptions(subscriptions.map(sub => ({ ...sub, status: 'canceled' })));
-        } catch (error) {
-            console.error('Error cancelling subscription:', error);
-        }
-    };
-
-    function useSkipFirstEffect(effect: React.EffectCallback, deps?: React.DependencyList) {
-        const isFirstRender = useRef(true);
-
-        useEffect(() => {
-            if (isFirstRender.current) {
-                isFirstRender.current = false;
-                return;
-            }
-
-            return effect();
-        }, deps);
-    }
-
-    useSkipFirstEffect(() => {
-        (async () => {
-            try {
-                const response = await axios.get('/api/account', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (JSON.stringify(response.data) !== JSON.stringify(account)) {
-                    setAccount(response.data);
-                }
-
-                if (client_reference_id) {
-                    const subscriptionData = await fetchSubscriptionData(client_reference_id);
-                    setSubscriptions(subscriptionData);
-                }
-            } catch (error) {
-                console.error('Error fetching account details:', error);
-            }
-        })();
-    }, [account]);
-
-    useEffect(() => {
-        axios.get('/api/offerings/myoffering', {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        })
-            .then(response => {
-                setServices(response.data || []);
-            })
-            .catch(error => {
-                console.error('Error fetching services:', error);
-            });
-    }, []);
-
-    const [editMode, setEditMode] = useState<EditModeType>({
-        firstName: false,
-        lastName: false,
-        email: false,
-        phone: false,
-        address: false,
-        description: false,
-        service: false
-    });
-
-    const [fieldValue, setFieldValue] = useState<FieldType>({
-        userId: "",
-        firstName: "",
-        lastName: "",
-        email: "",
-        phone: "",
-        address: "",
-        description: "",
-    });
-
-    useEffect(() => {
-        if (account) {
-            setFieldValue({
-                userId: account._id,
-                firstName: account.firstName,
-                lastName: account.lastName,
-                email: account.email,
-                phone: account.phone ? account.phone : "",
-                address: account.address ? account.address : "",
-                description: account.description ? account.description : "",
-            });
-        }
-    }, [account]);
-
-    const [userImage, setUserImage] = useState<File | null>(null);
-
-    const handleFileUpload = (setFile: React.Dispatch<React.SetStateAction<File | null>>) => (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files ? event.target.files[0] : null;
-        setFile(file);
-    };
-
-    const handleEditClick = (field: string) => {
-        setEditMode(prevState => ({ ...prevState, [field]: !prevState[field] }));
-    };
-
-    const handleFieldChange = (field: string, newValue: string) => {
-        setFieldValue(prevState => ({ ...prevState, [field]: newValue }));
-    };
-
-    const handleFieldSave = async (field: string) => {
-        const updatedAccount = { ...account, [field]: fieldValue[field] };
-
-        try {
-            const response = await axios.put('/api/account', updatedAccount, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            setAccount(response.data);
-        } catch (error) {
-            console.error('Error updating account details:', error);
-        }
-    };
-
-    const handleKeyPress = (event: React.KeyboardEvent, field: string) => {
-        if (event.key === 'Enter') {
-            handleFieldSave(field).then(() => console.log('Field saved'));
-            handleEditClick(field);
-        }
-    };
-
+function AddServicePage() {
     const navigate = useNavigate();
+    const location = useLocation();
+    const {token} = useAuth();
+    const serviceToEdit = location.state?.service || null;
+    const [certificate, setCertificate] = useState<File | null>(null);
+    const [isCertificateUploaded, setIsCertificateUploaded] = useState<boolean>(false);
+    const serviceTypes = [
+        {title: 'Bike Repair'},
+        {title: 'Moving Services'},
+        {title: 'Baby Sitting'},
+        {title: 'Tutoring'},
+        {title: 'Pet Sitting'},
+        {title: 'Landscaping Services'},
+        {title: 'Home Remodeling'},
+        {title: 'House Cleaning'}
+    ];
+    const paymentMethods = [
+        {title: 'Cash'}, {title: 'Paypal'}, {title: 'Bank Transfer'}
+    ];
+    const [formData, setFormData] = useState<FormData>({
+        selectedService: null,
+        hourlyRate: '',
+        selectedPaymentMethods: [],
+        description: '',
+        certificateId: null,
+        defaultSlotTime: '',
+        travelTime: ''
+    });
+    const [errors, setErrors] = useState({
+        selectedService: false,
+        hourlyRate: false,
+        selectedPaymentMethods: false,
+        defaultSlotTime: false,
+        travelTime: false
+    });
+    const isEditMode = Boolean(serviceToEdit);
 
-    const handleAddServiceClick = () => {
-        navigate('/addservice');
-    };
+    useEffect(() => {
+        if (isEditMode && serviceToEdit) {
+            console.log('Service to edit:', serviceToEdit);
+            setFormData({
+                selectedService: {title: serviceToEdit.serviceType},
+                hourlyRate: serviceToEdit.hourlyRate.toString(),
+                selectedPaymentMethods: serviceToEdit.selectedPaymentMethods ? serviceToEdit.selectedPaymentMethods.map((method: string) => ({title: method})) : [],
+                description: serviceToEdit.description,
+                certificateId: serviceToEdit.certificateId,
+                defaultSlotTime: serviceToEdit.baseDuration.toString(),
+                travelTime: serviceToEdit.bufferTimeDuration.toString()
+            });
+            fetchCertificate(serviceToEdit._id).then(r => console.log('Certificate fetched'));
+        }
+    }, [isEditMode, serviceToEdit]);
 
-    const handleEditServiceClick = (service: any) => {
-        navigate('/addservice', { state: { service } });
-    };
-
-    const handleDeleteServiceClick = async () => {
-        if (serviceToDelete) {
-            try {
-                const response = await axios.delete(`/api/services/delete-service/${serviceToDelete}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                setServices(services.filter(service => service._id !== serviceToDelete));
-            } catch (error) {
-                console.error('Error deleting service:', error);
-            } finally {
-                setOpenDialog(false);
-                setServiceToDelete(null);
-            }
+    const fetchCertificate = async (_id: string) => {
+        try {
+            // Fetch certificate
+            const certificateResponse = await axios.get(`/api/certificate/${_id}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                responseType: 'blob'
+            });
+            setCertificate(certificateResponse.data);
+            console.log('Certificate fetched:', certificateResponse.data)
+        } catch (error) {
+            console.error('Error fetching certificate:', error);
         }
     };
 
-    const handleOpenDialog = (serviceId: string) => {
-        setServiceToDelete(serviceId);
-        setOpenDialog(true);
-    };
-
-    const handleCloseDialog = () => {
-        setOpenDialog(false);
-        setServiceToDelete(null);
-    };
-
-    const handleDeleteAccount = async () => {
+    const handleDeleteCertificate = async () => {
         try {
-            const response = await axios.delete('/api/account', {
+            // Delete certificate
+            const response = await axios.delete(`/api/certificate/${serviceToEdit._id}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
-
-            navigate('/login');
+            console.log('Certificate deleted:', response.data);
+            setCertificate(null); // Reset the certificate state
         } catch (error) {
-            console.error('Error deleting account:', error);
+            console.error('Error deleting certificate:', error);
         }
     };
 
-    const handleViewScheduleClick = () => {
-        navigate('/select-availability');
+    const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const certificate = event.target.files ? event.target.files[0] : null;
+        setCertificate(certificate);
+        setIsCertificateUploaded(true);
     };
 
-    const renderField = (label: string, field: string) => {
-        return (
-            <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 0 }}>
-                <Typography variant="body1" sx={{ fontWeight: 'bold' }}>{label}:</Typography>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    {field === 'userId' || !editMode[field] ? (
-                        <Typography variant="body1">{fieldValue[field]}</Typography>
-                    ) : (
-                        <TextField
-                            fullWidth
-                            value={fieldValue[field]}
-                            variant="outlined"
-                            onChange={(e) => handleFieldChange(field, e.target.value)}
-                            onKeyPress={(e) => handleKeyPress(e, field)}
-                        />
-                    )}
-                    {field !== 'userId' && <Button onClick={() => handleEditClick(field)}>Edit</Button>}
-                </Box>
-            </Box>
-        );
+    const handleChange = (key: keyof FormData, value: any) => {
+        setFormData(prev => ({...prev, [key]: value}));
     };
 
-    const getFormattedDate = (timestamp: number) => {
-        return new Date(timestamp * 1000).toLocaleDateString();
+    const validateForm = () => {
+        const newErrors = {
+            selectedService: !formData.selectedService,
+            hourlyRate: !formData.hourlyRate,
+            selectedPaymentMethods: formData.selectedPaymentMethods.length === 0,
+            defaultSlotTime: !formData.defaultSlotTime,
+            travelTime: !formData.travelTime
+        };
+
+        setErrors(newErrors);
+        return Object.values(newErrors).every(error => !error);
+    };
+
+    const handleSubmit = async () => {
+        if (validateForm()) {
+            const submissionData = {
+                ...formData,
+                defaultSlotTime: Number(formData.defaultSlotTime),
+                travelTime: Number(formData.travelTime)
+            };
+
+            const certificateForm = new FormData();
+            if (certificate) {
+                certificateForm.append('file', certificate);
+            }
+
+            try {
+                let response;
+                if (isEditMode) {
+                    console.log('Editing service:', serviceToEdit._id);
+                    response = await axios.put(`/api/services/edit-service/${serviceToEdit._id}`, submissionData, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+
+                    if (certificate && isCertificateUploaded) {
+                        response = await axios.post(`/api/certificate/upload/${serviceToEdit._id}`, certificateForm, {
+                            headers: {
+                                'Authorization': `Bearer ${token}`
+                            }
+                        });
+                    }
+                } else {
+                    response = await axios.post('/api/services/add-new-service', submissionData, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    if (response.status === 201 && certificate && isCertificateUploaded) {
+                        response = await axios.post(`/api/certificate/upload/${response.data._id}`, certificateForm, {
+                            headers: {
+                                'Authorization': `Bearer ${token}`
+                            }
+                        });
+                    }
+                }
+                console.log(`Status: ${response.status}`);
+                console.log(response.data);
+                navigate('/profile'); // Redirect to profile page after submission
+            } catch
+                (error) {
+                console.error('Error submitting service:', error);
+            }
+        } else {
+            console.log('Form validation failed');
+        }
     };
 
     return (
-        <Container component="main" maxWidth="md" sx={{ mt: 4, backgroundColor: '#f5f5f5', borderRadius: '20px' }}>
-            <Paper variant="outlined" sx={{ p: 3, borderRadius: '20px' }}>
-                <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', fontSize: '24px', color: '#007BFF' }}>
-                    Public Profile
-                </Typography>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: 3 }}>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
-                        <Avatar src={userImage ? URL.createObjectURL(userImage) : undefined}
-                            sx={{ width: 80, height: 80 }} />
-                        <LightBlueFileButton text="Upload Profile Picture"
-                            onFileChange={handleFileUpload(setUserImage)} />
-                    </Box>
-                    {renderField("User ID", "userId")}
-                    {renderField("First Name", "firstName")}
-                    {renderField("Last Name", "lastName")}
-                    {renderField("Email Address", "email")}
-                    {renderField("Phone Number", "phone")}
-                    {renderField("Address", "address")}
-                    {renderField("Description", "description")}
-                    <Button onClick={logoutUser}>Logout</Button>
-                    {isProvider && (
-                        <>
-                            <Divider sx={{ my: 2 }} />
-                            <Typography variant="h6" gutterBottom component="div"
-                                sx={{ fontWeight: 'bold', fontSize: '24px', color: '#007BFF' }}>
-                                Service Provider Settings
-                            </Typography>
-                            <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 0 }}>
-                                <Typography variant="body1" sx={{ fontWeight: 'bold' }}>Provided Services:</Typography>
-                                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                                    {services.length > 0 ? (
-                                        services.map(service => (
-                                            <Box key={service._id} sx={{ display: 'flex', alignItems: 'center', gap: 1, my: 1 }}>
-                                                <Typography variant="body1">{service.serviceType}</Typography>
-                                                <Button onClick={() => handleEditServiceClick(service)}>Edit</Button>
-                                                <Button onClick={() => handleOpenDialog(service._id)} sx={{ color: 'red' }}>Delete</Button>
-                                            </Box>
-                                        ))
-                                    ) : (
-                                        <Typography variant="body1">No services provided</Typography>
-                                    )}
-                                </Box>
-                                <BlueButton text="Add Service" onClick={handleAddServiceClick} sx={{ alignSelf: 'flex-start', width: 'auto', padding: '5px 10px' }} />
-                            </Box>
-                        </>
-                    )}
-                    <Box sx={{ mt: 3 }}>
-                        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Subscription Information:</Typography>
-                        {subscriptions.length > 0 ? (
-                            subscriptions.map((subscription) => (
-                                <Box key={subscription.id} sx={{ display: 'flex', flexDirection: 'column', mt: 2 }}>
-                                    <Typography variant="body1"><strong>Subscription ID:</strong> {subscription.id}</Typography>
-                                    <Typography variant="body1"><strong>Status:</strong> {subscription.status}</Typography>
-                                    <Typography variant="body1"><strong>Expiration Date:</strong> {getFormattedDate(subscription.current_period_end)}</Typography>
-                                    {subscription.status !== 'canceled' && (
-                                        <Button onClick={cancelSubscription} sx={{ mt: 1, color: 'red' }}>Cancel Subscription</Button>
-                                    )}
-                                </Box>
-                            ))
-                        ) : (
-                            <Typography variant="body1">No active subscriptions</Typography>
-                        )}
-                    </Box>
-                    <BlueButton text="View My Schedule" onClick={handleViewScheduleClick} sx={{ backgroundColor: '#ADD8E6', color: 'white', mt: 2 }} />
-                    <Button onClick={handleDeleteAccount} sx={{ backgroundColor: 'red', color: 'white', mt: 2 }}>Delete Account</Button>
+        <Box className="w-full h-full flex items-center justify-center bg-gray-100" p={3}>
+            <Box className="w-full max-w-5xl p=6 bg-white shadow-md rounded-lg">
+                <Box className='flex justify-center p-3 py-3 items-center mb=6'>
+                    <h4 className="font-bold text-2xl">{isEditMode ? 'Edit Service' : 'Provide Service'}</h4>
                 </Box>
-            </Paper>
-            <Dialog open={openDialog} onClose={handleCloseDialog}>
-                <DialogTitle>{"Confirm Delete"}</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>
-                        Are you sure you want to delete this service?
-                    </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleCloseDialog} color="primary">
-                        Cancel
-                    </Button>
-                    <Button onClick={handleDeleteServiceClick} color="primary" autoFocus>
-                        Delete
-                    </Button>
-                </DialogActions>
-            </Dialog>
-        </Container>
+                <Grid container spacing={7} className='p-4'>
+                    <Grid item xs={12} md={6}>
+                        <Box mb={4}>
+                            <Autocomplete
+                                options={serviceTypes}
+                                getOptionLabel={(option) => option.title}
+                                value={formData.selectedService}
+                                onChange={(event, newValue) => handleChange('selectedService', newValue)}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        label="Choose Service"
+                                        variant="outlined"
+                                        fullWidth
+                                        error={errors.selectedService}
+                                        helperText={errors.selectedService ? 'Service is required' : ''}
+                                    />
+                                )}
+                            />
+                        </Box>
+                        <Box mb={4}>
+                            <TextField
+                                InputProps={{
+                                    startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                                }}
+                                placeholder="Hourly Rate"
+                                fullWidth
+                                value={formData.hourlyRate}
+                                onChange={(e) => handleChange('hourlyRate', e.target.value)}
+                                error={errors.hourlyRate}
+                                helperText={errors.hourlyRate ? 'Hourly rate is required' : ''}
+                            />
+                        </Box>
+                        <Box mb={4}>
+                            <Autocomplete
+                                multiple
+                                options={paymentMethods}
+                                getOptionLabel={(option) => option.title}
+                                value={formData.selectedPaymentMethods}
+                                onChange={(event, newValue) => handleChange('selectedPaymentMethods', newValue)}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        label="Payment Method"
+                                        variant="outlined"
+                                        fullWidth
+                                        error={errors.selectedPaymentMethods}
+                                        helperText={errors.selectedPaymentMethods ? 'At least one payment method is required' : ''}
+                                    />
+                                )}
+                            />
+                        </Box>
+                        <Box mb={4}>
+                            <TextField
+                                label="Default Slot Time (minutes)"
+                                variant="outlined"
+                                fullWidth
+                                value={formData.defaultSlotTime}
+                                onChange={(e) => handleChange('defaultSlotTime', e.target.value)}
+                                error={errors.defaultSlotTime}
+                                helperText={errors.defaultSlotTime ? 'Default slot time is required' : ''}
+                            />
+                        </Box>
+                        <Box mb={4}>
+                            <TextField
+                                label="Travel Time (minutes)"
+                                variant="outlined"
+                                fullWidth
+                                value={formData.travelTime}
+                                onChange={(e) => handleChange('travelTime', e.target.value)}
+                                error={errors.travelTime}
+                                helperText={errors.travelTime ? 'Travel time is required' : ''}
+                            />
+                        </Box>
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                        <Box mb={4}>
+                            <p className="font-bold mb-2">
+                                Add a description to your service (optional)
+                            </p>
+                            <TextField
+                                variant="outlined"
+                                multiline
+                                rows={4}
+                                fullWidth
+                                value={formData.description}
+                                onChange={(e) => handleChange('description', e.target.value)}
+                            />
+                        </Box>
+                        <Box>
+                            <p className="font-bold mb-2">
+                                Upload professional certificate to your service (optional)
+                            </p>
+                            {certificate && (
+                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                    <div>Certificate uploaded</div>
+                                    <div>
+                                        <a
+                                            href={URL.createObjectURL(certificate)}
+                                            download
+                                            style={{marginRight: '10px'}}
+                                        >
+                                            Download
+                                        </a>
+                                        <button
+                                            onClick={handleDeleteCertificate}
+                                            style={{ color: 'red', textDecoration: 'underline' }}
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                            <TextField
+                                type="file"
+                                variant="outlined"
+                                fullWidth
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                inputProps={{
+                                    accept: 'application/pdf',
+                                }}
+                                onChange={handleFileChange}
+                            />
+                        </Box>
+                    </Grid>
+                </Grid>
+                <Box mt={4} className="flex justify-center p-2">
+                    <LightBlueButton className="py-2 px-2" text="Submit" onClick={handleSubmit}/>
+                </Box>
+            </Box>
+        </Box>
     );
 }
 
-export default UserProfile;
+export default AddServicePage;
