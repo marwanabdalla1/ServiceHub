@@ -3,6 +3,8 @@ import {CgProfile} from "react-icons/cg";
 import {IoSettingsOutline, IoNotificationsOutline} from "react-icons/io5";
 import {CiSearch} from "react-icons/ci";
 import {FiFilter} from "react-icons/fi";
+import { BsQuestionCircle } from "react-icons/bs";
+
 import BlackButton from "./inputs/blackbutton";
 import RequestListButton from "./inputs/requestListButton";
 import Modal from "./inputs/Modal";
@@ -74,6 +76,7 @@ const Navbar: React.FC<NavbarProps> = ({toggleDrawer, onChange, onSearch, search
     const handleProfileMenuClose = () => {
         setProfileAnchorEl(null);
     };
+
 
     return (
         <nav className="bg-blue-300 shadow-md h-20">
@@ -147,7 +150,10 @@ const Navbar: React.FC<NavbarProps> = ({toggleDrawer, onChange, onSearch, search
                         )}
                     </Menu>
                     <div className="h-6 w-0.5 bg-gray-800"></div>
-                    <IoSettingsOutline className="h-6 w-6"/>
+                    {/*<IoSettingsOutline className="h-6 w-6"/>*/}
+                    <Link to="/faq" className="h-6 w-6" style={{ outline: 'none' }}>
+                        <BsQuestionCircle className="h-6 w-6" style={{ color: 'black'  }}/>
+                    </Link>
                 </div>
             </div>
 
