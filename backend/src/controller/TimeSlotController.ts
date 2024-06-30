@@ -28,6 +28,7 @@ function generateWeeklyInstances(events: ITimeslot[], startDate: moment.Moment, 
                     instance.start.getTime() === start.getTime() && 
                     instance.end.getTime() === end.getTime() && 
                     instance.createdById === event.createdById
+                    // instance.baseEventId === event.baseEventId
                 );
 
                 if (!exists) {
@@ -37,7 +38,8 @@ function generateWeeklyInstances(events: ITimeslot[], startDate: moment.Moment, 
                         end, 
                         isFixed: event.isFixed, 
                         isBooked: event.isBooked, 
-                        createdById: event.createdById 
+                        createdById: event.createdById,
+                        // baseEventId: event.baseEventId
                     } as ITimeslot);
                 }
             }
@@ -62,7 +64,7 @@ export const extendFixedSlots: RequestHandler = async (req, res, next) => {
             createdById: userId, 
             isFixed: true,
             start: { $gte: startDate.toDate() },
-            end: { $lte: endDate.toDate() }
+            end: { $lte: endDate.toDate() },
         });
 
         // Generate new instances
@@ -95,21 +97,38 @@ export const extendFixedSlots: RequestHandler = async (req, res, next) => {
 export const deleteTimeslot: RequestHandler = async (req, res, next) => {
     try {
         const userId = (req as any).user.userId;// Assuming userId is available in the request (e.g., from authentication middleware)
-        const { event } = req.body;
-        const start = new Date(event.start);
-        const end = new Date(event.end);
+        const { event, deleteAllFuture } = req.body;
+        const startTime = new Date(event.start);
+        const endTime = new Date(event.end);
         const { title, isFixed } = event;
 
         // Delete the specific event
-        await Timeslot.deleteOne({ start, end, createdById: userId });
+        const deletedOne = await Timeslot.deleteOne({ start:startTime, end:endTime, createdById: userId });
+
+        console.log(event, deletedOne)
 
         // If the event is fixed, delete its future instances
-        if (isFixed) {
-            const futureStartDate = moment(start).add(1, 'week');
+        if (isFixed && deleteAllFuture) {
+            const weekday = (startTime.getDay() + 1) % 7 || 7; // Convert 0 (Sunday in JS) to 7 for MongoDB
+            const futureStartDate = moment(startTime).add(1, 'week');
             await Timeslot.deleteMany({
                 createdById: userId,
                 title,
-                start: { $gte: futureStartDate.toDate() }
+                isFixed: true,
+                start: { $gte: futureStartDate.toDate() },
+                $and: [
+                    { $or: [ // Start time is within the base event duration
+                            { start: { $gte: startTime } },
+                            { start: { $lt: endTime } }
+                        ]},
+                    { $or: [ // End time is within the base event duration
+                            { end: { $gt: startTime } },
+                            { end: { $lte: endTime } }
+                        ]}
+                ],
+                $expr: {
+                    $eq: [{ $dayOfWeek: "$start" }, weekday] // Ensure it's the same day of the week
+                }
             });
         }
 
@@ -223,7 +242,7 @@ const adjustForTransit = (timeslots: ITimeslot[], transitTime: number) => {
 };
 
 
-// get events by user ID (i.e. of a provider)
+// get events by user ID (i.e. of a provider) for booking, this is ADJUSTED for transit time!
 export const getAvailabilityByProviderId: RequestHandler = async (req, res, next) => {
     // const userId = (req as any).user.userId; // consumer id
     const {providerId} = req.params;
@@ -268,7 +287,8 @@ export const saveEvents: RequestHandler = async (req, res, next) => {
         console.log(req)
         const userId = (req as any).user.userId; // Assuming userId is available in the request (e.g., from authentication middleware)
         const { events } = req.body;
-        console.log('User ID:', userId);
+        console.log('events to save:', events);
+
         // Generate future instances for new fixed events
         const fixedEvents = events.filter((event: ITimeslot) => event.isFixed);
         let futureInstances: ITimeslot[] = [];
@@ -287,10 +307,75 @@ export const saveEvents: RequestHandler = async (req, res, next) => {
             isFixed: event.isFixed,
             isBooked: event.isBooked,
             requestId: event.requestId,
-            createdById: userId // Use userId from the token
+            createdById: userId, // Use userId from the token
+            // baseEventId: event.baseEventId || undefined,
         })), { ordered: false });
 
+        console.log(insertedEvents)
         res.status(201).json({ insertedEvents });
+    } catch (err) {
+        let message = '';
+        if (err instanceof Error) {
+            message = err.message;
+            console.log(message)
+        }
+        return res.status(500).json({
+            error: "Internal server error",
+            message: message,
+        });
+    }
+};
+
+
+
+export const turnExistingEventIntoFixed: RequestHandler = async (req, res, next) => {
+    try {
+        console.log(req)
+        const userId = (req as any).user.userId; // Assuming userId is available in the request (e.g., from authentication middleware)
+        const event  = req.body;
+        console.log('events to save:', event);
+
+
+        // Step 1: Find and update the specified event to mark it as fixed
+        const eventToUpdate = await Timeslot.findOneAndUpdate({
+            _id: event._id,
+            createdById: event.createdById
+        }, {
+            $set: { isFixed: true }
+        }, { new: true }); // Return the updated document
+
+        if (!eventToUpdate) {
+            return res.status(404).json({ message: "Event not found or user mismatch" });
+        }
+
+
+        // Step 2: Generate future instances based on the newly fixed event
+        // const fixedEvents = events.filter((event: ITimeslot) => event.isFixed);
+        let futureInstances: ITimeslot[] = [];
+        if (eventToUpdate.isFixed) {
+            const futureEndDate = moment(eventToUpdate.end).endOf('week').add(6, 'months');
+            futureInstances = generateWeeklyInstances([eventToUpdate], moment(eventToUpdate.start).add(1, 'week'), futureEndDate);
+        }
+
+        // Insert new events
+        // console.log('All events to insert:', allEventsToInsert);
+        const insertedEvents = await Timeslot.insertMany(futureInstances.map(instance => ({
+            title: instance.title,
+            start: instance.start,
+            end: instance.end,
+            isFixed: instance.isFixed,
+            isBooked: instance.isBooked,
+            requestId: instance.requestId,
+            createdById: userId, // Use userId from the token
+            // baseEventId: event.baseEventId || undefined,
+        })), { ordered: false });
+
+        console.log(insertedEvents)
+        res.status(201).json({
+            message: "Event marked as fixed and future instances created successfully",
+            updatedEvent: eventToUpdate,
+            futureEvents: insertedEvents
+        });
     } catch (err) {
         let message = '';
         if (err instanceof Error) {
