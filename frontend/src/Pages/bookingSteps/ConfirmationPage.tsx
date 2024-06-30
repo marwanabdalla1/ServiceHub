@@ -1,4 +1,6 @@
 import React, { CSSProperties, FC } from 'react';
+import {useAuth} from "../../contexts/AuthContext";
+import { useParams } from 'react-router-dom';
 
 interface Styles {
     container: CSSProperties;
@@ -8,6 +10,9 @@ interface Styles {
 }
 
 const ConfirmationPage: FC = () => {
+
+    const { requestId } = useParams<{ requestId: string }>();
+    const { account } = useAuth();
 
     const styles: Styles = {
         container: {
@@ -46,11 +51,11 @@ const ConfirmationPage: FC = () => {
     return (
         <div>
             <div style={styles.container}>
-                <h1 style={styles.header}>Hi John</h1>
+                <h1 style={styles.header}>Hi {account?.firstName} {account?.lastName}</h1>
                 <h2 style={styles.header}>Thank you for your order!</h2>
                 <div style={styles.content}>
-                    <p>Your booking number is <span style={styles.highlight}>1570VL</span></p>
-                    <p>We'll send your confirmation to <span style={styles.highlight}>John.Newman.Baymard2021@gmail.com</span></p>
+                    <p>Your booking number is <span style={styles.highlight}>{requestId}</span></p>
+                    <p>We'll send your confirmation to <span style={styles.highlight}>{account?.email}</span></p>
                     <p>It might not arrive immediately. Make sure to check your spam folder.</p>
                 </div>
             </div>

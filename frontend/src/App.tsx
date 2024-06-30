@@ -85,8 +85,8 @@ function MainRoutes() {
 
                 {/*booking*/}
                 <Route path="/offerings/:offeringId" element={<ProviderProfilePage />} />
-                <Route path="/offerings/:offeringId/booking/:step" element={<BookingPage />} />
-                <Route path="/offerings/confirm" element={<ConfirmationPage />} />
+                <Route path="/offerings/:could /booking/:step" element={<BookingPage />} />
+                <Route path="/offerings/:requestId/confirm" element={<ConfirmationPage />} />
 
                 {/*old ones*/}
                 {/*<Route path="/create-account-or-sign-in" element={<CreateAccountOrSignIn/>}/>*/}
