@@ -138,7 +138,7 @@ function FilterPage() {
   return (
     <div>
       <NavigationBar toggleDrawer={toggleDrawer} onChange={handleInputChange} onSearch={handleSearch} search={search} />
-      <div>
+      <div className='flex-col justify-center'>
         <DrawerFilter
           openDrawer={isDrawerOpen}
           toggleDrawer={toggleDrawer}
@@ -149,7 +149,9 @@ function FilterPage() {
           onLicensedChange={handleLicensedChange}
           onClearFilters={clearFilters}
         />
-        <Sort onSortChange={handleSortChange} /> {/* Add Sort component here */}
+        <div className="flex justify-center "> {/* Flex container for alignment */}
+          <Sort onSortChange={handleSortChange} />
+        </div>
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-screen-lg w-full mx-auto '>
           {sortedOfferings.map((offering) => (
             <MediaCard key={offering._id} user={offering} />
