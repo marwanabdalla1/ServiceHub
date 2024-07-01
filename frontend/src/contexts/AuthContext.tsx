@@ -28,10 +28,10 @@ export const AccountProvider = ({children}: Props) => {
     // const [nextPath, setNextPath] = useState('/');  // Default to home
 
 
-
     useEffect(() => {
         // const account = localStorage.getItem('account');
         const token = localStorage.getItem('token');
+
         if (token) {
             setToken(token);
         }
@@ -47,7 +47,7 @@ export const AccountProvider = ({children}: Props) => {
                 }
             })
                 .then(response => {
-                    //console.log("account:" , response.data)
+                    console.log("account:", response.data)
                     setAccount(response.data);
                     localStorage.setItem('account', response?.data);
                 })
@@ -93,6 +93,7 @@ export const AccountProvider = ({children}: Props) => {
         } catch
             (error) {
             console.error('Error creating user:', error);
+            toast('User registration failed. Please try again.');
         }
     };
 
@@ -116,6 +117,7 @@ export const AccountProvider = ({children}: Props) => {
                 navigate('/');
             }
         } catch (error) {
+            toast.error('Login failed. Please check your credentials and try again.');
             console.error('Error logging in:', error);
         }
     };
@@ -131,6 +133,7 @@ export const AccountProvider = ({children}: Props) => {
         setToken(null);
         setAccount(null);
 
+        toast('User logged out successfully');
         // Navigate the user back to the login page
         navigate('/login');
     };
