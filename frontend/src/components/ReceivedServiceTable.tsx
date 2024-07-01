@@ -265,7 +265,7 @@ export default function ReceivedServiceTable() {
                       receiver={receiver}
                        onClose={() => setShowMediaCard(false)}
                        onCancel = {handleCancel}
-                       onReview={() => navigate("/customer_review")}
+                       onReview={()=>navigate(`/customer_review/${selectedReceivedService._id}`)}
             />
           </div>
         )}

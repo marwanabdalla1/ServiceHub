@@ -15,7 +15,6 @@ const ReviewPage: React.FC = () => {
     const [review, setReview] = React.useState<Review|null>(null); // Holds the existing review data
     const [job, setJob] = React.useState<Job|null>(null);
     const [reviewee, setReviewee] = React.useState<Account|null>(null);
-    const [newReview, setNewReview] = React.useState<Review|null>(null);
     const [rating, setRating] = React.useState<number | null>(0);
     const [reviewText, setReviewText] = React.useState(''); // State to hold the review text
     const [isEditing, setIsEditing] = React.useState(false);  // Tracks if we are editing an existing review
@@ -29,81 +28,51 @@ const ReviewPage: React.FC = () => {
 
     useEffect(() => {
         // This useEffect will always run, but the internal logic runs only under certain conditions.
-        if (jobId && !review) {  // Condition to perform fetching
-            console.log("Fetching job: ", jobId);
-            const fetchJob = async() => {
-                try {
-                    const response = await axios.get(`/api/jobs/${jobId}`, {
-                        headers: { Authorization: `Bearer ${token}` }
-                    });
-                    console.log(response.data);
-                    setJob(response.data);
-                    let revieweeId;
-                    console.log("Provider: ", job?.provider);
-                    console.log("Receiver: ", job?.receiver);
-                    if(account?._id === job?.provider){
-                        revieweeId = job?.receiver;
-                    } else if(account?._id === job?.receiver) {
-                        revieweeId = job?.provider;
-                    } else {
-                        console.error("Current user should not have access to this review!");
-                        revieweeId = "";
-                    }
+        const fetchJobAndReviewee = async () => {
+            if (!jobId || !token) return;
 
-                    const getReviewee =  await axios.get(`/api/account/${revieweeId}`, {
-                        headers: { Authorization: `Bearer ${token}` }
-                    });
-                    setReviewee(getReviewee.data);
-                } catch (error) {
-                    console.error('Error fetching Job:', error);
+            try {
+                // Fetch job data
+                const jobResponse = await axios.get(`/api/jobs/${jobId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const jobData = jobResponse.data;
+                setJob(jobData);
+
+                // Determine reviewee based on job data and current account
+                let revieweeId;
+                if (account?._id === jobData.provider) {
+                    revieweeId = jobData.receiver;
+                } else if (account?._id === jobData.receiver) {
+                    revieweeId = jobData.provider;
+                } else {
+                    throw new Error("Current user should not have access to this review!");
                 }
-            }; 
-            fetchJob();
-            console.log("Fetched job: ", job?._id);
-            console.log("Fetching review for job:", jobId);
-            const fetchReview = async () => {
-                try {
-                    const response = await axios.get(`/api/reviews/by-jobs/${jobId}`, {
-                        headers: { Authorization: `Bearer ${token}` }
-                    });
-                    if (response.data.success) {
-                        setReview(response.data.review);
-                        setRating(response.data.review.rating);
-                        setReviewText(response.data.review.content);
-                    } else {
-                        // Handle case where no review is returned
-                        console.log("No review found, possible first-time review setup.");
-                        try {
-                            const response = await axios.get(`/api/jobs/${jobId}`, {
-                                headers: { Authorization: `Bearer ${token}` }
-                            });
-                        setJob(response.data);
-                        const newReview = {
-                            rating: 0,
-                            content: "",
-                            createdOn: new Date(),
-                            recipient: response.data.provider, 
-                            reviewer: response.data.receiver,
-                            service: response.data.serviceType
-                            };
-                           
-                        } catch (error) {
-                            console.error('Error fetching review:', error);
-                        }
 
+                // Fetch reviewee data
+                const revieweeResponse = await axios.get(`/api/account/${revieweeId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setReviewee(revieweeResponse.data);
 
-
-                    }
-                } catch (error) {
-                    console.error('Error fetching review:', error);
+                // Fetch review data
+                const reviewResponse = await axios.get(`/api/reviews/by-jobs/${jobId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (reviewResponse.data.success) {
+                    setReview(reviewResponse.data.review);
+                    setRating(reviewResponse.data.review.rating);
+                    setReviewText(reviewResponse.data.review.content);
+                } else {
+                    console.log("No review found, possible first-time review setup.");
                 }
-            };
-            fetchReview();
-        } else {
-            console.log("ELSE CONDIITON MET!!!")
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
 
-        }
-    }, [jobId, review, token]); // Ensure dependencies are correctly listed for reactivity
+        fetchJobAndReviewee();
+    }, [jobId, token, account]); // Ensure dependencies are correctly listed for reactivity
 
 
     if (!jobId) {
