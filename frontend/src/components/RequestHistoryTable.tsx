@@ -21,6 +21,7 @@ import {ServiceOffering} from "../models/ServiceOffering";
 import axios from "axios";
 import {useEffect} from "react";
 import {useAuth} from "../contexts/AuthContext";
+import { formatDateTime } from '../utils/dateUtils';
 
 export default function RequestHistoryTable() {
   const [showMediaCard, setShowMediaCard] = React.useState(false);
@@ -70,7 +71,7 @@ export default function RequestHistoryTable() {
     setShowMediaCard(req !== null);
   };
 
-  const handleAccept =  async() => {
+ /* const handleAccept =  async() => {
 
     if (!selectedRequest) {
       console.error('No request selected');
@@ -128,9 +129,31 @@ export default function RequestHistoryTable() {
       console.error('Error posting job:', error);
     }
 
+    
+    // Prepare notification data
+    const notificationData = {
+      isViewed: false,
+      content: `Your service for ${selectedRequest.serviceType}`,
+      serviceRequest: selectedRequest._id,
+      recipient: selectedRequest.provider._id,
+      ...rest,
+    };
 
+    console.log("notification data at frontend:", notificationData);
 
-  };
+    // generate new notification
+    try {
+      const notification = await axios.post("api/notification/", notificationData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      console.log("Notification sent!", notification);
+
+      
+    } catch (notificationError) {
+      console.error('Error sending notification:', notificationError);
+    }
+
+  };*/
 
   const handleCancel =  async() => {
 
@@ -171,9 +194,33 @@ export default function RequestHistoryTable() {
       console.error('Error cancelling Request:', error);
     }
 
+// Prepare notification data
+
+if(selectedRequest.requestStatus == RequestStatus.accepted) {
+const notificationData = {
+  isViewed: false,
+  content: `Your scheduled job for ${selectedRequest.serviceType} on the ${formatDateTime(selectedRequest.appointmentStartTime)} has been cancelled`,
+  serviceRequest: selectedRequest._id,
+  recipient: selectedRequest.provider._id,
+  ...rest,
+};
+
+console.log("notification data at frontend:", notificationData);
+
+// generate new notification
+try {
+  const notification = await axios.post("api/notification/", notificationData, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  console.log("Notification sent!", notification);
+
+  
+} catch (notificationError) {
+  console.error('Error sending notification:', notificationError);
+}
 
 
-  };
+}};
 
   return (
     <Box sx={{ minWidth: 275, margin: 2 }}>
@@ -214,7 +261,6 @@ export default function RequestHistoryTable() {
           <div style={{ position: 'relative', flexShrink: 0, width: 400, marginLeft: 2 }}>
             <MediaCard request={selectedRequest} 
                         onClose={() => setShowMediaCard(false)} 
-                        onAccept={handleAccept}
                         onDecline={() => console.log('declined.') }
                         onProposeNewTime={() => console.log('New Time: ')}
                         onCancel={handleCancel} />

@@ -26,6 +26,7 @@ import axios from "axios";
 import { useNavigate } from 'react-router-dom';
 import { now } from 'moment';
 import OfferedServiceRow from './OfferedServiceRow';
+import { formatDateTime } from '../utils/dateUtils';
 
 
 export default function OfferedServicesTable() {
@@ -145,7 +146,7 @@ export default function OfferedServicesTable() {
     // Prepare notification data
     const notificationData = {
       isViewed: false,
-      content: `Your service for ${selectedJob.serviceType} has been marked as complete`,
+      content: `Your service for ${selectedJob.serviceType} on the ${formatDateTime(selectedJob.appointmentStartTime)} has been marked as complete`,
       job: selectedJob._id,
       recipient: selectedJob.receiver._id,
       ...rest,
@@ -208,7 +209,7 @@ export default function OfferedServicesTable() {
     // Prepare notification data
     const notificationData = {
       isViewed: false,
-      content: `The completion of your service for ${selectedJob.serviceType} has been revoked`,
+      content: `The completion of your service for ${selectedJob.serviceType} on the ${formatDateTime(selectedJob.appointmentStartTime)} has been revoked`,
       job: selectedJob._id,
       recipient: selectedJob.receiver._id,
       ...rest,
@@ -271,7 +272,7 @@ export default function OfferedServicesTable() {
     // Prepare notification data
     const notificationData = {
       isViewed: false,
-      content: `Your scheduled service for ${selectedJob.serviceType} has been cancelled`,
+      content: `Your scheduled service for ${selectedJob.serviceType} on the ${formatDateTime(selectedJob.appointmentStartTime)} has been cancelled`,
       job: selectedJob._id,
       recipient: selectedJob.receiver._id,
       ...rest,

@@ -17,13 +17,12 @@ import axios from 'axios';
 interface MediaCardProps {
   request: Request;
   onClose: () => void;
-  onAccept: (request: Request) => void;
   onDecline: (request: Request) => void;
   onProposeNewTime: (request: Request, newTime: Date) => void;
   onCancel: () => void;
 }
 
-const MediaCard: React.FC<MediaCardProps> = ({ request, onClose, onAccept,onDecline, onProposeNewTime, onCancel }) => {
+const MediaCard: React.FC<MediaCardProps> = ({ request, onClose,onDecline, onProposeNewTime, onCancel }) => {
   
   const { account, token, isProvider } = useAuth();
   const navigate = useNavigate();

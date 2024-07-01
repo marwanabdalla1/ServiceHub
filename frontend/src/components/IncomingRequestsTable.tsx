@@ -21,6 +21,7 @@ import {Account, bikeRepairService} from '../models/Account';
 import {useEffect} from "react";
 import {useAuth} from "../contexts/AuthContext";
 import axios from "axios";
+import { formatDateTime } from '../utils/dateUtils';
 
 
 export default function IncomingRequestTable() {
@@ -101,7 +102,7 @@ try {
     // Prepare notification data
     const notificationData = {
       isViewed: false,
-      content: `Your service request for ${selectedRequest.serviceType} has been accepted`,
+      content: `Your service request for ${selectedRequest.serviceType} on the ${formatDateTime(selectedRequest.appointmentStartTime)} has been accepted`,
       serviceRequest: selectedRequest._id,
       job: jobResponse.data._id,
       recipient: selectedRequest.requestedBy._id,
@@ -169,7 +170,7 @@ try {
         // Prepare notification data
     const notificationData = {
       isViewed: false,
-      content: `Your service request for ${selectedRequest.serviceType} has been declined `,
+      content: `Your service request for ${selectedRequest.serviceType} on the ${formatDateTime(selectedRequest.appointmentStartTime)}has been declined `,
       serviceRequest: selectedRequest._id,
       recipient: selectedRequest.requestedBy._id,
       ...rest,
@@ -234,7 +235,7 @@ try {
      // Prepare notification data
      const notificationData = {
       isViewed: false,
-      content: `Your service request for ${selectedRequest.serviceType} has been cancelled`,
+      content: `Your service request for ${selectedRequest.serviceType} on the ${formatDateTime(selectedRequest.appointmentStartTime)} has been cancelled`,
       serviceRequest: selectedRequest._id,
       recipient: selectedRequest.requestedBy._id,
       ...rest,

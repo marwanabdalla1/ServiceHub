@@ -21,12 +21,11 @@ interface MediaCardProps {
   provider: Account | null;
   receiver: Account | null;
   onClose: () => void;
-  onComplete: (job: Job) => void;
   onCancel: (job: Job) => void;
   onReview: (job: Job) => void;
 }
 
-const MediaCard: React.FC<MediaCardProps> = ({ receivedService, provider, receiver, onClose, onComplete, onCancel, onReview }) => {
+const MediaCard: React.FC<MediaCardProps> = ({ receivedService, provider, receiver, onClose, onCancel, onReview }) => {
   const {account, token, } = useAuth();
   
 /*

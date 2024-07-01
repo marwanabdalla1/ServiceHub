@@ -25,6 +25,7 @@ import {useEffect} from "react";
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
 import { now } from 'moment';
+import { formatDateTime } from '../utils/dateUtils';
 
 
 //Candidate for deletion
@@ -115,7 +116,7 @@ export default function ReceivedServiceTable() {
       });
   };
 
-  // handle completing the job
+  /*// handle completing the job
   const handleComplete =  async() => {
  
 
@@ -153,7 +154,7 @@ export default function ReceivedServiceTable() {
 
 
   };
-
+ */
   // handle cancel the job
   const handleCancel =  async() => {
  
@@ -189,7 +190,29 @@ export default function ReceivedServiceTable() {
       console.error('Error completing job:', error);
     }
 
+    const {status, _id, receiver, provider, ...rest} = selectedReceivedService;
+    // Prepare notification data
+    const notificationData = {
+      isViewed: false,
+      content: `Your scheduled job for ${selectedReceivedService.serviceType} on the ${formatDateTime(selectedReceivedService.appointmentStartTime)} has been cancelled`,
+      job: selectedReceivedService._id,
+      recipient: selectedReceivedService.provider._id,
+      ...rest,
+    };
 
+    console.log("notification data at frontend:", notificationData);
+
+    // generate new notification
+    try {
+      const notification = await axios.post("api/notification/", notificationData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      console.log("Notification sent!", notification);
+
+      
+    } catch (notificationError) {
+      console.error('Error sending notification:', notificationError);
+    }
 
   };
 
@@ -241,7 +264,6 @@ export default function ReceivedServiceTable() {
                       provider={provider}
                       receiver={receiver}
                        onClose={() => setShowMediaCard(false)}
-                       onComplete={handleComplete}
                        onCancel = {handleCancel}
                        onReview={() => navigate("/customer_review")}
             />
