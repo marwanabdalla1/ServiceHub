@@ -21,6 +21,11 @@ const transporter = nodemailer.createTransport({
     }
 });
 
+/**
+ * Send an OTP to the user's email
+ * @param req
+ * @param res
+ */
 export const sendResetPasswordEmail = (req: Request, res: Response): void => {
     const {otp, email} = req.body;
     // Store the OTP with the email
@@ -42,6 +47,11 @@ export const sendResetPasswordEmail = (req: Request, res: Response): void => {
     });
 };
 
+/**
+ * Update the new password and store it in the database
+ * @param req
+ * @param res
+ */
 export const setNewPassword: RequestHandler = async (req, res) => {
     const {email, password} = req.body;
 
