@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState } from 'react';
+import {useState} from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -9,10 +9,11 @@ import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { blue } from '@mui/material/colors';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import {createTheme, ThemeProvider} from '@mui/material/styles';
+import {blue} from '@mui/material/colors';
+import {useNavigate} from 'react-router-dom';
+import {useRecovery} from "../../../contexts/RecoveryContext";
+import {toast} from "react-toastify";
 
 const defaultTheme = createTheme({
     palette: {
@@ -25,12 +26,24 @@ const defaultTheme = createTheme({
 export default function ForgetPassword() {
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
+    const {resetPasswordEmail} = useRecovery();
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+
+        // Check if email is not empty
+        if (email.trim() === '') {
+            console.log('Email is empty');
+            toast.error('Email is required');
+            return;
+        }
+
         try {
-            // await axios.post('/api/reset-password', { email });
-            navigate('/forgetPassword/emailVerification', { state: { email } });
+            await resetPasswordEmail(email).then((res) => {
+                navigate('/forgetPassword/emailVerification', {state: {email}});
+            }).catch((err) => {
+                console.error(err);
+            });
         } catch (error) {
             console.error('There was an error sending the reset password email', error);
         }
@@ -43,9 +56,9 @@ export default function ForgetPassword() {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                minHeight: '60vh'
+                minHeight: '80vh'
             }}>
-                <CssBaseline />
+                <CssBaseline/>
                 <Box
                     sx={{
                         display: 'flex',
@@ -53,13 +66,13 @@ export default function ForgetPassword() {
                         alignItems: 'center',
                     }}
                 >
-                    <Avatar sx={{ bgcolor: 'primary.main' }}>
-                        <img src="/images/logo_short.png" alt="Logo" className="md:h-6" />
+                    <Avatar sx={{bgcolor: 'primary.main'}}>
+                        <img src="/images/logo_short.png" alt="Logo" className="md:h-6"/>
                     </Avatar>
-                    <Typography component="h1" variant="h5" sx={{ mt: 1, fontWeight: 'bold'}}>
+                    <Typography component="h1" variant="h5">
                         Reset Password
                     </Typography>
-                    <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+                    <Box component="form" onSubmit={handleSubmit} noValidate sx={{mt: 1}}>
                         <TextField
                             margin="normal"
                             required
@@ -76,7 +89,7 @@ export default function ForgetPassword() {
                             type="submit"
                             fullWidth
                             variant="contained"
-                            sx={{ mt: 3, mb: 2 }}
+                            sx={{mt: 3, mb: 2}}
                         >
                             Verify Email
                         </Button>

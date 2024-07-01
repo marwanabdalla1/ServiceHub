@@ -35,6 +35,7 @@ import ResetPasswordPage from "./Pages/AuthPages/ForgetPasswordPages/ResetPasswo
 import OTPPage from "./Pages/AuthPages/ForgetPasswordPages/OTPPage";
 import ForgetPasswordPage from "./Pages/AuthPages/ForgetPasswordPages/ForgetPasswordPage";
 import ResetPasswordSuccessPage from "./Pages/AuthPages/ForgetPasswordPages/ResetPasswordSuccessPage";
+import {RecoveryProvider} from './contexts/RecoveryContext';
 
 // import SelectAvailabilityBooking_temp from "./Pages/SelectAvailabilityBooking_temp";
 
@@ -49,9 +50,9 @@ function App() {
             <BookingProvider>
                 <RequestProvider>
                     <AccountProvider>
-
-                        <MainRoutes/>
-
+                        <RecoveryProvider>
+                            <MainRoutes/>
+                        </RecoveryProvider>
                     </AccountProvider>
                 </RequestProvider>
             </BookingProvider>

@@ -14,6 +14,7 @@ import {createTheme, ThemeProvider} from '@mui/material/styles';
 import {blue} from "@mui/material/colors";
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
+import {useRecovery} from "../../../contexts/RecoveryContext";
 
 function Copyright(props: PropsWithChildren<{}>) {
     return (
@@ -38,6 +39,7 @@ const defaultTheme = createTheme({
 
 export default function ResetPassword() {
     const navigate = useNavigate();
+    const {email} = useRecovery();
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -52,9 +54,22 @@ export default function ResetPassword() {
             return;
         }
 
+        if(password === null || confirmPassword === null||password===""||confirmPassword==="") {
+            console.error("Password is null");
+            return;
+        }
+
         try {
-            // await axios.post('/api/reset-password', { token, password });
-            navigate('/forgetPassword/success');
+            await axios.post('/api/forgetPassword/setNewPassword', {email: email, password: password}).then(
+                (res) => {
+                    navigate('/forgetPassword/success');
+                    console.log(res);
+                }
+            ).catch((err) => {
+                    console.error(err);
+                }
+            );
+
         } catch (error) {
             console.error("There was an error resetting the password", error);
         }
@@ -75,7 +90,7 @@ export default function ResetPassword() {
                     <Avatar sx={{bgcolor: 'primary.main'}}>
                         <img src="/images/logo_short.png" alt="Logo" className="md:h-6"/>
                     </Avatar>
-                    <Typography component="h1" variant="h5" sx={{ mt: 2, fontWeight: 'bold'}}>
+                    <Typography component="h1" variant="h5">
                         Reset Password
                     </Typography>
                     <Box component="form" onSubmit={handleSubmit} noValidate sx={{mt: 1}}>

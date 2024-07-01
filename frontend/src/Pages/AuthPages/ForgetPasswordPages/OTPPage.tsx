@@ -13,6 +13,8 @@ import {createTheme, ThemeProvider} from '@mui/material/styles';
 import {blue} from "@mui/material/colors";
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
+import {useRecovery} from "../../../contexts/RecoveryContext";
+import {toast} from "react-toastify";
 
 function Copyright(props: PropsWithChildren<{}>) {
     return (
@@ -38,6 +40,7 @@ const defaultTheme = createTheme({
 export default function EmailVerification() {
     const navigate = useNavigate();
     const refs = Array.from({length: 4}).map(() => createRef<HTMLInputElement>());
+    const {otp, email, resetPasswordEmail} = useRecovery();
 
     const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>, index: number) => {
         if (event.target.value.length === 1 && index < refs.length - 1) {
@@ -45,15 +48,27 @@ export default function EmailVerification() {
         }
     };
 
+    const handleResendOTP = async () => {
+        try {
+            await resetPasswordEmail(email);
+        } catch (error) {
+            console.error('There was an error resending the OTP', error);
+        }
+    };
+
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
-        const otp = Array.from({length: 4}, (_, i) => data.get(`digit-${i + 1}`)).join('');
+        const input_otp = Array.from({length: 4}, (_, i) => data.get(`digit-${i + 1}`)).join('');
 
         try {
-            // await axios.post('/api/verify-email', {otp});
-            // Optionally navigate to a success page
-            navigate('/forgetPassword/resetPassword');
+            if (input_otp === otp) {
+                navigate('/forgetPassword/resetPassword');
+            } else {
+                console.error("Invalid OTP");
+                toast("Invalid OTP");
+            }
+
         } catch (error) {
             console.error("There was an error verifying the OTP", error);
         }
@@ -66,7 +81,7 @@ export default function EmailVerification() {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                minHeight: '60vh' // Center the container vertically
+                minHeight: '100vh' // Center the container vertically
             }}>
                 <CssBaseline/>
                 <Box
@@ -79,11 +94,11 @@ export default function EmailVerification() {
                     <Avatar sx={{bgcolor: 'primary.main'}}>
                         <img src="/images/logo_short.png" alt="Logo" className="md:h-6"/>
                     </Avatar>
-                    <Typography component="h1" variant="h5" sx={{ mt: 1, fontWeight: 'bold'}}>
+                    <Typography component="h1" variant="h5">
                         Email Verification
                     </Typography>
                     <Typography component="p" variant="body2" align="center">
-                        We have sent a code to your email email123@gmail.com
+                        We have sent a code to your email {email}
                     </Typography>
                     <Box component="form" onSubmit={handleSubmit} noValidate sx={{mt: 1}}>
                         <Box sx={{display: 'flex', justifyContent: 'center'}}>
@@ -112,7 +127,7 @@ export default function EmailVerification() {
                     </Box>
                     <Grid container justifyContent="center">
                         <Grid item>
-                            <Link href="#" variant="body2">
+                            <Link href="#" variant="body2" onClick={handleResendOTP}>
                                 Didn't receive code? Resend OTP
                             </Link>
                         </Grid>
