@@ -47,9 +47,9 @@ const MediaCard: React.FC<MediaCardProps> = ({ offeredService, provider, receive
 
   const renderButton = () => {
     //Check whether user in sign-in context is a provider
-    console.log("Account ID: " + account?._id);
-    console.log("Receiver ID: " + offeredService.receiver);
-    console.log(account?._id === offeredService.receiver._id);
+    //console.log("Account ID: " + account?._id);
+    //console.log("Receiver ID: " + offeredService.receiver);
+    //console.log(account?._id === offeredService.receiver._id);
     if(offeredService.status === JobStatus.open && account?._id === provider?._id ){
         return (
           <>

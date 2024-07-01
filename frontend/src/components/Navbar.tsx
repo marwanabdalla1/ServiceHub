@@ -57,7 +57,7 @@ const Navbar: React.FC<NavbarProps> = ({toggleDrawer, onChange, onSearch, search
     const [profileAnchorEl, setProfileAnchorEl] = useState<null | HTMLElement>(null);
     const isPremium = account?.isPremium || false;
     const isProvider = account?.isProvider || false;
-    console.log("token: " + token + '\n' + "isProvider: " + isProvider + '\n' + "isPremium: " + isPremium );
+    //console.log("token: " + token + '\n' + "isProvider: " + isProvider + '\n' + "isPremium: " + isPremium );
 
     const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);

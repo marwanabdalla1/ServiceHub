@@ -47,7 +47,7 @@ export const AccountProvider = ({children}: Props) => {
                 }
             })
                 .then(response => {
-                    console.log("account:" , response.data)
+                    //console.log("account:" , response.data)
                     setAccount(response.data);
                     localStorage.setItem('account', response?.data);
                 })

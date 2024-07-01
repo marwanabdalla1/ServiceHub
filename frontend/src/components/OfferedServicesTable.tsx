@@ -47,7 +47,7 @@ export default function OfferedServicesTable() {
         headers: {Authorization: `Bearer ${token}` }
       })
           .then(response => {
-            console.log("getting requests ...", response.data)
+            //console.log("getting requests ...", response.data)
             setJobs(response.data);
             // setLoading(false);
           })
@@ -336,7 +336,7 @@ export default function OfferedServicesTable() {
                        onClose={() => setShowMediaCard(false)}
                        onComplete={handleComplete}
                        onCancel = {handleCancel}
-                       onReview={()=>navigate(`/customer-review/${selectedJob._id}`)}
+                       onReview={()=>navigate(`/customer_review/${selectedJob._id}`)}
                       onRevoke={handleRevoke}
             />
           </div>

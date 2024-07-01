@@ -9,10 +9,12 @@ import {useAuth} from "../contexts/AuthContext";
 import {useLocation, useNavigate} from "react-router-dom";
 import axios from "axios";
 import {Review} from "../models/Review";
+import { Account } from '../models/Account';
 
 const ReviewPage: React.FC = () => {
     const [review, setReview] = React.useState<Review|null>(null); // Holds the existing review data
     const [job, setJob] = React.useState<Job|null>(null);
+    const [reviewee, setReviewee] = React.useState<Account|null>(null);
     const [newReview, setNewReview] = React.useState<Review|null>(null);
     const [rating, setRating] = React.useState<number | null>(0);
     const [reviewText, setReviewText] = React.useState(''); // State to hold the review text
@@ -21,24 +23,43 @@ const ReviewPage: React.FC = () => {
 
     const {token, account} = useAuth();
 
-    /*const location = useLocation();
-    const job = location.state?.job;*/
-    const {jobId} = useParams();
+    const { jobId } = useParams();
+
+    
 
     useEffect(() => {
-        console.log("customer review page")
         // This useEffect will always run, but the internal logic runs only under certain conditions.
         if (jobId && !review) {  // Condition to perform fetching
             console.log("Fetching job: ", jobId);
             const fetchJob = async() => {
                 try {
-                    const response = await axios.get(`/api/reviews/by-jobs/${jobId}`, {
+                    const response = await axios.get(`/api/jobs/${jobId}`, {
                         headers: { Authorization: `Bearer ${token}` }
                     });
+                    console.log(response.data);
+                    setJob(response.data);
+                    let revieweeId;
+                    console.log("Provider: ", job?.provider);
+                    console.log("Receiver: ", job?.receiver);
+                    if(account?._id === job?.provider){
+                        revieweeId = job?.receiver;
+                    } else if(account?._id === job?.receiver) {
+                        revieweeId = job?.provider;
+                    } else {
+                        console.error("Current user should not have access to this review!");
+                        revieweeId = "";
+                    }
+
+                    const getReviewee =  await axios.get(`/api/account/${revieweeId}`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    setReviewee(getReviewee.data);
                 } catch (error) {
                     console.error('Error fetching Job:', error);
                 }
-            };
+            }; 
+            fetchJob();
+            console.log("Fetched job: ", job?._id);
             console.log("Fetching review for job:", jobId);
             const fetchReview = async () => {
                 try {
@@ -56,7 +77,7 @@ const ReviewPage: React.FC = () => {
                             const response = await axios.get(`/api/jobs/${jobId}`, {
                                 headers: { Authorization: `Bearer ${token}` }
                             });
-
+                        setJob(response.data);
                         const newReview = {
                             rating: 0,
                             content: "",
@@ -78,6 +99,9 @@ const ReviewPage: React.FC = () => {
                 }
             };
             fetchReview();
+        } else {
+            console.log("ELSE CONDIITON MET!!!")
+
         }
     }, [jobId, review, token]); // Ensure dependencies are correctly listed for reactivity
 
@@ -85,30 +109,6 @@ const ReviewPage: React.FC = () => {
     if (!jobId) {
         return <Typography variant="h6">No job selected for review.</Typography>;
     }
-
-    // useEffect(() => {
-    //     if (job && !review) {
-    //         console.log("job and no review!")
-    //
-    //         const fetchReview = async () => {
-    //             try {
-    //                 const response = await axios.get(`/api/reviews/by-jobs/${job._id}`, {
-    //                     headers: { Authorization: `Bearer ${token}` }
-    //                 });
-    //                 console.log("response for review: ", response)
-    //                 if (response.data.success) {
-    //                     setReview(response.data.review);
-    //                     setRating(response.data.review.ratingForProvider);
-    //                     setReviewText(response.data.review.content);
-    //                 }
-    //             } catch (error) {
-    //                 console.error('Error fetching review:', error);
-    //             }
-    //         };
-    //         fetchReview();
-    //     } else{}
-    // }, [token]);
-
 
     const handleRatingChange = (event: React.SyntheticEvent, newValue: number | null) => {
         setRating(newValue);
@@ -136,7 +136,7 @@ const ReviewPage: React.FC = () => {
             content: reviewText,
             serviceOffering: job?.serviceOffering,
             reviewer: account?._id,
-            recipient: job.provider._id, //todo: also make it possible for provider to review
+            recipient: job?.provider, //todo: also make it possible for provider to review
         };
 
         console.log(reviewData)
@@ -147,7 +147,7 @@ const ReviewPage: React.FC = () => {
                 headers: {Authorization: `Bearer ${token}`}
             });
             alert(`Review ${review ? 'updated' : 'submitted'} successfully!`);
-            navigate('/jobs/jobHistory');
+            navigate('/jobs/offeredServices');
         } catch (error) {
             console.error('Failed to submit review:', error);
             alert('Failed to submit review.');
@@ -165,7 +165,7 @@ const ReviewPage: React.FC = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
             alert('Review deleted successfully!');
-            navigate('/jobs/jobhistory');  // Redirect or update local state
+            navigate('/jobs/offeredServices');  // Redirect or update local state
         } catch (error) {
             console.error('Failed to delete review:', error);
             alert('Failed to delete review.');
@@ -173,84 +173,7 @@ const ReviewPage: React.FC = () => {
     };
 
     return (
-        // <Container>
-        //     <Box sx={{display: 'flex', justifyContent: 'space-between', mt: 4}}>
-        //         {/* Left Section: Appointments */}
-        //         {/*<Box sx={{width: '30%', mr: 30}}>*/}
-        //         {/*    <Typography variant="h5" gutterBottom>*/}
-        //         {/*        Upcoming appointments*/}
-        //         {/*    </Typography>*/}
-        //         {/*    {appointments.map((appointment, index) => (*/}
-        //         {/*        <AppointmentCard key={index} {...appointment} />*/}
-        //         {/*    ))}*/}
-        //         {/*    <Typography variant="h5" gutterBottom>*/}
-        //         {/*        Past appointments*/}
-        //         {/*    </Typography>*/}
-        //         {/*    {appointments.map((appointment, index) => (*/}
-        //         {/*        <AppointmentCard key={index} {...appointment} />*/}
-        //         {/*    ))}*/}
-        //         {/*</Box>*/}
-        //
-        //         {/* Right Section: Review Form */}
-        //         <Box sx={{width: '65%'}}>
-        //             <Typography variant="h5" gutterBottom>
-        //                 Happy with the service? Then give <span
-        //                 style={{fontWeight: 'bold'}}>{job?.provider.firstName}</span> a rating!
-        //             </Typography>
-        //             <Card>
-        //                 <CardContent sx={{display: 'flex', alignItems: 'center', mb: 2}}>
-        //                     <Avatar
-        //                         sx={{
-        //                             width: 56,
-        //                             height: 56,
-        //                             mr: 2
-        //                         }}
-        //
-        //                         src={job?.provider.profileImageUrl}
-        //                     />
-        //                     <Box>
-        //                         <Typography
-        //                             variant="h6">{job?.provider.firstName} {job?.provider.lastName}</Typography>
-        //                         <Typography variant="body2" color="text.secondary">
-        //                             {job?.serviceType}, {new Date(job?.appointmentStartTime).toLocaleString()}
-        //                         </Typography>
-        //                         <Typography variant="body2" color="text.secondary">
-        //                             Job ID: {job?._id}
-        //                         </Typography>
-        //                     </Box>
-        //                 </CardContent>
-        //                 <CardContent>
-        //                     <Typography variant="h6" gutterBottom>
-        //                         Rating
-        //                     </Typography>
-        //                     <Rating
-        //                         name="service-rating"
-        //                         value={rating}
-        //                         onChange={handleRatingChange}
-        //                         size="large"
-        //                     />
-        //                     <Typography variant="h6" gutterBottom sx={{mt: 2}}>
-        //                         Review (optional)
-        //                     </Typography>
-        //                     <TextField
-        //                         fullWidth
-        //                         multiline
-        //                         rows={4}
-        //                         variant="outlined"
-        //                     />
-        //                 </CardContent>
-        //                 <CardContent>
-        //                     <Button variant="contained" color="primary" onClick={handleSubmit}>
-        //                         Submit
-        //                     </Button>
-        //                 </CardContent>
-        //             </Card>
-        //         </Box>
-        //     </Box>
-        // </Container>
-
-
-
+        
         <Container>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
                 <Box sx={{ width: '65%' }}>
@@ -267,19 +190,16 @@ const ReviewPage: React.FC = () => {
                         />
                         <Box>
                             <Typography
-                                variant="h6">{job?.provider.firstName} {job?.provider.lastName}</Typography>
+                                variant="h6">{reviewee?.firstName} {reviewee?.lastName}</Typography>
                             <Typography variant="body2" color="text.secondary">
-                                {job?.serviceType}, {new Date(job?.appointmentStartTime).toLocaleString()}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                                Job ID: {job?._id}
+                                {job?.serviceType}, {new Date(job ? job.appointmentStartTime: new Date()).toLocaleString()}
                             </Typography>
                         </Box>
                     </CardContent>
                     {review && !isEditing ? (
                         <>
                             <Typography variant="h5" gutterBottom>
-                                Review for {job?.provider.firstName}
+                                Review for {reviewee?.firstName}
                             </Typography>
                             <Card>
                                 <CardContent>
@@ -299,7 +219,7 @@ const ReviewPage: React.FC = () => {
                     ) : (
                         <>
                             <Typography variant="h5" gutterBottom>
-                                {review ? 'Edit your review' : 'Write a review'} for {job?.provider.firstName}
+                                {review ? 'Edit your review' : 'Write a review'} for {reviewee?.firstName}
                             </Typography>
                             <Card>
 
@@ -327,57 +247,7 @@ const ReviewPage: React.FC = () => {
                             </Card>
                         </>
                     )}
-                    {!review && !isEditing ? (
-                        <>
-                            <Typography variant="h5" gutterBottom>
-                                Review for {job?.provider.firstName}
-                            </Typography>
-                            <Card>
-                                <CardContent>
-                                    <Typography variant="body1">{reviewText}</Typography>
-                                    <Rating name="read-only" value={rating} readOnly />
-                                </CardContent>
-                                <CardContent>
-                                    <Button onClick={handleEdit} variant="outlined" color="primary">
-                                        Edit
-                                    </Button>
-                                    <Button onClick={handleDelete} variant="outlined" color="secondary">
-                                        Delete
-                                    </Button>
-                                </CardContent>
-                            </Card>
-                        </>
-                    ) : (
-                        <>
-                            <Typography variant="h5" gutterBottom>
-                                {review ? 'Edit your review' : 'Write a review'} for {job?.provider.firstName}
-                            </Typography>
-                            <Card>
-
-                                <CardContent>
-                                    <Rating
-                                        name="service-rating"
-                                        value={rating}
-                                        onChange={(event, newValue) => setRating(newValue)}
-                                        size="large"
-                                    />
-                                    <TextField
-                                        fullWidth
-                                        multiline
-                                        rows={4}
-                                        variant="outlined"
-                                        value={reviewText}
-                                        onChange={(e) => setReviewText(e.target.value)}
-                                    />
-                                </CardContent>
-                                <CardContent>
-                                    <Button onClick={handleSubmit} variant="contained" color="primary">
-                                        {review ? 'Update Review' : 'Submit Review'}
-                                    </Button>
-                                </CardContent>
-                            </Card>
-                        </>
-                    )}
+                    
                     {/*todo: replace with actual email*/}
                     <Typography variant="body2" sx={{ mt: 2, textAlign: 'center' }}>
                         Something wrong? <MuiLink href="mailto:support@example.com" underline="hover">

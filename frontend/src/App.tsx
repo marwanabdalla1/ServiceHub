@@ -67,7 +67,7 @@ function MainRoutes() {
             <Routes>
                 <Route path="/" element={<HomePage/>}/>
                 <Route path="/setprofile" element={<ProfileSettingPage/>}/>
-                <Route path="/customer_review" element={<ReviewPage/>}/>
+                <Route path="/customer_review/:jobId" element={<ReviewPage/>}/>
                 <Route path="/login" element={<SignInPage/>}/>
                 <Route path="/signup" element={<SignUpPage/>}/>
                 <Route path="/filter" element={<FilterPage/>}/>

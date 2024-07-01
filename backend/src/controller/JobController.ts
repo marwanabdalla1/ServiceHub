@@ -183,3 +183,21 @@ export const updateJob: RequestHandler = async (req: Request, res: Response) => 
         res.status(400).send(error);
     }
 }
+
+export const getJobById: RequestHandler = async (req, res) => {
+    const { jobId } = req.params;  // Extract the Job ID from URL parameters
+
+    try {
+        // Fetch the job where the '_id' field matches 'jobId'
+        const job = await Job.findById(jobId).exec();
+
+        if (!job) {
+            return res.status(404).json({ message: "No job found for this ID." });
+        }
+
+        res.status(200).json(job);
+    } catch (error: any) {
+        console.error("Failed to retrieve job:", error);
+        res.status(500).json({ message: "Internal server error", error: error.message });
+    }
+}

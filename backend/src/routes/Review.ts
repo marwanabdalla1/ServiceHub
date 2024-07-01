@@ -1,6 +1,6 @@
 import express from 'express';
-import {deleteReview, findExistingReview, submitReview, updateReview} from "../controller/ReviewController";
-import {authenticate} from "../middleware/authenticate";
+import { deleteReview, findExistingReview, submitReview, updateReview } from "../controller/ReviewController";
+import { authenticate } from "../middleware/authenticate";
 
 const router = express.Router();
 

@@ -133,7 +133,7 @@ export const updateReview: RequestHandler = async (req, res) => {
             content: content,
         }
         const updatedReview = await Review.findByIdAndUpdate(reviewId, { $set: updates }, { new: true });
-        console.log("updated Revuew", updatedReview)
+        console.log("updated Review", updatedReview)
         if (!updatedReview) {
             return res.status(404).json({ message: "Review not found" });
         }

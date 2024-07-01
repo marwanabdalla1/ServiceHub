@@ -127,4 +127,21 @@ export const getRequesterById: RequestHandler = async (req, res) => {
     }
 };
 
+/**
+ * get user by id
+ * @param req
+ * @param res
+ */
+export const getAccountById: RequestHandler = async (req, res) => {
+    try {
+        console.log(req.params)
+        const account = await Account.findById(req.params.id);
+        if (!account) {
+            return res.status(404).json({ message: 'Account not found! ' + req.params.id });
+        }
+        res.json(account);
+    } catch (err: any) {
+        res.status(500).json({ message: err.message });
+    }
+};
 
