@@ -70,9 +70,7 @@ const MediaCard: React.FC<MediaCardProps> = ({ offeredService, provider, receive
         }
     else {
         console.log(offeredService.status);
-        return (
-          <BlackButton text="Close" onClick={onClose} />
-        );
+        return;
 
     }
   };

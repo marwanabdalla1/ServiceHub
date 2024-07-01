@@ -244,7 +244,7 @@ export default function OfferedServicesTable() {
 
       // update the request
         const updateOfferedServiceData = {
-         JobStatus: JobStatus.cancelled,
+         status: JobStatus.cancelled,
         };
         console.log("selected job id:" , selectedJob?._id, updateOfferedServiceData)
         const updateResponse = await axios.put(`/api/jobs/${selectedJob?._id}`, updateOfferedServiceData, {
@@ -336,7 +336,7 @@ export default function OfferedServicesTable() {
                        onClose={() => setShowMediaCard(false)}
                        onComplete={handleComplete}
                        onCancel = {handleCancel}
-                       onReview={() => navigate("/customer_review")}
+                       onReview={()=>navigate("/customer_review/")}
                       onRevoke={handleRevoke}
             />
           </div>
