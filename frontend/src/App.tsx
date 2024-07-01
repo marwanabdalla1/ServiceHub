@@ -26,6 +26,7 @@ import axios from "axios";
 import ProposeNewtimePage from './Pages/ProposeNewTimePage';
 import {AccountProvider} from "./contexts/AuthContext";
 import BookingPage from "./Pages/bookingSteps/BookingPage";
+import ConfirmationPage from "./Pages/bookingSteps/ConfirmationPage";
 import FAQPage from "./Pages/FAQPage";
 
 import CustomerReviewPage from "./Pages/CustomerReviewPage";
@@ -84,7 +85,8 @@ function MainRoutes() {
 
                 {/*booking*/}
                 <Route path="/offerings/:offeringId" element={<ProviderProfilePage />} />
-                <Route path="/offerings/:offeringId/booking/:step" element={<BookingPage />} />
+                <Route path="/offerings/:could /booking/:step" element={<BookingPage />} />
+                <Route path="/offerings/:requestId/confirm" element={<ConfirmationPage />} />
 
                 {/*old ones*/}
                 {/*<Route path="/create-account-or-sign-in" element={<CreateAccountOrSignIn/>}/>*/}

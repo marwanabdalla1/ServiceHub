@@ -20,6 +20,7 @@ function ReviewAndConfirm({ onComplete, onBack , bookingDetails}: ReviewAndConfi
     const navigate = useNavigate();
     const [comment, setComment] = useState('');
     const { token } = useAuth();
+    const [requestId, setRequestId] = useState('');
 
 
     // Handle changes in the TextField
@@ -95,6 +96,7 @@ function ReviewAndConfirm({ onComplete, onBack , bookingDetails}: ReviewAndConfi
                 }
             });
             const requestId = response.data._id;
+            setRequestId(requestId);
             console.log('Booking confirmed:', response.data);
 
 
@@ -156,7 +158,7 @@ function ReviewAndConfirm({ onComplete, onBack , bookingDetails}: ReviewAndConfi
         // todo: book the timeslot here
 
         // Handle booking confirmation logic
-        navigate('/confirmation'); // Navigate to a confirmation page or show a confirmation message
+        navigate(`/offerings/${requestId}/confirm`); // Navigate to a confirmation page or show a confirmation message
     };
 
     return (
