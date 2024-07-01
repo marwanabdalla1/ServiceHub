@@ -11,6 +11,7 @@ import OfferingRouter from "./routes/Offering";
 import RequestRouter from "./routes/Request";
 import JobRouter from "./routes/Job";
 import ReviewRouter from "./routes/Review";
+import NotificationRouter from "./routes/Notifications";
 
 
 // Import the models to ensure they are registered
@@ -43,6 +44,7 @@ app.use("/api/services", ServiceRouter);
 app.use("/api/requests", RequestRouter);
 app.use("/api/jobs", JobRouter);
 app.use("/api/reviews", ReviewRouter);
+app.use("/api/notification", NotificationRouter);
 
 
 app.get("/", async (req, res, next) => {

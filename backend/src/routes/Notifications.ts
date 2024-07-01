@@ -3,8 +3,8 @@ import { createNotification } from "../controller/NotificationController";
 import { authenticate } from "../middleware/authenticate";
 
 
-const NotificationsRouter = express.Router();
+const NotificationRouter = express.Router();
 
-NotificationsRouter.post('/', authenticate, createNotification);
+NotificationRouter.post('/', authenticate, createNotification);
 
-export default NotificationsRouter;
+export default NotificationRouter;

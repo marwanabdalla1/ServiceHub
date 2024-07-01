@@ -54,17 +54,17 @@ export default function IncomingRequestTable() {
     
     
         // get data from the request (selectedRequest)
-const { requestStatus, job, _id, requestedBy, provider, ...rest } = selectedRequest;
+  const { requestStatus, job, _id, requestedBy, provider, ...rest } = selectedRequest;
 
-const jobData = {
-  status: JobStatus.open,
-  request: selectedRequest._id,
-  receiver: selectedRequest.requestedBy._id,
-  provider: selectedRequest.provider._id,
-  ...rest,
-};
+  const jobData = {
+    status: JobStatus.open,
+    request: selectedRequest._id,
+    receiver: selectedRequest.requestedBy._id,
+    provider: selectedRequest.provider._id,
+    ...rest,
+  };
 
-console.log("job data at frontend:", jobData);
+  console.log("job data at frontend:", jobData);
 
 // post new job
 try {
@@ -101,10 +101,10 @@ try {
     // Prepare notification data
     const notificationData = {
       isViewed: false,
-      content: "Your service request has been accepted",
+      content: `Your service request for ${selectedRequest.serviceType} has been accepted`,
       serviceRequest: selectedRequest._id,
       job: jobResponse.data._id,
-      recipient: selectedRequest.requestedBy,
+      recipient: selectedRequest.requestedBy._id,
       ...rest,
     };
 
@@ -166,6 +166,28 @@ try {
           console.error('Error declining Request:', error);
         }
     
+        // Prepare notification data
+    const notificationData = {
+      isViewed: false,
+      content: `Your service request for ${selectedRequest.serviceType} has been declined `,
+      serviceRequest: selectedRequest._id,
+      recipient: selectedRequest.requestedBy._id,
+      ...rest,
+    };
+
+    console.log("notification data at frontend:", notificationData);
+
+    // generate new notification
+    try {
+      const notification = await axios.post("api/notification/", notificationData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      console.log("Notification sent!", notification);
+
+      
+    } catch (notificationError) {
+      console.error('Error sending notification:', notificationError);
+    }
     
     
       };
@@ -179,7 +201,7 @@ try {
     
     
         // get data from the request (selectedRequest)
-        //const {requestStatus, job, _id, requestedBy, provider, ...rest} = selectedRequest;
+        const {requestStatus, job, _id, requestedBy, provider, ...rest} = selectedRequest;
     
         try {
     
@@ -209,6 +231,28 @@ try {
           console.error('Error cancelling Request:', error);
         }
     
+     // Prepare notification data
+     const notificationData = {
+      isViewed: false,
+      content: `Your service request for ${selectedRequest.serviceType} has been cancelled`,
+      serviceRequest: selectedRequest._id,
+      recipient: selectedRequest.requestedBy._id,
+      ...rest,
+    };
+
+    console.log("notification data at frontend:", notificationData);
+
+    // generate new notification
+    try {
+      const notification = await axios.post("api/notification/", notificationData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      console.log("Notification sent!", notification);
+
+      
+    } catch (notificationError) {
+      console.error('Error sending notification:', notificationError);
+    }
     
     
       };
