@@ -1,8 +1,8 @@
 import React, {useEffect} from 'react';
 import {BrowserRouter, Routes, Route, useLocation} from "react-router-dom";
 import FilterPage from './Pages/FilterPage';
-import SignInPage from './Pages/LoginPage';
-import SignUpPage from './Pages/SignUpPage';
+import SignInPage from './Pages/AuthPages/LoginPage';
+import SignUpPage from './Pages/AuthPages/SignUpPage';
 import NavigationBar from './components/Navbar';
 import JobHistoryPage from './Pages/JobHistoryPage';
 import RequestHistoryPage from './Pages/RequestHistoryPage';
@@ -31,6 +31,12 @@ import FAQPage from "./Pages/FAQPage";
 
 import CustomerReviewPage from "./Pages/CustomerReviewPage";
 import BecomeProPage from './Pages/BecomePro';
+import ResetPasswordPage from "./Pages/AuthPages/ForgetPasswordPages/ResetPasswordPage";
+import OTPPage from "./Pages/AuthPages/ForgetPasswordPages/OTPPage";
+import ForgetPasswordPage from "./Pages/AuthPages/ForgetPasswordPages/ForgetPasswordPage";
+import ResetPasswordSuccessPage from "./Pages/AuthPages/ForgetPasswordPages/ResetPasswordSuccessPage";
+import {RecoveryProvider} from './contexts/RecoveryContext';
+
 // import SelectAvailabilityBooking_temp from "./Pages/SelectAvailabilityBooking_temp";
 
 function App() {
@@ -44,9 +50,9 @@ function App() {
             <BookingProvider>
                 <RequestProvider>
                     <AccountProvider>
-
-                        <MainRoutes/>
-
+                        <RecoveryProvider>
+                            <MainRoutes/>
+                        </RecoveryProvider>
                     </AccountProvider>
                 </RequestProvider>
             </BookingProvider>
@@ -56,7 +62,13 @@ function App() {
 
 function MainRoutes() {
     const location = useLocation();
-    const showNavBar = location.pathname !== "/login" && location.pathname !== "/signup" && location.pathname !== "/filter";
+    const showNavBar = location.pathname !== "/login"
+        && location.pathname !== "/signup"
+        && location.pathname !== "/filter"
+        && location.pathname !== "/forgetPassword/emailVerification"
+        && location.pathname !== "/forgetPassword/resetPassword"
+        && location.pathname !== "/forgetPassword"
+        && location.pathname !== "/forgetPassword/success";
 
     return (
         <div className="h-screen flex flex-col">
@@ -70,6 +82,10 @@ function MainRoutes() {
                 <Route path="/customer_review" element={<ReviewPage/>}/>
                 <Route path="/login" element={<SignInPage/>}/>
                 <Route path="/signup" element={<SignUpPage/>}/>
+                <Route path="/forgetPassword" element={<ForgetPasswordPage/>}/>
+                <Route path="/forgetPassword/emailVerification" element={<OTPPage/>}/>
+                <Route path="/forgetPassword/resetPassword" element={<ResetPasswordPage/>}/>
+                <Route path="/forgetPassword/success" element={<ResetPasswordSuccessPage/>}/>
                 <Route path="/filter" element={<FilterPage/>}/>
                 <Route path="/jobs/jobHistory" element={<JobHistoryPage/>}/>
                 <Route path="/jobs/requestHistory" element={<RequestHistoryPage/>}/>

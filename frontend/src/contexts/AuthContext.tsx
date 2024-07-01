@@ -28,7 +28,6 @@ export const AccountProvider = ({children}: Props) => {
     // const [nextPath, setNextPath] = useState('/');  // Default to home
 
 
-
     useEffect(() => {
         // const account = localStorage.getItem('account');
         const token = localStorage.getItem('token');
@@ -47,7 +46,7 @@ export const AccountProvider = ({children}: Props) => {
                 }
             })
                 .then(response => {
-                    console.log("account:" , response.data)
+                    console.log("account:", response.data)
                     setAccount(response.data);
                     localStorage.setItem('account', response?.data);
                 })
