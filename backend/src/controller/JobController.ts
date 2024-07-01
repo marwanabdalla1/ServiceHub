@@ -103,8 +103,25 @@ export const getJobsByProvider: RequestHandler = async (req, res) => {
     const { providerId } = req.params;  // Extract the provider ID from URL parameters
 
     try {
+
+        const { providerId } = req.params; // Extract the provider ID from the URL parameter
+        const userId = (req as any).user.userId;
+
+        //make sure only the provider him/herself can get this
+        // todo: uncomment this later
+        // if (userId !== providerId) {
+        //     console.log ("userId: ", userId, "\n providerId: ", providerId)
+        //     return res.status(403).json({ message: "Unauthorized access." });
+        // }
+
+
         // Fetch all jobs where the 'provider' field matches 'providerId'
-        const jobs = await Job.find({ provider: providerId }).exec();
+        const jobs = await Job.find({ provider: providerId })
+            .populate([
+                { path: 'receiver', select: 'firstName lastName' }, // todo: also include profile pic
+                { path: 'provider', select: 'firstName lastName' },
+            ])
+            .exec();
 
         if (!jobs.length) {
             return res.status(404).json({ message: "No jobs found for this provider." });

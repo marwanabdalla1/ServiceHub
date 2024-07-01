@@ -74,8 +74,8 @@ export default function OfferedServicesTable() {
     }
   }, [selectedJob, token]);
 
-  const fetchProvider = (providerId: Account) => {
-    axios.get<Account>(`/api/account/providers/${providerId}`, {
+  const fetchProvider = (provider: Account) => {
+    axios.get<Account>(`/api/account/providers/${provider._id}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(response => {
@@ -87,8 +87,8 @@ export default function OfferedServicesTable() {
       });
   };
 
-  const fetchReceiver = (requetserId: Account) => {
-    axios.get<Account>(`/api/account/requester/${requetserId}`, {
+  const fetchReceiver = (requester: Account) => {
+    axios.get<Account>(`/api/account/requester/${requester._id}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(response => {
@@ -336,7 +336,7 @@ export default function OfferedServicesTable() {
                        onClose={() => setShowMediaCard(false)}
                        onComplete={handleComplete}
                        onCancel = {handleCancel}
-                       onReview={()=>navigate("/customer_review/")}
+                       onReview={()=>navigate(`/customer-review/${selectedJob._id}`)}
                       onRevoke={handleRevoke}
             />
           </div>

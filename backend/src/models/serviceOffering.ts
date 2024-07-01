@@ -1,17 +1,11 @@
 import mongoose, { Document, Schema, Types } from 'mongoose';
 import { ServiceType } from './enums';
 
-interface ICertificate {
-    name: string;
-    data: Buffer;
-    contentType: string;
-}
-
 export interface IServiceOffering extends Document {
     serviceType: ServiceType;
     lastUpdatedOn: Date;
     createdOn: Date;
-    certificate: ICertificate;
+    certificateId: string;
     hourlyRate: number;
     description: string;
     isCertified: boolean;
@@ -23,13 +17,14 @@ export interface IServiceOffering extends Document {
     reviews: Types.ObjectId[]; // Reference to Review documents
     rating: number;
     reviewCount: number;
+    totalRating: number; //sum of all ratings
 }
 
 const ServiceOfferingSchema: Schema = new Schema({
     serviceType: { type: String, enum: Object.values(ServiceType), required: true },
     lastUpdatedOn: { type: Date, required: true },
     // createdOn: { type: Date, required: true },
-    certificate: { name: String, data: Buffer, contentType: String},
+    certificateId: { type: String, required: false},
     hourlyRate: { type: Number, required: true },
     description: { type: String, required: false },
     isCertified: { type: Boolean, required: false },
@@ -40,6 +35,7 @@ const ServiceOfferingSchema: Schema = new Schema({
     acceptedPaymentMethods: { type: [String], required: false }, // New field
     reviews: [{ type: Schema.Types.ObjectId, ref: 'Review', required: true }],
     rating: { type: Number, required: true },
+    totalRating: { type: Number, required: true },
     reviewCount: { type: Number, required: true }
 }, { timestamps: true });
 

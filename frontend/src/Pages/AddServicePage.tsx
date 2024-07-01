@@ -1,8 +1,8 @@
-import React, { useState, ChangeEvent, useEffect } from 'react';
-import { Autocomplete, TextField, InputAdornment, Box, Grid } from '@mui/material';
+import React, {useState, ChangeEvent, useEffect} from 'react';
+import {Autocomplete, TextField, InputAdornment, Box, Grid} from '@mui/material';
 import LightBlueButton from '../components/inputs/BlueButton';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import {useNavigate, useLocation} from 'react-router-dom';
+import {useAuth} from '../contexts/AuthContext';
 import axios from 'axios';
 
 interface FormData {
@@ -10,7 +10,7 @@ interface FormData {
     hourlyRate: string;
     selectedPaymentMethods: Array<{ title: string }>;
     description: string;
-    certificate: File | null;
+    certificateId: string | null;
     defaultSlotTime: string;
     travelTime: string;
 }
@@ -18,35 +18,32 @@ interface FormData {
 function AddServicePage() {
     const navigate = useNavigate();
     const location = useLocation();
-    const { token } = useAuth();
-
+    const {token} = useAuth();
     const serviceToEdit = location.state?.service || null;
-
+    const [certificate, setCertificate] = useState<File | null>(null);
+    const [isCertificateUploaded, setIsCertificateUploaded] = useState<boolean>(false);
     const serviceTypes = [
-        { title: 'Bike Repair' }, 
-        { title: 'Moving Services' }, 
-        { title: 'Baby Sitting' }, 
-        { title: 'Tutoring' }, 
-        { title: 'Pet Sitting' }, 
-        { title: 'Landscaping Services' }, 
-        { title: 'Home Remodeling' }, 
-        { title: 'House Cleaning' }
+        {title: 'Bike Repair'},
+        {title: 'Moving Services'},
+        {title: 'Baby Sitting'},
+        {title: 'Tutoring'},
+        {title: 'Pet Sitting'},
+        {title: 'Landscaping Services'},
+        {title: 'Home Remodeling'},
+        {title: 'House Cleaning'}
     ];
-    
     const paymentMethods = [
-        { title: 'Cash' }, { title: 'Paypal' }, { title: 'Bank Transfer' }
+        {title: 'Cash'}, {title: 'Paypal'}, {title: 'Bank Transfer'}
     ];
-
     const [formData, setFormData] = useState<FormData>({
         selectedService: null,
         hourlyRate: '',
         selectedPaymentMethods: [],
         description: '',
-        certificate: null,
+        certificateId: null,
         defaultSlotTime: '',
         travelTime: ''
     });
-
     const [errors, setErrors] = useState({
         selectedService: false,
         hourlyRate: false,
@@ -54,34 +51,63 @@ function AddServicePage() {
         defaultSlotTime: false,
         travelTime: false
     });
-
     const isEditMode = Boolean(serviceToEdit);
 
     useEffect(() => {
         if (isEditMode && serviceToEdit) {
+            console.log('Service to edit:', serviceToEdit);
             setFormData({
-                selectedService: { title: serviceToEdit.serviceType },
+                selectedService: {title: serviceToEdit.serviceType},
                 hourlyRate: serviceToEdit.hourlyRate.toString(),
-                selectedPaymentMethods: serviceToEdit.selectedPaymentMethods ? serviceToEdit.selectedPaymentMethods.map((method: string) => ({ title: method })) : [],
+                selectedPaymentMethods: serviceToEdit.selectedPaymentMethods ? serviceToEdit.selectedPaymentMethods.map((method: string) => ({title: method})) : [],
                 description: serviceToEdit.description,
-                certificate: null,
+                certificateId: serviceToEdit.certificateId,
                 defaultSlotTime: serviceToEdit.baseDuration.toString(),
                 travelTime: serviceToEdit.bufferTimeDuration.toString()
             });
+            fetchCertificate(serviceToEdit._id).then(r => console.log('Certificate fetched'));
         }
     }, [isEditMode, serviceToEdit]);
 
-    const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-        const files = event.target.files;
-        if (files && files.length > 0) {
-            setFormData(prev => ({ ...prev, certificate: files[0] }));
-        } else {
-            setFormData(prev => ({ ...prev, certificate: null }));
+    const fetchCertificate = async (_id: string) => {
+        try {
+            // Fetch certificate
+            const certificateResponse = await axios.get(`/api/certificate/${_id}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                responseType: 'blob'
+            });
+            setCertificate(certificateResponse.data);
+            console.log('Certificate fetched:', certificateResponse.data)
+        } catch (error) {
+            console.error('Error fetching certificate:', error);
         }
     };
 
+    const handleDeleteCertificate = async () => {
+        try {
+            // Delete certificate
+            const response = await axios.delete(`/api/certificate/${serviceToEdit._id}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            console.log('Certificate deleted:', response.data);
+            setCertificate(null); // Reset the certificate state
+        } catch (error) {
+            console.error('Error deleting certificate:', error);
+        }
+    };
+
+    const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const certificate = event.target.files ? event.target.files[0] : null;
+        setCertificate(certificate);
+        setIsCertificateUploaded(true);
+    };
+
     const handleChange = (key: keyof FormData, value: any) => {
-        setFormData(prev => ({ ...prev, [key]: value }));
+        setFormData(prev => ({...prev, [key]: value}));
     };
 
     const validateForm = () => {
@@ -94,7 +120,6 @@ function AddServicePage() {
         };
 
         setErrors(newErrors);
-
         return Object.values(newErrors).every(error => !error);
     };
 
@@ -105,25 +130,48 @@ function AddServicePage() {
                 defaultSlotTime: Number(formData.defaultSlotTime),
                 travelTime: Number(formData.travelTime)
             };
+
+            const certificateForm = new FormData();
+            if (certificate) {
+                certificateForm.append('file', certificate);
+            }
+
             try {
                 let response;
                 if (isEditMode) {
+                    console.log('Editing service:', serviceToEdit._id);
                     response = await axios.put(`/api/services/edit-service/${serviceToEdit._id}`, submissionData, {
                         headers: {
                             'Authorization': `Bearer ${token}`
-                        } 
+                        }
                     });
+
+                    if (certificate && isCertificateUploaded) {
+                        response = await axios.post(`/api/certificate/upload/${serviceToEdit._id}`, certificateForm, {
+                            headers: {
+                                'Authorization': `Bearer ${token}`
+                            }
+                        });
+                    }
                 } else {
                     response = await axios.post('/api/services/add-new-service', submissionData, {
                         headers: {
                             'Authorization': `Bearer ${token}`
                         }
                     });
+                    if (response.status === 201 && certificate && isCertificateUploaded) {
+                        response = await axios.post(`/api/certificate/upload/${response.data._id}`, certificateForm, {
+                            headers: {
+                                'Authorization': `Bearer ${token}`
+                            }
+                        });
+                    }
                 }
                 console.log(`Status: ${response.status}`);
                 console.log(response.data);
                 navigate('/profile'); // Redirect to profile page after submission
-            } catch (error) {
+            } catch
+                (error) {
                 console.error('Error submitting service:', error);
             }
         } else {
@@ -146,11 +194,11 @@ function AddServicePage() {
                                 value={formData.selectedService}
                                 onChange={(event, newValue) => handleChange('selectedService', newValue)}
                                 renderInput={(params) => (
-                                    <TextField 
-                                        {...params} 
-                                        label="Choose Service" 
-                                        variant="outlined" 
-                                        fullWidth 
+                                    <TextField
+                                        {...params}
+                                        label="Choose Service"
+                                        variant="outlined"
+                                        fullWidth
                                         error={errors.selectedService}
                                         helperText={errors.selectedService ? 'Service is required' : ''}
                                     />
@@ -178,11 +226,11 @@ function AddServicePage() {
                                 value={formData.selectedPaymentMethods}
                                 onChange={(event, newValue) => handleChange('selectedPaymentMethods', newValue)}
                                 renderInput={(params) => (
-                                    <TextField 
-                                        {...params} 
-                                        label="Payment Method" 
-                                        variant="outlined" 
-                                        fullWidth 
+                                    <TextField
+                                        {...params}
+                                        label="Payment Method"
+                                        variant="outlined"
+                                        fullWidth
                                         error={errors.selectedPaymentMethods}
                                         helperText={errors.selectedPaymentMethods ? 'At least one payment method is required' : ''}
                                     />
@@ -230,6 +278,26 @@ function AddServicePage() {
                             <p className="font-bold mb-2">
                                 Upload professional certificate to your service (optional)
                             </p>
+                            {certificate && (
+                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                    <div>Certificate uploaded</div>
+                                    <div>
+                                        <a
+                                            href={URL.createObjectURL(certificate)}
+                                            download
+                                            style={{marginRight: '10px'}}
+                                        >
+                                            Download
+                                        </a>
+                                        <button
+                                            onClick={handleDeleteCertificate}
+                                            style={{ color: 'red', textDecoration: 'underline' }}
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                             <TextField
                                 type="file"
                                 variant="outlined"
@@ -238,7 +306,7 @@ function AddServicePage() {
                                     shrink: true,
                                 }}
                                 inputProps={{
-                                    accept: 'image/*',
+                                    accept: 'application/pdf',
                                 }}
                                 onChange={handleFileChange}
                             />
@@ -246,7 +314,7 @@ function AddServicePage() {
                     </Grid>
                 </Grid>
                 <Box mt={4} className="flex justify-center p-2">
-                    <LightBlueButton className="py-2 px-2" text="Submit" onClick={handleSubmit} />
+                    <LightBlueButton className="py-2 px-2" text="Submit" onClick={handleSubmit}/>
                 </Box>
             </Box>
         </Box>

@@ -3,6 +3,8 @@ import {CgProfile} from "react-icons/cg";
 import {IoSettingsOutline, IoNotificationsOutline} from "react-icons/io5";
 import {CiSearch} from "react-icons/ci";
 import {FiFilter} from "react-icons/fi";
+import { BsQuestionCircle } from "react-icons/bs";
+
 import BlackButton from "./inputs/blackbutton";
 import RequestListButton from "./inputs/requestListButton";
 import Modal from "./inputs/Modal";
@@ -32,6 +34,9 @@ const ServiceButton: React.FC<ServiceButtonProps> = ({isLoggedIn, isProvider, is
     };
 
     const getLinkDestination = () => {
+        if (isProvider && !isPremium) {
+            return "/becomepro";
+        }
         return isLoggedIn ? "/addservice" : "/login";
     };
 
@@ -47,10 +52,12 @@ const ServiceButton: React.FC<ServiceButtonProps> = ({isLoggedIn, isProvider, is
 };
 
 const Navbar: React.FC<NavbarProps> = ({toggleDrawer, onChange, onSearch, search}) => {
-    const {token, isLoggedIn, logoutUser, isProvider, isPremium} = useAuth();
-    console.log("token: " + token + '\n' + "isProvider: " + isProvider() + '\n' + "isPremium: " + isPremium());
+    const {token, isLoggedIn, logoutUser, account} = useAuth();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [profileAnchorEl, setProfileAnchorEl] = useState<null | HTMLElement>(null);
+    const isPremium = account?.isPremium || false;
+    const isProvider = account?.isProvider || false;
+    console.log("token: " + token + '\n' + "isProvider: " + isProvider + '\n' + "isPremium: " + isPremium );
 
     const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
@@ -69,6 +76,7 @@ const Navbar: React.FC<NavbarProps> = ({toggleDrawer, onChange, onSearch, search
     const handleProfileMenuClose = () => {
         setProfileAnchorEl(null);
     };
+
 
     return (
         <nav className="bg-blue-300 shadow-md h-20">
@@ -112,8 +120,8 @@ const Navbar: React.FC<NavbarProps> = ({toggleDrawer, onChange, onSearch, search
                 <div className="flex items-center space-x-4 m-4">
                     <ServiceButton
                         isLoggedIn={isLoggedIn()}
-                        isProvider={isProvider()}
-                        isPremium={isPremium()}
+                        isProvider={isProvider}
+                        isPremium={isPremium}
                     />
                     <RequestListButton className="h-6 w-6" onClick={handleMenuOpen}/>
                     <IoNotificationsOutline className="h-6 w-6"/>
@@ -142,7 +150,10 @@ const Navbar: React.FC<NavbarProps> = ({toggleDrawer, onChange, onSearch, search
                         )}
                     </Menu>
                     <div className="h-6 w-0.5 bg-gray-800"></div>
-                    <IoSettingsOutline className="h-6 w-6"/>
+                    {/*<IoSettingsOutline className="h-6 w-6"/>*/}
+                    <Link to="/faq" className="h-6 w-6" style={{ outline: 'none' }}>
+                        <BsQuestionCircle className="h-6 w-6" style={{ color: 'black'  }}/>
+                    </Link>
                 </div>
             </div>
 

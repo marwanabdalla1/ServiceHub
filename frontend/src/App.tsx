@@ -26,6 +26,9 @@ import axios from "axios";
 import ProposeNewtimePage from './Pages/ProposeNewTimePage';
 import {AccountProvider} from "./contexts/AuthContext";
 import BookingPage from "./Pages/bookingSteps/BookingPage";
+import FAQPage from "./Pages/FAQPage";
+
+import BecomeProPage from './Pages/BecomePro';
 import OfferedServicesPage from './Pages/OfferedServicesPage';
 import ChangeBookingTimePage from './Pages/ChangeBookingTimePage';
 // import SelectAvailabilityBooking_temp from "./Pages/SelectAvailabilityBooking_temp";
@@ -79,6 +82,7 @@ function MainRoutes() {
                 {/*<Route path="/select-availability-booking" element={<SelectAvailabilityBooking_temp/>}/>*/}
 
                 <Route path="/update-timeslot" element={<UpdateTimeslot/>}/>
+                <Route path="/becomepro" element={<BecomeProPage/>}/>
 
 
                 {/*booking*/}
@@ -93,6 +97,10 @@ function MainRoutes() {
                 <Route path="/listsLandingPage" element={<ListsLandingPage/>}/>
                 <Route path="/update-timeslot/" element={<UpdateTimeslot/>} />
                 <Route path="/proposeNewTime" element={<ProposeNewtimePage />} />
+                <Route path="/write-reviews" element={<ReviewPage/>} />
+                <Route path="/faq" element={<FAQPage/>}/>
+
+
                 <Route path="*" element={<h1>Not Found</h1>}/>
 
 

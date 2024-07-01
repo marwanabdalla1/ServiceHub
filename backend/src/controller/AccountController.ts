@@ -59,27 +59,6 @@ export const getProviderById: RequestHandler = async (req, res) => {
 };
 
 /**
- * get user by id
- * @param req
- * @param res
- */
-export const getRequesterById: RequestHandler = async (req, res) => {
-    try {
-        console.log(req.params)
-        const account = await Account.findById(req.params.requesterId);
-        if (!account) {
-            return res.status(404).json({ message: 'Account not found! ' + req.params.requesterId });
-        }
-        else if (!account.isProvider) {
-            return res.status(400).json({ message: 'This is NOT a provider!' })
-        }
-        res.json(account);
-    } catch (err: any) {
-        res.status(500).json({ message: err.message });
-    }
-};
-
-/**
  * Update user details
  * @param req
  * @param res
@@ -130,5 +109,22 @@ export const getAccountDetails: RequestHandler = async (req, res) => {
     }
 }
 
+/**
+ * get user by id
+ * @param req
+ * @param res
+ */
+export const getRequesterById: RequestHandler = async (req, res) => {
+    try {
+        console.log(req.params)
+        const account = await Account.findById(req.params.requesterId);
+        if (!account) {
+            return res.status(404).json({ message: 'Account not found! ' + req.params.requesterId });
+        }
+        res.json(account);
+    } catch (err: any) {
+        res.status(500).json({ message: err.message });
+    }
+};
 
 

@@ -13,10 +13,12 @@ export interface IJob extends Document {
     provider: Types.ObjectId; // Reference to an Account document
     receiver: Types.ObjectId; // Reference to an Account document, the receiver of the job
     providerImage: string;
-    rating: number | undefined;
+    ratingForProvider: number | undefined; //probably not needed
+    ratingForConsumer: number | undefined; //probably not needed
     timeOfService: Types.ObjectId; // Reference to a Timeslot document
     request: Types.ObjectId; // Reference to a ServiceRequest document
     serviceOffering: Types.ObjectId;
+    // reviews: [Types.ObjectId]; //reference to the reviews, probably not needed
 }
 
 const JobSchema: Schema = new Schema({
@@ -31,11 +33,13 @@ const JobSchema: Schema = new Schema({
     provider: {type: Schema.Types.ObjectId, ref: 'Account', required: true},
     receiver: {type: Schema.Types.ObjectId, ref: 'Account', required: true},
     providerImage: {type: String},
-    rating: {type: Number, required: false},
+    // ratingForProvider: {type: Number, required: false},
+    // ratingForConsumer: {type: Number, required: false},
     timeOfService: {type: Schema.Types.ObjectId, ref: 'Timeslot', required: false}, //todo: maybe change this later
     request: {type: Schema.Types.ObjectId, ref: 'ServiceRequest', required: true},
     serviceOffering: {type: Schema.Types.ObjectId, ref: 'ServiceOffering', required: true},
+    // reviews: [{type: Schema.Types.ObjectId, ref: 'Review', required: false}],
 
-});
+},{timestamps: true});
 
 export default mongoose.model<IJob>('Job', JobSchema);

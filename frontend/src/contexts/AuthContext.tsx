@@ -3,7 +3,7 @@ import {createContext, useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import * as React from "react";
 import axios, {AxiosResponse} from 'axios';
-import {toast} from 'react-toastify';
+import {toast} from "react-toastify";
 
 type AccountContextType = {
     token: string | null;
@@ -126,8 +126,6 @@ export const AccountProvider = ({children}: Props) => {
         // Clear the user's token and account information from local storage
         localStorage.removeItem('token');
         localStorage.removeItem('account');
-        localStorage.removeItem('isProvider');
-        localStorage.removeItem('isPremium');
 
         // Clear the token and account state
         setToken(null);
@@ -142,11 +140,11 @@ export const AccountProvider = ({children}: Props) => {
     };
 
     const isPremium = () => {
-        return localStorage.getItem('isPremium') === 'true';
+        return account?.isPremium === true;
     };
 
     const isProvider = () => {
-        return localStorage.getItem('isProvider') === 'true';
+        return account?.isProvider === true;
     };
 
 
