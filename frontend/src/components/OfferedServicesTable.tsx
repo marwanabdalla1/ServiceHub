@@ -141,6 +141,30 @@ export default function OfferedServicesTable() {
       console.error('Error completing job:', error);
     }
 
+    const {status, _id, receiver, provider, ...rest} = selectedJob;
+    // Prepare notification data
+    const notificationData = {
+      isViewed: false,
+      content: `Your service for ${selectedJob.serviceType} has been marked as complete`,
+      job: selectedJob._id,
+      recipient: selectedJob.receiver._id,
+      ...rest,
+    };
+
+    console.log("notification data at frontend:", notificationData);
+
+    // generate new notification
+    try {
+      const notification = await axios.post("api/notification/", notificationData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      console.log("Notification sent!", notification);
+
+      
+    } catch (notificationError) {
+      console.error('Error sending notification:', notificationError);
+    }
+    
 
 
   };
@@ -180,6 +204,30 @@ export default function OfferedServicesTable() {
       console.error('Error completing job:', error);
     }
 
+    const {status, _id, receiver, provider, ...rest} = selectedJob;
+    // Prepare notification data
+    const notificationData = {
+      isViewed: false,
+      content: `The completion of your service for ${selectedJob.serviceType} has been revoked`,
+      job: selectedJob._id,
+      recipient: selectedJob.receiver._id,
+      ...rest,
+    };
+
+    console.log("notification data at frontend:", notificationData);
+
+    // generate new notification
+    try {
+      const notification = await axios.post("api/notification/", notificationData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      console.log("Notification sent!", notification);
+
+      
+    } catch (notificationError) {
+      console.error('Error sending notification:', notificationError);
+    }
+    
 
 
   };
@@ -219,7 +267,29 @@ export default function OfferedServicesTable() {
       console.error('Error cancelling Request:', error);
     }
 
+    const {status, _id, receiver, provider, ...rest} = selectedJob;
+    // Prepare notification data
+    const notificationData = {
+      isViewed: false,
+      content: `Your scheduled service for ${selectedJob.serviceType} has been cancelled`,
+      job: selectedJob._id,
+      recipient: selectedJob.receiver._id,
+      ...rest,
+    };
 
+    console.log("notification data at frontend:", notificationData);
+
+    // generate new notification
+    try {
+      const notification = await axios.post("api/notification/", notificationData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      console.log("Notification sent!", notification);
+
+      
+    } catch (notificationError) {
+      console.error('Error sending notification:', notificationError);
+    }
 
   };
 
