@@ -26,6 +26,7 @@ export const submitFeedback:RequestHandler = async (req, res) => {
             category: req.body.category,
             content: req.body.content || "",
             rating: req.body.rating,
+            title: req.body.title || "",
         };
 
         console.log("review Data: ", feedback)
