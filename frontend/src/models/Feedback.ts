@@ -13,10 +13,11 @@ export interface Feedback {
     rating?: number; // rating is optional
     content: string;
     category: ReviewCategory;
-    givenBy: {
-        _id: string;
-        name: string;
-    };
+    // givenBy: {
+    //     _id: string;
+    //     name: string;
+    // };
+    firstName: string;
     createdAt: string;
     updatedAt: string;
 }

@@ -48,8 +48,29 @@ export const submitFeedback:RequestHandler = async (req, res) => {
 
 export const getPremiumUpgradeReviews: RequestHandler = async (req, res) => {
     try {
-        console.log("fetching reviews")
-        const reviews = await PlatformFeedback.find({ category: 'Premium Upgrade' }).populate('givenBy', 'name'); // assuming givenBy references an Account with a name field
+        const reviews = await PlatformFeedback.find({ category: 'Premium Upgrade' })
+            .populate('givenBy'); // populate the givenBy field with the entire Account object
+
+        // const transformedReviews = reviews.map(review => ({
+        //     _id: review._id,
+        //     title: review.title,
+        //     rating: review.rating,
+        //     content: review.content,
+        //     category: review.category,
+        //     givenBy: {
+        //         _id: review.givenBy._id,
+        //         name: `${review.givenBy.firstName} ${review.givenBy.lastName}`, // Combine firstName and lastName
+        //         email: review.givenBy.email,
+        //         profileImageUrl: review.givenBy.profileImageUrl,
+        //         location: review.givenBy.location,
+        //         country: review.givenBy.country,
+        //         postal: review.givenBy.postal,
+        //         // Include other fields you need from the givenBy object
+        //     },
+        //     createdAt: review.createdAt,
+        //     updatedAt: review.updatedAt
+        // }));
+
         res.status(200).json(reviews);
     } catch (error) {
         console.error("Failed to fetch reviews:", error);

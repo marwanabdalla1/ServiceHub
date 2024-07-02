@@ -71,7 +71,7 @@ const BecomeProPage: React.FC = () => {
         <div className="bg-gray-100 p-4 rounded-lg shadow-md">
           {reviews.map((review, index) => (
             <div className="mb-4" key={index}>
-              <h3 className="font-semibold">{review.givenBy.name}</h3>
+              <h3 className="font-semibold">{review.firstName}</h3>
               <p className="text-sm text-gray-600">Reviewed on {new Date(review.createdAt).toLocaleDateString()}</p>
               <p className="mt-2">{review.title}</p>
               <p className="text-gray-700">{review.content}</p>
