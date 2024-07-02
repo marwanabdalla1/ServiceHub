@@ -46,6 +46,16 @@ export const submitFeedback:RequestHandler = async (req, res) => {
     }
 };
 
+export const getPremiumUpgradeReviews: RequestHandler = async (req, res) => {
+    try {
+        console.log("fetching reviews")
+        const reviews = await PlatformFeedback.find({ category: 'Premium Upgrade' }).populate('givenBy', 'name'); // assuming givenBy references an Account with a name field
+        res.status(200).json(reviews);
+    } catch (error) {
+        console.error("Failed to fetch reviews:", error);
+        res.status(500).json({ error: "Internal server error", message: "Could not fetch reviews." });
+    }
+};
 
 // // find review based on jobId and reviewer
 // export const findExistingReview: RequestHandler = async(req, res) => {
