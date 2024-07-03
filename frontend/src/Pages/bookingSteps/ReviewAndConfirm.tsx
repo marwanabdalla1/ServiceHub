@@ -38,6 +38,7 @@ function ReviewAndConfirm({onComplete, onBack, bookingDetails}: ReviewAndConfirm
 
 
     const {token} = useAuth();
+    const [requestId, setRequestId] = useState('');
 
 
     // Handle changes in the TextField
@@ -139,7 +140,7 @@ function ReviewAndConfirm({onComplete, onBack, bookingDetails}: ReviewAndConfirm
     //     });
     // };
 
-    const handleConfirmBooking = async () => {
+    const handleConfirmBooking = async() => {
 
         const apiEndpoint = '/api/requests'
 
@@ -174,6 +175,7 @@ function ReviewAndConfirm({onComplete, onBack, bookingDetails}: ReviewAndConfirm
                 }
             });
             const requestId = response.data._id;
+            setRequestId(requestId);
             console.log('Booking confirmed:', response.data);
 
             const timeSlotWithRequest = {
@@ -197,7 +199,8 @@ function ReviewAndConfirm({onComplete, onBack, bookingDetails}: ReviewAndConfirm
             console.log('Request updated with timeslot ID:', timeslotResponse._id);
 
             // todo: actually go to confirmation page
-            navigate('/confirmation'); // Navigate to a confirmation page or show a confirmation message
+            // navigate('/confirmation'); // Navigate to a confirmation page or show a confirmation message
+            navigate(`/offerings/${requestId}/confirm`); // Navigate to a confirmation page or show a confirmation message
 
             //     if booking timeslot fails, then roll back the request
         } catch (error: any) {
@@ -261,9 +264,9 @@ function ReviewAndConfirm({onComplete, onBack, bookingDetails}: ReviewAndConfirm
         //         }
         //     };
 
-    };
 
 
+        // Handle booking confirmation logic
     const handleAlertClose = () => {
         setShowAlert(false);
         navigate(`/offerings/${bookingDetails.serviceOffering?._id}`); // Redirect after closing the alert
@@ -311,10 +314,10 @@ function ReviewAndConfirm({onComplete, onBack, bookingDetails}: ReviewAndConfirm
                     <Typography variant="h4" gutterBottom>
                         Review and confirm booking
                     </Typography>
-                    <Box sx={{display: 'flex', justifyContent: 'space-between', mt: 2}}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
                         <Button variant="outlined" onClick={onBack}>Back</Button>
                     </Box>
-                    <Card sx={{mb: 2}}>
+                    <Card sx={{ mb: 2 }}>
                         <CardContent>
                             <Typography variant="h6" gutterBottom>
                                 Booking Details
@@ -336,7 +339,7 @@ function ReviewAndConfirm({onComplete, onBack, bookingDetails}: ReviewAndConfirm
                             </Typography>
                         </CardContent>
                     </Card>
-                    <Card sx={{mb: 2}}>
+                    <Card sx={{ mb: 2 }}>
                         <CardContent>
                             <Typography variant="h6" gutterBottom>
                                 Add Booking Notes
@@ -352,18 +355,17 @@ function ReviewAndConfirm({onComplete, onBack, bookingDetails}: ReviewAndConfirm
                             />
                         </CardContent>
                     </Card>
-                    <Box sx={{display: 'flex', justifyContent: 'flex-end', mt: 2}}>
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
                         <Button variant="contained" color="primary" onClick={handleConfirmBooking}>
                             Confirm Booking
                         </Button>
                     </Box>
                 </Box>
-                <Box sx={{width: 250}}>
+                <Box sx={{ width: 250 }}>
                     <Card>
-                        <CardContent sx={{display: 'flex', alignItems: 'center'}}>
+                        <CardContent sx={{ display: 'flex', alignItems: 'center' }}>
                             <Box>
-                                <Typography
-                                    variant="h6">{`${bookingDetails.provider?.firstName} ${bookingDetails.provider?.lastName}`}</Typography>
+                                <Typography variant="h6">{`${bookingDetails.provider?.firstName} ${bookingDetails.provider?.lastName}`}</Typography>
                                 <Typography variant="body2" color="text.secondary">
                                     {bookingDetails.location}
                                 </Typography>

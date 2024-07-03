@@ -23,6 +23,7 @@ import ServiceRouter from "./routes/Service";
 import ProfileImage from "./routes/ProfileImage";
 import PaymentRouter from "./routes/PaymentRouter";
 import WebhookRouter from "./routes/WebhookRouter";
+import RecoveryRouter from "./routes/Recovery";
 
 const app = express();
 
@@ -47,6 +48,7 @@ app.use("/api/auth", AuthRouter);
 app.use("/api/file", ProfileImageRouter);
 app.use("/api/certificate", CertificateRouter);
 app.use("/api/account", AccountRouter);
+app.use("/api/forgetPassword", RecoveryRouter);
 app.use("/api/offerings", OfferingRouter);
 app.use("/api/timeslots", TimeSlotRouter);
 app.use("/api/services", ServiceRouter);
