@@ -29,6 +29,7 @@ export default function MediaCard({ user, profileImageUrl }: MediaCardProps) {
               {user.firstName} {user.lastName}
             </Typography>
             <Typography variant="body2" color="text.secondary">
+              {/*todo: this only has the first service offering!*/}
               {user.serviceOfferings[0]?.serviceType}
             </Typography>
 
@@ -57,7 +58,7 @@ export default function MediaCard({ user, profileImageUrl }: MediaCardProps) {
         </CardContent>
         <div className='flex justify-center'>
           <CardActions>
-            <Link to={`/provider-profile/${user._id}`}>
+            <Link to={`/offerings/${user.serviceOfferings[0]._id}`}>
               <Button size="small">Book Now</Button>
             </Link>
           </CardActions>

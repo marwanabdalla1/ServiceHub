@@ -318,7 +318,7 @@ function ProviderProfilePage() {
                             {/*todo: update the reviews part once the review controllers etc. are done!*/}
 
                             {provider.reviews ? provider.reviews.map((review) => (
-                                <Card key={review.reviewId} sx={{mb: 2}}>
+                                <Card key={review._id} sx={{mb: 2}}>
                                     <CardContent>
                                         <Box sx={{display: 'flex', alignItems: 'center', mb: 1}}>
                                             <Avatar sx={{mr: 2}}/>

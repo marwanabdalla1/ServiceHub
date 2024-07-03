@@ -3,7 +3,7 @@ import { Account } from "./Account";
 import { ServiceOffering } from './ServiceOffering';
 
 export class Review {
-    reviewId: string;
+    _id: string;
     rating: starCount;
     content: String;
     createdOn: Date;
@@ -16,7 +16,7 @@ export class Review {
 
     constructor(reviewId: string, rating: starCount, content: String, createdOn: Date, recipient: Account, reviewer: Account,
         service: ServiceOffering) {
-        this.reviewId = reviewId;
+        this._id = reviewId;
         this.rating = rating;
         this.content = content;
         this.createdOn = createdOn;

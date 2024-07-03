@@ -25,7 +25,7 @@ import {createTheme, ThemeProvider} from '@mui/material/styles';
 import {blue} from "@mui/material/colors";
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
-import {useAuth} from "../contexts/AuthContext";
+import {useAuth} from "../../contexts/AuthContext";
 
 function Copyright(props: PropsWithChildren<{}>) {
     return (
@@ -109,7 +109,7 @@ export default function SignIn() {
                         </Button>
                         <Grid container>
                             <Grid item xs>
-                                <Link href="#" variant="body2">
+                                <Link href="/forgetPassword" variant="body2">
                                     Forgot password?
                                 </Link>
                             </Grid>
