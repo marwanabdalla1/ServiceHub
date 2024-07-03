@@ -90,9 +90,10 @@ export default function ReceivedServiceTable() {
     }
   }, [selectedReceivedService, token]);
 
-  const fetchProvider = (providerId: Account) => {
-    axios.get<Account>(`/api/account/providers/${providerId}`, {
-      headers: { Authorization: `Bearer ${token}` },
+  const fetchProvider = (provider: Account) => {
+    console.log("Received, 94: " + provider);
+    axios.get<Account>(`/api/account/providers/${provider}`, {
+      headers: {Authorization: `Bearer ${token}` }
     })
       .then(response => {
         setProvider(response.data);
@@ -103,9 +104,10 @@ export default function ReceivedServiceTable() {
       });
   };
 
-  const fetchReceiver = (receiverId: Account) => {
-    axios.get<Account>(`/api/account/providers/${receiverId}`, {
-      headers: { Authorization: `Bearer ${token}` },
+  const fetchReceiver = (receiver: Account) => {
+    console.log("Received, 107: " + receiver);
+    axios.get<Account>(`/api/account/requester/${receiver}`, {
+      headers: {Authorization: `Bearer ${token}` }
     })
       .then(response => {
         setReceiver(response.data);

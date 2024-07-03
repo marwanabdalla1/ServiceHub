@@ -17,8 +17,8 @@ import { useEffect } from 'react';
 
 interface MediaCardProps {
   offeredService: Job;
-  provider: Account | null;
-  receiver: Account | null;
+  provider: [string, string];
+  receiver: [string, string];
   onClose: () => void;
   onComplete: (offeredService: Job) => void;
   onCancel: (offeredService: Job) => void;
@@ -50,14 +50,14 @@ const MediaCard: React.FC<MediaCardProps> = ({ offeredService, provider, receive
     //console.log("Account ID: " + account?._id);
     //console.log("Receiver ID: " + offeredService.receiver);
     //console.log(account?._id === offeredService.receiver._id);
-    if(offeredService.status === JobStatus.open && account?._id === provider?._id ){
+    if(offeredService.status === JobStatus.open && account?._id === offeredService.provider._id ){
         return (
           <>
           <BlackButton text="Mark as Completed" onClick={() => onComplete(offeredService)} sx={{ marginRight:"1rem" }}/>
           <BlackButton text="Cancel Service" onClick={() => onCancel(offeredService)} sx={{ marginRight:"1rem" }}/>
           </>
         );}
-      if(offeredService.status === JobStatus.open && account?._id === receiver?._id ) {
+      if(offeredService.status === JobStatus.open && account?._id === offeredService.receiver._id ) {
           return(<>
           <BlackButton text="Cancel Service" onClick={onClose} />
           </>);
@@ -92,13 +92,13 @@ const MediaCard: React.FC<MediaCardProps> = ({ offeredService, provider, receive
       </button>
       <CardContent>
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem' }}>
-          <Avatar alt={provider?.firstName + " " + provider?.lastName} src={provider?.profileImageUrl} sx={{ width: 100, height: 100, marginRight: '1rem' }} />
+          <Avatar alt={provider[0] + " " + provider[1]} src={offeredService.provider.profileImageUrl} sx={{ width: 100, height: 100, marginRight: '1rem' }} />
           <div style={{ marginRight: '1rem' }}>
             <Typography variant="h6" >
               Request Detail
             </Typography>
             <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
-              Provider: {provider?.firstName + " " + provider?.lastName}
+              Provider: {provider[0] + " " + provider[1]}
             </Typography>
           </div>
           <div className='flex space-x-1 items-center'>

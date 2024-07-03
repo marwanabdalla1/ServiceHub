@@ -35,8 +35,8 @@ export default function OfferedServicesTable() {
   const [jobs, setJobs] = React.useState<Job[]>([]);
   const {token, account} = useAuth();
   const navigate = useNavigate();
-  const [provider, setProvider] = React.useState<Account | null>(null);
-  const [receiver, setReceiver] = React.useState<Account | null>(null);
+  const [provider, setProvider] = React.useState<[string, string]>(["", ""]);
+  const [receiver, setReceiver] = React.useState<[string, string]>(["", ""]);
 
   // todo: this probably can be combined/reused along with the request history table
   useEffect(() => {
@@ -75,28 +75,29 @@ export default function OfferedServicesTable() {
   }, [selectedJob, token]);
 
   const fetchProvider = (provider: Account) => {
-    axios.get<Account>(`/api/account/providers/${provider._id}`, {
-      headers: { Authorization: `Bearer ${token}` },
+    axios.get<[string, string]>(`/api/account/providers/${provider._id}`, {
+      headers: {Authorization: `Bearer ${token}` }
     })
       .then(response => {
         setProvider(response.data);
       })
       .catch(error => {
         console.error('Failed to fetch provider:', error);
-        setProvider(null);
+        setProvider(["",""]);
       });
   };
 
   const fetchReceiver = (requester: Account) => {
-    axios.get<Account>(`/api/account/requester/${requester._id}`, {
-      headers: { Authorization: `Bearer ${token}` },
+    console.log("Offered, 91: " + requester.firstName);
+    axios.get<[string, string]>(`/api/account/requester/${requester._id}`, {
+      headers: {Authorization: `Bearer ${token}` }
     })
       .then(response => {
         setReceiver(response.data);
       })
       .catch(error => {
         console.error('Failed to fetch receiver:', error);
-        setReceiver(null);
+        setReceiver(["",""]);
       });
   };
 

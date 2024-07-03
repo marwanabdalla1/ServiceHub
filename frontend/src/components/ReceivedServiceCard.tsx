@@ -75,13 +75,13 @@ const MediaCard: React.FC<MediaCardProps> = ({ receivedService, provider, receiv
       </button>
       <CardContent>
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem' }}>
-          <Avatar alt={provider?.firstName + " " + provider?.lastName} src={provider?.profileImageUrl} sx={{ width: 100, height: 100, marginRight: '1rem' }} />
+          <Avatar alt={receivedService.provider.firstName + " " + receivedService.provider.lastName} src={receivedService.provider.profileImageUrl} sx={{ width: 100, height: 100, marginRight: '1rem' }} />
           <div style={{ marginRight: '1rem' }}>
             <Typography variant="h6" >
               Request Detail
             </Typography>
             <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
-              Provider: {provider?.firstName + " " + provider?.lastName}
+              Provider: {receivedService.provider.firstName + " " + receivedService.provider.lastName}
             </Typography>
           </div>
           <div className='flex space-x-1 items-center'>
