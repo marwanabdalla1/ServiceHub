@@ -45,10 +45,6 @@ const MediaCard: React.FC<MediaCardProps> = ({ receivedService, provider, receiv
   });*/
 
   const renderButton = () => {
-    //Check whether user in sign-in context is a provider
-    console.log("Account ID: " + account?._id);
-    console.log("Receiver ID: " + receivedService.receiver);
-    console.log(account?._id === receivedService.receiver._id);
       if(receivedService.status === JobStatus.open && account?._id === receiver?._id ) {
           return(<>
           <BlackButton text="Cancel Job" onClick={() => onCancel(receivedService)} />
