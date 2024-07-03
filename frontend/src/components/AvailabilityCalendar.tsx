@@ -59,6 +59,8 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration }: ServiceSched
     // const [bookedEvents, setBookedEvents] = useState<TimeSlot[]>([]);
 
     const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot | null>(null);
+
+    // todo: editing
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [editAllRecurring, setEditAllRecurring] = useState(false);
 
@@ -88,7 +90,7 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration }: ServiceSched
         }).catch(error => {
             console.error("Error fetching timeslots:", error);
         });
-    }, [token]);
+    }, [token, selectedTimeSlot]);
     //
     // const saveAvailability = () => {
     //     console.log('Submitted token' + token + availability)
@@ -113,9 +115,16 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration }: ServiceSched
 
     const handleSelect = ({ start, end }: SlotInfo) => {
         const newTimeSlot: TimeSlot = { start, end, title: 'available', isFixed: false, isBooked: false, createdById: '' };
-        const isClashing = availability.some(TimeSlot =>
-            (newTimeSlot.start < TimeSlot.end && newTimeSlot.end > TimeSlot.start)
-        );
+        const isClashing = /*[...fetchedEvents, ...availability]*/
+            fetchedEvents.some(TimeSlot => {
+                const newTimeSlotEnd = new Date(newTimeSlot.start.getTime() + defaultSlotDuration * 60000);
+                return (
+                    (newTimeSlot.start < TimeSlot.end && newTimeSlot.end > TimeSlot.start) ||
+                    (newTimeSlot.start < TimeSlot.end && newTimeSlotEnd > TimeSlot.start)
+                );
+
+            });
+
         //     || bookedEvents.some(TimeSlot =>
         //     (newTimeSlot.start < TimeSlot.end && newTimeSlot.end > TimeSlot.start)
         // );
@@ -129,7 +138,9 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration }: ServiceSched
             }
 
             const adjustedTimeSlot: TimeSlot = { start: start, end: adjustedEnd, title: 'available', isFixed: false, isBooked: false, createdById: '' };
-            setAvailability([...availability, adjustedTimeSlot]);
+            // setAvailability([...availability, adjustedTimeSlot]);
+            setFetchedEvents([...fetchedEvents, adjustedTimeSlot]);
+
 
             console.log(adjustedTimeSlot)
 
@@ -202,7 +213,11 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration }: ServiceSched
                 //     }
                 //     return a !== selectedTimeSlot;
                 // }));
-                setFetchedEvents(fetchedEvents.filter(a => a.start !== selectedTimeSlot.start && a.end !== selectedTimeSlot.end));
+
+
+
+                setFetchedEvents(fetchedEvents.filter(a => a.start.getTime() !== selectedTimeSlot.start.getTime() && a.end.getTime() !== selectedTimeSlot.end.getTime()));
+                console.log(fetchedEvents.length)
                 setDeleteDialog(false);
                 setDeleteOptionDialogOpen(false);
             }).catch(error => {
@@ -362,6 +377,7 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration }: ServiceSched
             // setBookedEvents(bookedEvents);
             // setAvailability(editableEvents);
             setFetchedEvents(allEvents)
+            console.log(fetchedEvents)
         } catch (error) {
             console.error("Error fetching timeslots:", error);
         }
@@ -374,7 +390,7 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration }: ServiceSched
             const start = startOfDay(range[0]);
             const end = endOfDay(range[range.length - 1]);
 
-            const lastDate = new Date(Math.max(...availability.map(slot => slot.end.getTime())));
+            const lastDate = new Date(Math.max(.../*availability*/fetchedEvents.map(slot => slot.end.getTime())));
             if (end > lastDate) {
                 axios.post('/api/timeslots/extend', {
                     start: lastDate,
@@ -438,9 +454,9 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration }: ServiceSched
 
     const eventPropGetter = (event: TimeSlot) => {
         if (event.isBooked) {
-            return { style: { backgroundColor: 'grey', pointerEvents: 'none' as 'none', opacity: 0.6 } };
+            return { style: { backgroundColor: 'grey', pointerEvents: 'none' as 'none', opacity: 0.6, zIndex:1 } };
         }
-        return { style: { backgroundColor: event.isFixed ? 'purple' : 'blue' } };
+        return { style: { backgroundColor: event.isFixed ? 'purple' : 'blue', zIndex: 2 } };
     };
 
 
@@ -453,8 +469,9 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration }: ServiceSched
             <Calendar
                 defaultView='week'
                 views={['week']}
+                step={15}
                 localizer={localizer}
-                events={[...fetchedEvents, ...availability]}
+                events={fetchedEvents/*[...fetchedEvents, ...availability]*/}
                 startAccessor="start"
                 endAccessor="end"
                 style={{ height: 500 }}
@@ -546,7 +563,7 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration }: ServiceSched
             <Dialog open={clashDialogOpen} onClose={handleClashDialogClose}>
                 <DialogTitle>TimeSlot Clash</DialogTitle>
                 <DialogContent>
-                    The new TimeSlot clashes with an existing TimeSlot.
+                    The new timeslot clashes with an existing timeslot or is adjusted to meet the minimum slot duration.
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClashDialogClose}>OK</Button>

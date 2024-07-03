@@ -118,7 +118,7 @@ function MainRoutes() {
 
                 {/*booking*/}
                 <Route path="/offerings/:offeringId" element={<ProviderProfilePage/>}/>
-                <Route path="/offerings/:could /booking/:step" element={<BookingPage/>}/>
+                <Route path="/offerings/:offeringId/booking/:step" element={<BookingPage/>}/>
                 <Route path="/offerings/:requestId/confirm" element={<ConfirmationPage/>}/>
 
                 {/*old ones*/}
