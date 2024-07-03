@@ -144,21 +144,3 @@ export const getAccountById: RequestHandler = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 };
-
-/**
- * get first and last name by id
- * @param req
- * @param res
- */
-export const getNameById: RequestHandler = async (req, res) => {
-    try {
-        console.log(req.params)
-        const account = await Account.findById(req.params.userId);
-        if (!account) {
-            return res.status(404).json({ message: 'Account not found! ' + req.params.userId });
-        }
-        res.json([account.firstName, account.lastName]);
-    } catch (err: any) {
-        res.status(500).json({ message: err.message });
-    }
-};

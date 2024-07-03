@@ -30,7 +30,7 @@ export default function IncomingRequestTable() {
     const [selectedRequest, setSelectedRequest] = React.useState<ServiceRequest | null>(null);
     const [serviceRequests, setServiceRequests] = React.useState<ServiceRequest[]>([]);
     const {token, account} = useAuth();
-    const [clashDialogOpen, setClashDialogOpen] = useState(false);
+    const [timeChangePopUp, setTimeChangePopUp] = useState(false);
 
     const openModal = (request: Request) => {
         setSelectedRequest(request);
@@ -258,8 +258,43 @@ try {
     
       };
 
-      const handleClashDialogClose = () => {
-        setClashDialogOpen(false);
+      const handleTimeChange = async() => {
+        setTimeChangePopUp(true);
+        console.log("handle time change begin");
+
+        if (!selectedRequest) {
+          console.error('No request selected');
+          return;
+        }
+
+        console.log("request exists");
+
+        // get data from the request (selectedRequest)
+        const {requestStatus, job, _id, requestedBy, provider, ...rest} = selectedRequest;
+
+        // Prepare notification data
+     const notificationData = {
+      isViewed: false,
+      content: `Please change the booking time for your service request ${selectedRequest.serviceType} on the ${formatDateTime(selectedRequest.appointmentStartTime)}`,
+      serviceRequest: selectedRequest._id,
+      recipient: selectedRequest.requestedBy._id,
+      ...rest,
+    };
+
+    console.log("notification data at frontend:", notificationData);
+
+    // generate new notification
+    try {
+      const notification = await axios.post("api/notification/", notificationData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      console.log("Notification sent!", notification);
+
+      
+    } catch (notificationError) {
+      console.error('Error sending notification:', notificationError);
+    }
+    setTimeChangePopUp(false);
     };
 
     useEffect(() => {
@@ -316,14 +351,14 @@ try {
                         </TableContainer>
                     </Box>
                 </Box>
-                <Dialog open={clashDialogOpen} onClose={handleClashDialogClose}>
+                <Dialog open={timeChangePopUp} onClose={handleTimeChange}>
                 <DialogTitle>Time Slot Update Requested</DialogTitle>
                 <DialogContent>
-                    The consumer has been alerted of the need to select a new TimeSlot.
+                    The consumer will be alerted of the need to select a new TimeSlot.
                     Please update your availabilities accordingly.
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleClashDialogClose}>OK</Button>
+                    <Button onClick={handleTimeChange}>Notify Requester</Button>
                 </DialogActions>
             </Dialog>
                 {showMediaCard && selectedRequest && (
@@ -333,7 +368,7 @@ try {
                         onAccept={handleAccept}
                         onDecline={handleDecline }
                         onCancel={handleCancel}
-                        setClashDialogOpen={setClashDialogOpen} />
+                        onTimeChange={() => setTimeChangePopUp(true)} />
           </div>
         )}
             </Box>

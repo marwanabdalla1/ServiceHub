@@ -14,6 +14,7 @@ import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 import { Account } from '../models/Account';
 import { useEffect } from 'react';
+import { formatDateTime } from '../utils/dateUtils';
 
 interface MediaCardProps {
   offeredService: Job;
@@ -96,7 +97,7 @@ const MediaCard: React.FC<MediaCardProps> = ({ offeredService, provider, receive
           Service Type: {offeredService.serviceType}
         </Typography>
         <Typography variant="body2">
-          Appointment Time: {offeredService.appointmentStartTime.toLocaleString()}
+          Appointment Time: {formatDateTime(offeredService.appointmentStartTime)}
         </Typography>
         <Typography variant="body2" sx={{ marginBottom: '2rem'}}>
           Service Fee: {offeredService.serviceFee}

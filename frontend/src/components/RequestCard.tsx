@@ -13,6 +13,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Account } from '../models/Account';
 import axios from 'axios';
+import { formatDateTime } from '../utils/dateUtils';
 
 interface MediaCardProps {
   request: Request;
@@ -92,7 +93,7 @@ if (request.requestStatus === RequestStatus.cancelled ){
           Service Type: {request.serviceType}
         </Typography>
         <Typography variant="body2">
-          Appointment Time: {request.appointmentStartTime.toLocaleString()}
+          Appointment Time: {formatDateTime(request.appointmentStartTime)}
         </Typography>
         <Typography variant="body2" sx={{ marginBottom: '2rem'}}>
           Service Fee: {request.serviceFee}

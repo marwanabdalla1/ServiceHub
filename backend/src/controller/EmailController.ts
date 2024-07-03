@@ -85,7 +85,7 @@ export const sendCancellationNotificationEmail = (req: Request, res: Response): 
         from: process.env.MY_EMAIL,
         to: email,
         subject: `${serviceType} Appointment Cancellation`,
-        text: `Dear ${name}, /n We are sorry to inform you that your scheduled service appointment for ${serviceType} at ${startTime} has been cancelled. /n Please find an alternative timeslot. /n Thank you for understanding. /n Kind regards, /n The ServiceHub Team`
+        text: `Dear ${name}, \n We are sorry to inform you that your scheduled service appointment for ${serviceType} at ${startTime} has been cancelled. \n Please find an alternative timeslot. \n Thank you for understanding. \n Kind regards, \n The ServiceHub Team`
     };
 
     transporter.sendMail(mailOptions, (error, info) => {
@@ -96,4 +96,8 @@ export const sendCancellationNotificationEmail = (req: Request, res: Response): 
         }
     });
 };
+
+function formatDateTime(startTime: any) {
+    throw new Error('Function not implemented.');
+}
 

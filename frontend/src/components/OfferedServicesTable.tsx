@@ -35,8 +35,6 @@ export default function OfferedServicesTable() {
   const [jobs, setJobs] = React.useState<Job[]>([]);
   const {token, account} = useAuth();
   const navigate = useNavigate();
-  const [providerAccount, setProviderAccount] = React.useState<Account | null>(null);
-  const [receiverAccount, setReceiverAccount] = React.useState<Account | null>(null);
 
   // todo: this probably can be combined/reused along with the request history table
   useEffect(() => {
@@ -65,44 +63,6 @@ export default function OfferedServicesTable() {
   const handleToggleMediaCard = (job: Job | null) => {
     setSelectedJob(job);
     setShowMediaCard(job !== null);
-  };
-
-  useEffect(() => {
-    if (selectedJob) {
-      console.log(selectedJob);
-      fetchProvider(selectedJob.provider);
-      fetchReceiver(selectedJob.receiver);
-    }
-  }, [selectedJob, token]);
-
-  const fetchProvider = (p_provider: Account) => {
-    console.log("Get provider name for ", p_provider);
-    axios.get<Account>(`/api/account/providers/${p_provider._id}`, {
-      headers: {Authorization: `Bearer ${token}` }
-    })
-      .then(response => {
-        console.log("Got response ", response.data);
-        setProviderAccount(response.data);
-      })
-      .catch(error => {
-        console.error('Failed to fetch provider:', error);
-        setProviderAccount(null);
-      });
-  };
-
-  const fetchReceiver = (p_requester: Account) => {
-    console.log("Get receiver name for ", p_requester);
-    axios.get<Account>(`/api/account/requester/${p_requester._id}`, {
-      headers: {Authorization: `Bearer ${token}` }
-    })
-      .then(response => {
-        console.log("Got response ", response.data);
-        setReceiverAccount(response.data);
-      })
-      .catch(error => {
-        console.error('Failed to fetch receiver:', error);
-        setReceiverAccount(null);
-      });
   };
 
   // handle completing the job
@@ -300,14 +260,14 @@ export default function OfferedServicesTable() {
     let email = "";
     let addressee = "";
 
-    if (account?._id === providerAccount?._id) {
+    if (account?._id === selectedJob.provider._id) {
 
-      email = receiverAccount?.email ? receiverAccount?.email : "";
-      addressee = receiverAccount?.firstName + " " + receiverAccount?.lastName;
+      email = selectedJob.receiver.email;
+      addressee = selectedJob.receiver.firstName + " " + selectedJob.receiver.lastName;
       
-    } else if (account?._id === receiverAccount?._id) {
-      email = providerAccount?.email ? providerAccount?.email : "";
-      addressee = providerAccount?.firstName + " " + providerAccount?.lastName;
+    } else if (account?._id === selectedJob.receiver._id) {
+      email = selectedJob.provider.email;
+      addressee = selectedJob.provider.firstName + " " + selectedJob.provider.lastName;
     }
 
     // send Email notification
@@ -365,8 +325,8 @@ export default function OfferedServicesTable() {
         {showMediaCard && selectedJob && (
           <div style={{ position: 'relative', flexShrink: 0, width: 400, marginLeft: 2 }}>
             <MediaCard offeredService={selectedJob}
-                      provider={providerAccount}
-                      receiver={receiverAccount}
+                      provider={selectedJob.provider}
+                      receiver={selectedJob.receiver}
                        onClose={() => setShowMediaCard(false)}
                        onComplete={handleComplete}
                        onCancel = {handleCancel}

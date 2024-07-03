@@ -21,10 +21,10 @@ interface MediaCardProps {
   onAccept: (request: Request) => void;
   onDecline: (request: Request) => void;
   onCancel: (request: Request) => void;
-  setClashDialogOpen: (open: boolean) => void;
+  onTimeChange: (value: boolean) => void;
 }
 
-const MediaCard: React.FC<MediaCardProps> = ({ request, onClose, onAccept,onDecline, onCancel, setClashDialogOpen }) => {
+const MediaCard: React.FC<MediaCardProps> = ({ request, onClose, onAccept,onDecline, onCancel, onTimeChange }) => {
   
   //const { account, token, isProvider } = useAuth();
   //const navigate = useNavigate();
@@ -45,7 +45,7 @@ if (request.requestStatus === RequestStatus.cancelled ){
             <>
             <BlackButton text="Decline Request" onClick={() => onDecline (request)} sx={{ marginRight:"1rem" }}/>
             <BlackButton text="Accept Request" onClick={() => onAccept (request)} sx={{ marginRight:"1rem" }}/>
-            <BlackButton text="Request Time Change" onClick={() => setClashDialogOpen(true)} sx={{ marginTop:"1rem" }} />
+            <BlackButton text="Request Time Change" onClick={() => onTimeChange(true)} sx={{ marginTop:"1rem" }} />
             </>
           );
         }
@@ -54,7 +54,7 @@ if (request.requestStatus === RequestStatus.cancelled ){
         return (
           <>
           <BlackButton text="Cancel Request" onClick={() => onCancel (request)} sx={{ marginRight:"1rem" }}/>
-          <BlackButton text="Request Time Change" onClick={() => setClashDialogOpen(true)} />
+          <BlackButton text="Request Time Change" onClick={() => onTimeChange(true)} />
           </>
         );
     }
