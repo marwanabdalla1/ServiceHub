@@ -1,5 +1,16 @@
-import React, {useState} from 'react';
-import {Container, Box, Typography, Card, CardContent, TextField, Button} from '@mui/material';
+import React, {useEffect, useState} from 'react';
+import {
+    Container,
+    Box,
+    Typography,
+    Card,
+    CardContent,
+    TextField,
+    Button,
+    Alert,
+    AlertColor,
+    AlertTitle, LinearProgress
+} from '@mui/material';
 import {useBooking, BookingDetails} from '../../contexts/BookingContext';
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
@@ -18,6 +29,14 @@ function ReviewAndConfirm({onComplete, onBack, bookingDetails}: ReviewAndConfirm
     // const { bookingDetails } = useBooking();
     const navigate = useNavigate();
     const [comment, setComment] = useState('');
+
+    // alert
+    const [alertMessage, setAlertMessage] = useState('');
+    const [alertSeverity, setAlertSeverity] = useState<AlertColor>('success');
+    const [showAlert, setShowAlert] = useState(false);
+    const [countdown, setCountdown] = useState(5); // Countdown timer in seconds
+
+
     const {token} = useAuth();
 
 
@@ -26,7 +45,23 @@ function ReviewAndConfirm({onComplete, onBack, bookingDetails}: ReviewAndConfirm
         setComment(event.target.value);
     };
 
-
+    useEffect(() => {
+        let timer: NodeJS.Timeout;
+        if (showAlert && countdown > 0) {
+            timer = setInterval(() => {
+                setCountdown((prevCountdown) => {
+                    if (prevCountdown <= 0.1) {
+                        handleAlertClose();
+                        return 0;
+                    }
+                    return prevCountdown - 0.1;
+                });
+            }, 100);
+        } else if (countdown <= 0) {
+            handleAlertClose();
+        }
+        return () => clearInterval(timer);
+    }, [showAlert, countdown]);
     // const bookTimeSlot = (timeSlot: any) => {
     //     axios.post('/api/timeslots/book', timeSlot, {
     //         headers: {
@@ -141,51 +176,62 @@ function ReviewAndConfirm({onComplete, onBack, bookingDetails}: ReviewAndConfirm
             const requestId = response.data._id;
             console.log('Booking confirmed:', response.data);
 
+            const timeSlotWithRequest = {
+                ...bookingDetails.timeSlot,
+                // title: bookingDetails.timeSlot?.title,
+                requestId: requestId,
+            };
 
-            try {
-                const timeSlotWithRequest = {
-                    ...bookingDetails.timeSlot,
-                    // title: bookingDetails.timeSlot?.title,
-                    requestId: requestId,
-                };
+            // try {
+            // step 2: post the timeslot into timeslot table
+            const timeslotResponse = await bookTimeSlot(timeSlotWithRequest);
+            console.log("Timeslot booked successfully", timeslotResponse);
 
-                // step 2: post the timeslot into timeslot table
-                const timeslotResponse = await bookTimeSlot(timeSlotWithRequest);
-                console.log("Timeslot booked successfully", timeslotResponse);
-
-                // step 3: update the request
-                const updatedRequestData = {timeslot: timeslotResponse._id};
-                await axios.patch(`/api/requests/${requestId}`, updatedRequestData, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                console.log('Request updated with timeslot ID:', timeslotResponse._id);
-
-            //     if booking timeslot fails, then roll back the request
-            } catch (error: any) {
-                console.error('Error confirming booking:', error);
-
-                if (error instanceof BookingError && error.code === 409) {
-                    // Specific rollback for timeslot booking failure
-                    // todo: delete the request
-                    await axios.delete(`/api/requests/${requestId}`, {
-                        headers: {'Authorization': `Bearer ${token}`}
-                    });
-                    console.error('Rolled back the created request due to timeslot booking failure.');
-                    alert('Unfortunately, the selected timeslot is no longer available. Please select another time.');
+            // step 3: update the request
+            const updatedRequestData = {timeslot: timeslotResponse._id};
+            await axios.patch(`/api/requests/${requestId}`, updatedRequestData, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
                 }
-                throw error;  // Rethrow to inform the user
-                // Error handling
-            }
+            });
+            console.log('Request updated with timeslot ID:', timeslotResponse._id);
 
+            // todo: actually go to confirmation page
             navigate('/confirmation'); // Navigate to a confirmation page or show a confirmation message
 
-        } catch (error) {
+            //     if booking timeslot fails, then roll back the request
+        } catch (error: any) {
             console.error('Error confirming booking:', error);
-            alert('Failed to confirm booking. Please retry.'); // General error handling
-            navigate(`/offerings/${bookingDetails.serviceOffering?._id}`);
+
+            if (error instanceof BookingError && error.code === 409) {
+                // await axios.delete(`/api/requests/${requestId}`, {
+                //     headers: {'Authorization': `Bearer ${token}`}
+                // });
+                // console.error('Rolled back the created request due to timeslot booking failure.');
+                // alert('Unfortunately, the selected timeslot is no longer available. Please select another time.');
+
+                setAlertMessage('Unfortunately, the selected timeslot is no longer available. Please select another time.');
+                setAlertSeverity('error');
+                setShowAlert(true);
+                setCountdown(5);
+            } else {
+                // alert('An error occurred while confirming your booking. Please try again.');
+
+                setAlertMessage('An error occurred while confirming your booking. Please try again.');
+                setAlertSeverity('error');
+                setShowAlert(true);
+
+                setCountdown(5);
+            }
+            // Error handling
         }
+
+
+        // } catch (error) {
+        //     console.error('Error confirming booking:', error);
+        //     alert('Failed to confirm booking. Please retry.'); // General error handling
+        //     navigate(`/offerings/${bookingDetails.serviceOffering?._id}`);
+        // }
 
 
         // example from the signup page
@@ -217,8 +263,46 @@ function ReviewAndConfirm({onComplete, onBack, bookingDetails}: ReviewAndConfirm
 
     };
 
+
+    const handleAlertClose = () => {
+        setShowAlert(false);
+        navigate(`/offerings/${bookingDetails.serviceOffering?._id}`); // Redirect after closing the alert
+    };
+
+    const getButtonColor = (severity: AlertColor) => {
+        switch (severity) {
+            case 'error':
+                return 'error';
+            case 'warning':
+                return 'warning';
+            case 'info':
+                return 'info';
+            case 'success':
+                return 'success';
+            default:
+                return 'primary';
+        }
+    };
+
     return (
         <Container>
+            {showAlert && (
+                <Box sx={{position: 'relative', mb: 2, maxWidth: '500px', margin: 'auto'}}>
+                    <LinearProgress variant="determinate" value={(countdown / 5) * 100} color={getButtonColor(alertSeverity)}
+                                    sx={{position: 'absolute', top: 0, left: 0, right: 0}}/>
+
+                    <Alert severity={alertSeverity}>
+                        <AlertTitle>Error</AlertTitle>
+                        {alertMessage}
+                        <Box mt={2} display="flex" justifyContent="flex-end">
+                            <Button onClick={handleAlertClose} variant="contained" color={getButtonColor(alertSeverity)}
+                                    sx={{ml: 2}}>
+                                OK
+                            </Button>
+                        </Box>
+                    </Alert>
+                </Box>
+            )}
             <Box sx={{display: 'flex', justifyContent: 'space-between', mt: 4}}>
                 <Box sx={{width: '60%'}}>
                     <Typography variant="h6" gutterBottom>

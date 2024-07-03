@@ -2,6 +2,7 @@ import { RequestHandler } from 'express';
 import moment from 'moment';
 import Timeslot, { ITimeslot } from '../models/timeslot';
 import mongoose, {Types} from "mongoose";
+import ServiceRequest from "../models/serviceRequest";
 
 // Function to generate weekly instances (existing code)
 function generateWeeklyInstances(events: ITimeslot[], startDate: moment.Moment, endDate: moment.Moment) {
@@ -521,7 +522,7 @@ export const checkAvailability: RequestHandler = async (req, res) => {
 export const bookTimeslot: RequestHandler = async (req, res) => {
     // const userId = (req as any).user.userId; // consumer id
     console.log(req.body)
-    const { start, end, title, isFixed, isBooked, createdById } = req.body;
+    const { start, end, title, isFixed, isBooked, createdById, requestId } = req.body;
     const session = await mongoose.startSession();
     try {
         session.startTransaction();
@@ -572,7 +573,7 @@ export const bookTimeslot: RequestHandler = async (req, res) => {
             isFixed,
             isBooked,
             createdById,
-            // requestId,
+            requestId,
         });
 
         // save the new timeslot
@@ -615,6 +616,21 @@ export const bookTimeslot: RequestHandler = async (req, res) => {
     } catch (error: any) {
         await session.abortTransaction();
         console.error("Failed to book timeslot:", error);
+
+        // delete the corresponding request if there is an error in saving timeslots
+        if (requestId) {
+            try {
+                await ServiceRequest.findByIdAndDelete(requestId).session(session);
+                console.error('Rolled back the created request due to timeslot booking failure.');
+            } catch (deleteError) {
+                console.error('Failed to delete the request:', deleteError);
+            }
+        }
+
+        if (error.response?.status === 409) {
+            return res.status(409).json({ message: "Timeslot is no longer available." });
+        }
+
         res.status(500).json({ message: "Failed to book timeslot", error: error.message });
     } finally {
         session.endSession();
