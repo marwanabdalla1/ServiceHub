@@ -56,44 +56,45 @@ function MainRoutes() {
 
     return (
         <div className="h-screen flex flex-col">
-            {showNavBar && <NavigationBar toggleDrawer={() => {
-            }} onChange={() => {
-            }} onSearch={() => {
-            }} search={""}/>}
+            {showNavBar && <NavigationBar toggleDrawer={() => {}} onChange={() => {}} onSearch={() => {}} search={""}/>}
             <Routes>
+                {/* Home */}
                 <Route path="/" element={<HomePage/>}/>
-                <Route path="/setprofile" element={<ProfileSettingPage/>}/>
-                <Route path="/customer_review" element={<ReviewPage/>}/>
+
+                {/* User Authentication */}
                 <Route path="/login" element={<SignInPage/>}/>
                 <Route path="/signup" element={<SignUpPage/>}/>
-                <Route path="/filter" element={<FilterPage/>}/>
+
+                {/* User Profile */}
+                <Route path="/setprofile" element={<ProfileSettingPage/>}/>
+                <Route path="/customer_review" element={<ReviewPage/>}/>
+                <Route path="/profile-settings" element={<ProfileSettingPage/>}/>
+
+                {/* Provider Related */}
+                <Route path="/addservice" element={<AddServicePage/>}/>
+                <Route path="/provider-profile/:id" element={<ProviderProfilePage/>}/>
+                <Route path="/becomepro" element={<BecomeProPage/>}/>
+
+                {/* Booking */}
+                <Route path="/offerings/:offeringId" element={<ProviderProfilePage/>} />
+                <Route path="/offerings/:offeringId/booking/:step" element={<BookingPage/>} />
+                <Route path="/select-availability" element={<SelectAvailabilityPage/>}/>
+                <Route path="/update-timeslot" element={<UpdateTimeslot/>}/>
+
+                {/* Requests */}
                 <Route path="/jobs/jobHistory" element={<JobHistoryPage/>}/>
                 <Route path="/jobs/requestHistory" element={<RequestHistoryPage/>}/>
                 <Route path="/incomingRequests" element={<IncomingRequestsPage/>}/>
-                <Route path="/addservice" element={<AddServicePage/>}/>
-                <Route path="/provider-profile/:id" element={<ProviderProfilePage/>}/>
-                <Route path="/select-availability" element={<SelectAvailabilityPage/>}/>
-                {/*<Route path="/select-availability-booking" element={<SelectAvailabilityBooking_temp/>}/>*/}
+                <Route path="/proposeNewTime" element={<ProposeNewtimePage/>}/>
 
-                <Route path="/update-timeslot" element={<UpdateTimeslot/>}/>
-                <Route path="/becomepro" element={<BecomeProPage/>}/>
-
-
-                {/*booking*/}
-                <Route path="/offerings/:offeringId" element={<ProviderProfilePage />} />
-                <Route path="/offerings/:offeringId/booking/:step" element={<BookingPage />} />
-
-                {/*old ones*/}
-                {/*<Route path="/create-account-or-sign-in" element={<CreateAccountOrSignIn/>}/>*/}
-                {/*<Route path="/update-profile" element={<UpdateProfile/>}/>*/}
-                {/*<Route path="/review-and-confirm" element={<ReviewAndConfirm/>}/>*/}
-
+                {/* Lists */}
                 <Route path="/listsLandingPage" element={<ListsLandingPage/>}/>
-                <Route path="/update-timeslot/" element={<UpdateTimeslot/>} />
-                <Route path="/proposeNewTime" element={<ProposeNewtimePage />} />
+
+                {/* Filter */}
+                <Route path="/filter" element={<FilterPage/>}/>
+
+                {/* Catch All */}
                 <Route path="*" element={<h1>Not Found</h1>}/>
-
-
             </Routes>
         </div>
     );
