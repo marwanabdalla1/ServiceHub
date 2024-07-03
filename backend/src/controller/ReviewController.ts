@@ -231,4 +231,23 @@ async function recalculateServiceOfferingRating(serviceOfferingId: any) {
 
 
 
-// review for platform
+// get all reviews of an offering
+// this does NOT require signing in!
+export const getAllReviewsByOffering: RequestHandler = async (req, res) => {
+    // const user = (req as any).user;
+    const { offeringId } = req.params;
+    console.log("offering id for finding reviews: ", offeringId)
+    // const userId = user.userId; // Assuming you're using some authentication middleware
+
+    try {
+        const reviews = await Review.find({ serviceOffering: offeringId });
+        if (reviews) {
+            return res.json({ review: reviews });
+        }
+        // else {
+        //     return res.json({ success: false });
+        // }
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server error", error });
+    }
+}
