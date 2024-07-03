@@ -73,3 +73,27 @@ export const setNewPassword: RequestHandler = async (req, res) => {
     }
 };
 
+/**
+ * Send an cancellation notification to the user's email
+ * @param req
+ * @param res
+ */
+export const sendCancellationNotificationEmail = (req: Request, res: Response): void => {
+    const { email, serviceType, startTime, name } = req.body;
+
+    const mailOptions = {
+        from: process.env.MY_EMAIL,
+        to: email,
+        subject: `${serviceType} Appointment Cancellation`,
+        text: `Dear ${name}, /n We are sorry to inform you that your scheduled service appointment for ${serviceType} at ${startTime} has been cancelled. /n Please find an alternative timeslot. /n Thank you for understanding. /n Kind regards, /n The ServiceHub Team`
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            res.status(500).send(error.toString());
+        } else {
+            res.status(200).send(`Cancellation notification sent to  sent to ${email}`);
+        }
+    });
+};
+

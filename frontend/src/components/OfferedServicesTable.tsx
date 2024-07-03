@@ -35,8 +35,8 @@ export default function OfferedServicesTable() {
   const [jobs, setJobs] = React.useState<Job[]>([]);
   const {token, account} = useAuth();
   const navigate = useNavigate();
-  const [provider, setProvider] = React.useState<[string, string]>(["", ""]);
-  const [receiver, setReceiver] = React.useState<[string, string]>(["", ""]);
+  const [providerAccount, setProviderAccount] = React.useState<Account | null>(null);
+  const [receiverAccount, setReceiverAccount] = React.useState<Account | null>(null);
 
   // todo: this probably can be combined/reused along with the request history table
   useEffect(() => {
@@ -47,7 +47,7 @@ export default function OfferedServicesTable() {
         headers: {Authorization: `Bearer ${token}` }
       })
           .then(response => {
-            //console.log("getting requests ...", response.data)
+            console.log("getting requests ...", response.data)
             setJobs(response.data);
             // setLoading(false);
           })
@@ -69,35 +69,39 @@ export default function OfferedServicesTable() {
 
   useEffect(() => {
     if (selectedJob) {
+      console.log(selectedJob);
       fetchProvider(selectedJob.provider);
       fetchReceiver(selectedJob.receiver);
     }
   }, [selectedJob, token]);
 
-  const fetchProvider = (provider: Account) => {
-    axios.get<[string, string]>(`/api/account/providers/${provider._id}`, {
+  const fetchProvider = (p_provider: Account) => {
+    console.log("Get provider name for ", p_provider);
+    axios.get<Account>(`/api/account/providers/${p_provider._id}`, {
       headers: {Authorization: `Bearer ${token}` }
     })
       .then(response => {
-        setProvider(response.data);
+        console.log("Got response ", response.data);
+        setProviderAccount(response.data);
       })
       .catch(error => {
         console.error('Failed to fetch provider:', error);
-        setProvider(["",""]);
+        setProviderAccount(null);
       });
   };
 
-  const fetchReceiver = (requester: Account) => {
-    console.log("Offered, 91: " + requester.firstName);
-    axios.get<[string, string]>(`/api/account/requester/${requester._id}`, {
+  const fetchReceiver = (p_requester: Account) => {
+    console.log("Get receiver name for ", p_requester);
+    axios.get<Account>(`/api/account/requester/${p_requester._id}`, {
       headers: {Authorization: `Bearer ${token}` }
     })
       .then(response => {
-        setReceiver(response.data);
+        console.log("Got response ", response.data);
+        setReceiverAccount(response.data);
       })
       .catch(error => {
         console.error('Failed to fetch receiver:', error);
-        setReceiver(["",""]);
+        setReceiverAccount(null);
       });
   };
 
@@ -293,6 +297,35 @@ export default function OfferedServicesTable() {
       console.error('Error sending notification:', notificationError);
     }
 
+    let email = "";
+    let addressee = "";
+
+    if (account?._id === providerAccount?._id) {
+
+      email = receiverAccount?.email ? receiverAccount?.email : "";
+      addressee = receiverAccount?.firstName + " " + receiverAccount?.lastName;
+      
+    } else if (account?._id === receiverAccount?._id) {
+      email = providerAccount?.email ? providerAccount?.email : "";
+      addressee = providerAccount?.firstName + " " + providerAccount?.lastName;
+    }
+
+    // send Email notification
+    try {
+      await axios.post('/api/email/cancelNotification', {email: email, serviceType: selectedJob.serviceType,
+         startTime: selectedJob.appointmentStartTime, name: addressee}).then(
+          (res) => {
+              console.log(res);
+          }
+      ).catch((err) => {
+              console.error(err);
+          }
+      );
+
+  } catch (error) {
+      console.error("There was an error sending the email", error);
+  }
+
   };
 
   return (
@@ -332,8 +365,8 @@ export default function OfferedServicesTable() {
         {showMediaCard && selectedJob && (
           <div style={{ position: 'relative', flexShrink: 0, width: 400, marginLeft: 2 }}>
             <MediaCard offeredService={selectedJob}
-                      provider={provider}
-                      receiver={receiver}
+                      provider={providerAccount}
+                      receiver={receiverAccount}
                        onClose={() => setShowMediaCard(false)}
                        onComplete={handleComplete}
                        onCancel = {handleCancel}

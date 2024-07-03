@@ -100,7 +100,6 @@ async function updateUserJobHistory(userId: string, jobId: string) {
 }
 
 export const getJobsByProvider: RequestHandler = async (req, res) => {
-    const { providerId } = req.params;  // Extract the provider ID from URL parameters
 
     try {
 

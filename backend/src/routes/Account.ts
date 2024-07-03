@@ -9,6 +9,6 @@ router.get('/requester/:requesterId', authenticate, getRequesterById);
 router.delete("/", authenticate, deleteAccount);
 router.put('/', authenticate, updateAccountDetails);
 router.get('/', authenticate, getAccountDetails);
-router.get('/name/:userId', authenticate, getNameById);
+router.get('/name/:userId', getNameById);
 
 export default router;

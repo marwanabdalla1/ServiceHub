@@ -17,8 +17,8 @@ import { useEffect } from 'react';
 
 interface MediaCardProps {
   offeredService: Job;
-  provider: [string, string];
-  receiver: [string, string];
+  provider: Account | null;
+  receiver: Account | null;
   onClose: () => void;
   onComplete: (offeredService: Job) => void;
   onCancel: (offeredService: Job) => void;
@@ -28,28 +28,9 @@ interface MediaCardProps {
 
 const MediaCard: React.FC<MediaCardProps> = ({ offeredService, provider, receiver, onClose, onComplete, onCancel, onReview, onRevoke }) => {
   const {account, token, } = useAuth();
-  
-/*
-  useEffect(() => {
-    console.log(job.provider);
-    axios.get<Account>(`/api/account/providers/${job.provider}`, {
-      headers: {Authorization: `Bearer ${token}` }
-    })
-        .then(response => {
-          console.log("getting provider info ...", response.data)
-          setProvider(response.data);
-        })
-        .catch(error => {
-          console.error('Failed to fetch provider info:', error);
-          setProvider(null);
-        });
-  });*/
 
   const renderButton = () => {
     //Check whether user in sign-in context is a provider
-    //console.log("Account ID: " + account?._id);
-    //console.log("Receiver ID: " + offeredService.receiver);
-    //console.log(account?._id === offeredService.receiver._id);
     if(offeredService.status === JobStatus.open && account?._id === offeredService.provider._id ){
         return (
           <>
@@ -92,13 +73,13 @@ const MediaCard: React.FC<MediaCardProps> = ({ offeredService, provider, receive
       </button>
       <CardContent>
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem' }}>
-          <Avatar alt={provider[0] + " " + provider[1]} src={offeredService.provider.profileImageUrl} sx={{ width: 100, height: 100, marginRight: '1rem' }} />
+          <Avatar alt={receiver?.firstName + " " + receiver?.lastName} src={receiver?.profileImageUrl} sx={{ width: 100, height: 100, marginRight: '1rem' }} />
           <div style={{ marginRight: '1rem' }}>
             <Typography variant="h6" >
               Request Detail
             </Typography>
             <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
-              Provider: {provider[0] + " " + provider[1]}
+              Provider: {receiver?.firstName + " " + receiver?.lastName}
             </Typography>
           </div>
           <div className='flex space-x-1 items-center'>

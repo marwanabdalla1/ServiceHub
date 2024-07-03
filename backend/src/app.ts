@@ -25,6 +25,7 @@ import ProfileImage from "./routes/ProfileImage";
 import PaymentRouter from "./routes/PaymentRouter";
 import WebhookRouter from "./routes/WebhookRouter";
 import RecoveryRouter from "./routes/Recovery";
+import EmailRouter from "./routes/Email";
 
 const app = express();
 
@@ -59,6 +60,7 @@ app.use("/api/requests", RequestRouter);
 app.use("/api/jobs", JobRouter);
 app.use("/api/reviews", ReviewRouter);
 app.use("/api/notification", NotificationRouter);
+app.use("/api/email", EmailRouter);
 app.use("/api/feedback", FeedbackRouter);
 
 
