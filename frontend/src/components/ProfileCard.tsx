@@ -47,6 +47,11 @@ export default function MediaCard({ user, profileImageUrl }: MediaCardProps) {
                   Licensed
                 </Typography>
               )}
+              {user.isPremium && (
+                <Typography className='text-slate-500 font-extrabold' variant="body2">
+                  Promoted
+                </Typography>
+              )}
             </div>
           </div>
         </CardContent>

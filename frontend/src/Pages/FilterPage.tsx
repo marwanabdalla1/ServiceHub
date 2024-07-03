@@ -67,7 +67,7 @@ function FilterPage() {
           newProfileImages[account._id] = URL.createObjectURL(profileImageResponse.data);
         }
       } catch (error) {
-        console.error('Error fetching profile image:', error);
+        // console.error('Error fetching profile image:', error);
       }
     }));
 
@@ -77,7 +77,7 @@ function FilterPage() {
 
   useEffect(() => {
     fetchOfferings();
-  }, [filterState, search]);
+  }, [filterState, search, sortKey]);
 
   useEffect(() => {
     let sortedData = [...offerings];
@@ -94,44 +94,57 @@ function FilterPage() {
     // Collect all premium accounts
     const premiumAccounts = sortedData.filter(account => account.isPremium);
 
-    // Select 4 random premium accounts
-    const topPremiumAccounts = shuffleArray(premiumAccounts).slice(0, 4);
+    // Check if filter and sort parameters are set
+    const isFilterDefault = 
+      filterState.type === '' && 
+      filterState.priceRange[0] === 15 && 
+      filterState.priceRange[1] === 60 && 
+      filterState.locations.length === 0 && 
+      filterState.isLicensed === undefined;
 
-    // Remove the selected premium accounts from the original list to avoid duplication
-    const remainingAccounts = sortedData.filter(account => !topPremiumAccounts.includes(account));
+    if (isFilterDefault) {
+      // If filter and sort parameters are not set, place all premium accounts at the top
+      sortedData = [...premiumAccounts, ...sortedData.filter(account => !account.isPremium)];
+    } else {
+      // Select 4 random premium accounts on subsequent fetches
+      const topPremiumAccounts = shuffleArray(premiumAccounts).slice(0, 4);
 
-    // Sorting the remaining accounts based on the selected sort key
-    if (sortKey === "priceAsc") {
-      remainingAccounts.sort((a, b) => {
-        const aRate = a.serviceOfferings.length > 0 ? a.serviceOfferings[0].hourlyRate : 0;
-        const bRate = b.serviceOfferings.length > 0 ? b.serviceOfferings[0].hourlyRate : 0;
-        return aRate - bRate;
-      });
-    } else if (sortKey === "priceDesc") {
-      remainingAccounts.sort((a, b) => {
-        const aRate = a.serviceOfferings.length > 0 ? a.serviceOfferings[0].hourlyRate : 0;
-        const bRate = b.serviceOfferings.length > 0 ? b.serviceOfferings[0].hourlyRate : 0;
-        return bRate - aRate;
-      });
-    } else if (sortKey === "ratingAsc") {
-      remainingAccounts.sort((a, b) => {
-        const aRating = a.serviceOfferings.length > 0 ? a.serviceOfferings[0].rating : 0;
-        const bRating = b.serviceOfferings.length > 0 ? b.serviceOfferings[0].rating : 0;
-        return aRating - bRating;
-      });
-    } else if (sortKey === "ratingDesc") {
-      remainingAccounts.sort((a, b) => {
-        const aRating = a.serviceOfferings.length > 0 ? a.serviceOfferings[0].rating : 0;
-        const bRating = b.serviceOfferings.length > 0 ? b.serviceOfferings[0].rating : 0;
-        return bRating - aRating;
-      });
+      // Remove the selected premium accounts from the original list to avoid duplication
+      const remainingAccounts = sortedData.filter(account => !topPremiumAccounts.includes(account));
+
+      // Sorting the remaining accounts based on the selected sort key
+      if (sortKey === "priceAsc") {
+        remainingAccounts.sort((a, b) => {
+          const aRate = a.serviceOfferings.length > 0 ? a.serviceOfferings[0].hourlyRate : 0;
+          const bRate = b.serviceOfferings.length > 0 ? b.serviceOfferings[0].hourlyRate : 0;
+          return aRate - bRate;
+        });
+      } else if (sortKey === "priceDesc") {
+        remainingAccounts.sort((a, b) => {
+          const aRate = a.serviceOfferings.length > 0 ? a.serviceOfferings[0].hourlyRate : 0;
+          const bRate = b.serviceOfferings.length > 0 ? b.serviceOfferings[0].hourlyRate : 0;
+          return bRate - aRate;
+        });
+      } else if (sortKey === "ratingAsc") {
+        remainingAccounts.sort((a, b) => {
+          const aRating = a.serviceOfferings.length > 0 ? a.serviceOfferings[0].rating : 0;
+          const bRating = b.serviceOfferings.length > 0 ? b.serviceOfferings[0].rating : 0;
+          return aRating - bRating;
+        });
+      } else if (sortKey === "ratingDesc") {
+        remainingAccounts.sort((a, b) => {
+          const aRating = a.serviceOfferings.length > 0 ? a.serviceOfferings[0].rating : 0;
+          const bRating = b.serviceOfferings.length > 0 ? b.serviceOfferings[0].rating : 0;
+          return bRating - aRating;
+        });
+      }
+
+      // Combine the top premium accounts with the sorted remaining accounts
+      sortedData = [...topPremiumAccounts, ...remainingAccounts];
     }
 
-    // Combine the top premium accounts with the sorted remaining accounts
-    let combinedAccounts = [...topPremiumAccounts, ...remainingAccounts];
-
-    setSortedOfferings(combinedAccounts);
-  }, [sortKey, offerings]);
+    setSortedOfferings(sortedData);
+  }, [ offerings]);
 
   const toggleDrawer = () => {
     setIsDrawerOpen(!isDrawerOpen);
@@ -184,9 +197,10 @@ function FilterPage() {
   };
 
   const handleSortChange = (sortKey: string) => {
+    console.log('Sort key:', sortKey);
     setSortKey(sortKey);
   };
-//TODO: Add if the filter, sort or search is empty then display all the premium accounts "Promoted"
+
   return (
     <div>
       <NavigationBar toggleDrawer={toggleDrawer} onChange={handleInputChange} onSearch={handleSearch} search={search} />
