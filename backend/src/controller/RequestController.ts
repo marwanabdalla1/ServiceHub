@@ -2,7 +2,9 @@ import {Request, Response, NextFunction, RequestHandler} from 'express';
 import Account from '../models/account';
 import ServiceOffering from "../models/serviceOffering";
 import ServiceRequest, { IServiceRequest } from "../models/serviceRequest";
-import {Document} from 'mongoose';
+import mongoose, {Document} from 'mongoose';
+import Timeslot from "../models/timeslot";
+import {bookTimeslot} from "./TimeSlotController";
 
 
 
@@ -18,6 +20,67 @@ function errorHandler(req: Request, res: Response, requiredProperties: string[])
     }
     return false;
 }
+
+// export const createServiceRequest: RequestHandler = async (req, res) => {
+//     const user = (req as any).user;
+//     console.log("request body: " + JSON.stringify(req.body), "userID: ", user.userId);
+//
+//     // Perform initial validation checks
+//     const error = errorHandler(req, res, [
+//         "requestStatus", "serviceType", "appointmentStartTime",
+//         "appointmentEndTime", "serviceFee", "serviceOffering",
+//         "provider", "requestedBy", "profileImageUrl",
+//     ]);
+//     if (error) {
+//         return error;
+//     }
+//
+//     if (req.body.requestedBy !== user.userId) {
+//         return res.status(403).json({
+//             error: "Unauthorized",
+//             message: "Unable to create this request" // Only the corresponding requester can create requests
+//         });
+//     }
+//
+//     try {
+//         const { timeSlot, ...requestBody } = req.body;
+//
+//         // Start a transaction
+//
+//         const session = await mongoose.startSession();
+//         session.startTransaction();
+//
+//         try {
+//             // Create the service request
+//             let newServiceRequest = await ServiceRequest.create([requestBody], { session: session });
+//
+//             if (!newServiceRequest) {
+//                 throw new Error("Failed to create service request.");
+//             }
+//
+//             // Create the timeslot if specified
+//             if (timeSlot) {
+//                 const { start, end, title, isFixed, isBooked, createdById } = timeSlot;
+//                 bookTimeslot({ start, end, title, isFixed, isBooked, createdById })
+//             }
+//
+//             // Commit the transaction
+//             await session.commitTransaction();
+//             res.status(201).json(newServiceRequest);
+//         } catch (error) {
+//             // Abort the transaction on any error
+//             await session.abortTransaction();
+//             throw error; // This will be caught by the outer catch
+//         } finally {
+//             // End the session whether success or fail
+//             session.endSession();
+//         }
+//     } catch (error: any) {
+//         console.error("Failed to create service request and/or timeslot: ", error);
+//         res.status(500).json({ message: error.message });
+//     }
+// };
+//
 
 export const createServiceRequest:RequestHandler = async (req: Request, res: Response) => {
     const user = (req as any).user;

@@ -4,7 +4,7 @@ import {
     saveEvents,
     extendFixedSlots,
     deleteTimeslot,
-    getAvailabilityByProviderId, bookTimeslot, turnExistingEventIntoFixed
+    getAvailabilityByProviderId, bookTimeslot, turnExistingEventIntoFixed, cancelTimeslot, checkAvailability
 } from "../controller/TimeSlotController";
 import {authenticate} from "../middleware/authenticate";
 
@@ -23,6 +23,9 @@ TimeSlotRouter.post("/book", bookTimeslot);
 
 
 TimeSlotRouter.patch('/', authenticate, turnExistingEventIntoFixed);
+TimeSlotRouter.patch('/:timeslotId', authenticate, cancelTimeslot);
 
+
+TimeSlotRouter.get('/check-availability', checkAvailability);
 
 export default TimeSlotRouter;
