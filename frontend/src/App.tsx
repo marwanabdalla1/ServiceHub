@@ -108,7 +108,7 @@ function MainRoutes() {
                 <Route path="/jobs/requestHistory" element={<RequestHistoryPage/>}/>
                 <Route path="/incomingRequests" element={<IncomingRequestsPage/>}/>
                 <Route path="/addservice" element={<AddServicePage/>}/>
-                <Route path="/provider-profile/:id" element={<ProviderProfilePage/>}/>
+                {/*<Route path="/provider-profile/:id" element={<ProviderProfilePage/>}/>*/}
                 <Route path="/select-availability" element={<SelectAvailabilityPage/>}/>
                 {/*<Route path="/select-availability-booking" element={<SelectAvailabilityBooking_temp/>}/>*/}
 
@@ -118,7 +118,7 @@ function MainRoutes() {
 
                 {/*booking*/}
                 <Route path="/offerings/:offeringId" element={<ProviderProfilePage/>}/>
-                <Route path="/offerings/:could /booking/:step" element={<BookingPage/>}/>
+                <Route path="/offerings/:offeringId/booking/:step" element={<BookingPage/>}/>
                 <Route path="/offerings/:requestId/confirm" element={<ConfirmationPage/>}/>
 
                 {/*old ones*/}
