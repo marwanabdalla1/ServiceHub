@@ -140,7 +140,7 @@ function ReviewAndConfirm({onComplete, onBack, bookingDetails}: ReviewAndConfirm
     //     });
     // };
 
-    const handleConfirmBooking = async() => {
+    const handleConfirmBooking = async () => {
 
         const apiEndpoint = '/api/requests'
 
@@ -262,11 +262,9 @@ function ReviewAndConfirm({onComplete, onBack, bookingDetails}: ReviewAndConfirm
         //             // Handle the error here. For example, you might display an error message to the user
         //             console.error('Error creating user:', error);
         //         }
-        //     };
+    };
 
-
-
-        // Handle booking confirmation logic
+    // Handle booking confirmation logic
     const handleAlertClose = () => {
         setShowAlert(false);
         navigate(`/offerings/${bookingDetails.serviceOffering?._id}`); // Redirect after closing the alert
@@ -291,14 +289,16 @@ function ReviewAndConfirm({onComplete, onBack, bookingDetails}: ReviewAndConfirm
         <Container>
             {showAlert && (
                 <Box sx={{position: 'relative', mb: 2, maxWidth: '500px', margin: 'auto'}}>
-                    <LinearProgress variant="determinate" value={(countdown / 5) * 100} color={getButtonColor(alertSeverity)}
+                    <LinearProgress variant="determinate" value={(countdown / 5) * 100}
+                                    color={getButtonColor(alertSeverity)}
                                     sx={{position: 'absolute', top: 0, left: 0, right: 0}}/>
 
                     <Alert severity={alertSeverity}>
                         <AlertTitle>Error</AlertTitle>
                         {alertMessage}
                         <Box mt={2} display="flex" justifyContent="flex-end">
-                            <Button onClick={handleAlertClose} variant="contained" color={getButtonColor(alertSeverity)}
+                            <Button onClick={handleAlertClose} variant="contained"
+                                    color={getButtonColor(alertSeverity)}
                                     sx={{ml: 2}}>
                                 OK
                             </Button>
@@ -314,10 +314,10 @@ function ReviewAndConfirm({onComplete, onBack, bookingDetails}: ReviewAndConfirm
                     <Typography variant="h4" gutterBottom>
                         Review and confirm booking
                     </Typography>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+                    <Box sx={{display: 'flex', justifyContent: 'space-between', mt: 2}}>
                         <Button variant="outlined" onClick={onBack}>Back</Button>
                     </Box>
-                    <Card sx={{ mb: 2 }}>
+                    <Card sx={{mb: 2}}>
                         <CardContent>
                             <Typography variant="h6" gutterBottom>
                                 Booking Details
@@ -339,7 +339,7 @@ function ReviewAndConfirm({onComplete, onBack, bookingDetails}: ReviewAndConfirm
                             </Typography>
                         </CardContent>
                     </Card>
-                    <Card sx={{ mb: 2 }}>
+                    <Card sx={{mb: 2}}>
                         <CardContent>
                             <Typography variant="h6" gutterBottom>
                                 Add Booking Notes
@@ -355,17 +355,18 @@ function ReviewAndConfirm({onComplete, onBack, bookingDetails}: ReviewAndConfirm
                             />
                         </CardContent>
                     </Card>
-                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+                    <Box sx={{display: 'flex', justifyContent: 'flex-end', mt: 2}}>
                         <Button variant="contained" color="primary" onClick={handleConfirmBooking}>
                             Confirm Booking
                         </Button>
                     </Box>
                 </Box>
-                <Box sx={{ width: 250 }}>
+                <Box sx={{width: 250}}>
                     <Card>
-                        <CardContent sx={{ display: 'flex', alignItems: 'center' }}>
+                        <CardContent sx={{display: 'flex', alignItems: 'center'}}>
                             <Box>
-                                <Typography variant="h6">{`${bookingDetails.provider?.firstName} ${bookingDetails.provider?.lastName}`}</Typography>
+                                <Typography
+                                    variant="h6">{`${bookingDetails.provider?.firstName} ${bookingDetails.provider?.lastName}`}</Typography>
                                 <Typography variant="body2" color="text.secondary">
                                     {bookingDetails.location}
                                 </Typography>
