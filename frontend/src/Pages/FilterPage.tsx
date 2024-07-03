@@ -53,32 +53,56 @@ function FilterPage() {
 
   useEffect(() => {
     let sortedData = [...offerings];
+
+    // Function to shuffle an array
+    const shuffleArray = (array: any[]) => {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    };
+
+    // Collect all premium accounts
+    const premiumAccounts = sortedData.filter(account => account.isPremium);
+
+    // Select 4 random premium accounts
+    const topPremiumAccounts = shuffleArray(premiumAccounts).slice(0, 4);
+
+    // Remove the selected premium accounts from the original list to avoid duplication
+    const remainingAccounts = sortedData.filter(account => !topPremiumAccounts.includes(account));
+
+    // Sorting the remaining accounts based on the selected sort key
     if (sortKey === "priceAsc") {
-      sortedData.sort((a, b) => {
+      remainingAccounts.sort((a, b) => {
         const aRate = a.serviceOfferings.length > 0 ? a.serviceOfferings[0].hourlyRate : 0;
         const bRate = b.serviceOfferings.length > 0 ? b.serviceOfferings[0].hourlyRate : 0;
         return aRate - bRate;
       });
     } else if (sortKey === "priceDesc") {
-      sortedData.sort((a, b) => {
+      remainingAccounts.sort((a, b) => {
         const aRate = a.serviceOfferings.length > 0 ? a.serviceOfferings[0].hourlyRate : 0;
         const bRate = b.serviceOfferings.length > 0 ? b.serviceOfferings[0].hourlyRate : 0;
         return bRate - aRate;
       });
     } else if (sortKey === "ratingAsc") {
-      sortedData.sort((a, b) => {
+      remainingAccounts.sort((a, b) => {
         const aRating = a.serviceOfferings.length > 0 ? a.serviceOfferings[0].rating : 0;
         const bRating = b.serviceOfferings.length > 0 ? b.serviceOfferings[0].rating : 0;
         return aRating - bRating;
       });
     } else if (sortKey === "ratingDesc") {
-      sortedData.sort((a, b) => {
+      remainingAccounts.sort((a, b) => {
         const aRating = a.serviceOfferings.length > 0 ? a.serviceOfferings[0].rating : 0;
         const bRating = b.serviceOfferings.length > 0 ? b.serviceOfferings[0].rating : 0;
         return bRating - aRating;
       });
     }
-    setSortedOfferings(sortedData);
+
+    // Combine the top premium accounts with the sorted remaining accounts
+    let combinedAccounts = [...topPremiumAccounts, ...remainingAccounts];
+
+    setSortedOfferings(combinedAccounts);
   }, [sortKey, offerings]);
 
   const toggleDrawer = () => {
@@ -136,9 +160,9 @@ function FilterPage() {
   };
 
   return (
-    <div>
+    <div className=' '>
       <NavigationBar toggleDrawer={toggleDrawer} onChange={handleInputChange} onSearch={handleSearch} search={search} />
-      <div className='flex-col justify-center'>
+      <div  className='flex-col items-center '>
         <DrawerFilter
           openDrawer={isDrawerOpen}
           toggleDrawer={toggleDrawer}
@@ -149,10 +173,8 @@ function FilterPage() {
           onLicensedChange={handleLicensedChange}
           onClearFilters={clearFilters}
         />
-        <div className="flex justify-center "> {/* Flex container for alignment */}
           <Sort onSortChange={handleSortChange} />
-        </div>
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-screen-lg w-full mx-auto '>
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4  mx-auto  bg-slate-50 max-w-screen-2xl '>
           {sortedOfferings.map((offering) => (
             <MediaCard key={offering._id} user={offering} />
           ))}
