@@ -8,40 +8,16 @@ import Typography from '@mui/material/Typography';
 import { Account } from '../models/Account';
 import { GoStarFill } from "react-icons/go";
 import { Link } from 'react-router-dom';
-import { useEffect, useState } from "react";
-import axios from "axios";
 
-export default function MediaCard({ user }: { user: Account }) {
-  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
-  useEffect(() => {
-    const fetchProfileImage = async () => {
-      try {
-        // Fetch profile image
-        const profileImageResponse = await axios.get(`/api/file/profileImage/${user._id}`, {
-          responseType: 'blob'
-        });
+interface MediaCardProps {
+  user: Account;
+  profileImageUrl: string | null;
+}
 
-        if (profileImageResponse.status === 200) {
-          setProfileImageUrl(URL.createObjectURL(profileImageResponse.data));
-          user.profileImageUrl = URL.createObjectURL(profileImageResponse.data);
-        }
-      } catch (error) {
-        // console.error('Error fetching profile image:', error);
-      }
-    };
-
-    fetchProfileImage().then(r => {
-      return r;
-    });
-  }, [user._id]);
-
+export default function MediaCard({ user, profileImageUrl }: MediaCardProps) {
   return (
-    <div className='border margin-4  '>
-      <Card
-        //I want to make the card have rounded corners
-        sx={{ borderRadius: '15px' }}
-
-      >
+    <div className='border margin-4'>
+      <Card sx={{ borderRadius: '15px' }}>
         <CardMedia
           sx={{ height: 280 }}
           image={profileImageUrl ? profileImageUrl : user.profileImageUrl}

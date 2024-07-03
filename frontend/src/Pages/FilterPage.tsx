@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import NavigationBar from '../components/Navbar';
 import MediaCard from '../components/ProfileCard';
 import { DrawerFilter } from '../components/DrawFilter';
-import Sort from '../components/Sort'; 
+import Sort from '../components/Sort';
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import { Account } from '../models/Account';
+import CircularProgress from '@mui/material/CircularProgress';
+import Box from '@mui/material/Box';
 
 interface FilterState {
   type: string;
@@ -26,10 +28,13 @@ function FilterPage() {
   const [sortedOfferings, setSortedOfferings] = useState<Account[]>([]);
   const [search, setSearch] = useState<string>("");
   const [sortKey, setSortKey] = useState<string>("priceAsc");
+  const [profileImages, setProfileImages] = useState<{ [key: string]: string }>({});
+  const [loading, setLoading] = useState<boolean>(true);
 
   const navigate = useNavigate();
 
   const fetchOfferings = () => {
+    setLoading(true);
     const params = {
       type: filterState.type,
       priceRange: filterState.priceRange.join(','),
@@ -41,10 +46,33 @@ function FilterPage() {
     axios.get<Account[]>('/api/offerings', { params })
       .then(response => {
         setOfferings(response.data);
+        fetchProfileImages(response.data);
       })
       .catch(error => {
         console.error('Error fetching data:', error);
+        setLoading(false); // Set loading to false even if there's an error
       });
+  };
+
+  const fetchProfileImages = async (accounts: Account[]) => {
+    const newProfileImages: { [key: string]: string } = {};
+
+    await Promise.all(accounts.map(async (account) => {
+      try {
+        const profileImageResponse = await axios.get(`/api/file/profileImage/${account._id}`, {
+          responseType: 'blob'
+        });
+
+        if (profileImageResponse.status === 200) {
+          newProfileImages[account._id] = URL.createObjectURL(profileImageResponse.data);
+        }
+      } catch (error) {
+        console.error('Error fetching profile image:', error);
+      }
+    }));
+
+    setProfileImages(newProfileImages);
+    setLoading(false); // Set loading to false after images are fetched
   };
 
   useEffect(() => {
@@ -158,11 +186,11 @@ function FilterPage() {
   const handleSortChange = (sortKey: string) => {
     setSortKey(sortKey);
   };
-
+//TODO: Add if the filter, sort or search is empty then display all the premium accounts "Promoted"
   return (
-    <div className=' '>
+    <div>
       <NavigationBar toggleDrawer={toggleDrawer} onChange={handleInputChange} onSearch={handleSearch} search={search} />
-      <div  className='flex-col items-center '>
+      <div className='flex-col items-center'>
         <DrawerFilter
           openDrawer={isDrawerOpen}
           toggleDrawer={toggleDrawer}
@@ -173,12 +201,18 @@ function FilterPage() {
           onLicensedChange={handleLicensedChange}
           onClearFilters={clearFilters}
         />
-          <Sort onSortChange={handleSortChange} />
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4  mx-auto  bg-slate-50 max-w-screen-2xl '>
-          {sortedOfferings.map((offering) => (
-            <MediaCard key={offering._id} user={offering} />
-          ))}
-        </div>
+        <Sort onSortChange={handleSortChange} />
+        {loading ? (
+          <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+            <CircularProgress />
+          </Box>
+        ) : (
+          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mx-auto bg-slate-50 max-w-screen-2xl'>
+            {sortedOfferings.map((offering) => (
+              <MediaCard key={offering._id} user={offering} profileImageUrl={profileImages[offering._id] || null} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
