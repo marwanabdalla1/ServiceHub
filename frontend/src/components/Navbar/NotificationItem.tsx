@@ -12,6 +12,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
   isViewed,
   updatedAt,
   markAsRead,
+  NotificationType
 }) => {
   const timeAgo = formatDistanceToNow(new Date(updatedAt), { addSuffix: true });
 

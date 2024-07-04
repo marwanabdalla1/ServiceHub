@@ -9,4 +9,5 @@ export interface Notification {
   updatedAt: string;
   recipient?: string;
   job?: string;
+  NotificationType: string;
 }

@@ -22,7 +22,7 @@ const NotificationSchema: Schema = new Schema({
     job: {type: Schema.Types.ObjectId, ref: 'Job', required: false},
     review: {type: Schema.Types.ObjectId, ref: 'Review', required: false},
     recipient: {type: Schema.Types.ObjectId, ref: 'Account', required: true},
-
+    NotificationType: {type: String, required: true}
 }, {timestamps: true});
 
 export default mongoose.model<INotification>('Notification', NotificationSchema);
