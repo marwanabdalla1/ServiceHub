@@ -80,7 +80,7 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
                 const endTime = new Date(event.end);
                 const durationInMinutes = (endTime.getTime() - startTime.getTime()) / 60000;
                 console.log(startTime, endTime, "duration in min:", durationInMinutes, defaultSlotDuration);
-                return durationInMinutes > 0 && durationInMinutes > defaultSlotDuration;
+                return durationInMinutes > 0 && durationInMinutes >= defaultSlotDuration;
             }).map((event: any) => ({
                 ...event,
                 start: new Date(event.start),

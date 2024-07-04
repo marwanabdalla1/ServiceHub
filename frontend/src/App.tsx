@@ -42,6 +42,7 @@ import ChangeBookingTimePage from './Pages/ChangeBookingTimePage';
 import {ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import {Slide} from "react-toastify";
+import JobDetailsPage from "./Pages/JobDetailsPage";
 
 function App() {
 
@@ -90,7 +91,7 @@ function MainRoutes() {
 
     return (
         <div className="h-screen flex flex-col">
-            {showNavBar && <NavigationBar toggleDrawer={() => {}} onChange={() => {}} onSearch={() => {}} search={""}/>}
+            {showNavBar && <NavigationBar toggleDrawer={() => {}} onChange={() => {}} onSearch={() => {}} search={""} />}
             <Routes>
                 {/* Home */}
                 <Route path="/" element={<HomePage/>}/>
@@ -133,12 +134,15 @@ function MainRoutes() {
                 <Route path="/offerings/:offeringId/booking/:step" element={<BookingPage/>}/> */}
                 <Route path="/offerings/:requestId/confirm" element={<ConfirmationPage/>}/>
 
+                {/*todo: get this once it's done*/}
+                <Route path="/jobs/:jobId" element={<JobDetailsPage />} />
+
                 {/*old ones*/}
                 {/*<Route path="/create-account-or-sign-in" element={<CreateAccountOrSignIn/>}/>*/}
                 {/*<Route path="/update-profile" element={<UpdateProfile/>}/>*/}
                 {/*<Route path="/review-and-confirm" element={<ReviewAndConfirm/>}/>*/}
 
-                <Route path="/listsLandingPage" element={<ListsLandingPage/>}/>
+                {/*<Route path="/listsLandingPage" element={<ListsLandingPage/>}/>*/}
                 <Route path="/update-timeslot/" element={<UpdateTimeslot/>}/>
                 <Route path="/proposeNewTime" element={<ProposeNewtimePage/>}/>
                 <Route path="/write-reviews" element={<ReviewPage/>}/>

@@ -23,7 +23,7 @@ interface MediaCardProps {
   onCancel: () => void;
 }
 
-const MediaCard: React.FC<MediaCardProps> = ({ request, onClose,onDecline, onProposeNewTime, onCancel }) => {
+const MediaCard: React.FC<MediaCardProps> = ({ request, onClose, onDecline, onProposeNewTime, onCancel }) => {
   
   const { account, token, isProvider } = useAuth();
   const navigate = useNavigate();

@@ -339,7 +339,7 @@ export const getAvailabilityByProviderId: RequestHandler = async (req, res, next
         }).lean();
 
         // Merge contiguous and overlapping timeslots
-        // todo: replace/delete this once the mergeandclean is done
+        // (maybe todo: replace/delete this once the mergeandclean is done)
         const mergedTimeslots: ITimeslot[] = mergeTimeslots(timeslots);
 
         // Adjust for transit time
@@ -798,3 +798,48 @@ const mergeAndCleanTimeslots = async (providerId: string | Types.ObjectId, sessi
 // };
 
 
+// helper function to calculate duration
+const getDurationInMinutes = (start: Date, end: Date): number => {
+    return (new Date(end).getTime() - new Date(start).getTime()) / 60000;
+};
+
+
+// get the next available timeslot
+export const getNextAvailability: RequestHandler = async (req, res, next) => {
+    const { providerId } = req.params;
+    const transitTime = parseInt(req.query.transitTime as string) || 30;
+    const defaultDuration = parseInt(req.query.defaultDuration as string) || 30;
+
+
+
+    try {
+        const providerIdConditions = [
+            { createdById: providerId },
+            { createdById: new Types.ObjectId(providerId) }
+        ];
+
+        const timeslots: ITimeslot[] = await Timeslot.find({
+            $or: providerIdConditions,
+            isBooked: false,
+            start: { $gte: new Date() }
+        }).sort({ start: 1 }).lean();
+
+        // const mergedTimeslots = mergeTimeslots(timeslots);
+        const adjustedTimeslots = adjustForTransit(timeslots, transitTime);
+
+        const validTimeslots = adjustedTimeslots.filter(slot => {
+            const duration = getDurationInMinutes(new Date(slot.start), new Date(slot.end));
+            return duration >= defaultDuration;
+        });
+
+        if (validTimeslots.length > 0) {
+            console.log("next availability:", validTimeslots[0])
+            return res.json({ nextAvailability: validTimeslots[0] });
+        } else {
+            return res.status(404).json({ message: 'No available timeslots found' });
+        }
+    } catch (error: any) {
+        console.error("Error fetching next availability:", error);
+        res.status(500).json({ error: 'Internal Server Error', message: error.message });
+    }
+};
