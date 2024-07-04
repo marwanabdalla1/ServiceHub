@@ -5,6 +5,8 @@ import SignInPage from './Pages/AuthPages/LoginPage';
 import SignUpPage from './Pages/AuthPages/SignUpPage';
 import NavigationBar from './components/Navbar';
 import ReceivedServicesPage from './Pages/ReceivedServicesPage';
+import AdminNavbar from "./components/adminComponents/AdminNavbar";
+import JobHistoryPage from './Pages/JobHistoryPage';
 import RequestHistoryPage from './Pages/RequestHistoryPage';
 import IncomingRequestsPage from './Pages/IncomingRequestsPage';
 import HomePage from './Pages/HomePage';
@@ -44,6 +46,8 @@ import 'react-toastify/dist/ReactToastify.css';
 import {Slide} from "react-toastify";
 import JobDetailsPage from "./Pages/JobDetailsPage";
 import VerifyCertificatePage from "./Pages/AdminPanel/VerifyCertificatePage";
+import AdminUserDataPage from "./Pages/AdminPanel/AdminUserDataPage";
+import AdminHomePage from "./Pages/AdminPanel/AdminHomePage";
 
 function App() {
 
@@ -89,11 +93,17 @@ function MainRoutes() {
         && location.pathname !== "/forgetPassword/resetPassword"
         && location.pathname !== "/forgetPassword"
         && location.pathname !== "/forgetPassword/success"
-        && location.pathname !== "/admin/verifyCertificate";
+        && location.pathname !== "/admin/verifyCertificate"
+        && location.pathname !== "/admin/UserData";
 
+    const showAdminNavBar = location.pathname.includes("/admin");
     return (
         <div className="h-screen flex flex-col">
-            {showNavBar && <NavigationBar toggleDrawer={() => {}} onChange={() => {}} onSearch={() => {}} search={""} />}
+            {showNavBar && !showAdminNavBar && <NavigationBar toggleDrawer={() => {
+            }} onChange={() => {
+            }} onSearch={() => {
+            }} search={""}/>}
+            {showAdminNavBar && <AdminNavbar/>}
             <Routes>
                 {/* Home */}
                 <Route path="/" element={<HomePage/>}/>
@@ -148,8 +158,9 @@ function MainRoutes() {
                 <Route path="/write-reviews" element={<ReviewPage/>}/>
                 <Route path="/faq" element={<FAQPage/>}/>
 
+                <Route path="/admin" element={<AdminHomePage/>}/>
                 <Route path="/admin/verifyCertificate" element={<VerifyCertificatePage/>}/>
-
+                <Route path="/admin/UserData" element={<AdminUserDataPage/>}/>
 
                 <Route path="*" element={<h1>Not Found</h1>}/>
             </Routes>

@@ -82,20 +82,29 @@ export default function VerifyCertificates(): React.ReactElement {
         }
     };
 
+    // TODO: Implement downloadFile function -> this one not working
     const downloadFile = (fileBuffer: ArrayBuffer, filename: string) => {
         const blob = new Blob([fileBuffer], {type: 'application/pdf'});
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
+        const link  = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+    };
+
+    // Function to convert ArrayBuffer to Base64
+    const arrayBufferToBase64 = (buffer: ArrayBuffer) => {
+        let binary = '';
+        const bytes = new Uint8Array(buffer);
+        const len = bytes.byteLength;
+        for (let i = 0; i < len; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+        return window.btoa(binary);
     };
 
     return (
-        <Container>
-            <Typography variant="h4" component="h1" gutterBottom>
+        <Container component="main" maxWidth="md" sx={{ mt: 4}}>
+            <Typography variant="h6" gutterBottom sx={{fontWeight: 'bold', fontSize: '30px', color: '#007BFF'}}>
                 Verify Certificates
             </Typography>
             <TableContainer component={Paper}>
