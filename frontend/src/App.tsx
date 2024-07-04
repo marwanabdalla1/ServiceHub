@@ -43,6 +43,7 @@ import {ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import {Slide} from "react-toastify";
 import JobDetailsPage from "./Pages/JobDetailsPage";
+import VerifyCertificatePage from "./Pages/AdminPanel/VerifyCertificatePage";
 
 function App() {
 
@@ -87,7 +88,8 @@ function MainRoutes() {
         && location.pathname !== "/forgetPassword/emailVerification"
         && location.pathname !== "/forgetPassword/resetPassword"
         && location.pathname !== "/forgetPassword"
-        && location.pathname !== "/forgetPassword/success";
+        && location.pathname !== "/forgetPassword/success"
+        && location.pathname !== "/admin/verifyCertificate";
 
     return (
         <div className="h-screen flex flex-col">
@@ -103,8 +105,6 @@ function MainRoutes() {
                 {/* User Profile */}
                 <Route path="/setprofile" element={<ProfileSettingPage/>}/>
                 <Route path="/customer_review/:jobId" element={<ReviewPage/>}/>
-                <Route path="/login" element={<SignInPage/>}/>
-                <Route path="/signup" element={<SignUpPage/>}/>
                 <Route path="/forgetPassword" element={<ForgetPasswordPage/>}/>
                 <Route path="/forgetPassword/emailVerification" element={<OTPPage/>}/>
                 <Route path="/forgetPassword/resetPassword" element={<ResetPasswordPage/>}/>
@@ -147,6 +147,8 @@ function MainRoutes() {
                 <Route path="/proposeNewTime" element={<ProposeNewtimePage/>}/>
                 <Route path="/write-reviews" element={<ReviewPage/>}/>
                 <Route path="/faq" element={<FAQPage/>}/>
+
+                <Route path="/admin/verifyCertificate" element={<VerifyCertificatePage/>}/>
 
 
                 <Route path="*" element={<h1>Not Found</h1>}/>

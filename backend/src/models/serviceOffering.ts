@@ -1,5 +1,6 @@
 import mongoose, { Document, Schema, Types } from 'mongoose';
 import { ServiceType } from './enums';
+import {IAccount} from "./account";
 
 export interface IServiceOffering extends Document {
     serviceType: ServiceType;
@@ -10,7 +11,7 @@ export interface IServiceOffering extends Document {
     description: string;
     isCertified: boolean;
     location: string;
-    provider: Types.ObjectId; // Reference to an Account document
+    provider: Types.ObjectId|IAccount // Reference to an Account document
     baseDuration: number;
     bufferTimeDuration: number;
     acceptedPaymentMethods: string[]; // New field for accepted payment methods

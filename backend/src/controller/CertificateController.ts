@@ -2,9 +2,9 @@ import {GridFsStorage} from "multer-gridfs-storage";
 import env from "../util/validateEnv";
 import multer from "multer";
 import express, {RequestHandler} from "express";
-import Account from "../models/account";
+import Account, {IAccount} from "../models/account";
 import {MongoClient, GridFSBucket, ObjectId} from "mongodb";
-import ServiceOffering from "../models/serviceOffering";
+import ServiceOffering, {IServiceOffering} from "../models/serviceOffering";
 
 interface MulterFile extends Express.Multer.File {
     id: ObjectId;
@@ -79,7 +79,7 @@ export const uploadCertificate: RequestHandler = async (req, res) => {
 
             // Update the service offering with the new certificate
             // TODO: Check if the service is already certified -> isCertified check should not be here
-            const updates = {certificateId: certificateId, isCertified: true};
+            const updates = {certificateId: certificateId, isCertified: false};
 
 
             const updatedService = await ServiceOffering.findOneAndUpdate({_id: serviceId}, updates, {
@@ -146,11 +146,11 @@ export const getCertificate: RequestHandler = async (req, res) => {
 
         } catch (error) {
             console.error("Error with ObjectId conversion:", error);
-            return res.status(400).json({error: 'Invalid File ID'});
+            return res.status(400).json({error: 'Invalid File ID4'});
         }
 
     } catch (error) {
-        return res.status(400).json({error: 'Invalid File ID'});
+        return res.status(400).json({error: 'Invalid File ID3'});
     }
 }
 
@@ -193,12 +193,76 @@ export const deleteCertificate: RequestHandler = async (req, res) => {
             return res.status(200).send('Certificate deleted successfully');
         });
     } catch (error) {
-        return res.status(400).json({error: 'Invalid File ID'});
+        return res.status(400).json({error: 'Invalid File ID1'});
     }
 }
 
+/**
+ * Fetch all unverified certificates
+ * @param req
+ * @param res
+ */
+export const fetchUnverifiedCertificates: RequestHandler = async (req, res) => {
+    console.log("Fetching certificates");
+    try {
+        console.log("Fetching certificates");
+        const unverifiedServices = await ServiceOffering.find({
+            certificateId: { $ne: "", $exists: true },
+            $or: [{ isCertified: false }, { isCertified: null }]
+        }).populate<{ provider: IAccount }>('provider').exec();
 
+        const results = await Promise.all(
+            unverifiedServices.map(async service => {
 
+                const _id = new ObjectId(service.get('certificateId'));
+
+                const downloadStream = bucket.openDownloadStream(_id);
+
+                let fileBuffer = Buffer.alloc(0);
+                for await (const chunk of downloadStream) {
+                    fileBuffer = Buffer.concat([fileBuffer, chunk]);
+                }
+
+                return {
+                    email: service.provider.email,
+                    serviceType: service.serviceType,
+                    certificateFile: fileBuffer,
+                    isCertified: service.isCertified,
+                    serviceId: service._id,
+                };
+            })
+        );
+
+        res.status(200).json(results);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error fetching certificates');
+    }
+};
+
+export const verifyCertificate: RequestHandler = async (req, res) => {
+    try {
+        const serviceId = req.body.serviceId;
+        const service = await ServiceOffering.findById(serviceId);
+
+        if (!service) {
+            return res.status(404).json({message: 'Service not found'});
+        }
+
+        const updatedService = await ServiceOffering.findOneAndUpdate({_id: serviceId}, {isCertified: true}, {
+            new: true,
+            upsert: true,
+            strict: false
+        });
+
+        if (!updatedService) {
+            return res.status(404).send({message: 'Service not found'});
+        }
+        return res.status(200).send('Certificate verified successfully');
+    } catch (error) {
+        return res.status(400).json({error: 'Invalid File ID2'});
+    }
+}
 
 
 
