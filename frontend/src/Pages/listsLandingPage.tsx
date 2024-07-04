@@ -1,16 +1,16 @@
 import React from 'react';
-import JobHistoryPage from './JobHistoryPage';
+import JobHistoryPage from './ReceivedServicesPage';
 import RequestHistoryPage from './RequestHistoryPage';
 import { Account } from '../models/Account';
-import account from '../models/Account';
+import {useAuth} from "../contexts/AuthContext";
 
 function LandingPage() {
-  const currentUser = account; // Replace with actual logic
+  const {token, account} = useAuth(); // todo: Replace with actual logic
 
   return (
     <div style={{ display: 'flex' }}>
       <div style={{ flex: 1, padding: '20px', marginLeft: '200px' }}>
-        {currentUser.isProvider ? <JobHistoryPage /> : <RequestHistoryPage />}
+        {account?.isProvider ? <JobHistoryPage /> : <RequestHistoryPage />}
       </div>
     </div>
   );

@@ -6,7 +6,8 @@ import {
     submitReview,
     updateReview
 } from "../controller/ReviewController";
-import {authenticate} from "../middleware/authenticate";
+import { authenticate } from "../middleware/authenticate";
+
 
 const router = express.Router();
 

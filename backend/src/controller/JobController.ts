@@ -1,10 +1,10 @@
-import {Request, Response, NextFunction, RequestHandler} from 'express';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
 import Account from '../models/account';
 import ServiceOffering from "../models/serviceOffering";
 import ServiceRequest, { IServiceRequest } from "../models/serviceRequest";
 import Job, { IJob } from "../models/job";
 
-import {Document} from 'mongoose';
+import { Document } from 'mongoose';
 
 
 
@@ -22,7 +22,7 @@ function errorHandler(req: Request, res: Response, requiredProperties: string[])
 }
 
 // after provider accepted
-export const createJob:RequestHandler = async (req: Request, res: Response) => {
+export const createJob: RequestHandler = async (req: Request, res: Response) => {
 
     // Assuming `req.user` is set by the `authenticate` middleware
     const user = (req as any).user;
@@ -88,7 +88,7 @@ export const createJob:RequestHandler = async (req: Request, res: Response) => {
 
 
 // also update the jobHistory arrays in the account
-async function updateUserJobHistory(userId:string, jobId:string) {
+async function updateUserJobHistory(userId: string, jobId: string) {
     try {
         await Account.findByIdAndUpdate(userId, {
             $push: { jobHistory: jobId }
@@ -99,8 +99,7 @@ async function updateUserJobHistory(userId:string, jobId:string) {
     }
 }
 
-export const getJobsByProvider: RequestHandler = async(req, res) => {
-    const { providerId } = req.params;  // Extract the provider ID from URL parameters
+export const getJobsByProvider: RequestHandler = async (req, res) => {
 
     try {
 
@@ -118,8 +117,8 @@ export const getJobsByProvider: RequestHandler = async(req, res) => {
         // Fetch all jobs where the 'provider' field matches 'providerId'
         const jobs = await Job.find({ provider: providerId })
             .populate([
-                { path: 'receiver', select: 'firstName lastName' }, // todo: also include profile pic
-                { path: 'provider', select: 'firstName lastName' },
+                { path: 'receiver', select: 'firstName lastName email profileImageId' }, // todo: also include profile pic
+                { path: 'provider', select: 'firstName lastName email profileImageId' },
             ])
             .exec();
 
@@ -130,6 +129,78 @@ export const getJobsByProvider: RequestHandler = async(req, res) => {
         res.status(200).json(jobs);
     } catch (error: any) {
         console.error("Failed to retrieve jobs:", error);
+        res.status(500).json({ message: "Internal server error", error: error.message });
+    }
+}
+
+export const getJobsByRequester: RequestHandler = async (req, res) => {
+    const { requesterId } = req.params;  // Extract the provider ID from URL parameters
+
+    try {
+        // Fetch all jobs where the 'receiver' field matches 'requesterId'
+        const jobs = await Job.find({ receiver: requesterId }).populate([
+            { path: 'receiver', select: 'firstName lastName email profileImageId' }, // todo: also include profile pic
+            { path: 'provider', select: 'firstName lastName email profileImageId' },
+        ])
+            .exec();;
+
+        if (!jobs.length) {
+            return res.status(404).json({ message: "No requested services found for this receiver." });
+        }
+
+        res.status(200).json(jobs);
+    } catch (error: any) {
+        console.error("Failed to retrieve jobs:", error);
+        res.status(500).json({ message: "Internal server error", error: error.message });
+    }
+}
+
+export const updateJob: RequestHandler = async (req: Request, res: Response) => {
+    // Get the userId from the JWT token
+    const userId = (req as any).user.userId;
+    const { jobId } = req.params; //get request ID from parameter
+    const updates = req.body;
+
+
+    console.log("job updates:", updates)
+
+    const job = await Job.findById(jobId)
+
+    if (!job) {
+        return res.status(404).json({ message: "Job not found" });
+    }
+
+    //console.log("User ID: ", userId, "Provider ID: ", job.provider._id.toString(), "Receiver ID: ", job.receiver._id.toString())
+
+    // Check if the user is authorized to access this service request
+    if (job.provider._id.toString() !== userId && job.receiver._id.toString() !== userId) {
+        return res.status(403).json({ message: "Unauthorized to access this resource" });
+    }
+
+    try {
+        // Update the user in the database using the userId from the JWT token
+        const updatedJob = await Job.findByIdAndUpdate(jobId, updates, { new: true, upsert: true, strict: true });
+
+        res.status(200).json(updatedJob);
+    } catch (error) {
+        res.status(400).send(error);
+    }
+}
+
+export const getJobById: RequestHandler = async (req, res) => {
+    const { jobId } = req.params;  // Extract the Job ID from URL parameters
+
+    try {
+        // Fetch the job where the '_id' field matches 'jobId'
+        const job = await Job.findById(jobId).exec();
+
+        if (!job) {
+            return res.status(404).json({ message: "No job found for this ID." });
+        }
+
+        res.status(200).json(job);
+    } catch (error: any) {
+        console.error("Failed to retrieve job:", error);
         res.status(500).json({ message: "Internal server error", error: error.message });
     }
 }

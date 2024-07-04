@@ -11,6 +11,7 @@ import OfferingRouter from "./routes/Offering";
 import RequestRouter from "./routes/Request";
 import JobRouter from "./routes/Job";
 import ReviewRouter from "./routes/Review";
+import NotificationRouter from "./routes/Notifications";
 import FeedbackRouter from "./routes/Feedback";
 import ProfileImageRouter from "./routes/ProfileImage";
 import CertificateRouter from "./routes/Certificate";
@@ -24,6 +25,7 @@ import ProfileImage from "./routes/ProfileImage";
 import PaymentRouter from "./routes/PaymentRouter";
 import WebhookRouter from "./routes/WebhookRouter";
 import RecoveryRouter from "./routes/Recovery";
+import EmailRouter from "./routes/Email";
 
 const app = express();
 
@@ -57,6 +59,8 @@ app.use("/api/becomepro", PaymentRouter);
 app.use("/api/requests", RequestRouter);
 app.use("/api/jobs", JobRouter);
 app.use("/api/reviews", ReviewRouter);
+app.use("/api/notification", NotificationRouter);
+app.use("/api/email", EmailRouter);
 app.use("/api/feedback", FeedbackRouter);
 
 
