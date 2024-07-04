@@ -202,44 +202,64 @@ export const deleteCertificate: RequestHandler = async (req, res) => {
  * @param req
  * @param res
  */
-export const fetchUnverifiedCertificates: RequestHandler = async (req, res) => {
-    console.log("Fetching certificates");
+export const fetchUncheckedCertificates: RequestHandler = async (req, res) => {
     try {
-        console.log("Fetching certificates");
         const unverifiedServices = await ServiceOffering.find({
-            certificateId: { $ne: "", $exists: true },
-            $or: [{ isCertified: false }, { isCertified: null }]
+            certificateId: {$ne: "", $exists: true},
+            $or: [{isCertificateChecked: false}, {isCertificateChecked: null}]
         }).populate<{ provider: IAccount }>('provider').exec();
 
         const results = await Promise.all(
             unverifiedServices.map(async service => {
-
-                const _id = new ObjectId(service.get('certificateId'));
-
-                const downloadStream = bucket.openDownloadStream(_id);
-
-                let fileBuffer = Buffer.alloc(0);
-                for await (const chunk of downloadStream) {
-                    fileBuffer = Buffer.concat([fileBuffer, chunk]);
-                }
-
                 return {
                     email: service.provider.email,
                     serviceType: service.serviceType,
-                    certificateFile: fileBuffer,
                     isCertified: service.isCertified,
                     serviceId: service._id,
                 };
             })
         );
-
         res.status(200).json(results);
     } catch (error) {
         console.error(error);
-        res.status(500).send('Error fetching certificates');
+        res.status(500).send('Error fetching unverified certificates');
     }
 };
 
+/**
+ * Fetch all unverified certificates
+ * @param req
+ * @param res
+ */
+export const fetchCheckedCertificates: RequestHandler = async (req, res) => {
+    try {
+        const verifiedServices = await ServiceOffering.find({
+            certificateId: {$ne: "", $exists: true}, isCertificateChecked: true
+        }).populate<{ provider: IAccount }>('provider').exec();
+
+        const results = await Promise.all(
+            verifiedServices.map(async service => {
+                return {
+                    email: service.provider.email,
+                    serviceType: service.serviceType,
+                    isCertified: service.isCertified,
+                    serviceId: service._id,
+                };
+            })
+        );
+        res.status(200).json(results);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error fetching verified certificates');
+    }
+};
+
+
+/**
+ * Verify a certificate
+ * @param req
+ * @param res
+ */
 export const verifyCertificate: RequestHandler = async (req, res) => {
     try {
         const serviceId = req.body.serviceId;
@@ -249,7 +269,61 @@ export const verifyCertificate: RequestHandler = async (req, res) => {
             return res.status(404).json({message: 'Service not found'});
         }
 
-        const updatedService = await ServiceOffering.findOneAndUpdate({_id: serviceId}, {isCertified: true}, {
+        const updatedService = await ServiceOffering.findOneAndUpdate({_id: serviceId}, {isCertified: true, isCertificateChecked: true}, {
+            new: true,
+            upsert: true,
+            strict: false
+        });
+
+        if (!updatedService) {
+            return res.status(404).send({message: 'Service not found'});
+        }
+        return res.status(200).send('Certificate verified successfully');
+    } catch (error) {
+        return res.status(400).json({error: 'Invalid File ID'});
+    }
+}
+
+export const declineCertificate: RequestHandler = async (req, res) => {
+    try {
+        const serviceId = req.body.serviceId;
+        const service = await ServiceOffering.findById(serviceId);
+
+        if (!service) {
+            return res.status(404).json({message: 'Service not found'});
+        }
+
+        const updatedService = await ServiceOffering.findOneAndUpdate({_id: serviceId}, {isCertified: false, isCertificateChecked: true}, {
+            new: true,
+            upsert: true,
+            strict: false
+        });
+
+        if (!updatedService) {
+            return res.status(404).send({message: 'Service not found'});
+        }
+        return res.status(200).send('Certificate verified successfully');
+    } catch (error) {
+        return res.status(400).json({error: 'Invalid File ID'});
+    }
+
+}
+
+/**
+ * Verify a certificate
+ * @param req
+ * @param res
+ */
+export const revertVerifyCertificate: RequestHandler = async (req, res) => {
+    try {
+        const serviceId = req.body.serviceId;
+        const service = await ServiceOffering.findById(serviceId);
+
+        if (!service) {
+            return res.status(404).json({message: 'Service not found'});
+        }
+
+        const updatedService = await ServiceOffering.findOneAndUpdate({_id: serviceId}, {isCertified: false, isCertificateChecked: false}, {
             new: true,
             upsert: true,
             strict: false

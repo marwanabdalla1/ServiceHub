@@ -10,6 +10,7 @@ export interface IServiceOffering extends Document {
     hourlyRate: number;
     description: string;
     isCertified: boolean;
+    isCertificateChecked: boolean;
     location: string;
     provider: Types.ObjectId|IAccount // Reference to an Account document
     baseDuration: number;
@@ -29,6 +30,7 @@ const ServiceOfferingSchema: Schema = new Schema({
     hourlyRate: { type: Number, required: true },
     description: { type: String, required: false },
     isCertified: { type: Boolean, required: false },
+    isCertificateChecked: { type: Boolean, required: false },
     location: { type: String, required: true },
     provider: { type: Schema.Types.ObjectId, ref: 'Account', required: true },
     baseDuration: { type: Number, required: true },
