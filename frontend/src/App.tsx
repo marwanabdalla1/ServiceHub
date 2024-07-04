@@ -90,7 +90,7 @@ function MainRoutes() {
 
     return (
         <div className="h-screen flex flex-col">
-            {showNavBar && <NavigationBar toggleDrawer={() => {}} onChange={() => {}} onSearch={() => {}} search={""}/>}
+            {showNavBar && <NavigationBar toggleDrawer={() => {}} onChange={() => {}} onSearch={() => {}} search={""} />}
             <Routes>
                 {/* Home */}
                 <Route path="/" element={<HomePage/>}/>
@@ -138,7 +138,7 @@ function MainRoutes() {
                 {/*<Route path="/update-profile" element={<UpdateProfile/>}/>*/}
                 {/*<Route path="/review-and-confirm" element={<ReviewAndConfirm/>}/>*/}
 
-                <Route path="/listsLandingPage" element={<ListsLandingPage/>}/>
+                {/*<Route path="/listsLandingPage" element={<ListsLandingPage/>}/>*/}
                 <Route path="/update-timeslot/" element={<UpdateTimeslot/>}/>
                 <Route path="/proposeNewTime" element={<ProposeNewtimePage/>}/>
                 <Route path="/write-reviews" element={<ReviewPage/>}/>

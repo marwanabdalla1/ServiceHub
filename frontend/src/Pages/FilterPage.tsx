@@ -3,7 +3,7 @@ import NavigationBar from '../components/Navbar';
 import MediaCard from '../components/ProfileCard';
 import { DrawerFilter } from '../components/DrawFilter';
 import Sort from '../components/Sort';
-import { useNavigate } from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 import axios from 'axios';
 import { Account } from '../models/Account';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -26,7 +26,9 @@ function FilterPage() {
   });
   const [offerings, setOfferings] = useState<Account[]>([]);
   const [sortedOfferings, setSortedOfferings] = useState<Account[]>([]);
-  const [search, setSearch] = useState<string>("");
+  const location = useLocation()
+  const searchTerm = location.state?.searchTerm? location.state?.searchTerm:""
+  const [search, setSearch] = useState<string>(searchTerm);
   const [sortKey, setSortKey] = useState<string>("priceAsc");
   const [profileImages, setProfileImages] = useState<{ [key: string]: string }>({});
   const [loading, setLoading] = useState<boolean>(true);
@@ -76,10 +78,13 @@ function FilterPage() {
   };
 
   useEffect(() => {
+    setSearch(searchTerm)
     fetchOfferings();
   }, [filterState, search, sortKey]);
 
   useEffect(() => {
+
+
     let sortedData = [...offerings];
 
     // Function to shuffle an array

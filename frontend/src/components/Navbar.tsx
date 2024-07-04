@@ -8,7 +8,7 @@ import { BsQuestionCircle } from "react-icons/bs";
 import BlackButton from "./inputs/blackbutton";
 import RequestListButton from "./inputs/requestListButton";
 import Modal from "./inputs/Modal";
-import {Link} from "react-router-dom";
+import {Link, useLocation, useNavigate} from "react-router-dom";
 import {Menu, MenuItem} from '@mui/material';
 import {useAuth} from "../contexts/AuthContext";
 
@@ -55,6 +55,11 @@ const Navbar: React.FC<NavbarProps> = ({toggleDrawer, onChange, onSearch, search
     const {token, isLoggedIn, logoutUser, account} = useAuth();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [profileAnchorEl, setProfileAnchorEl] = useState<null | HTMLElement>(null);
+    const [searchTerm, setSearchTerm] = useState(search);
+    const navigate = useNavigate();
+    const location = useLocation();
+
+
     const isPremium = account?.isPremium || false;
     const isProvider = account?.isProvider || false;
     //console.log("token: " + token + '\n' + "isProvider: " + isProvider + '\n' + "isPremium: " + isPremium );
@@ -77,6 +82,14 @@ const Navbar: React.FC<NavbarProps> = ({toggleDrawer, onChange, onSearch, search
         setProfileAnchorEl(null);
     };
 
+
+    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchTerm(event.target.value);
+    };
+
+    const handleSearch = () => {
+        navigate(`/filter`, {state: {searchTerm}});
+    };
 
     return (
         <nav className="bg-blue-300 shadow-md h-20">
@@ -104,16 +117,18 @@ const Navbar: React.FC<NavbarProps> = ({toggleDrawer, onChange, onSearch, search
                             type="text"
                             placeholder={"Search for a service"}
                             className="flex-grow px-2 py-1 rounded-l-full focus:outline-none"
-                            value={search}
-                            onChange={onChange}
+                            value={searchTerm}
+                            onChange={handleSearchChange}
                         />
-                        <button className="text-blue-500" onClick={onSearch}>
+                        <button className="text-blue-500" onClick={handleSearch}>
                             <CiSearch className="h-6 w-6"/>
                         </button>
                     </div>
-                    <button onClick={toggleDrawer}>
-                        <FiFilter className="h-6 w-6 text-blue-500 ml-2"/>
-                    </button>
+                    {location.pathname === '/filter' && (
+                        <button onClick={toggleDrawer}>
+                            <FiFilter className="h-6 w-6 text-blue-500 ml-2"/>
+                        </button>
+                    )}
                 </div>
 
                 {/* Right Section: Provide Service Button and Icons */}
