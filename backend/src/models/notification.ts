@@ -1,9 +1,10 @@
 import mongoose, {Document, Schema, Types} from 'mongoose';
-
+import { NotificationType } from './enums';
 export interface INotification extends Document {
     isViewed: boolean;
     // notificationType:
     // new request/new job/ (job/request) status changed/ new review/ change time request from provider etc.
+    NotificationType: NotificationType ;
     content: string;
     serviceRequest: Types.ObjectId; // Reference to a ServiceRequest document
     // serviceResponse: Types.ObjectId; // Reference to a ServiceResponse document

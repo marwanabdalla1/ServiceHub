@@ -47,3 +47,13 @@ export enum ServiceType {
     homeRemodeling = "Home Remodeling", // 6
     movingServices = "Moving Services", // 7
 }
+
+export enum NotificationType {
+    // new request/new job/ (job/request) status changed/ new review/ change time request from provider etc.
+    newRequest = "New Request", // 0
+    newJob = "New Job", // 1
+    JobStatusChanged = "Job Status Changed", // 2
+    RequestStatusChanged = "Request Status Changed", // 3
+    newReview = "New Review", // 4
+    timeRequestChanged = "Time Request Changed", // 5
+}
