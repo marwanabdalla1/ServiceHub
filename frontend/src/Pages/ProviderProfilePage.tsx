@@ -18,7 +18,7 @@ import {
 } from '@mui/material';
 import {GoStarFill} from "react-icons/go";
 import {Account as ServiceProvider} from '../models/Account';
-import { DaysOfWeek, ServiceType, JobStatus, ResponseStatus, RequestStatus } from '../models/enums';
+import {DaysOfWeek, ServiceType, JobStatus, ResponseStatus, RequestStatus} from '../models/enums';
 import {styled} from '@mui/system';
 import SearchIcon from '@mui/icons-material/Search';
 import PinDropIcon from '@mui/icons-material/PinDrop';
@@ -28,8 +28,8 @@ import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 import Breadcrumb from "../components/Breadcrumb";
 import LightBlueButton from "../components/inputs/BlueButton";
-import { ServiceOffering } from '../models/ServiceOffering';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import {ServiceOffering} from '../models/ServiceOffering';
+import {Link, useParams, useNavigate} from 'react-router-dom';
 import {useBooking} from "../contexts/BookingContext";
 import axios from "axios";
 import Select from "@mui/material/Select";
@@ -62,8 +62,8 @@ interface Review {
         _id: string;
         firstName: string;
         lastName: string;
-        email: string|null;
-        profileImageId: string|null;
+        email: string | null;
+        profileImageId: string | null;
     };
     recipient: string;
     serviceOffering: string;
@@ -74,7 +74,7 @@ interface Review {
 }
 
 function ProviderProfilePage() {
-    const { fetchAccountDetails, fetchOfferingDetails } = useBooking();
+    const {fetchAccountDetails, fetchOfferingDetails} = useBooking();
     const [provider, setProvider] = useState<ServiceProvider | null>(null);
     const [offering, setOffering] = useState<ServiceOffering | null>(null);
     const [reviews, setReviews] = useState<Review[]>([]);
@@ -87,7 +87,7 @@ function ProviderProfilePage() {
 
 
     // const provider = mockProvider;
-    const {offeringId} = useParams<{offeringId:string}>(); //use this to then make a request to the user with the id to get the user data
+    const {offeringId} = useParams<{ offeringId: string }>(); //use this to then make a request to the user with the id to get the user data
 
     console.log("offeringId", offeringId);
 
@@ -103,8 +103,10 @@ function ProviderProfilePage() {
                     try {
                         console.log("fetched Offering:", fetchedOffering);
                         const response = await axios.get(`/api/timeslots/next-availability/${fetchedOffering.provider}`, {
-                            params: { transitTime: fetchedOffering.bufferTimeDuration,
-                                    defaultDuration: fetchedOffering.baseDuration}
+                            params: {
+                                transitTime: fetchedOffering.bufferTimeDuration,
+                                defaultDuration: fetchedOffering.baseDuration
+                            }
                         });
                         console.log("next availability:", response.data);
                         setNextAvailability(response.data.nextAvailability);
@@ -119,7 +121,6 @@ function ProviderProfilePage() {
                     console.log("fetched provider:", fetchedProvider)
 
                     setProvider(fetchedProvider);
-
 
 
                 } catch (error) {
@@ -212,21 +213,29 @@ function ProviderProfilePage() {
                             <Typography variant="h4" gutterBottom>
                                 {provider.firstName} {provider.lastName}
                             </Typography>
-                            <Box sx={{ justifyContent: 'space-between'}}>
+                            <Box sx={{justifyContent: 'space-between'}}>
                                 {/*<LightBlueButton className = 'px-3 py-2 rounded bg-white mr-3' text='Check Next Availability' onClick={() => console.log('booking button pressed')}></LightBlueButton>*/}
                                 {/*<Link to={`/select-timeslot/${id}`}>*/}
-                                <LightBlueButton className = 'px-3 py-2 rounded' text='Book Now' onClick={handleBookNow}></LightBlueButton>
+                                <LightBlueButton className='px-3 py-2 rounded' text='Book Now'
+                                                 onClick={handleBookNow}></LightBlueButton>
                                 {/*</Link>*/}
                             </Box>
                         </Box>
 
                         <Box sx={{display: 'flex', alignItems: 'center', mt: 2, justifyContent: 'space-between'}}>
                             <Box sx={{display: 'flex', alignItems: 'center'}}>
-                                <Typography variant="h5" sx={{mr: 1}}>{offering.rating.toFixed(2)}</Typography>
-                                {/*<GoStarFill className='text-yellow-500'/>*/}
-                                <Typography variant="body2" sx={{ml: 1}}>
-                                    ({offering.reviewCount} reviews)
-                                </Typography>
+                                {totalReviews > 0 ? (
+                                    <>
+                                        <Typography variant="h5" sx={{mr: 1}}>{offering.rating.toFixed(2)}</Typography>
+                                        <Typography variant="body2" sx={{ml: 1}}>
+                                            ({offering.reviewCount} reviews)
+                                        </Typography>
+                                    </>
+                                ) : (
+                                    <Typography variant="body2" sx={{ml: 1}}>
+                                        (0 reviews)
+                                    </Typography>
+                                )}
                             </Box>
                             <Typography variant="body2" color="text.secondary">
                                 {offering.serviceType}
@@ -235,22 +244,23 @@ function ProviderProfilePage() {
                                 {offering.location}
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                                Next Availability: {nextAvailability ? formatDate(new Date(nextAvailability.start)) : 'No available times'}
+                                Next
+                                Availability: {nextAvailability ? formatDate(new Date(nextAvailability.start)) : 'No available times'}
                                 {/*//todo: modify availability!*/}
                                 {/*{provider.availability}  */}
                             </Typography>
                         </Box>
 
-                        <Divider sx={{mt:2}}/>
+                        <Divider sx={{mt: 2}}/>
 
                         <Box sx={{display: 'flex', alignItems: 'flex-start', mt: 2, justifyContent: 'space-between'}}>
-                            <Box sx ={{flex: '1 1 45%', display: 'flex', flexDirection: 'row'}}  >
-                            <PinDropIcon sx={{mt:2, mr:1}}></PinDropIcon>
-                            <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 2}}>
-                            <Typography variant="body2" color="text.secondary">
-                                {offering.description}
-                            </Typography>
-                            </Box>
+                            <Box sx={{flex: '1 1 45%', display: 'flex', flexDirection: 'row'}}>
+                                <PinDropIcon sx={{mt: 2, mr: 1}}></PinDropIcon>
+                                <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 2}}>
+                                    <Typography variant="body2" color="text.secondary">
+                                        {offering.description}
+                                    </Typography>
+                                </Box>
                             </Box>
 
                             {/*<AccessTimeIcon sx={{mt:2}}/>*/}
@@ -260,31 +270,31 @@ function ProviderProfilePage() {
                             {/*    <Typography variant="body2" color="text.secondary">*/}
                             {/*        {provider.phoneNumber} </Typography>*/}
                             {/*</Box>*/}
-                            <Box sx={{ mt: 2, flex: '1 1 30%'}}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 0 }}>
-                                    <EmailIcon sx={{ mr: 1 }} />
+                            <Box sx={{mt: 2, flex: '1 1 30%'}}>
+                                <Box sx={{display: 'flex', alignItems: 'center', mb: 0}}>
+                                    <EmailIcon sx={{mr: 1}}/>
                                     <Typography variant="body2" color="text.secondary">
                                         {provider.email}
                                     </Typography>
                                 </Box>
-                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                                    <PhoneIcon sx={{ mr: 1 }} />
+                                <Box sx={{display: 'flex', alignItems: 'center', mb: 1}}>
+                                    <PhoneIcon sx={{mr: 1}}/>
                                     <Typography variant="body2" color="text.secondary">
                                         {provider.phoneNumber}
                                     </Typography>
                                 </Box>
                             </Box>
 
-                            <Box sx ={{flex: '1 1 30%', display: 'flex', flexDirection: 'row'}}  >
-                            <AccountBalanceWalletIcon sx={{mb: 1, mt:2, mr: 1}}/>
-                            <Box sx={{alignItems: 'center', mt:2}}>
-                                <Typography variant="body2">
-                                    Service Fee: €{offering.hourlyRate}/hour
-                                </Typography>
-                                <Typography variant="body2">
-                                    Payment methods: {offering.acceptedPaymentMethods}{/*todo: add this to */}
-                                </Typography>
-                            </Box>
+                            <Box sx={{flex: '1 1 30%', display: 'flex', flexDirection: 'row'}}>
+                                <AccountBalanceWalletIcon sx={{mb: 1, mt: 2, mr: 1}}/>
+                                <Box sx={{alignItems: 'center', mt: 2}}>
+                                    <Typography variant="body2">
+                                        Service Fee: €{offering.hourlyRate}/hour
+                                    </Typography>
+                                    <Typography variant="body2">
+                                        Payment methods: {offering.acceptedPaymentMethods}{/*todo: add this to */}
+                                    </Typography>
+                                </Box>
                             </Box>
                         </Box>
                     </Grid>
@@ -294,38 +304,56 @@ function ProviderProfilePage() {
                         <Card>
                             <CardContent>
                                 <Typography variant="h6">Customer reviews</Typography>
-                                <Typography variant="h4" gutterBottom>
-                                    {offering.rating.toFixed(2)} <Rating precision={0.25} defaultValue={offering.rating} readOnly={true}/>
 
-                                </Typography>
-                                <Typography variant="body2">
-                                    {offering.reviewCount} global ratings
-                                </Typography>
-                                {/*<Box sx={{mt: 2}}>*/}
-                                {/*    <Typography variant="body2">5 star</Typography>*/}
-                                {/*    <Box sx={{backgroundColor: 'black', height: 10, width: '80%'}}></Box>*/}
-                                {/*    <Typography variant="body2">80%</Typography>*/}
-                                {/*    <Typography variant="body2">4 star</Typography>*/}
-                                {/*    <Box sx={{backgroundColor: 'black', height: 10, width: '20%'}}></Box>*/}
-                                {/*    <Typography variant="body2">20%</Typography>*/}
-                                {/*</Box>*/}
-                                <Box sx={{ mt: 2 }}>
-                                    {ratingCounts.map((count, index) => (
-                                        <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                                            <Typography variant="body2" sx={{ width: '18%' }}>{5 - index} star</Typography>
-                                            <Box sx={{ backgroundColor: 'black', height: 10, width: `${ratingPercentages[4 - index] * 0.6}%`, marginLeft: 1, marginRight: 1 }}></Box>
-                                            <Typography variant="body2" sx={{ width: '10%' }}>{ratingPercentages[4 - index].toFixed(2)}%</Typography>
+                                {totalReviews > 0 ? (
+                                    <>
+                                        <Typography variant="h4" gutterBottom>
+                                            {offering.rating.toFixed(2)} <Rating precision={0.25}
+                                                                                 defaultValue={offering.rating}
+                                                                                 readOnly={true}/>
+
+                                        </Typography>
+                                        <Typography variant="body2">
+                                            {offering.reviewCount} global ratings
+                                        </Typography>
+                                        {/*<Box sx={{mt: 2}}>*/}
+                                        {/*    <Typography variant="body2">5 star</Typography>*/}
+                                        {/*    <Box sx={{backgroundColor: 'black', height: 10, width: '80%'}}></Box>*/}
+                                        {/*    <Typography variant="body2">80%</Typography>*/}
+                                        {/*    <Typography variant="body2">4 star</Typography>*/}
+                                        {/*    <Box sx={{backgroundColor: 'black', height: 10, width: '20%'}}></Box>*/}
+                                        {/*    <Typography variant="body2">20%</Typography>*/}
+                                        {/*</Box>*/}
+                                        <Box sx={{mt: 2}}>
+                                            {ratingCounts.map((count, index) => (
+                                                <Box key={index} sx={{display: 'flex', alignItems: 'center', mb: 1}}>
+                                                    <Typography variant="body2"
+                                                                sx={{width: '18%'}}>{5 - index} star</Typography>
+                                                    <Box sx={{
+                                                        backgroundColor: 'black',
+                                                        height: 10,
+                                                        width: `${ratingPercentages[4 - index] * 0.6}%`,
+                                                        marginLeft: 1,
+                                                        marginRight: 1
+                                                    }}></Box>
+                                                    <Typography variant="body2"
+                                                                sx={{width: '10%'}}>{ratingPercentages[4 - index].toFixed(2)}%</Typography>
+                                                </Box>
+                                            ))}
                                         </Box>
-                                    ))}
-                                </Box>
+                                    </>
+                                ) : (
+                                    <Typography variant="body2">
+                                        No reviews yet.
+                                    </Typography>
+                                )}
                             </CardContent>
                         </Card>
 
 
-
                     </Grid>
+                    {totalReviews > 0 && (
                     <Grid item xs={9}>
-
 
 
                         <Box sx={{mt: 4}}>
@@ -345,9 +373,14 @@ function ProviderProfilePage() {
                                 />
                             </Box>
 
-                            <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2}}>
-                                <FormControl sx={{ display: 'flex', width: "20%"}}>
-                                    <InputLabel sx={{mb:2}}>Sort by</InputLabel>
+                            <Box sx={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                mb: 2
+                            }}>
+                                <FormControl sx={{display: 'flex', width: "20%"}}>
+                                    <InputLabel sx={{mb: 2}}>Sort by</InputLabel>
                                     <Select
                                         value={sortOption}
                                         onChange={handleSortChange}
@@ -360,29 +393,29 @@ function ProviderProfilePage() {
                                         <MenuItem value="dateDesc">Date Descending</MenuItem>
                                     </Select>
                                 </FormControl>
-                            {/*</Box>*/}
-                            <Box sx={{ display: 'flex', mb: 2 }}>
-                                {[5, 4, 3, 2, 1].map((star) => (
+                                {/*</Box>*/}
+                                <Box sx={{display: 'flex', mb: 2}}>
+                                    {[5, 4, 3, 2, 1].map((star) => (
+                                        <Button
+                                            key={star}
+                                            variant={filterStars === star ? 'contained' : 'outlined'}
+                                            onClick={() => handleFilterStars(star)}
+                                            // fullWidth
+                                            sx={{mr: 1}}
+                                        >
+                                            {star} Stars
+                                        </Button>
+                                    ))}
                                     <Button
-                                        key={star}
-                                        variant={filterStars === star ? 'contained' : 'outlined'}
-                                        onClick={() => handleFilterStars(star)}
+                                        sx={{mr: 1}}
+                                        variant={filterStars === null ? 'contained' : 'outlined'}
+                                        onClick={() => handleFilterStars(null)}
                                         // fullWidth
-                                        sx={{ mr: 1 }}
                                     >
-                                        {star} Stars
+                                        All Stars
                                     </Button>
-                                ))}
-                                <Button
-                                    sx={{ mr: 1 }}
-                                    variant={filterStars === null ? 'contained' : 'outlined'}
-                                    onClick={() => handleFilterStars(null)}
-                                    // fullWidth
-                                >
-                                    All Stars
-                                </Button>
 
-                            </Box>
+                                </Box>
                             </Box>
 
                             <Divider sx={{mb: 2}}/>
@@ -394,11 +427,13 @@ function ProviderProfilePage() {
                                     <CardContent>
                                         <Box sx={{display: 'flex', alignItems: 'center', mb: 1}}>
                                             <Avatar sx={{mr: 2}}/>
-                                            <Typography variant="h6">{review.reviewer.firstName + " " + review.reviewer.lastName}</Typography>
+                                            <Typography
+                                                variant="h6">{review.reviewer.firstName + " " + review.reviewer.lastName}</Typography>
                                         </Box>
                                         <Box sx={{display: 'flex', alignItems: 'center', mb: 2}}>
                                             {/*<GoStarFill className='text-yellow-500'/>*/}
-                                            <Rating precision={0.5} defaultValue={review.rating} readOnly={true}/>
+                                            <Rating precision={0.5} defaultValue={review.rating}
+                                                    readOnly={true}/>
                                             <Typography variant="body2" sx={{ml: 1}}>
                                                 {review.rating.toFixed(2)} stars
                                             </Typography>
@@ -417,7 +452,7 @@ function ProviderProfilePage() {
                                 </Card>
                             )) : ""}
                         </Box>
-                    </Grid>
+                    </Grid> )}
                 </Grid>
             </Box>
         </Container>
