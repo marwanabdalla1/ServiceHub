@@ -63,7 +63,7 @@ export default function VerifyCertificates(): React.ReactElement {
             }
         };
 
-        fetchCertificates();
+        fetchCertificates().then(r => console.log('Certificates fetched'));
     }, []);
 
     const handleVerify = async (serviceId: string) => {

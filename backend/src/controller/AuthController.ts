@@ -140,7 +140,8 @@ export const login: RequestHandler = async (req, res, next) => {
             token,
             accountId: account._id,
             isProvider: account.isProvider,
-            isPremium: account.isPremium
+            isPremium: account.isPremium,
+            isAdmin: account.isAdmin
         });
 
     } catch (err: any) {

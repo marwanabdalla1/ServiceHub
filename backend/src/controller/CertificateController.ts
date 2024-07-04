@@ -146,11 +146,11 @@ export const getCertificate: RequestHandler = async (req, res) => {
 
         } catch (error) {
             console.error("Error with ObjectId conversion:", error);
-            return res.status(400).json({error: 'Invalid File ID4'});
+            return res.status(400).json({error: 'Invalid File ID'});
         }
 
     } catch (error) {
-        return res.status(400).json({error: 'Invalid File ID3'});
+        return res.status(400).json({error: 'Invalid File ID'});
     }
 }
 
@@ -193,7 +193,7 @@ export const deleteCertificate: RequestHandler = async (req, res) => {
             return res.status(200).send('Certificate deleted successfully');
         });
     } catch (error) {
-        return res.status(400).json({error: 'Invalid File ID1'});
+        return res.status(400).json({error: 'Invalid File ID'});
     }
 }
 
@@ -260,7 +260,7 @@ export const verifyCertificate: RequestHandler = async (req, res) => {
         }
         return res.status(200).send('Certificate verified successfully');
     } catch (error) {
-        return res.status(400).json({error: 'Invalid File ID2'});
+        return res.status(400).json({error: 'Invalid File ID'});
     }
 }
 
