@@ -255,10 +255,21 @@ export const getAllReviewsByOffering: RequestHandler = async (req, res) => {
     // const userId = user.userId; // Assuming you're using some authentication middleware
 
     try {
-        const reviews = await Review.find({ serviceOffering: offeringId }).populate([
-            { path: 'reviewer', select: 'firstName lastName email' },
+        // Find the service offering to get its provider
+        const serviceOffering = await ServiceOffering.findById(offeringId).select('provider');
+        if (!serviceOffering) {
+            console.error("Service offering not found:", offeringId);
+            return;
+        }
+
+        const reviews = await Review.find({
+            serviceOffering: offeringId,
+            recipient: serviceOffering.provider}).populate([
+            { path: 'reviewer', select: 'firstName lastName email profileImageId' },
         ]).exec();
         if (reviews) {
+            console.log(reviews.length, reviews)
+
             return res.json({ review: reviews });
         }
         // else {
