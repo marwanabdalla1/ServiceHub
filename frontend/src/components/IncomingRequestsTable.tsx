@@ -298,6 +298,9 @@ try {
             <Box style={{display: 'flex'}}>
                 <Box sx={{flexGrow: 1, marginRight: 2}}>
                     <Box>
+                        {serviceRequests.length === 0 ? (
+                            <Typography variant="body1">No incoming requests.</Typography>
+                        ) : (
                         <TableContainer component={Paper} sx={{overflow: 'auto'}}>
                             <Table sx={{minWidth: 650}} aria-label="simple table">
                                 <TableHead>
@@ -313,7 +316,7 @@ try {
                   ))}
                                 </TableBody>
                             </Table>
-                        </TableContainer>
+                        </TableContainer> )}
                     </Box>
                 </Box>
                 <Dialog open={clashDialogOpen} onClose={handleClashDialogClose}>

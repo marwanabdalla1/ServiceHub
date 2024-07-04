@@ -309,6 +309,9 @@ export default function OfferedServicesTable() {
       <Box style={{ display: 'flex' }}>
         <Box sx={{ flexGrow: 1, marginRight: 2 }}>
           <Box>
+              {jobs.length === 0 ? (
+              <Typography variant="body1">No jobs received.</Typography>
+          ) : (
             <TableContainer component={Paper} sx={{ overflow: 'auto' }}>
               <Table sx={{ minWidth: 650 }} aria-label="simple table">
                 <TableHead>
@@ -325,7 +328,7 @@ export default function OfferedServicesTable() {
                   ))}
                 </TableBody>
               </Table>
-            </TableContainer>
+            </TableContainer>)}
           </Box>
         </Box>
         {showMediaCard && selectedJob && (

@@ -77,13 +77,15 @@ if (request.requestStatus === RequestStatus.cancelled ){
       </button>
       <CardContent>
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem' }}>
-          <Avatar alt={request.requestedBy.firstName + " " + request.requestedBy.lastName} src={request.profileImageUrl} sx={{ width: 100, height: 100, marginRight: '1rem' }} />
+            {/*const requesterName = request.requestedBy ? `${request.requestedBy.firstName} ${request.requestedBy.lastName}` : 'Account Deleted';*/}
+
+            <Avatar alt={request.requestedBy ? `${request.requestedBy.firstName} ${request.requestedBy.lastName}` : 'Account Deleted'} src={request.profileImageUrl} sx={{ width: 100, height: 100, marginRight: '1rem' }} />
           <div style={{ marginRight: '1rem' }}>
             <Typography variant="h6" >
               Request Detail
             </Typography>
             <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
-              Requestor: {request.requestedBy.firstName + " " + request.requestedBy.lastName }
+              Requestor: {request.requestedBy ? `${request.requestedBy.firstName} ${request.requestedBy.lastName}` : 'Account Deleted'}
             </Typography>
           </div>
           <div className='flex space-x-1 items-center'>

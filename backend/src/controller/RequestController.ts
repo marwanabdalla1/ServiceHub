@@ -143,11 +143,15 @@ export const getServiceRequestsByProvider: RequestHandler = async (req, res) => 
             ])
             .exec();
 
-        if (serviceRequests.length === 0) {
+
+        // remove everything where the requestor account is deleted
+        const filteredRequests = serviceRequests.filter(request => request.requestedBy !== null);
+
+        if (filteredRequests.length === 0) {
             return res.status(404).json({ message: "No service requests found for this provider." });
         }
 
-        res.status(200).json(serviceRequests);
+        res.status(200).json(filteredRequests);
     } catch (error: any) {
         console.error("Failed to retrieve service requests:", error);
         res.status(500).json({ message: "Internal server error", error: error.message });
@@ -177,11 +181,15 @@ export const getIncomingServiceRequestsByProvider: RequestHandler = async (req, 
             ])
             .exec();
 
-        if (serviceRequests.length === 0) {
+        // remove everything where the requestor account is deleted
+        const filteredRequests = serviceRequests.filter(request => request.requestedBy !== null);
+
+
+        if (filteredRequests.length === 0) {
             return res.status(404).json({ message: "No service requests found for this provider." });
         }
 
-        res.status(200).json(serviceRequests);
+        res.status(200).json(filteredRequests);
     } catch (error: any) {
         console.error("Failed to retrieve service requests:", error);
         res.status(500).json({ message: "Internal server error", error: error.message });

@@ -239,6 +239,9 @@ export default function ReceivedServiceTable() {
       <Box style={{ display: 'flex' }}>
         <Box sx={{ flexGrow: 1, marginRight: 2 }}>
           <Box>
+            {receivedServices.length === 0 ? (
+                <Typography variant="body1">You haven't booked anything yet.</Typography>
+            ) : (
             <TableContainer component={Paper} sx={{ overflow: 'auto' }}>
               <Table sx={{ minWidth: 650 }} aria-label="simple table">
                 <TableHead>
@@ -255,7 +258,7 @@ export default function ReceivedServiceTable() {
                   ))}
                 </TableBody>
               </Table>
-            </TableContainer>
+            </TableContainer>)}
           </Box>
         </Box>
         {showMediaCard && selectedReceivedService && (
