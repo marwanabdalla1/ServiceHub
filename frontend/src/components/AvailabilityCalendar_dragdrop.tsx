@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import { Calendar, dateFnsLocalizer, SlotInfo } from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import './calendarStyles.css'; 
+import './calendarStyles.css';
 import { format, startOfWeek, parseISO, getDay, startOfDay, endOfDay } from 'date-fns';
 import { enUS } from '@mui/material/locale';
 import {Dialog, Button, DialogActions, DialogContent, DialogTitle, Box, FormControl, IconButton, TextField, InputAdornment} from '@mui/material';
@@ -9,6 +9,7 @@ import CloseIcon from '@mui/icons-material/Close';
 
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
 
+// const DraggableCalendar = withDragAndDrop(Calendar);
 
 import axios from 'axios';
 import moment from 'moment';
@@ -17,7 +18,6 @@ import FormLabel from "@mui/joy/FormLabel";
 import RadioGroup from "@mui/joy/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Radio from "@mui/joy/Radio";
-import { v4 as uuidv4 } from 'uuid';
 
 
 const locales = {
@@ -42,6 +42,7 @@ export interface TimeSlot {
     // baseEventId?: string
 }
 
+
 type RangeType = Date[] | { start: Date; end: Date };
 
 interface ServiceScheduleProps {
@@ -50,21 +51,24 @@ interface ServiceScheduleProps {
 }
 
 
+// Extending TimeSlot for use in drag-and-drop with _id from backend
+interface DnDTimeSlot extends TimeSlot {
+    _id: string; // This field is added for handling drag and drop operations
+}
+
+const DragAndDropCalendar = withDragAndDrop<DnDTimeSlot|TimeSlot>(Calendar);
 
 
 function AvailabilityCalendar({ Servicetype, defaultSlotDuration }: ServiceScheduleProps) {
     const [availability, setAvailability] = useState<TimeSlot[]>([]);
-    const [fetchedEvents, setFetchedEvents] = useState<TimeSlot[]>([]);
+    const [fetchedEvents, setFetchedEvents] = useState<DnDTimeSlot[]>([]);
 
     // const [bookedEvents, setBookedEvents] = useState<TimeSlot[]>([]);
+    // for move and resize
+    const [events, setEvents] = useState<DnDTimeSlot[]>([]);
+
 
     const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot | null>(null);
-
-    // todo: editing
-    const [editDialogOpen, setEditDialogOpen] = useState(false);
-    const [editAllRecurring, setEditAllRecurring] = useState(false);
-
-
     const [deleteDialog, setDeleteDialog] = useState(false);
     const [deleteOption, setDeleteOption] = useState('single'); // 'single' or 'all'
     const [actionDialogOpen, setActionDialogOpen] = useState(false);
@@ -81,16 +85,24 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration }: ServiceSched
                 'Authorization': `Bearer ${token}`
             }
         }).then(response => {
-            const events = response.data.map((event: any) => ({
+            setFetchedEvents(response.data.map((event: any) => ({
                 ...event,
                 start: new Date(event.start),
-                end: new Date(event.end)
+                end: new Date(event.end),
+            })));
+            const events:DnDTimeSlot[] = response.data.map((event: any) => ({
+                ...event,
+                start: new Date(event.start),
+                end: new Date(event.end),
+                _id: event._id
+
             }));
-            setFetchedEvents(events);
+            setEvents(events);
+
         }).catch(error => {
             console.error("Error fetching timeslots:", error);
         });
-    }, [token, selectedTimeSlot]);
+    }, [token]);
     //
     // const saveAvailability = () => {
     //     console.log('Submitted token' + token + availability)
@@ -115,16 +127,9 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration }: ServiceSched
 
     const handleSelect = ({ start, end }: SlotInfo) => {
         const newTimeSlot: TimeSlot = { start, end, title: 'available', isFixed: false, isBooked: false, createdById: '' };
-        const isClashing = /*[...fetchedEvents, ...availability]*/
-            fetchedEvents.some(TimeSlot => {
-                const newTimeSlotEnd = new Date(newTimeSlot.start.getTime() + defaultSlotDuration * 60000);
-                return (
-                    (newTimeSlot.start < TimeSlot.end && newTimeSlot.end > TimeSlot.start) ||
-                    (newTimeSlot.start < TimeSlot.end && newTimeSlotEnd > TimeSlot.start)
-                );
-
-            });
-
+        const isClashing = availability.some(TimeSlot =>
+            (newTimeSlot.start < TimeSlot.end && newTimeSlot.end > TimeSlot.start)
+        );
         //     || bookedEvents.some(TimeSlot =>
         //     (newTimeSlot.start < TimeSlot.end && newTimeSlot.end > TimeSlot.start)
         // );
@@ -138,9 +143,7 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration }: ServiceSched
             }
 
             const adjustedTimeSlot: TimeSlot = { start: start, end: adjustedEnd, title: 'available', isFixed: false, isBooked: false, createdById: '' };
-            // setAvailability([...availability, adjustedTimeSlot]);
-            setFetchedEvents([...fetchedEvents, adjustedTimeSlot]);
-
+            setAvailability([...availability, adjustedTimeSlot]);
 
             console.log(adjustedTimeSlot)
 
@@ -213,11 +216,8 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration }: ServiceSched
                 //     }
                 //     return a !== selectedTimeSlot;
                 // }));
-
-
-
-                setFetchedEvents(fetchedEvents.filter(a => a.start.getTime() !== selectedTimeSlot.start.getTime() && a.end.getTime() !== selectedTimeSlot.end.getTime()));
-                console.log(fetchedEvents.length)
+                setFetchedEvents(fetchedEvents.filter(a => a.start !== selectedTimeSlot.start && a.end !== selectedTimeSlot.end));
+                setEvents(events.filter(a => a.start !== selectedTimeSlot.start && a.end !== selectedTimeSlot.end));
                 setDeleteDialog(false);
                 setDeleteOptionDialogOpen(false);
             }).catch(error => {
@@ -285,8 +285,9 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration }: ServiceSched
     };
 
 
-    const handleSelectTimeSlot = (TimeSlot: TimeSlot) => {
+    const handleSelectTimeSlot = (TimeSlot: TimeSlot | DnDTimeSlot) => {
         setSelectedTimeSlot(TimeSlot);
+        console.log("selected timeslot:" , TimeSlot)
         setActionDialogOpen(true);
     };
 
@@ -377,7 +378,6 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration }: ServiceSched
             // setBookedEvents(bookedEvents);
             // setAvailability(editableEvents);
             setFetchedEvents(allEvents)
-            console.log(fetchedEvents)
         } catch (error) {
             console.error("Error fetching timeslots:", error);
         }
@@ -390,7 +390,7 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration }: ServiceSched
             const start = startOfDay(range[0]);
             const end = endOfDay(range[range.length - 1]);
 
-            const lastDate = new Date(Math.max(.../*availability*/fetchedEvents.map(slot => slot.end.getTime())));
+            const lastDate = new Date(Math.max(...availability.map(slot => slot.end.getTime())));
             if (end > lastDate) {
                 axios.post('/api/timeslots/extend', {
                     start: lastDate,
@@ -447,16 +447,50 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration }: ServiceSched
         }
     };
 
-    // const eventPropGetter = (event: TimeSlot) => {
-    //     const backgroundColor = event.isFixed ? 'purple' : 'blue';
-    //     return { style: { backgroundColor } };
-    // };
 
-    const eventPropGetter = (event: TimeSlot) => {
+
+    const moveEvent = useCallback(
+        ({ event, start, end }: { event: DnDTimeSlot | TimeSlot, start: string | Date, end: string | Date }) => {
+            // Ensure start and end are Date objects
+            const startDate: Date = new Date(start);
+            const endDate: Date = new Date(end);
+
+            if ('_id' in event) {
+                const updatedEvent: DnDTimeSlot = { ...event as DnDTimeSlot, start: startDate, end: endDate };
+                setEvents(prevEvents => prevEvents.map(evt => evt._id === event._id ? updatedEvent : evt));
+
+                axios.patch(`/api/timeslots/${event._id}`, updatedEvent, {
+                    headers: { Authorization: `Bearer ${token}` }
+                }).catch(error => console.error('Error updating timeslot:', error));
+            }
+        },
+        [token, setEvents]
+    );
+
+    const resizeEvent = useCallback(
+        ({ event, start, end }: { event: DnDTimeSlot | TimeSlot, start: string | Date, end: string | Date }) => {
+            console.log("Resizing event:", event, start, end);  // Log to see what's received
+            const startDate: Date = new Date(start);
+            const endDate: Date = new Date(end);
+
+            if ('_id' in event) {
+                const updatedEvent: DnDTimeSlot = { ...event as DnDTimeSlot, start: startDate, end: endDate };
+                setEvents(prevEvents => prevEvents.map(evt => evt._id === event._id ? updatedEvent : evt));
+
+                axios.patch(`/api/timeslots/${event._id}`, updatedEvent, {
+                    headers: { Authorization: `Bearer ${token}` }
+                }).catch(error => console.error('Error resizing timeslot:', error));
+            }
+        },
+        [token]
+    );
+
+
+    const eventPropGetter = (event: TimeSlot | DnDTimeSlot) => {
         if (event.isBooked) {
-            return { style: { backgroundColor: 'grey', pointerEvents: 'none' as 'none', opacity: 0.6, zIndex:1 } };
+            return { style: { backgroundColor: 'grey', pointerEvents: 'none' as 'none', opacity: 0.6 } };
         }
-        return { style: { backgroundColor: event.isFixed ? 'purple' : 'blue', zIndex: 2 } };
+        return { style: { backgroundColor: event.isFixed ? 'purple' : 'blue' } };
     };
 
 
@@ -466,25 +500,39 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration }: ServiceSched
 
     return (
         <div>
-            <Calendar
+            <DragAndDropCalendar
+                localizer={localizer}
+                // events={events}
+                events={[...events, ...availability]}
+                onEventDrop={moveEvent}
+                onEventResize={resizeEvent}
+                popup
+                resizable
                 defaultView='week'
                 views={['week']}
-                step={15}
-                localizer={localizer}
-                events={fetchedEvents/*[...fetchedEvents, ...availability]*/}
-                startAccessor="start"
-                endAccessor="end"
-                style={{ height: 500 }}
-                // onEventDrop={handleEventDrop}
-                // onEventResize={handleEventResize}
-                selectable
-                onSelectSlot={handleSelect}
-                onSelectEvent={handleSelectTimeSlot}
-                onRangeChange={handleRangeChange}
+                // startAccessor="start"
+                // endAccessor="end"
+                // selectable
+                // onSelectSlot={handleSelect}
+                // onSelectEvent={handleSelectTimeSlot}
+                // onRangeChange={handleRangeChange}
                 eventPropGetter={eventPropGetter}
-                // backgroundEvents={bookedEvents}
-                className="bg-black-300" // Apply Tailwind class here
             />
+            {/*<DragAndDropCalendar*/}
+            {/*    defaultView='week'*/}
+            {/*    views={['week']}*/}
+            {/*    localizer={localizer}*/}
+            {/*    events={[...events, ...availability]}*/}
+            {/*    startAccessor="start"*/}
+            {/*    endAccessor="end"*/}
+            {/*    style={{ height: 500 }}*/}
+            {/*    onEventDrop={moveEvent}*/}
+            {/*    onEventResize={resizeEvent}*/}
+            {/*    resizable*/}
+
+            {/*    // backgroundEvents={bookedEvents}*/}
+            {/*    className="bg-black-300" // Apply Tailwind class here*/}
+            {/*/>*/}
             {/*<Dialog open={deleteDialog} onClose={handleClose}>*/}
             {/*    <DialogTitle>Delete Slot?</DialogTitle>*/}
             {/*    <DialogContent>*/}
@@ -563,7 +611,7 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration }: ServiceSched
             <Dialog open={clashDialogOpen} onClose={handleClashDialogClose}>
                 <DialogTitle>TimeSlot Clash</DialogTitle>
                 <DialogContent>
-                    The new timeslot clashes with an existing timeslot or is adjusted to meet the minimum slot duration.
+                    The new TimeSlot clashes with an existing TimeSlot.
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClashDialogClose}>OK</Button>

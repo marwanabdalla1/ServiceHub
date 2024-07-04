@@ -24,6 +24,8 @@ import ServiceRouter from "./routes/Service";
 import ProfileImage from "./routes/ProfileImage";
 import PaymentRouter from "./routes/PaymentRouter";
 import WebhookRouter from "./routes/WebhookRouter";
+import RecoveryRouter from "./routes/Recovery";
+import EmailRouter from "./routes/Email";
 
 const app = express();
 
@@ -48,6 +50,7 @@ app.use("/api/auth", AuthRouter);
 app.use("/api/file", ProfileImageRouter);
 app.use("/api/certificate", CertificateRouter);
 app.use("/api/account", AccountRouter);
+app.use("/api/forgetPassword", RecoveryRouter);
 app.use("/api/offerings", OfferingRouter);
 app.use("/api/timeslots", TimeSlotRouter);
 app.use("/api/services", ServiceRouter);
@@ -57,6 +60,7 @@ app.use("/api/requests", RequestRouter);
 app.use("/api/jobs", JobRouter);
 app.use("/api/reviews", ReviewRouter);
 app.use("/api/notification", NotificationRouter);
+app.use("/api/email", EmailRouter);
 app.use("/api/feedback", FeedbackRouter);
 
 

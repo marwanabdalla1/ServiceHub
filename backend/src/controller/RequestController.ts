@@ -2,7 +2,9 @@ import { Request, Response, NextFunction, RequestHandler } from 'express';
 import Account from '../models/account';
 import ServiceOffering from "../models/serviceOffering";
 import ServiceRequest, { IServiceRequest } from "../models/serviceRequest";
-import { Document } from 'mongoose';
+import mongoose, { Document } from 'mongoose';
+import Timeslot from "../models/timeslot";
+import { bookTimeslot } from "./TimeSlotController";
 
 
 
@@ -53,7 +55,7 @@ export const createServiceRequest: RequestHandler = async (req: Request, res: Re
 
     try {
         // Extract fields from req.body and possibly validate or transform them
-        const {timeSlot, ...requestBody} = req.body;
+        const { timeSlot, ...requestBody } = req.body;
         // const requestBody = req.body; // Simplified, assuming body has all required fields
 
         console.log("request body: " + requestBody)

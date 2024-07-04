@@ -35,8 +35,6 @@ export default function OfferedServicesTable() {
   const [jobs, setJobs] = React.useState<Job[]>([]);
   const {token, account} = useAuth();
   const navigate = useNavigate();
-  const [provider, setProvider] = React.useState<Account | null>(null);
-  const [receiver, setReceiver] = React.useState<Account | null>(null);
 
   // todo: this probably can be combined/reused along with the request history table
   useEffect(() => {
@@ -47,7 +45,7 @@ export default function OfferedServicesTable() {
         headers: {Authorization: `Bearer ${token}` }
       })
           .then(response => {
-            //console.log("getting requests ...", response.data)
+            console.log("getting requests ...", response.data)
             setJobs(response.data);
             // setLoading(false);
           })
@@ -65,39 +63,6 @@ export default function OfferedServicesTable() {
   const handleToggleMediaCard = (job: Job | null) => {
     setSelectedJob(job);
     setShowMediaCard(job !== null);
-  };
-
-  useEffect(() => {
-    if (selectedJob) {
-      fetchProvider(selectedJob.provider);
-      fetchReceiver(selectedJob.receiver);
-    }
-  }, [selectedJob, token]);
-
-  const fetchProvider = (provider: Account) => {
-    axios.get<Account>(`/api/account/providers/${provider._id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(response => {
-        setProvider(response.data);
-      })
-      .catch(error => {
-        console.error('Failed to fetch provider:', error);
-        setProvider(null);
-      });
-  };
-
-  const fetchReceiver = (requester: Account) => {
-    axios.get<Account>(`/api/account/requester/${requester._id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(response => {
-        setReceiver(response.data);
-      })
-      .catch(error => {
-        console.error('Failed to fetch receiver:', error);
-        setReceiver(null);
-      });
   };
 
   // handle completing the job
@@ -292,6 +257,35 @@ export default function OfferedServicesTable() {
       console.error('Error sending notification:', notificationError);
     }
 
+    let email = "";
+    let addressee = "";
+
+    if (account?._id === selectedJob.provider._id) {
+
+      email = selectedJob.receiver.email;
+      addressee = selectedJob.receiver.firstName + " " + selectedJob.receiver.lastName;
+      
+    } else if (account?._id === selectedJob.receiver._id) {
+      email = selectedJob.provider.email;
+      addressee = selectedJob.provider.firstName + " " + selectedJob.provider.lastName;
+    }
+
+    // send Email notification
+    try {
+      await axios.post('/api/email/cancelNotification', {email: email, serviceType: selectedJob.serviceType,
+         startTime: selectedJob.appointmentStartTime, name: addressee}).then(
+          (res) => {
+              console.log(res);
+          }
+      ).catch((err) => {
+              console.error(err);
+          }
+      );
+
+  } catch (error) {
+      console.error("There was an error sending the email", error);
+  }
+
   };
 
   return (
@@ -334,8 +328,8 @@ export default function OfferedServicesTable() {
         {showMediaCard && selectedJob && (
           <div style={{ position: 'relative', flexShrink: 0, width: 400, marginLeft: 2 }}>
             <MediaCard offeredService={selectedJob}
-                      provider={provider}
-                      receiver={receiver}
+                      provider={selectedJob.provider}
+                      receiver={selectedJob.receiver}
                        onClose={() => setShowMediaCard(false)}
                        onComplete={handleComplete}
                        onCancel = {handleCancel}

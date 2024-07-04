@@ -14,6 +14,7 @@ import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 import { Account } from '../models/Account';
 import { useEffect } from 'react';
+import { formatDateTime } from '../utils/dateUtils';
 
 interface MediaCardProps {
   offeredService: Job;
@@ -28,36 +29,17 @@ interface MediaCardProps {
 
 const MediaCard: React.FC<MediaCardProps> = ({ offeredService, provider, receiver, onClose, onComplete, onCancel, onReview, onRevoke }) => {
   const {account, token, } = useAuth();
-  
-/*
-  useEffect(() => {
-    console.log(job.provider);
-    axios.get<Account>(`/api/account/providers/${job.provider}`, {
-      headers: {Authorization: `Bearer ${token}` }
-    })
-        .then(response => {
-          console.log("getting provider info ...", response.data)
-          setProvider(response.data);
-        })
-        .catch(error => {
-          console.error('Failed to fetch provider info:', error);
-          setProvider(null);
-        });
-  });*/
 
   const renderButton = () => {
     //Check whether user in sign-in context is a provider
-    //console.log("Account ID: " + account?._id);
-    //console.log("Receiver ID: " + offeredService.receiver);
-    //console.log(account?._id === offeredService.receiver._id);
-    if(offeredService.status === JobStatus.open && account?._id === provider?._id ){
+    if(offeredService.status === JobStatus.open && account?._id === offeredService.provider._id ){
         return (
           <>
           <BlackButton text="Mark as Completed" onClick={() => onComplete(offeredService)} sx={{ marginRight:"1rem" }}/>
           <BlackButton text="Cancel Service" onClick={() => onCancel(offeredService)} sx={{ marginRight:"1rem" }}/>
           </>
         );}
-      if(offeredService.status === JobStatus.open && account?._id === receiver?._id ) {
+      if(offeredService.status === JobStatus.open && account?._id === offeredService.receiver._id ) {
           return(<>
           <BlackButton text="Cancel Service" onClick={onClose} />
           </>);
@@ -92,13 +74,13 @@ const MediaCard: React.FC<MediaCardProps> = ({ offeredService, provider, receive
       </button>
       <CardContent>
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem' }}>
-          <Avatar alt={provider?.firstName + " " + provider?.lastName} src={provider?.profileImageUrl} sx={{ width: 100, height: 100, marginRight: '1rem' }} />
+          <Avatar alt={receiver?.firstName + " " + receiver?.lastName} src={receiver?.profileImageUrl} sx={{ width: 100, height: 100, marginRight: '1rem' }} />
           <div style={{ marginRight: '1rem' }}>
             <Typography variant="h6" >
               Request Detail
             </Typography>
             <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
-              Provider: {provider?.firstName + " " + provider?.lastName}
+              Provider: {receiver?.firstName + " " + receiver?.lastName}
             </Typography>
           </div>
           <div className='flex space-x-1 items-center'>
@@ -115,7 +97,7 @@ const MediaCard: React.FC<MediaCardProps> = ({ offeredService, provider, receive
           Service Type: {offeredService.serviceType}
         </Typography>
         <Typography variant="body2">
-          Appointment Time: {offeredService.appointmentStartTime.toLocaleString()}
+          Appointment Time: {formatDateTime(offeredService.appointmentStartTime)}
         </Typography>
         <Typography variant="body2" sx={{ marginBottom: '2rem'}}>
           Service Fee: {offeredService.serviceFee}

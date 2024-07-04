@@ -100,7 +100,6 @@ async function updateUserJobHistory(userId: string, jobId: string) {
 }
 
 export const getJobsByProvider: RequestHandler = async (req, res) => {
-    const { providerId } = req.params;  // Extract the provider ID from URL parameters
 
     try {
 
@@ -118,8 +117,8 @@ export const getJobsByProvider: RequestHandler = async (req, res) => {
         // Fetch all jobs where the 'provider' field matches 'providerId'
         const jobs = await Job.find({ provider: providerId })
             .populate([
-                { path: 'receiver', select: 'firstName lastName' }, // todo: also include profile pic
-                { path: 'provider', select: 'firstName lastName' },
+                { path: 'receiver', select: 'firstName lastName email profileImageId' }, // todo: also include profile pic
+                { path: 'provider', select: 'firstName lastName email profileImageId' },
             ])
             .exec();
 
@@ -139,7 +138,11 @@ export const getJobsByRequester: RequestHandler = async (req, res) => {
 
     try {
         // Fetch all jobs where the 'receiver' field matches 'requesterId'
-        const jobs = await Job.find({ receiver: requesterId }).exec();
+        const jobs = await Job.find({ receiver: requesterId }).populate([
+            { path: 'receiver', select: 'firstName lastName email profileImageId' }, // todo: also include profile pic
+            { path: 'provider', select: 'firstName lastName email profileImageId' },
+        ])
+            .exec();;
 
         if (!jobs.length) {
             return res.status(404).json({ message: "No requested services found for this receiver." });

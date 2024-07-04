@@ -27,32 +27,13 @@ import { useNavigate } from 'react-router-dom';
 import { now } from 'moment';
 import { formatDateTime } from '../utils/dateUtils';
 
-
-//Candidate for deletion
-// const serviceRequests: ServiceRequest[] = [
-//   new ServiceRequest('sr1', RequestStatus.accepted, new Date(), ServiceType.babySitting,  undefined, new Date(), undefined, [new File([], "empty.txt", { type: "text/plain" })],
-//   'something', 12, 30,  null, account, account, 5, '../../images/profiles/profile3.png'),
-//   new ServiceRequest('sr2', RequestStatus.declined, new Date(), ServiceType.bikeRepair, null, new Date(), undefined, [new File([], "empty.txt", { type: "text/plain" })],
-//   'somethingElse', 13, 30,  null, account, account, 5, '../../images/profiles/profile3.png'),
-//   new ServiceRequest('sr3', RequestStatus.pending, new Date(), ServiceType.homeRemodeling, null, new Date(), undefined,[new File([], "empty.txt", { type: "text/plain" })],
-//   'comment3', 14, 30, null, account, account, 5, '../../images/profiles/profile3.png')
-// ];
-//
-//
-// const rows: Job[] = [
-//   new Job('1', ServiceType.bikeRepair, new Date('2024-05-11'), new Date('2024-05-11'), '50', JobStatus.open, 'Description 1', account, account,'../../images/profiles/profile3.png', 4.99,  new Timeslot(ServiceType.babySitting, new Date(), new Date(), true), serviceRequests[0], undefined),
-//   new Job('2', ServiceType.petSitting, new Date('2024-05-12'), new Date('2024-05-11'), '30', JobStatus.completed, 'Description 2', account, account, '../../images/profiles/profile2.png', 5, new Timeslot(ServiceType.tutoring, new Date(), new Date(), true), serviceRequests[1], undefined),
-//   new Job('3', ServiceType.homeRemodeling, new Date('2024-05-13'), new Date('2024-05-13'),  '100', JobStatus.cancelled, 'Description 3', account,account, '../../images/profiles/profile1.png',  3,  new Timeslot(ServiceType.petSitting, new Date(), new Date(), true), serviceRequests[2], undefined),
-// ];
-
 export default function ReceivedServiceTable() {
   const [showMediaCard, setShowMediaCard] = React.useState(false);
   const [selectedReceivedService, setSelectedReceivedService] = React.useState<Job | null>(null);
   const [receivedServices, setReceivedServices] = React.useState<Job[]>([]);
   const {token, account} = useAuth();
   const navigate = useNavigate();
-  const [provider, setProvider] = React.useState<Account | null>(null);
-  const [receiver, setReceiver] = React.useState<Account | null>(null);
+
 
   // todo: this probably can be combined/reused along with the request history table
   useEffect(() => {
@@ -81,39 +62,6 @@ export default function ReceivedServiceTable() {
   const handleToggleMediaCard = (job: Job | null) => {
     setSelectedReceivedService(job);
     setShowMediaCard(job !== null);
-  };
-
-  useEffect(() => {
-    if (selectedReceivedService) {
-      fetchProvider(selectedReceivedService.provider);
-      fetchReceiver(selectedReceivedService.receiver);
-    }
-  }, [selectedReceivedService, token]);
-
-  const fetchProvider = (providerId: Account) => {
-    axios.get<Account>(`/api/account/providers/${providerId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(response => {
-        setProvider(response.data);
-      })
-      .catch(error => {
-        console.error('Failed to fetch provider:', error);
-        setProvider(null);
-      });
-  };
-
-  const fetchReceiver = (receiverId: Account) => {
-    axios.get<Account>(`/api/account/providers/${receiverId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(response => {
-        setReceiver(response.data);
-      })
-      .catch(error => {
-        console.error('Failed to fetch receiver:', error);
-        setReceiver(null);
-      });
   };
 
   /*// handle completing the job
@@ -214,6 +162,36 @@ export default function ReceivedServiceTable() {
       console.error('Error sending notification:', notificationError);
     }
 
+
+    let email = "";
+    let addressee = "";
+
+    if (account?._id === selectedReceivedService.provider._id) {
+
+      email = selectedReceivedService.receiver.email;
+      addressee = selectedReceivedService.receiver.firstName + " " + selectedReceivedService.receiver.lastName;
+      
+    } else if (account?._id === selectedReceivedService.receiver._id) {
+      email = selectedReceivedService.provider.email;
+      addressee = selectedReceivedService.provider.firstName + " " +  selectedReceivedService.provider.lastName;
+    }
+
+    // send Email notification
+    try {
+      await axios.post('/api/email/cancelNotification', {email: email, serviceType: selectedReceivedService.serviceType,
+         startTime: selectedReceivedService.appointmentStartTime, name: addressee}).then(
+          (res) => {
+              console.log(res);
+          }
+      ).catch((err) => {
+              console.error(err);
+          }
+      );
+
+  } catch (error) {
+      console.error("There was an error sending the email", error);
+  }
+
   };
 
   const handleReview = (job: Job) => {
@@ -264,8 +242,8 @@ export default function ReceivedServiceTable() {
         {showMediaCard && selectedReceivedService && (
           <div style={{ position: 'relative', flexShrink: 0, width: 400, marginLeft: 2 }}>
             <MediaCard receivedService={selectedReceivedService}
-                      provider={provider}
-                      receiver={receiver}
+                      provider={selectedReceivedService.provider}
+                      receiver={selectedReceivedService.receiver}
                        onClose={() => setShowMediaCard(false)}
                        onCancel = {handleCancel}
                        onReview={()=>navigate(`/customer_review/${selectedReceivedService._id}`)}
