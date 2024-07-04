@@ -90,12 +90,16 @@ function MainRoutes() {
 
     return (
         <div className="h-screen flex flex-col">
-            {showNavBar && <NavigationBar toggleDrawer={() => {
-            }} onChange={() => {
-            }} onSearch={() => {
-            }} search={""}/>}
+            {showNavBar && <NavigationBar toggleDrawer={() => {}} onChange={() => {}} onSearch={() => {}} search={""}/>}
             <Routes>
+                {/* Home */}
                 <Route path="/" element={<HomePage/>}/>
+
+                {/* User Authentication */}
+                <Route path="/login" element={<SignInPage/>}/>
+                <Route path="/signup" element={<SignUpPage/>}/>
+
+                {/* User Profile */}
                 <Route path="/setprofile" element={<ProfileSettingPage/>}/>
                 <Route path="/customer_review/:jobId" element={<ReviewPage/>}/>
                 <Route path="/login" element={<SignInPage/>}/>
@@ -115,13 +119,18 @@ function MainRoutes() {
                 <Route path="/change-booking-time/:providerId/:requestId" element={<ChangeBookingTimePage/>}/>
                 {/*<Route path="/select-availability-booking" element={<SelectAvailabilityBooking_temp/>}/>*/}
 
+                {/* Booking */}
+                <Route path="/offerings/:offeringId" element={<ProviderProfilePage/>} />
+                <Route path="/offerings/:offeringId/booking/:step" element={<BookingPage/>} />
+                <Route path="/select-availability" element={<SelectAvailabilityPage/>}/>
                 <Route path="/update-timeslot" element={<UpdateTimeslot/>}/>
                 <Route path="/becomepro" element={<BecomeProPage/>}/>
 
 
+
                 {/*booking*/}
-                <Route path="/offerings/:offeringId" element={<ProviderProfilePage/>}/>
-                <Route path="/offerings/:offeringId/booking/:step" element={<BookingPage/>}/>
+                {/* <Route path="/offerings/:offeringId" element={<ProviderProfilePage/>}/>
+                <Route path="/offerings/:offeringId/booking/:step" element={<BookingPage/>}/> */}
                 <Route path="/offerings/:requestId/confirm" element={<ConfirmationPage/>}/>
 
                 {/*old ones*/}
@@ -137,8 +146,6 @@ function MainRoutes() {
 
 
                 <Route path="*" element={<h1>Not Found</h1>}/>
-
-
             </Routes>
         </div>
     );
