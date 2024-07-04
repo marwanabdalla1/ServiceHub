@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
 import moment from 'moment';
 import Timeslot, { ITimeslot } from '../models/timeslot';
-import mongoose, {Types} from "mongoose";
+import mongoose, { Types } from "mongoose";
 import ServiceRequest from "../models/serviceRequest";
 
 // Function to generate weekly instances (existing code)
@@ -25,20 +25,20 @@ function generateWeeklyInstances(events: ITimeslot[], startDate: moment.Moment, 
                     second: moment(event.end).seconds()
                 }).toDate();
 
-                const exists = weekInstances.some(instance => 
-                    instance.start.getTime() === start.getTime() && 
-                    instance.end.getTime() === end.getTime() && 
+                const exists = weekInstances.some(instance =>
+                    instance.start.getTime() === start.getTime() &&
+                    instance.end.getTime() === end.getTime() &&
                     instance.createdById === event.createdById
                     // instance.baseEventId === event.baseEventId
                 );
 
                 if (!exists) {
-                    weekInstances.push({ 
-                        title: event.title, 
-                        start, 
-                        end, 
-                        isFixed: event.isFixed, 
-                        isBooked: event.isBooked, 
+                    weekInstances.push({
+                        title: event.title,
+                        start,
+                        end,
+                        isFixed: event.isFixed,
+                        isBooked: event.isBooked,
                         createdById: event.createdById,
                         // baseEventId: event.baseEventId
                     } as ITimeslot);
@@ -61,8 +61,8 @@ export const extendFixedSlots: RequestHandler = async (req, res, next) => {
         const endDate = moment(end).subtract(1, 'week');
 
         // Fetch existing fixed events within the one-week range before the start and end dates
-        const fixedEvents = await Timeslot.find({ 
-            createdById: userId, 
+        const fixedEvents = await Timeslot.find({
+            createdById: userId,
             isFixed: true,
             start: { $gte: startDate.toDate() },
             end: { $lte: endDate.toDate() },
@@ -104,7 +104,7 @@ export const deleteTimeslot: RequestHandler = async (req, res, next) => {
         const { title, isFixed } = event;
 
         // Delete the specific event
-        const deletedOne = await Timeslot.deleteOne({ start:startTime, end:endTime, createdById: userId });
+        const deletedOne = await Timeslot.deleteOne({ start: startTime, end: endTime, createdById: userId });
 
         console.log(event, deletedOne)
 
@@ -118,14 +118,18 @@ export const deleteTimeslot: RequestHandler = async (req, res, next) => {
                 isFixed: true,
                 start: { $gte: futureStartDate.toDate() },
                 $and: [
-                    { $or: [ // Start time is within the base event duration
+                    {
+                        $or: [ // Start time is within the base event duration
                             { start: { $gte: startTime } },
                             { start: { $lt: endTime } }
-                        ]},
-                    { $or: [ // End time is within the base event duration
+                        ]
+                    },
+                    {
+                        $or: [ // End time is within the base event duration
                             { end: { $gt: startTime } },
                             { end: { $lte: endTime } }
-                        ]}
+                        ]
+                    }
                 ],
                 $expr: {
                     $eq: [{ $dayOfWeek: "$start" }, weekday] // Ensure it's the same day of the week
@@ -155,7 +159,7 @@ export const updateTimeslot: RequestHandler = async (req, res, next) => {
         const newEnd = new Date(req.body.newEnd);
         const { _id, start, end, isFixed } = event;
 
-         // Adjust day of week to match MongoDB's indexing (1-7)
+        // Adjust day of week to match MongoDB's indexing (1-7)
 
 
 
@@ -312,7 +316,7 @@ const adjustForTransit = (timeslots: ITimeslot[], transitTime: number) => {
 // get events by user ID (i.e. of a provider) for booking, this is ADJUSTED for transit time!
 export const getAvailabilityByProviderId: RequestHandler = async (req, res, next) => {
     // const userId = (req as any).user.userId; // consumer id
-    const {providerId} = req.params;
+    const { providerId } = req.params;
     const transitTime = parseInt(req.query.transitTime as string); // Get the transit time from query params
     console.log(req.query, "transit Time: ", transitTime)
     if (isNaN(transitTime)) {
@@ -331,7 +335,8 @@ export const getAvailabilityByProviderId: RequestHandler = async (req, res, next
         const timeslots: ITimeslot[] = await Timeslot.find({
             // createdById: providerId,
             $or: providerIdConditions,
-            isBooked:false, }).lean();
+            isBooked: false,
+        }).lean();
 
         // Merge contiguous and overlapping timeslots
         // todo: replace/delete this once the mergeandclean is done
@@ -393,11 +398,22 @@ export const saveEvents: RequestHandler = async (req, res, next) => {
     }
 };
 
+// Existing Get Events Controller (updated code)
+export const getEventsByProvider: RequestHandler = async (req, res, next) => {
+    const { providerId } = req.params;
+    try {
+        const timeslots = await Timeslot.find({ createdById: providerId });
+        res.json(timeslots);
+    } catch (error: unknown) {
+        const err = error as Error;
+        res.status(500).json({ error: 'Internal Server Error', message: err.message });
+    }
+};
 export const turnExistingEventIntoFixed: RequestHandler = async (req, res, next) => {
     try {
         console.log(req)
         const userId = (req as any).user.userId; // Assuming userId is available in the request (e.g., from authentication middleware)
-        const event  = req.body;
+        const event = req.body;
         console.log('events to save:', event);
 
 
@@ -639,7 +655,7 @@ export const bookTimeslot: RequestHandler = async (req, res) => {
 
 // Cancel Timeslot Endpoint
 export const cancelTimeslot: RequestHandler = async (req, res) => {
-    const timeslotId  = req.params;
+    const timeslotId = req.params;
     // const session = await mongoose.startSession();
     try {
         // session.startTransaction();
@@ -660,7 +676,7 @@ export const cancelTimeslot: RequestHandler = async (req, res) => {
 
         // await session.commitTransaction();
         res.status(200).json({ message: "Timeslot cancelled successfully" });
-    } catch (error:any) {
+    } catch (error: any) {
         // await session.abortTransaction();
         console.error("Error cancelling timeslot:", error);
         res.status(500).json({ message: "Failed to cancel timeslot", error: error.message });

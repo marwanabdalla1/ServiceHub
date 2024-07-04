@@ -5,6 +5,7 @@ import Button from '@mui/material/Button';
 import { ServiceRequest } from '../models/ServiceRequest';
 import BlackButton from './inputs/blackbutton';
 import { ServiceType } from '../models/enums';
+import { formatDateTime } from '../utils/dateUtils';
 
 interface IncomingRequestRowProps {
   request: ServiceRequest;
@@ -15,7 +16,7 @@ const RequestRow: React.FC<IncomingRequestRowProps> = ({ request, onViewDetails 
   return (
     <TableRow>
       <TableCell>{request.serviceType}</TableCell>
-        <TableCell>{new Date(request.appointmentStartTime).toString()}</TableCell>
+        <TableCell>{formatDateTime(request.appointmentStartTime)}</TableCell>
       <TableCell>
         <BlackButton text="View" onClick={() => onViewDetails(request)}/>
       </TableCell>

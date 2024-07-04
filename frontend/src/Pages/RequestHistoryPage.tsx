@@ -1,7 +1,6 @@
 import React from 'react';
 import NavigationBar from '../components/Navbar';
 import MediaCard from '../components/ProfileCard';
-import {users, User} from '../models/Account';
 import RequestHistoryTable from '../components/RequestHistoryTable';
 
 

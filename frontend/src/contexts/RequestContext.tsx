@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { RequestStatus, ServiceType } from '../models/enums';
 import { Job } from '../models/Job';
 import { Account } from '../models/Account';
-import account from '../models/Account';
+// import account from '../models/Account';
 
 interface RequestDetails {
     serviceRequestId: string;
@@ -58,10 +58,10 @@ export const RequestProvider: React.FC<RequestProviderProps> = ({ children }) =>
 
         //foreign keys
         job: null,
-        provider: account,
-        requestedBy: account,
+        provider: new Account('', '', '', ''),  // default values
+        requestedBy: new Account('', '', '', ''),
         rating: -1,
-        profileImageUrl: account.profileImageUrl
+        profileImageUrl: ""
 
     });
     

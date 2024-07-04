@@ -3,7 +3,7 @@ import {createContext, useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import * as React from "react";
 import axios, {AxiosResponse} from 'axios';
-import {toast} from 'react-toastify';
+import {toast} from "react-toastify";
 
 type AccountContextType = {
     token: string | null;

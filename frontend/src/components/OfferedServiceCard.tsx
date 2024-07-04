@@ -3,53 +3,58 @@ import Card from '@mui/material/Card';
 import CloseIcon from '@mui/icons-material/Close';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
-import { ServiceRequest as Request, ServiceRequest} from '../models/ServiceRequest';
+import Button from '@mui/material/Button';
+import { Job } from '../models/Job';
 import { GoStarFill } from 'react-icons/go';
 import BlackButton from './inputs/blackbutton';
 import Avatar from '@mui/material/Avatar';
 import { Divider } from '@mui/material';
-import { RequestStatus } from '../models/enums';
+import { JobStatus } from '../models/enums';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { Account } from '../models/Account';
 import axios from 'axios';
+import { Account } from '../models/Account';
+import { useEffect } from 'react';
 import { formatDateTime } from '../utils/dateUtils';
 
 interface MediaCardProps {
-  request: Request;
+  offeredService: Job;
+  provider: Account | null;
+  receiver: Account | null;
   onClose: () => void;
-  onDecline: (request: Request) => void;
-  onProposeNewTime: (request: Request, newTime: Date) => void;
-  onCancel: () => void;
+  onComplete: (offeredService: Job) => void;
+  onCancel: (offeredService: Job) => void;
+  onReview: (offeredService: Job) => void;
+  onRevoke: (offeredService: Job) => void;
 }
 
-const MediaCard: React.FC<MediaCardProps> = ({ request, onClose,onDecline, onProposeNewTime, onCancel }) => {
-  
-  const { account, token, isProvider } = useAuth();
-  const navigate = useNavigate();
+const MediaCard: React.FC<MediaCardProps> = ({ offeredService, provider, receiver, onClose, onComplete, onCancel, onReview, onRevoke }) => {
+  const {account, token, } = useAuth();
 
-  const handleProposeNewTime = (request: ServiceRequest) => {
-    navigate(`/change-booking-time/${request.provider}/${request._id}`); // Navigate to the calendar to select a new Timeslot
-  }
-  
   const renderButton = () => {
-if (request.requestStatus === RequestStatus.cancelled ){
-          console.log("No Actions possible for CANCELLED requests!");
-        }
-        else if (request.requestStatus === RequestStatus.declined ){
-          console.log("No Actions possible for DECLINED requests!");
-        }
-        else if (request.requestStatus === RequestStatus.accepted ){
-          return(<BlackButton text="Cancel Request" onClick={onCancel} sx={{ marginRight:"1rem" }}/>);
-        }
-         else {
-          console.log(request);
+      console.log(receiver, provider)
+      //Check whether user in sign-in context is a provider
+    if(offeredService.status === JobStatus.open && account?._id === offeredService.provider._id ){
         return (
           <>
-          <BlackButton text="Cancel Request" onClick={onCancel} sx={{ marginRight:"1rem" }}/>
-          <BlackButton text="Change Time" onClick={() => handleProposeNewTime(request)} />
+          <BlackButton text="Mark as Completed" onClick={() => onComplete(offeredService)} sx={{ marginRight:"1rem" }}/>
+          <BlackButton text="Cancel Service" onClick={() => onCancel(offeredService)} sx={{ marginRight:"1rem" }}/>
           </>
-        );
+        );}
+      if(offeredService.status === JobStatus.open && account?._id === offeredService.receiver._id ) {
+          return(<>
+          <BlackButton text="Cancel Service" onClick={onClose} />
+          </>);
+        }
+        else if (offeredService.status === JobStatus.completed) {
+          return(<>
+            <BlackButton text="Write a Review" onClick={() => onReview(offeredService)} sx={{ marginRight:"1rem" }} />
+            <BlackButton text="Revoke Completion" onClick={() => onRevoke(offeredService)} />
+          </>);
+        }
+    else {
+        console.log(offeredService.status);
+        return;
+
     }
   };
   return (
@@ -70,13 +75,13 @@ if (request.requestStatus === RequestStatus.cancelled ){
       </button>
       <CardContent>
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem' }}>
-          <Avatar alt={request.requestedBy.firstName + " " + request.requestedBy.lastName} src={request.profileImageUrl} sx={{ width: 100, height: 100, marginRight: '1rem' }} />
+          <Avatar alt={receiver?.firstName + " " + receiver?.lastName} src={receiver?.profileImageUrl} sx={{ width: 100, height: 100, marginRight: '1rem' }} />
           <div style={{ marginRight: '1rem' }}>
             <Typography variant="h6" >
               Request Detail
             </Typography>
             <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
-              Requestor: {request.requestedBy.firstName + " " + request.requestedBy.lastName }
+              Receiver: {receiver?.firstName + " " + receiver?.lastName}
             </Typography>
           </div>
           <div className='flex space-x-1 items-center'>
@@ -84,26 +89,26 @@ if (request.requestStatus === RequestStatus.cancelled ){
               <GoStarFill className='text-yellow-500'/>
             </div>
             <Typography variant="body2" color="text.secondary">
-              {request.rating}
+              {offeredService.rating}
             </Typography>
           </div>
         </div>
         <Divider sx={{marginBottom:'1rem'}}/>
         <Typography variant="body2">
-          Service Type: {request.serviceType}
+          Service Type: {offeredService.serviceType}
         </Typography>
         <Typography variant="body2">
-          Appointment Time: {formatDateTime(request.appointmentStartTime)}
+          Appointment Time: {formatDateTime(offeredService.appointmentStartTime)}
         </Typography>
         <Typography variant="body2" sx={{ marginBottom: '2rem'}}>
-          Service Fee: {request.serviceFee}
+          Service Fee: {offeredService.serviceFee}
         </Typography>
         <Typography variant="body2" sx={{marginBottom:'1rem'}}>
-          Status: {request.requestStatus}
+          Status: {offeredService.status}
         </Typography>
         <Divider sx={{marginBottom:'1rem'}}/>
         <Typography variant="body2" sx={{marginBottom:'1rem'}}>
-          Description: {request.comment}
+          Description: {offeredService.description}
         </Typography>
         {renderButton()}
       </CardContent>

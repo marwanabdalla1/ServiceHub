@@ -1,4 +1,4 @@
-import {RequestHandler} from "express";
+import { RequestHandler } from "express";
 import jwt from "jsonwebtoken";
 
 /**
@@ -11,13 +11,13 @@ export const authenticate: RequestHandler = async (req, res, next) => {
     // Check if the request contains an Authorization header
     const authHeader = req.headers['authorization'];
     if (!authHeader) {
-        return res.status(401).json({error: "Unauthorized"});
+        return res.status(401).json({ error: "Unauthorized" });
     }
 
     // Extract the token from the Authorization header
     const token = authHeader.split(' ')[1];
     if (!token) {
-        return res.status(401).json({error: "Unauthorized"});
+        return res.status(401).json({ error: "Unauthorized" });
     }
 
     // Verify the token
@@ -31,12 +31,12 @@ export const authenticate: RequestHandler = async (req, res, next) => {
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err: any, user: any) => {
         if (err) {
             console.log("Invalid token")
-            return res.status(403).json({error: "Forbidden"});
+            return res.status(403).json({ error: "Forbidden" });
         }
         // Check if the userId is included in the payload of the verified token
         if (!user.userId) {
             console.log("Invalid token payload")
-            return res.status(403).json({error: "Forbidden", message: "Invalid token payload"});
+            return res.status(403).json({ error: "Forbidden", message: "Invalid token payload" });
         }
         (req as any).user = user;
         console.log("User authenticated")

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import NavigationBar from '../components/Navbar';
 import MediaCard from '../components/ProfileCard';
-import {users, User} from '../models/Account';
 import { ServiceRequest as Request } from '../models/ServiceRequest';
 import { useRequest } from '../contexts/RequestContext';
 import { Card, CardContent, Avatar, Typography, TextField, Divider, Box } from '@mui/material';

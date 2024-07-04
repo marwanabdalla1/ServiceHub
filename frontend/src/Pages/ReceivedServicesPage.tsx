@@ -1,18 +1,17 @@
 import React from 'react';
 import NavigationBar from '../components/Navbar';
 import MediaCard from '../components/ProfileCard';
-import {users, User} from '../models/Account';
-import JobHistoryTable from '../components/JobHistoryTable';
+import ReceivedServiceTable from '../components/ReceivedServiceTable';
 
 
-function JobHistoryPage() {
+function ReceivedServicePage() {
   return (
   <div style={{ display: 'flex' }}>
   <div style={{ flex: 1, padding: '20px' }}>
-  <JobHistoryTable />
+  <ReceivedServiceTable />
   </div>
 </div>
   );
 }
 
-export default JobHistoryPage;
+export default ReceivedServicePage;
