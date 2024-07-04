@@ -1,26 +1,12 @@
-import { Job } from "./Job";
-import { ServiceRequest } from "./ServiceRequest";
-import { ServiceResponse } from "./ServiceResponse";
+// src/types.ts
 
-export class Notification {
-    notificationId: string;
-    isViewed: boolean;
-    content: string;
-    timestamp: Date;
-
-    //foreign keys
-    serviceRequest: ServiceRequest | null;
-    serviceResponse: ServiceResponse | null;
-    job: Job | null;
-
-    constructor(notificationId: string, isViewed: boolean, content: string, serviceRequest: ServiceRequest | null,
-        serviceResponse: ServiceResponse | null, job: Job | null) {
-        this.notificationId = notificationId;
-        this.isViewed = isViewed;
-        this.content = content;
-        this.timestamp = new Date();
-        this.serviceRequest = serviceRequest;
-        this.serviceResponse = serviceResponse;
-        this.job = job;
-    }
+export interface Notification {
+  _id: string;
+  content: string;
+  isViewed: boolean;
+  createdAt?: string;
+  review?: string;
+  updatedAt: string;
+  recipient?: string;
+  job?: string;
 }

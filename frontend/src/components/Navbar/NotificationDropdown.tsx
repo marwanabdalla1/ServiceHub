@@ -21,7 +21,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
       <div className="max-h-60 overflow-y-auto">
         {data.map(notification => (
           <NotificationItem
-            key={notification?.id}
+            key={notification._id}
             {...notification}
             markAsRead={markAsRead}
           />
