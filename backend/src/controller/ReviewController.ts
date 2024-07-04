@@ -11,7 +11,7 @@ import ServiceOffering from "../models/serviceOffering";
 //
 //
 
-// todo: sanity check: (add after job and request controllers are done)
+// todo (i think its done): sanity check: (add after job and request controllers are done)
 // the reviewer has to have used the service (or is the provider)
 // no other reviews has existed for this job
 export const submitReview: RequestHandler = async (req, res) => {
@@ -65,8 +65,8 @@ export const submitReview: RequestHandler = async (req, res) => {
 
         console.log("saved review:", savedReview)
 
-
-        if (savedReview) {
+        // Update the service offering only if the reviewer is the client
+        if (isClient && savedReview) {
             // Update the service offering with new review info and recalculated rating
             await ServiceOffering.findByIdAndUpdate(savedReview.serviceOffering, {
                 $push: { reviews: savedReview._id },
@@ -127,7 +127,6 @@ export const updateReview: RequestHandler = async (req, res) => {
 
     try {
         // Update the review
-
         const updates = {
             rating: rating,
             content: content,
@@ -211,7 +210,17 @@ export const deleteReview: RequestHandler = async (req, res) => {
 async function recalculateServiceOfferingRating(serviceOfferingId: any) {
     console.log("service offering id:", serviceOfferingId)
     try {
-        const reviews = await Review.find({ serviceOffering: serviceOfferingId });
+
+        // Find the service offering to get its provider
+        const serviceOffering = await ServiceOffering.findById(serviceOfferingId).select('provider');
+        if (!serviceOffering) {
+            console.error("Service offering not found:", serviceOfferingId);
+            return;
+        }
+
+        const reviews = await Review.find({
+            serviceOffering: serviceOfferingId,
+            recipient: serviceOffering.provider});
         // console.log("all reviews:", reviews)
         const totalRating = reviews.reduce((acc, curr) => acc + curr.rating, 0);
         const reviewCount = reviews.length;

@@ -15,7 +15,6 @@ import MediaCard from './ReceivedServiceCard';
 import { Job } from '../models/Job';
 import ReceivedServiceRow from './ReceivedServiceRow';
 import { Account } from '../models/Account';
-import account from '../models/Account';
 import {Timeslot} from '../models/Timeslot';
 import {ServiceRequest} from '../models/ServiceRequest';
 import {RequestStatus, ServiceType, JobStatus} from '../models/enums';

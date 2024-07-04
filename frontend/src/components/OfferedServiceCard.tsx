@@ -31,7 +31,8 @@ const MediaCard: React.FC<MediaCardProps> = ({ offeredService, provider, receive
   const {account, token, } = useAuth();
 
   const renderButton = () => {
-    //Check whether user in sign-in context is a provider
+      console.log(receiver, provider)
+      //Check whether user in sign-in context is a provider
     if(offeredService.status === JobStatus.open && account?._id === offeredService.provider._id ){
         return (
           <>
@@ -80,7 +81,7 @@ const MediaCard: React.FC<MediaCardProps> = ({ offeredService, provider, receive
               Request Detail
             </Typography>
             <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
-              Provider: {receiver?.firstName + " " + receiver?.lastName}
+              Receiver: {receiver?.firstName + " " + receiver?.lastName}
             </Typography>
           </div>
           <div className='flex space-x-1 items-center'>

@@ -16,7 +16,7 @@ import {
     Rating
 } from '@mui/material';
 import {GoStarFill} from "react-icons/go";
-import {Account as ServiceProvider, bikeRepairService } from '../models/Account';
+import {Account as ServiceProvider} from '../models/Account';
 import { DaysOfWeek, ServiceType, JobStatus, ResponseStatus, RequestStatus } from '../models/enums';
 import {styled} from '@mui/system';
 import SearchIcon from '@mui/icons-material/Search';
@@ -26,7 +26,6 @@ import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import Breadcrumb from "../components/Breadcrumb";
 import LightBlueButton from "../components/inputs/BlueButton";
 import { ServiceOffering } from '../models/ServiceOffering';
-import account from '../models/Account';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import {useBooking} from "../contexts/BookingContext";
 

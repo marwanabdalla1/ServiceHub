@@ -17,7 +17,7 @@ import Modal from './inputs/Modal';
 import MediaCard from './IncomingRequestCard';
 
 import {ServiceType, RequestStatus, JobStatus} from '../models/enums'
-import {Account, bikeRepairService} from '../models/Account';
+import {Account} from '../models/Account';
 import {useEffect} from "react";
 import {useAuth} from "../contexts/AuthContext";
 import axios from "axios";

@@ -1,8 +1,6 @@
 import React, {useEffect} from 'react';
 import {Container, Box, Typography, Card, CardContent, Avatar, Button, TextField, Link as MuiLink} from '@mui/material';
 import Rating from '@mui/material/Rating';
-import {appointments, bobBikerAppointment} from '../models/Appointment';
-import AppointmentCard from '../components/AppointmentCard';
 import { useParams } from 'react-router-dom';
 import {Job} from "../models/Job";
 import {useAuth} from "../contexts/AuthContext";
