@@ -28,106 +28,14 @@ import LightBlueButton from "../components/inputs/BlueButton";
 import { ServiceOffering } from '../models/ServiceOffering';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import {useBooking} from "../contexts/BookingContext";
+import axios from "axios";
 
+// !todo s
+// 1. link reviews
+//     if someone has no reviews just don't have the part
+// 2. display contact info
+// 3. display next availability
 
-// const mockProvider: ServiceProvider = {
-//     _id: '1',
-//     firstName: 'Bob',
-//     lastName: 'Biker',
-//     serviceOfferings: [new ServiceOffering('offering0',
-//         ServiceType.bikeRepair, new Date(), new Date(), new File([], "empty.txt", { type: "text/plain" }), 15, 'desc0', true,
-//     'Munich', account, 1, 0.5, [], 3, 4.5)],
-//     location: 'Munich',
-//     availability: [
-//         {
-//             dayOfWeek: DaysOfWeek.Thursday,
-//             timeslots: [
-//                 {title: ServiceType.bikeRepair, start: new Date('2024-05-11T15:00:00'), end: new Date('2024-05-11T20:00:00'), isFixed: false}
-//             ]
-//         },
-//         {
-//             dayOfWeek: DaysOfWeek.Friday,
-//             timeslots: [
-//                 {title: ServiceType.babySitting, start: new Date('2024-05-11T15:00:00'), end: new Date('2024-05-11T20:00:00'), isFixed: true}
-//             ]
-//         },
-//         {
-//             dayOfWeek: DaysOfWeek.Saturday,
-//             timeslots: [
-//                 {title: ServiceType.petSitting, start: new Date('2024-05-11T15:00:00'), end: new Date('2024-05-11T20:00:00'), isFixed: true}
-//             ]
-//         },
-//         {
-//             dayOfWeek: DaysOfWeek.Sunday,
-//             timeslots: [
-//                 {title: ServiceType.homeRemodeling, start: new Date('2024-05-11T15:00:00'), end: new Date('2024-05-11T20:00:00'), isFixed: false}
-//             ]
-//         }
-//     ],
-//
-//     reviews: [
-//         {
-//             reviewId: '1',
-//             rating: 5,
-//             content: 'Very friendly, great service. I can definitely recommend!',
-//             createdOn: new Date('2024-05-03'),
-//             reviewer: account,
-//             recipient: account,
-//             service: bikeRepairService
-//         },
-//         {
-//             reviewId: '2',
-//             rating: 5,
-//             content: 'Bob is very competent and quick in his work. I will definitely be using him for all my bike repairs from now on.',
-//             createdOn: new Date('2024-05-03'),
-//             reviewer: account,
-//             recipient: account,
-//             service: bikeRepairService
-//         },
-//         {
-//             reviewId: '3',
-//             rating: 5,
-//             content: 'Great Service!',
-//             createdOn: new Date('2024-05-03'),
-//             reviewer: account,
-//             recipient: account,
-//             service: bikeRepairService
-//         },
-//         {
-//             reviewId: '4',
-//             rating: 4,
-//             content: 'Good',
-//             createdOn: new Date('2024-05-03'),
-//             reviewer: account,
-//             recipient: account,
-//             service: bikeRepairService
-//         },
-//         {
-//             reviewId: '5',
-//             rating: 4,
-//             content: 'Good',
-//             createdOn: new Date('2024-05-03'),
-//             reviewer: account,
-//             recipient: account,
-//             service: bikeRepairService
-//         },
-//
-//     ],
-//     rating: 4.6,
-//     reviewCount: 5,
-//     description: 'Having tinkered with bikes since I was 16, I\'ve got the skills to fix yours up good as new.',
-//     email: 'bob.biker@biking.com',
-//     address: 'Biking Avenue',
-//     createdOn: new Date(),
-//     phoneNumber: '07775000',
-//     isProvider: true,
-//     profileImageUrl: '/images/profiles/profile2.png',
-//     isPremium: false,
-//     notifications: [],
-//     requestHistory: [],
-//     jobHistory: []
-//
-// };
 
 const daysOfWeekToString = (day: DaysOfWeek): string => {
     return DaysOfWeek[day];
@@ -137,10 +45,29 @@ const formatTime = (date: Date): string => {
     return date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
 };
 
+
+interface Review {
+    _id: string;
+    reviewer: {
+        _id: string;
+        firstName: string;
+        lastName: string;
+        profileImageId: string | null;
+        email: string|null;
+    };
+    recipient: string;
+    serviceOffering: string;
+    job: string;
+    rating: number;
+    content: string;
+    createdAt: string;
+}
+
 function ProviderProfilePage() {
     const { fetchAccountDetails, fetchOfferingDetails } = useBooking();
     const [provider, setProvider] = useState<ServiceProvider | null>(null);
     const [offering, setOffering] = useState<ServiceOffering | null>(null);
+    const [reviews, setReviews] = useState<Review[]>([]);
 
 
     // const provider = mockProvider;
@@ -165,6 +92,13 @@ function ProviderProfilePage() {
                 } catch (error) {
                     console.error("Failed to fetch account details:", error);
                 }
+                try {
+                    const response = await axios.get(`/api/reviews/${offeringId}`);
+                    console.log("reviews: ", response.data);
+                    setReviews(response.data.review);
+                } catch (error) {
+                    console.error("Failed to fetch reviews:", error);
+                }
             }
         };
 
@@ -187,7 +121,7 @@ function ProviderProfilePage() {
 
             <Box sx={{mt: 4}}>
                 <Breadcrumb paths={[
-                    // todo: change this!
+                    // todo: change breadcrumb!
                     {label: 'Home', href: '/'},
                     {label: 'Munich', href: '/munich'},
                     {label: 'Bike Repair', href: '/munich/bike-repair'},
@@ -316,7 +250,7 @@ function ProviderProfilePage() {
 
                             {/*todo: update the reviews part once the review controllers etc. are done!*/}
 
-                            {provider.reviews ? provider.reviews.map((review) => (
+                            {reviews ? reviews.map((review) => (
                                 <Card key={review._id} sx={{mb: 2}}>
                                     <CardContent>
                                         <Box sx={{display: 'flex', alignItems: 'center', mb: 1}}>
@@ -334,12 +268,12 @@ function ProviderProfilePage() {
                                             {review.content}
                                         </Typography>
                                         <Typography variant="body2" color="text.secondary">
-                                            Reviewed in Munich on {new Date(review.createdOn).toLocaleDateString()}
+                                            Reviewed on {new Date(review.createdAt).toLocaleDateString()}
                                         </Typography>
-                                        <Box sx={{display: 'flex', justifyContent: 'space-between', mt: 2}}>
-                                            <Button size="small">Helpful</Button>
-                                            <Button size="small">Report Abuse</Button>
-                                        </Box>
+                                        {/*<Box sx={{display: 'flex', justifyContent: 'space-between', mt: 2}}>*/}
+                                        {/*    <Button size="small">Helpful</Button>*/}
+                                        {/*    <Button size="small">Report Abuse</Button>*/}
+                                        {/*</Box>*/}
                                     </CardContent>
                                 </Card>
                             )) : ""}

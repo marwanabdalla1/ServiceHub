@@ -339,7 +339,7 @@ export const getAvailabilityByProviderId: RequestHandler = async (req, res, next
         }).lean();
 
         // Merge contiguous and overlapping timeslots
-        // todo: replace/delete this once the mergeandclean is done
+        // (maybe todo: replace/delete this once the mergeandclean is done)
         const mergedTimeslots: ITimeslot[] = mergeTimeslots(timeslots);
 
         // Adjust for transit time

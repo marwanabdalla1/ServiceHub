@@ -8,6 +8,7 @@ import Review from "../models/review";
 import Notification from "../models/notification"
 import Job from "../models/job";
 import ServiceOffering from "../models/serviceOffering";
+import mongoose from "mongoose";
 //
 //
 
@@ -38,6 +39,11 @@ export const submitReview: RequestHandler = async (req, res) => {
         const isProvider = jobDetails.provider._id.toString() === user.userId;
         if (!isClient && !isProvider) {
             return res.status(403).json({ error: "You must be the provider or have used the service to review it." });
+        }
+
+        // make sure you can't give review to yourself!
+        if (user.userId === recipient){
+            return res.status(403).json({ error: "You cannot give a review to yourself!." });
         }
 
         // Check if a review already exists for this job
@@ -77,7 +83,7 @@ export const submitReview: RequestHandler = async (req, res) => {
 
 
         // push notification to receiver
-        const notificationContent = `A new review has been added to ${savedReview.job}.`;
+        const notificationContent = `A new review has been added to the job ${savedReview.job}.`;
         const newNotification = new Notification({
             isViewed: false,
             content: notificationContent,
@@ -249,13 +255,42 @@ export const getAllReviewsByOffering: RequestHandler = async (req, res) => {
     // const userId = user.userId; // Assuming you're using some authentication middleware
 
     try {
-        const reviews = await Review.find({ serviceOffering: offeringId });
+        const reviews = await Review.find({ serviceOffering: offeringId }).populate([
+            { path: 'reviewer', select: 'firstName lastName email' },
+        ]).exec();
         if (reviews) {
             return res.json({ review: reviews });
         }
         // else {
         //     return res.json({ success: false });
         // }
+
+        // Fetch profile images
+        // const profileImagePromises = reviews.map(async (review) => {
+        //     const reviewer = review.reviewer as mongoose.Document & { profileImageId: string };
+        //     let profileImageUrl = null;
+        //
+        //     if (reviewer && reviewer.profileImageId) {
+        //         const profileImageResponse = await Account.findById(reviewer._id).select('profileImageUrl');
+        //         profileImageUrl = profileImageResponse?.profileImageUrl || null;
+        //     }
+        //
+        //     return {
+        //         ...review.toObject(),
+        //         reviewer: {
+        //             ...reviewer.toObject(),
+        //             profileImageUrl: profileImageUrl,
+        //         },
+        //     };
+        // });
+
+        // const reviewsWithProfileImages = await Promise.all(profileImagePromises);
+        //
+        // if (reviewsWithProfileImages) {
+        //     return res.json({ review: reviewsWithProfileImages });
+        // }
+
+
     } catch (error) {
         res.status(500).json({ success: false, message: "Server error", error });
     }
