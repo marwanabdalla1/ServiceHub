@@ -6,14 +6,12 @@ import SignUpPage from './Pages/AuthPages/SignUpPage';
 import NavigationBar from './components/Navbar';
 import ReceivedServicesPage from './Pages/ReceivedServicesPage';
 import AdminNavbar from "./components/adminComponents/AdminNavbar";
-import JobHistoryPage from './Pages/JobHistoryPage';
 import RequestHistoryPage from './Pages/RequestHistoryPage';
 import IncomingRequestsPage from './Pages/IncomingRequestsPage';
 import HomePage from './Pages/HomePage';
 import AddServicePage from './Pages/AddServicePage';
 import ReviewPage from "./Pages/CustomerReviewPage";
 import ProviderProfilePage from "./Pages/ProviderProfilePage";
-import UserProfilePage from "./Pages/ProfileSettingPage";
 import ProfileSettingPage from "./Pages/ProfileSettingPage";
 import SelectAvailabilityPage from './Pages/SelectAvailabilityPage';
 import SelectTimeslot from './Pages/bookingSteps/SelectTimeslotPage'
