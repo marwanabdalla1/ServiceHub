@@ -143,7 +143,7 @@ function MainRoutes({search, setSearch}: {search: any, setSearch: any}) {
                 {/*booking*/}
                 {/* <Route path="/offerings/:offeringId" element={<ProviderProfilePage/>}/>
                 <Route path="/offerings/:offeringId/booking/:step" element={<BookingPage/>}/> */}
-                <Route path="/offerings/:requestId/confirm" element={<ConfirmationPage/>}/>
+                <Route path="/confirmation/:requestId/:type" element={<ConfirmationPage/>}/>
 
                 {/*todo: get this once it's done*/}
                 <Route path="/jobs/:jobId" element={<JobDetailsPage />} />

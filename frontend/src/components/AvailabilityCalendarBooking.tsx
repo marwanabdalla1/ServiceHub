@@ -11,7 +11,9 @@ import { useAuth } from '../contexts/AuthContext';
 import {BookingDetails, useBooking} from '../contexts/BookingContext';
 import {ServiceType} from "../models/enums";
 import {Timeslot} from "../models/Timeslot";
-import { bookTimeSlot, BookingError } from '../services/timeslotService';
+import {bookTimeSlot, BookingError, changeTimeSlot} from '../services/timeslotService';
+import {useNavigate} from "react-router-dom";
+import useAlert from '../hooks/useAlert'; // Adjust the path as necessary
 
 
 const locales = {
@@ -44,17 +46,19 @@ interface ServiceScheduleProps {
     defaultSlotDuration: number;
     defaultTransitTime: number;
     providerIdInput: string| null|undefined;
+    requestIdInput: string|null|undefined;
     mode:"create" | "change"; //"create" or "change"
     onRequestChange: () => void;
     onNext: () => void;
 }
 
-function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, defaultTransitTime, providerIdInput, mode, onRequestChange, onNext }: ServiceScheduleProps) {
+function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, defaultTransitTime, providerIdInput, requestIdInput, mode, onRequestChange, onNext }: ServiceScheduleProps) {
     const {bookingDetails, setTimeAndDuration} = useBooking();
     // const providerId = bookingDetails.provider?._id;
     const providerId = mode === 'change' ? providerIdInput : bookingDetails.provider?._id;
+    const requestId = mode === 'change' ? requestIdInput : null;
 
-
+    const { triggerAlert, closeAlert } = useAlert();
     const [availability, setAvailability] = useState<Timeslot[]>([]);
     const [selectedTimeSlot, setSelectedTimeSlot] = useState<Timeslot | null>(null);
     // const [selectedTimeSlotWithTransit, setSelectedTimeSlotWithTransit] = useState<TimeSlot | null>(null);
@@ -62,6 +66,9 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
     const [deleteDialog, setDeleteDialog] = useState(false);
     const [clashDialogOpen, setClashDialogOpen] = useState(false);
     const { token } = useAuth();
+
+    const navigate = useNavigate();
+
 
     // const [previewSlot, setPreviewSlot] = useState<Date | null>(null);
     // const [previewStart, setPreviewStart] = useState<Date | null>(null);
@@ -259,7 +266,7 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
                 transitEnd,
                 false,
                 true,
-                undefined,
+                requestId,
                 undefined, providerId,
             )
             // const timeslot = new Timeslot(...newTimeSlot)
@@ -307,6 +314,7 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
     const confirmBooking = async () => {
         if (!selectedTimeSlot) {
             console.error("No timeslot selected");
+            triggerAlert("No timeslot selected", "error");
             return;
         }
 
@@ -332,8 +340,27 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
         }
 
         if (mode ==="change"){
-            const timeslotResponse = await bookTimeSlot(selectedTimeSlot, token)
-            console.log("Timeslot updated successfully", timeslotResponse);
+            try {
+                const timeslotResponse = await changeTimeSlot(selectedTimeSlot, token)
+                console.log("Timeslot updated", timeslotResponse);
+                triggerAlert("Timeslot updated successfully", "success");
+                navigate(`/confirmation/${requestId}/timeslotChange`);
+            } catch (error: any){
+                console.error('Error changing Timeslot booking:', error);
+
+                if (error instanceof BookingError && error.code === 409) {
+                    triggerAlert("Unfortunately, the selected timeslot is no longer available. Please select another time.", "error");
+                    // await axios.delete(`/api/requests/${requestId}`, {
+                    //     headers: {'Authorization': `Bearer ${token}`}
+                    // });
+                    // console.error('Rolled back the created request due to timeslot booking failure.');
+                    // alert('Unfortunately, the selected timeslot is no longer available. Please select another time.');
+
+                } else {
+                    // alert('An error occurred while confirming your booking. Please try again.');
+                    triggerAlert("Failed to update timeslot", "error");
+                }
+            }
 
         }
     };

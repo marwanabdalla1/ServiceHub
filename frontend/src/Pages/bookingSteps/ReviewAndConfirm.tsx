@@ -209,7 +209,7 @@ function ReviewAndConfirm({onComplete, onBack, bookingDetails}: ReviewAndConfirm
 
 
             // navigate('/confirmation'); // Navigate to a confirmation page or show a confirmation message
-            navigate(`/offerings/${requestId}/confirm`); // Navigate to a confirmation page or show a confirmation message
+            navigate(`/confirmation/${requestId}/booking`); // Navigate to a confirmation page or show a confirmation message
 
             //     if booking timeslot fails, then roll back the request
         } catch (error: any) {

@@ -87,6 +87,7 @@ const ChangeBookingTimePage: React.FC = () => {
             <AvailabilityCalendarBooking
                 Servicetype={request.serviceType}
                 providerIdInput={providerId}
+                requestIdInput={requestId}
                 mode={"change"}
                 defaultSlotDuration={request.serviceOffering.baseDuration || 60}
                 defaultTransitTime={request.serviceOffering?.bufferTimeDuration || 30}

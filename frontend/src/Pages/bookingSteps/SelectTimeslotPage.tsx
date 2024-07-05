@@ -85,6 +85,7 @@ function SelectTimeslot({ onNext, onBack, bookingDetails }: SelectTimeslotProps)
                     <AvailabilityCalendarBooking
                         Servicetype={bookingDetails?.serviceType}
                         providerIdInput={null}
+                        requestIdInput={null}
                         mode={'create'}
                         defaultSlotDuration={bookingDetails.serviceOffering?.baseDuration || 60}
                         defaultTransitTime={bookingDetails.serviceOffering?.bufferTimeDuration || 30}
