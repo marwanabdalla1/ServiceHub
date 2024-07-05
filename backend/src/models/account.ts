@@ -29,7 +29,7 @@ const accountSchema: Schema = new Schema({
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true, select: false },
+    password: { type: String, required: true, select: true },
     phoneNumber: { type: String, required: false },
     address: { type: String, required: false },
     postal: { type: String, required: false },
