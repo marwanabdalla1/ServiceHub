@@ -3,7 +3,7 @@ import Account from "../models/account";
 import { RequestHandler } from "express";
 import * as dotenv from 'dotenv'
 import { validateRequestBody } from "../helpers/validate";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 import { ERRORS } from "../helpers/authHelper";
 
 dotenv.config();
@@ -46,7 +46,7 @@ export const signup: RequestHandler = async (req, res, next) => {
             lastName: req.body.lastName,
             email: req.body.email,
             password: hashedPassword,
-
+            isAdmin: false,
             isProvider: false,
             isPremium: false,
         };
@@ -140,7 +140,8 @@ export const login: RequestHandler = async (req, res, next) => {
             token,
             accountId: account._id,
             isProvider: account.isProvider,
-            isPremium: account.isPremium
+            isPremium: account.isPremium,
+            isAdmin: account.isAdmin
         });
 
     } catch (err: any) {

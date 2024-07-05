@@ -9,6 +9,7 @@ export enum ReviewCategory {
 }
 
 export interface IPlatformFeedback extends Document {
+    title: string;
     rating: number;
     content: string;
     category: ReviewCategory;
@@ -17,6 +18,7 @@ export interface IPlatformFeedback extends Document {
 }
 
 const PlatformFeedbackSchema: Schema = new Schema({
+    title: { type: String, required: true },
     rating: { type: Number, required: false },
     content: { type: String, required: true },
     category: { type: String, enum: Object.values(ReviewCategory), required: true },

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { CgProfile } from "react-icons/cg";
 import { IoSettingsOutline, IoNotificationsOutline } from "react-icons/io5";
 import { CiSearch } from "react-icons/ci";
@@ -12,10 +12,11 @@ import { Menu, MenuItem } from '@mui/material';
 import { useAuth } from "../contexts/AuthContext";
 import NotificationBell from './Navbar/NotificationBell';
 interface NavbarProps {
-  toggleDrawer: () => void;
-  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onSearch: () => void;
-  search: string;
+    toggleDrawer: () => void;
+    onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    onSearch: () => void;
+    search: string;
+    setSearch: (value: string) => void;
 }
 
 interface ServiceButtonProps {
@@ -50,18 +51,22 @@ const ServiceButton: React.FC<ServiceButtonProps> = ({ isLoggedIn, isProvider, i
   );
 };
 
-const Navbar: React.FC<NavbarProps> = ({ toggleDrawer, onChange, onSearch, search }) => {
-  const { token, isLoggedIn, logoutUser, account } = useAuth();
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [profileAnchorEl, setProfileAnchorEl] = useState<null | HTMLElement>(null);
-  const [searchTerm, setSearchTerm] = useState(search);
-  const navigate = useNavigate();
-  const location = useLocation();
+const Navbar: React.FC<NavbarProps> = ({toggleDrawer, onChange, onSearch, search, setSearch}) => {
+    const {token, isLoggedIn, logoutUser, account} = useAuth();
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const [profileAnchorEl, setProfileAnchorEl] = useState<null | HTMLElement>(null);
+    // const [searchTerm, setSearchTerm] = useState(search);
+    const navigate = useNavigate();
+    const location = useLocation();
 
 
-  const isPremium = account?.isPremium || false;
-  const isProvider = account?.isProvider || false;
-  //console.log("token: " + token + '\n' + "isProvider: " + isProvider + '\n' + "isPremium: " + isPremium );
+    const isPremium = account?.isPremium || false;
+    const isProvider = account?.isProvider || false;
+    //console.log("token: " + token + '\n' + "isProvider: " + isProvider + '\n' + "isPremium: " + isPremium );
+
+    useEffect(() => {
+        setSearch(search);
+    }, [search]);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -82,13 +87,14 @@ const Navbar: React.FC<NavbarProps> = ({ toggleDrawer, onChange, onSearch, searc
   };
 
 
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(event.target.value);
-  };
+    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setSearch(event.target.value);
+    };
 
-  const handleSearch = () => {
-    navigate(`/filter`, { state: { searchTerm } });
-  };
+    const handleSearch = () => {
+        navigate(`/filter`, {state: {searchTerm: search}});
+        // setSearchTerm("")
+    };
 
   return (
     <nav className="bg-blue-300 shadow-md h-20">
@@ -116,7 +122,7 @@ const Navbar: React.FC<NavbarProps> = ({ toggleDrawer, onChange, onSearch, searc
               type="text"
               placeholder={"Search for a service"}
               className="flex-grow px-2 py-1 rounded-l-full focus:outline-none"
-              value={searchTerm}
+              value={search}
               onChange={handleSearchChange}
             />
             <button className="text-blue-500" onClick={handleSearch}>

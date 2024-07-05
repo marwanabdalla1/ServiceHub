@@ -1,25 +1,42 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import BlackButton from '../components/inputs/blackbutton';
 import { loadStripe } from '@stripe/stripe-js';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
+import { Feedback, ReviewCategory } from '../models/Feedback';
 
 const stripePromise = loadStripe('pk_test_51NEdzDChuUsrK8kGX1Wcu8TazsmDPprhV212alFOg78GS9W3FW8JLv1S6FyJnirCaj4f5UevhfUetfDSxIvATSHp003QYXNJYT'); 
 
-const BecomeProPage = () => {
-  const {token, account} = useAuth();
-  const userid = account?._id;
-console.log(token)
+const BecomeProPage: React.FC = () => {
+  const { token } = useAuth();
+  const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const response = await axios.get<Feedback[]>('/api/feedback/premium-upgrade', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        setFeedbacks(response.data);
+      } catch (error) {
+        console.error('Error fetching reviews:', error);
+      }
+    };
+
+    fetchReviews();
+  }, [token]);
+
   const handleJoinNow = async () => {
     try {
-     
       const response = await axios.post('/api/becomepro/payment', 
         {}, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
-    });
+      });
       const sessionId = response.data.id;
       const stripe = await stripePromise;
 
@@ -46,6 +63,29 @@ console.log(token)
         </div>
         <div className="md:mt-0 mr-0">
           <img src="/images/handshake.png" alt="Handshake" className="w-full" />
+        </div>
+      </div>
+      {/* Review Section */}
+      <div className="w-3/4 mt-8">
+        <h2 className="text-3xl font-bold mb-4">What Our Pro Members Say</h2>
+        <div className="bg-gray-100 p-6 rounded-lg shadow-md">
+          {feedbacks.map((feedback, index) => (
+            <div className="mb-6 p-4 bg-white rounded-lg shadow-lg" key={index}>
+              <div className="flex items-center mb-2">
+                <h4 className="font-semibold text-lg text-gray-800">{feedback.givenBy.firstName}</h4>
+                <span className="ml-4 text-sm text-gray-600">{new Date(feedback.createdAt).toLocaleDateString()}</span>
+              </div>
+              <h5 className="text-lg font-bold text-gray-900">{feedback.title}</h5>
+              <p className="mt-2 text-gray-700">{feedback.content}</p>
+              {feedback.rating && (
+                <div className="mt-2">
+                  {[...Array(5)].map((star, i) => (
+                    <i key={i} className={`fas fa-star ${i < feedback.rating ? 'text-yellow-500' : 'text-gray-300'}`}></i>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       </div>
     </div>
