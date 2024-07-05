@@ -4,10 +4,10 @@ import ServiceOffering from "../models/serviceOffering";
 import ServiceRequest, { IServiceRequest } from "../models/serviceRequest";
 import mongoose, {Document, Types} from 'mongoose';
 import Timeslot from "../models/timeslot";
-import {bookTimeslot, cancelTimeslot} from "./TimeSlotController";
 import {createNotification, createNotificationDirect} from "./NotificationController";
 import Notification from "../models/notification";
 import {NotificationType} from "../models/enums";
+import {bookTimeslot} from "./TimeSlotController";
 
 
 
@@ -304,13 +304,14 @@ export const handleChangeTimeslot: RequestHandler = async (req, res, next) => {
     const { createdById, requestId } = req.body;
     let success = true;  // Flag to track success of booking
 
+    // todo: first delete the existing timeslot if not yet done
     try {
-        await bookTimeslot(req, res, next);
+        const hi = await bookTimeslot(req, res, next);
 
-        // Check if the response has been sent by bookTimeslot
-        if (res.headersSent) {
-            return; // If the response is sent, bookTimeslot was successful
-        }
+        // // Check if the response has been sent by bookTimeslot
+        // if (res.headersSent) {
+        //     return; // If the response is sent, bookTimeslot was successful
+        // }
 
     } catch (error) {
         console.error("Error in handling timeslot change:", error);
@@ -343,12 +344,38 @@ export const handleChangeTimeslot: RequestHandler = async (req, res, next) => {
     }
 };
 
+// export const handleChangeTimeslot: RequestHandler = async (req, res, next) => {
+//     const { createdById, requestId } = req.body;
+//
+//     try {
+//         const result = await bookTimeslot(req, res, next);  // Assume bookTimeslot now just handles logic and throws
+//         console.log("request controller change timeslot result:", result)
+//         res.json(result);
+//         await createNotificationDirect({
+//             content: `The timeslot of the existing request ${requestId} has been successfully changed.`,
+//             serviceRequest: requestId,
+//             notificationType: NotificationType.timeRequestChanged,
+//             recipient: createdById
+//         });
+//     } catch (error) {
+//         console.error("Error in handling timeslot change:", error);
+//         res.status(500).json({ message: "Failed to process timeslot change." });
+//         await createNotificationDirect({
+//             content: `Failed to change the timeslot of the existing request ${requestId}.`,
+//             serviceRequest: requestId,
+//             notificationType: NotificationType.timeRequestChanged,
+//             recipient: createdById
+//         });
+//     }
+// };
 
 
 export const getRequestById: RequestHandler = async (req, res) => {
     try {
 
         const { requestId } = req.params; // Extract the provider ID from the URL parameter
+
+
         const userId = (req as any).user.userId;
 
         // if (userId !== requestId) {
@@ -357,22 +384,25 @@ export const getRequestById: RequestHandler = async (req, res) => {
         // }
 
         const serviceRequest = await ServiceRequest.findOne({ _id: requestId })
-            .populate([
-                { path: 'requestedBy', select: 'firstName lastName' },
-                {path: 'provider', select: 'firstName lastName'},
-                {path: 'serviceOffering', select: 'baseDuration bufferTimeDuration'}
-            ])
-            .exec();
+            // .populate([
+            //     { path: 'requestedBy', select: 'firstName lastName' },
+            //     {path: 'provider', select: 'firstName lastName'},
+            //     {path: 'serviceOffering', select: 'baseDuration bufferTimeDuration'}
+            // ])
+            // .exec();
 
-        //make sure only the provider/consumer him/herself can get this
+        console.log(serviceRequest)
+
         if (!serviceRequest){
             return res.status(404).json({ message: "No service requests found." });
         }
 
+        //make sure only the provider/consumer him/herself can get this
         if (userId !== serviceRequest.requestedBy._id.toString() && userId !== serviceRequest.provider._id.toString()) {
             console.log("userId: ", userId, "\n requesterId: ", serviceRequest.requestedBy._id, "provider ID:", serviceRequest.provider._id)
             return res.status(403).json({ message: "Unauthorized access." });
         }
+
 
 
         console.log("incoming requests with their timeslots", serviceRequest)

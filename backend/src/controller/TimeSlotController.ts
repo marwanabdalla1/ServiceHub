@@ -1,7 +1,7 @@
-import { RequestHandler } from 'express';
+import {RequestHandler} from 'express';
 import moment from 'moment';
-import Timeslot, { ITimeslot } from '../models/timeslot';
-import mongoose, { Types } from "mongoose";
+import Timeslot, {ITimeslot} from '../models/timeslot';
+import mongoose, {Types} from "mongoose";
 import ServiceRequest from "../models/serviceRequest";
 
 // Function to generate weekly instances (existing code)
@@ -56,7 +56,7 @@ function generateWeeklyInstances(events: ITimeslot[], startDate: moment.Moment, 
 export const extendFixedSlots: RequestHandler = async (req, res, next) => {
     try {
         const userId = (req as any).user.userId;// Assuming userId is available in the request (e.g., from authentication middleware)
-        const { start, end } = req.body;
+        const {start, end} = req.body;
         const startDate = moment(start).subtract(1, 'week');
         const endDate = moment(end).subtract(1, 'week');
 
@@ -64,8 +64,8 @@ export const extendFixedSlots: RequestHandler = async (req, res, next) => {
         const fixedEvents = await Timeslot.find({
             createdById: userId,
             isFixed: true,
-            start: { $gte: startDate.toDate() },
-            end: { $lte: endDate.toDate() },
+            start: {$gte: startDate.toDate()},
+            end: {$lte: endDate.toDate()},
         });
 
         // Generate new instances
@@ -81,7 +81,7 @@ export const extendFixedSlots: RequestHandler = async (req, res, next) => {
             createdById: userId
         })));
 
-        res.status(201).json({ message: "Extended fixed slots successfully" });
+        res.status(201).json({message: "Extended fixed slots successfully"});
     } catch (err) {
         let message = '';
         if (err instanceof Error) {
@@ -98,13 +98,13 @@ export const extendFixedSlots: RequestHandler = async (req, res, next) => {
 export const deleteTimeslot: RequestHandler = async (req, res, next) => {
     try {
         const userId = (req as any).user.userId;// Assuming userId is available in the request (e.g., from authentication middleware)
-        const { event, deleteAllFuture } = req.body;
+        const {event, deleteAllFuture} = req.body;
         const startTime = new Date(event.start);
         const endTime = new Date(event.end);
-        const { title, isFixed } = event;
+        const {title, isFixed} = event;
 
         // Delete the specific event
-        const deletedOne = await Timeslot.deleteOne({ start: startTime, end: endTime, createdById: userId });
+        const deletedOne = await Timeslot.deleteOne({start: startTime, end: endTime, createdById: userId});
 
         console.log(event, deletedOne)
 
@@ -116,28 +116,28 @@ export const deleteTimeslot: RequestHandler = async (req, res, next) => {
                 createdById: userId,
                 title,
                 isFixed: true,
-                start: { $gte: futureStartDate.toDate() },
+                start: {$gte: futureStartDate.toDate()},
                 $and: [
                     {
                         $or: [ // Start time is within the base event duration
-                            { start: { $gte: startTime } },
-                            { start: { $lt: endTime } }
+                            {start: {$gte: startTime}},
+                            {start: {$lt: endTime}}
                         ]
                     },
                     {
                         $or: [ // End time is within the base event duration
-                            { end: { $gt: startTime } },
-                            { end: { $lte: endTime } }
+                            {end: {$gt: startTime}},
+                            {end: {$lte: endTime}}
                         ]
                     }
                 ],
                 $expr: {
-                    $eq: [{ $dayOfWeek: "$start" }, weekday] // Ensure it's the same day of the week
+                    $eq: [{$dayOfWeek: "$start"}, weekday] // Ensure it's the same day of the week
                 }
             });
         }
 
-        res.status(200).json({ message: 'Timeslot deleted successfully' });
+        res.status(200).json({message: 'Timeslot deleted successfully'});
     } catch (err) {
         let message = '';
         if (err instanceof Error) {
@@ -154,21 +154,20 @@ export const deleteTimeslot: RequestHandler = async (req, res, next) => {
 export const updateTimeslot: RequestHandler = async (req, res, next) => {
     try {
         const userId = (req as any).user.userId;
-        const { event, updateAllFuture } = req.body;
+        const {event, updateAllFuture} = req.body;
         const newStart = new Date(req.body.newStart);
         const newEnd = new Date(req.body.newEnd);
-        const { _id, start, end, isFixed } = event;
+        const {_id, start, end, isFixed} = event;
 
         // Adjust day of week to match MongoDB's indexing (1-7)
-
 
 
         // Update only the specific event
         if (!updateAllFuture) {
             await Timeslot.updateOne(
-                { _id: _id, createdById: userId },
+                {_id: _id, createdById: userId},
                 // then it no longer is a fixed event
-                { $set: { start: newStart, end: newEnd, isFixed: false } }
+                {$set: {start: newStart, end: newEnd, isFixed: false}}
             );
         } else if (isFixed && updateAllFuture) {
             // Parse original start and end times to match exact future instances
@@ -184,14 +183,14 @@ export const updateTimeslot: RequestHandler = async (req, res, next) => {
                 createdById: userId,
                 title: event.title,
                 isFixed: true,
-                start: { $gte: originalStart },
+                start: {$gte: originalStart},
                 $expr: {
                     $and: [
-                        { $eq: [{ $hour: "$start" }, originalStart.getHours()] },
-                        { $eq: [{ $minute: "$start" }, originalStart.getMinutes()] },
-                        { $eq: [{ $hour: "$end" }, originalEnd.getHours()] },
-                        { $eq: [{ $minute: "$end" }, originalEnd.getMinutes()] },
-                        { $eq: [{ $dayOfWeek: "$start" }, dayOfWeek] }
+                        {$eq: [{$hour: "$start"}, originalStart.getHours()]},
+                        {$eq: [{$minute: "$start"}, originalStart.getMinutes()]},
+                        {$eq: [{$hour: "$end"}, originalEnd.getHours()]},
+                        {$eq: [{$minute: "$end"}, originalEnd.getMinutes()]},
+                        {$eq: [{$dayOfWeek: "$start"}, dayOfWeek]}
                     ]
                 }
             };
@@ -201,14 +200,14 @@ export const updateTimeslot: RequestHandler = async (req, res, next) => {
                     createdById: userId,
                     title: event.title,
                     isFixed: true,
-                    start: { $gte: futureStartDate.toDate() },
-                    $expr: { $eq: [{ $dayOfWeek: "$start" }, dayOfWeek] }
+                    start: {$gte: futureStartDate.toDate()},
+                    $expr: {$eq: [{$dayOfWeek: "$start"}, dayOfWeek]}
                 },
-                { $set: { start: newStart, end: newEnd } }
+                {$set: {start: newStart, end: newEnd}}
             );
         }
 
-        res.status(200).json({ message: 'Timeslot updated successfully' });
+        res.status(200).json({message: 'Timeslot updated successfully'});
     } catch (err: any) {
         console.error("Error updating timeslot:", err);
         res.status(500).json({
@@ -222,14 +221,13 @@ export const updateTimeslot: RequestHandler = async (req, res, next) => {
 export const getEvents: RequestHandler = async (req, res, next) => {
     const userId = (req as any).user.userId; // Assuming userId is available in the request (e.g., from authentication middleware)
     try {
-        const timeslots = await Timeslot.find({ createdById: userId });
+        const timeslots = await Timeslot.find({createdById: userId});
         res.json(timeslots);
     } catch (error: unknown) {
         const err = error as Error;
-        res.status(500).json({ error: 'Internal Server Error', message: err.message });
+        res.status(500).json({error: 'Internal Server Error', message: err.message});
     }
 };
-
 
 
 // merge overlapping timeslots
@@ -316,19 +314,19 @@ const adjustForTransit = (timeslots: ITimeslot[], transitTime: number) => {
 // get events by user ID (i.e. of a provider) for booking, this is ADJUSTED for transit time!
 export const getAvailabilityByProviderId: RequestHandler = async (req, res, next) => {
     // const userId = (req as any).user.userId; // consumer id
-    const { providerId } = req.params;
+    const {providerId} = req.params;
     const transitTime = parseInt(req.query.transitTime as string); // Get the transit time from query params
     console.log(req.query, "transit Time: ", transitTime)
     if (isNaN(transitTime)) {
         console.log("invalid transit time!")
-        return res.status(400).json({ error: 'Invalid transit time provided' });
+        return res.status(400).json({error: 'Invalid transit time provided'});
     }
 
     try {
         // handle both string and objectId
         const providerIdConditions = [
-            { createdById: providerId }, // Assuming it's a string or matches the ObjectId format
-            { createdById: new Types.ObjectId(providerId) } // Explicitly cast to ObjectId
+            {createdById: providerId}, // Assuming it's a string or matches the ObjectId format
+            {createdById: new Types.ObjectId(providerId)} // Explicitly cast to ObjectId
         ];
 
         // Fetch all timeslots for the provider
@@ -349,7 +347,7 @@ export const getAvailabilityByProviderId: RequestHandler = async (req, res, next
         res.json(adjustedTimeslots);
     } catch (error: any) {
         console.error("Error fetching timeslots:", error);
-        res.status(500).json({ error: 'Internal Server Error', message: error.message });
+        res.status(500).json({error: 'Internal Server Error', message: error.message});
     }
 };
 
@@ -358,7 +356,7 @@ export const saveEvents: RequestHandler = async (req, res, next) => {
     try {
         console.log(req)
         const userId = (req as any).user.userId; // Assuming userId is available in the request (e.g., from authentication middleware)
-        const { events } = req.body;
+        const {events} = req.body;
         console.log('events to save:', events);
 
         // Generate future instances for new fixed events
@@ -381,10 +379,10 @@ export const saveEvents: RequestHandler = async (req, res, next) => {
             requestId: event.requestId,
             createdById: userId, // Use userId from the token
             // baseEventId: event.baseEventId || undefined,
-        })), { ordered: false });
+        })), {ordered: false});
 
         console.log(insertedEvents)
-        res.status(201).json({ insertedEvents });
+        res.status(201).json({insertedEvents});
     } catch (err) {
         let message = '';
         if (err instanceof Error) {
@@ -400,13 +398,13 @@ export const saveEvents: RequestHandler = async (req, res, next) => {
 
 // Existing Get Events Controller (updated code)
 export const getEventsByProvider: RequestHandler = async (req, res, next) => {
-    const { providerId } = req.params;
+    const {providerId} = req.params;
     try {
-        const timeslots = await Timeslot.find({ createdById: providerId });
+        const timeslots = await Timeslot.find({createdById: providerId});
         res.json(timeslots);
     } catch (error: unknown) {
         const err = error as Error;
-        res.status(500).json({ error: 'Internal Server Error', message: err.message });
+        res.status(500).json({error: 'Internal Server Error', message: err.message});
     }
 };
 export const turnExistingEventIntoFixed: RequestHandler = async (req, res, next) => {
@@ -422,11 +420,11 @@ export const turnExistingEventIntoFixed: RequestHandler = async (req, res, next)
             _id: event._id,
             createdById: event.createdById
         }, {
-            $set: { isFixed: true }
-        }, { new: true }); // Return the updated document
+            $set: {isFixed: true}
+        }, {new: true}); // Return the updated document
 
         if (!eventToUpdate) {
-            return res.status(404).json({ message: "Event not found or user mismatch" });
+            return res.status(404).json({message: "Event not found or user mismatch"});
         }
 
 
@@ -449,7 +447,7 @@ export const turnExistingEventIntoFixed: RequestHandler = async (req, res, next)
             requestId: instance.requestId,
             createdById: userId, // Use userId from the token
             // baseEventId: event.baseEventId || undefined,
-        })), { ordered: false });
+        })), {ordered: false});
 
         console.log(insertedEvents)
         res.status(201).json({
@@ -495,9 +493,8 @@ export const turnExistingEventIntoFixed: RequestHandler = async (req, res, next)
 // };
 
 
-
 export const checkAvailability: RequestHandler = async (req, res) => {
-    const { start, end, createdById } = req.params;
+    const {start, end, createdById} = req.params;
 
     const startTime = new Date(start);
     const endTime = new Date(end);
@@ -507,8 +504,8 @@ export const checkAvailability: RequestHandler = async (req, res) => {
         const timeslots = await Timeslot.find({
             createdById: createdById,
             isBooked: false,
-            end: { $gt: start },
-            start: { $lt: end },
+            end: {$gt: start},
+            start: {$lt: end},
             // $or: [
             //     { start: { $lte: new Date(end) } },
             //     { end: { $gte: new Date(start) } }
@@ -521,24 +518,22 @@ export const checkAvailability: RequestHandler = async (req, res) => {
 
         for (const slot of merged) {
             if (slot.start <= startTime && slot.end >= endTime) {
-                res.status(200).json({ isAvailable: true });
+                res.status(200).json({isAvailable: true});
                 return;
             }
         }// Try to merge these timeslots to cover the entire requested period
-        res.status(200).json({ isAvailable: false });
+        res.status(200).json({isAvailable: false});
     } catch (error: any) {
         console.error("Error checking timeslot availability:", error);
-        res.status(500).json({ message: "Internal server error", error: error.message });
+        res.status(500).json({message: "Internal server error", error: error.message});
     }
 };
 
 
-
-
-export const bookTimeslot: RequestHandler = async (req, res) => {
+export const bookTimeslot: RequestHandler = async (req, res, next) => {
     // const userId = (req as any).user.userId; // consumer id
     console.log(req.body)
-    const { start, end, title, isFixed, isBooked, createdById, requestId, transitStart, transitEnd } = req.body;
+    const {start, end, title, isFixed, isBooked, createdById, requestId, transitStart, transitEnd, isUpdate} = req.body;
     const session = await mongoose.startSession();
     try {
         session.startTransaction();
@@ -546,8 +541,8 @@ export const bookTimeslot: RequestHandler = async (req, res) => {
         // Find overlapping timeslots
         const overlappingSlots = await Timeslot.find({
             createdById: createdById,
-            end: { $gt: transitStart },
-            start: { $lt: transitEnd },
+            end: {$gt: transitStart},
+            start: {$lt: transitEnd},
             isBooked: false // assuming only unbooked slots are modifiable
         }).session(session);
 
@@ -557,7 +552,7 @@ export const bookTimeslot: RequestHandler = async (req, res) => {
             // If there are any booked overlaps, abort the transaction
             await session.abortTransaction();
             session.endSession();
-            return res.status(409).json({ message: "no timeslot, Timeslot is no longer available." });
+            return res.status(409).json({message: "no timeslot, Timeslot is no longer available."});
         }
 
         // check availability
@@ -575,9 +570,13 @@ export const bookTimeslot: RequestHandler = async (req, res) => {
         }
 
         if (!available) {
-            await session.abortTransaction();
-            session.endSession();
-            return res.status(409).json({ message: "Timeslot is no longer available." });
+            if (!isUpdate) {
+                await session.abortTransaction();
+                session.endSession();
+                return res.status(409).json({message: "Timeslot is no longer available."});
+            } else {
+                throw new Error("Timeslot is no longer available.")
+            }
         }
 
 
@@ -595,7 +594,7 @@ export const bookTimeslot: RequestHandler = async (req, res) => {
         });
 
         // save the new timeslot
-        await newTimeslot.save({ session });
+        await newTimeslot.save({session});
 
         // Adjust timeslots based on the booked time
         for (const slot of overlappingSlots) {
@@ -615,9 +614,9 @@ export const bookTimeslot: RequestHandler = async (req, res) => {
                     isFixed: false,
                     createdById: slot.createdById,
                     isBooked: false
-                }], { session });
+                }], {session});
                 // Remove the original slot
-                await Timeslot.findByIdAndDelete(slot._id, { session });
+                await Timeslot.findByIdAndDelete(slot._id, {session});
             } else {
                 // Adjust existing slot start or end
                 if (new Date(slot.end) > new Date(transitEnd)) {
@@ -625,7 +624,7 @@ export const bookTimeslot: RequestHandler = async (req, res) => {
                 } else if (new Date(slot.start) < new Date(transitStart)) {
                     slot.end = transitStart;
                 }
-                await slot.save({ session });
+                await slot.save({session});
             }
         }
 
@@ -637,20 +636,23 @@ export const bookTimeslot: RequestHandler = async (req, res) => {
         console.error("Failed to book timeslot:", error);
 
         // delete the corresponding request if there is an error in saving timeslots
-        if (requestId) {
-            try {
-                await ServiceRequest.findByIdAndDelete(requestId).session(session);
-                console.error('Rolled back the created request due to timeslot booking failure.');
-            } catch (deleteError) {
-                console.error('Failed to delete the request:', deleteError);
+        if (!isUpdate) {
+            if (requestId) {
+                try {
+                    await ServiceRequest.findByIdAndDelete(requestId).session(session);
+                    console.error('Rolled back the created request due to timeslot booking failure.');
+                } catch (deleteError) {
+                    console.error('Failed to delete the request:', deleteError);
+                }
             }
-        }
+            if (error.response?.status === 409) {
+                return res.status(409).json({message: "Timeslot is no longer available."});
+            }
 
-        if (error.response?.status === 409) {
-            return res.status(409).json({ message: "Timeslot is no longer available." });
+            res.status(500).json({message: "Failed to book timeslot", error: error.message});
+        } else {
+            throw error
         }
-
-        res.status(500).json({ message: "Failed to book timeslot", error: error.message });
     } finally {
         session.endSession();
     }
@@ -659,14 +661,14 @@ export const bookTimeslot: RequestHandler = async (req, res) => {
 // Cancel Timeslot Endpoint
 
 export const cancelTimeslot: RequestHandler = async (req, res) => {
-    const { timeslotId } = req.params;
+    const {timeslotId} = req.params;
 
     try {
         // Fetch the timeslot from the database
         const timeslot = await Timeslot.findById(timeslotId);
 
         if (!timeslot) {
-            return res.status(404).json({ message: "Timeslot not found" });
+            return res.status(404).json({message: "Timeslot not found"});
         }
 
         // Update the timeslot's start and end times
@@ -690,10 +692,10 @@ export const cancelTimeslot: RequestHandler = async (req, res) => {
         // Save the updated timeslot back to the database
         const updatedTimeslot = await timeslot.save();
 
-        res.status(200).json({ message: "Timeslot cancelled successfully", updatedTimeslot });
+        res.status(200).json({message: "Timeslot cancelled successfully", updatedTimeslot});
     } catch (error: any) {
         console.error("Error cancelling timeslot:", error);
-        res.status(500).json({ message: "Failed to cancel timeslot", error: error.message });
+        res.status(500).json({message: "Failed to cancel timeslot", error: error.message});
     }
 };
 
@@ -729,7 +731,7 @@ export const cancelTimeslot: RequestHandler = async (req, res) => {
 const mergeAndCleanTimeslots = async (providerId: string | Types.ObjectId, session: mongoose.ClientSession) => {
     const timeslots: ITimeslot[] = await Timeslot.find({
         createdById: providerId
-    }).sort({ start: 1 }).session(session);
+    }).sort({start: 1}).session(session);
 
     if (!timeslots.length) {
         return; // No timeslots to merge or clean
@@ -746,7 +748,7 @@ const mergeAndCleanTimeslots = async (providerId: string | Types.ObjectId, sessi
                     // Next is entirely within current
                     if (!next.isBooked) {
                         // Delete next if it's unbooked and fully overlapped
-                        await Timeslot.findByIdAndDelete(next._id, { session });
+                        await Timeslot.findByIdAndDelete(next._id, {session});
                         timeslots.splice(i + 1, 1); // Remove from array
                         continue; // Skip incrementing i to recheck next pair
                     }
@@ -756,22 +758,22 @@ const mergeAndCleanTimeslots = async (providerId: string | Types.ObjectId, sessi
                         // Trim the end of current if it's unbooked
                         if (!current.isBooked) {
                             current.end = next.start;
-                            await Timeslot.findByIdAndUpdate(current._id, { end: current.end }, { session });
+                            await Timeslot.findByIdAndUpdate(current._id, {end: current.end}, {session});
                         }
                     } else {
                         // Next extends beyond the end of a booked current
                         if (current.isBooked) {
                             next.start = current.end;
-                            await Timeslot.findByIdAndUpdate(next._id, { start: next.start }, { session });
+                            await Timeslot.findByIdAndUpdate(next._id, {start: next.start}, {session});
                         }
                     }
                 }
             } else {
                 // Extend current to include next if they have the same isBooked status
                 current.end = new Date(Math.max(current.end.getTime(), next.end.getTime()));
-                await Timeslot.findByIdAndUpdate(current._id, { end: current.end }, { session });
+                await Timeslot.findByIdAndUpdate(current._id, {end: current.end}, {session});
                 // Delete next as it's now redundant
-                await Timeslot.findByIdAndDelete(next._id, { session });
+                await Timeslot.findByIdAndDelete(next._id, {session});
                 timeslots.splice(i + 1, 1); // Remove from array
                 continue; // Skip incrementing i to recheck next pair
             }
@@ -849,23 +851,22 @@ const getDurationInMinutes = (start: Date, end: Date): number => {
 
 // get the next available timeslot
 export const getNextAvailability: RequestHandler = async (req, res, next) => {
-    const { providerId } = req.params;
+    const {providerId} = req.params;
     const transitTime = parseInt(req.query.transitTime as string) || 30;
     const defaultDuration = parseInt(req.query.defaultDuration as string) || 30;
 
 
-
     try {
         const providerIdConditions = [
-            { createdById: providerId },
-            { createdById: new Types.ObjectId(providerId) }
+            {createdById: providerId},
+            {createdById: new Types.ObjectId(providerId)}
         ];
 
         const timeslots: ITimeslot[] = await Timeslot.find({
             $or: providerIdConditions,
             isBooked: false,
-            start: { $gte: new Date() }
-        }).sort({ start: 1 }).lean();
+            start: {$gte: new Date()}
+        }).sort({start: 1}).lean();
 
         // const mergedTimeslots = mergeTimeslots(timeslots);
         const adjustedTimeslots = adjustForTransit(timeslots, transitTime);
@@ -877,12 +878,12 @@ export const getNextAvailability: RequestHandler = async (req, res, next) => {
 
         if (validTimeslots.length > 0) {
             console.log("next availability:", validTimeslots[0])
-            return res.json({ nextAvailability: validTimeslots[0] });
+            return res.json({nextAvailability: validTimeslots[0]});
         } else {
-            return res.status(404).json({ message: 'No available timeslots found' });
+            return res.status(404).json({message: 'No available timeslots found'});
         }
     } catch (error: any) {
         console.error("Error fetching next availability:", error);
-        res.status(500).json({ error: 'Internal Server Error', message: error.message });
+        res.status(500).json({error: 'Internal Server Error', message: error.message});
     }
 };

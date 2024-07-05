@@ -35,7 +35,7 @@ export const bookTimeSlot = (timeSlot: any, token: string|null) => {
 export const changeTimeSlot = (timeSlot: any, token: string|null) => {
     return new Promise((resolve, reject) => {
         console.log("changing timeslot to this:", timeSlot)
-        axios.post('/api/requests/change-timeslots', timeSlot, {
+        axios.post('/api/requests/change-timeslots', {...timeSlot, isUpdate:true}, {
             headers: {'Authorization': `Bearer ${token}`}
         })
             .then(response => {

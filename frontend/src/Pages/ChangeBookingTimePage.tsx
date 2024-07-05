@@ -39,10 +39,11 @@ const ChangeBookingTimePage: React.FC = () => {
     const [request, setRequest] = useState<ServiceRequest | null>(null);
     // const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string| null>(null);
-    const {token} = useAuth();
+    const {token, account} = useAuth();
 
     // get the booking details
     useEffect(() => {
+        console.log(requestId)
         const fetchRequest = async () => {
             try {
                 const response = await axios.get(`/api/requests/${requestId}`, {
@@ -50,6 +51,12 @@ const ChangeBookingTimePage: React.FC = () => {
                         'Authorization': `Bearer ${token}`,  // Pass the token if authentication is needed
                     },
                 });
+
+                // make sure only the requestor can access this
+                if (response.data.requestedBy._id !== account?._id) {
+                    setError('Access Denied');
+                    return;
+                }
                 setRequest(response.data);
                 console.log("fetched request when changing booking time:", request)
             } catch (err: any) {
