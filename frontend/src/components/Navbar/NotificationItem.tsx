@@ -14,7 +14,8 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
   updatedAt,
   markAsRead,
   NotificationType,
-  review
+  review,
+  job
 }) => {
   const timeAgo = formatDistanceToNow(new Date(updatedAt), { addSuffix: true });
   const navigate = useNavigate(); // useNavigate hook to navigate
@@ -25,6 +26,9 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
     switch (NotificationType) {
       case 'New Review':
         url = `/customer_review/${review}`;
+        break;
+      case 'New Job':
+        url = `/jobs/${job}`;
         break;
       // Add more cases here as needed
       default:
