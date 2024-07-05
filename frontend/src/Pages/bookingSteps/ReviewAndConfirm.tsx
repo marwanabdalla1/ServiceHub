@@ -17,6 +17,8 @@ import axios from "axios";
 import {RequestStatus} from "../../models/enums";
 import {useAuth} from "../../contexts/AuthContext";
 import {Timeslot} from "../../models/Timeslot";
+import { bookTimeSlot, BookingError } from '../../services/timeslotService';
+
 
 
 interface ReviewAndConfirmProps {

@@ -14,7 +14,7 @@ interface SelectTimeslotProps {
 
 function SelectTimeslot({ onNext, onBack, bookingDetails }: SelectTimeslotProps) {
     const {setProvider,
-    setRequestedBy, setSelectedServiceDetails, setTimeAndDuration } = useBooking();
+        setRequestedBy, setSelectedServiceDetails, setTimeAndDuration } = useBooking();
     const navigate = useNavigate();
     const { id } = useParams(); //use this to then make a post request to the user with the id to get the user data
 
@@ -84,15 +84,18 @@ function SelectTimeslot({ onNext, onBack, bookingDetails }: SelectTimeslotProps)
                     </Box>
                     <AvailabilityCalendarBooking
                         Servicetype={bookingDetails?.serviceType}
+                        providerIdInput={null}
+                        mode={'create'}
                         defaultSlotDuration={bookingDetails.serviceOffering?.baseDuration || 60}
                         defaultTransitTime={bookingDetails.serviceOffering?.bufferTimeDuration || 30}
                         onNext={onNext}
+                        onRequestChange={()=>{}}
                         // globalAvailabilities={globalAvailabilities}
                     />
                 </Box>
                 <Box sx={{width: '20%'}}>
                     <Card>
-                    <CardContent sx={{ display: 'flex', alignItems: 'center' }}>
+                        <CardContent sx={{ display: 'flex', alignItems: 'center' }}>
                             <Box>
                                 <Typography variant="h6">{`${bookingDetails.provider?.firstName} ${bookingDetails.provider?.lastName}`}</Typography>
                                 <Typography variant="body2" color="text.secondary">

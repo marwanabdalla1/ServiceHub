@@ -2,9 +2,12 @@ import { Request, Response, NextFunction, RequestHandler } from 'express';
 import Account from '../models/account';
 import ServiceOffering from "../models/serviceOffering";
 import ServiceRequest, { IServiceRequest } from "../models/serviceRequest";
-import mongoose, { Document } from 'mongoose';
+import mongoose, {Document, Types} from 'mongoose';
 import Timeslot from "../models/timeslot";
-import { bookTimeslot } from "./TimeSlotController";
+import {bookTimeslot, cancelTimeslot} from "./TimeSlotController";
+import {createNotification, createNotificationDirect} from "./NotificationController";
+import Notification from "../models/notification";
+import {NotificationType} from "../models/enums";
 
 
 
@@ -115,7 +118,27 @@ export const updateServiceRequest: RequestHandler = async (req: Request, res: Re
         //     return res.status(404).send({ message: 'User not found' });
         // }
         // res.send(updatedRequest);
+
+
+        // todo: Create and send notification
+        // Assuming recipient is determined by logic - can be provider or requester based on context
+        // const notificationContent = `Service request ${requestId} has been updated.`;
+
+        // Notify the provider
+        // await createNotification({
+        //     content: notificationContent,
+        //     serviceRequest: requestId,
+        //     recipient: serviceRequest.provider
+        // });
+        //
+        // // Notify the requestedBy
+        // await createNotification({
+        //     content: notificationContent,
+        //     serviceRequest: requestId,
+        //     recipient: serviceRequest.requestedBy
+        // });
         res.status(200).json(updatedRequest);
+
     } catch (error) {
         res.status(400).send(error);
     }
@@ -274,3 +297,92 @@ export const getServiceRequestsByRequester: RequestHandler = async (req, res) =>
 //         res.status(500).json({ message: "Internal server error", error: error.message });
 //     }
 // };
+
+
+
+export const handleChangeTimeslot: RequestHandler = async (req, res, next) => {
+    const { createdById, requestId } = req.body;
+    let success = true;  // Flag to track success of booking
+
+    try {
+        await bookTimeslot(req, res, next);
+
+        // Check if the response has been sent by bookTimeslot
+        if (res.headersSent) {
+            return; // If the response is sent, bookTimeslot was successful
+        }
+
+    } catch (error) {
+        console.error("Error in handling timeslot change:", error);
+        success = false;  // Update success flag to false on error
+        // Only send this error response if headers have not been sent
+        if (!res.headersSent) {
+            res.status(500).json({ message: "Failed to process timeslot change." });
+        }
+    } finally {
+        // Notification should happen regardless of the booking outcome
+        const notificationContent = success
+            ? `The timeslot of the existing request ${requestId} has been successfully changed.`
+            : `Failed to change the timeslot of the existing request ${requestId}.`;
+        const notificationType = NotificationType.timeRequestChanged; // Adjust if you have specific types for success/failure
+
+        // Perform notification creation
+        try {
+            await createNotificationDirect({
+                content: notificationContent,
+                serviceRequest: requestId,
+                notificationType,
+                recipient: createdById,
+                job: undefined,
+                review: undefined
+            });
+        } catch (notificationError) {
+            console.error("Failed to create notification:", notificationError);
+            // Optionally handle the failure of notification creation
+        }
+    }
+};
+
+
+
+export const getRequestById: RequestHandler = async (req, res) => {
+    try {
+
+        const { requestId } = req.params; // Extract the provider ID from the URL parameter
+        const userId = (req as any).user.userId;
+
+        // if (userId !== requestId) {
+        //     console.log("userId: ", userId, "\n requesterId: ", requestId)
+        //     return res.status(403).json({ message: "Unauthorized access." });
+        // }
+
+        const serviceRequest = await ServiceRequest.findOne({ _id: requestId })
+            .populate([
+                { path: 'requestedBy', select: 'firstName lastName' },
+                {path: 'provider', select: 'firstName lastName'},
+                {path: 'serviceOffering', select: 'baseDuration bufferTimeDuration'}
+            ])
+            .exec();
+
+        //make sure only the provider/consumer him/herself can get this
+        if (!serviceRequest){
+            return res.status(404).json({ message: "No service requests found." });
+        }
+
+        if (userId !== serviceRequest.requestedBy._id.toString() && userId !== serviceRequest.provider._id.toString()) {
+            console.log("userId: ", userId, "\n requesterId: ", serviceRequest.requestedBy._id, "provider ID:", serviceRequest.provider._id)
+            return res.status(403).json({ message: "Unauthorized access." });
+        }
+
+
+        console.log("incoming requests with their timeslots", serviceRequest)
+
+        res.status(200).json(serviceRequest);
+
+    } catch (error: any) {
+        console.error("Failed to retrieve service requests:", error);
+        res.status(500).json({ message: "Internal server error", error: error.message });
+    }
+};
+
+

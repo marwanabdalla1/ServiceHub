@@ -4,7 +4,7 @@ import { Notification } from '../../models/Notification'; // Import Notification
 import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
 
 interface NotificationItemProps extends Notification {
-  markAsRead: (id: string) => void;
+  markAsRead: (_id: string) => void;
 }
 
 const NotificationItem: React.FC<NotificationItemProps> = ({

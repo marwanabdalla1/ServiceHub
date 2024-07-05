@@ -26,9 +26,9 @@ function generateWeeklyInstances(events: ITimeslot[], startDate: moment.Moment, 
                 }).toDate();
 
                 const exists = weekInstances.some(instance =>
-                    instance.start.getTime() === start.getTime() &&
-                    instance.end.getTime() === end.getTime() &&
-                    instance.createdById === event.createdById
+                        instance.start.getTime() === start.getTime() &&
+                        instance.end.getTime() === end.getTime() &&
+                        instance.createdById === event.createdById
                     // instance.baseEventId === event.baseEventId
                 );
 
@@ -546,8 +546,8 @@ export const bookTimeslot: RequestHandler = async (req, res) => {
         // Find overlapping timeslots
         const overlappingSlots = await Timeslot.find({
             createdById: createdById,
-            end: { $gt: start },
-            start: { $lt: end },
+            end: { $gt: transitStart },
+            start: { $lt: transitEnd },
             isBooked: false // assuming only unbooked slots are modifiable
         }).session(session);
 
@@ -630,6 +630,7 @@ export const bookTimeslot: RequestHandler = async (req, res) => {
         }
 
         await session.commitTransaction();
+
         res.status(201).json(newTimeslot);
     } catch (error: any) {
         await session.abortTransaction();

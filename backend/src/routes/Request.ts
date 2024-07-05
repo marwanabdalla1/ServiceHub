@@ -4,7 +4,7 @@ import {
     getServiceRequestsByProvider,
     getIncomingServiceRequestsByProvider,
     getServiceRequestsByRequester,
-    updateServiceRequest,
+    updateServiceRequest, handleChangeTimeslot, getRequestById,
     // cleanUpServiceRequests
 } from "../controller/RequestController";
 import { authenticate } from "../middleware/authenticate";
@@ -13,7 +13,11 @@ import { authenticate } from "../middleware/authenticate";
 const router = express.Router();
 
 router.post('/', authenticate, createServiceRequest);
+router.post('/change-timeslots', authenticate, handleChangeTimeslot);
+
 router.patch('/:requestId', authenticate, updateServiceRequest);
+router.get('/:requestId', authenticate, getRequestById);
+
 router.get('/provider/:providerId', authenticate, getServiceRequestsByProvider);
 router.get('/provider/incoming/:providerId', authenticate, getIncomingServiceRequestsByProvider);
 router.get('/requester/:requesterId', authenticate, getServiceRequestsByRequester);
