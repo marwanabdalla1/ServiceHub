@@ -94,7 +94,7 @@ function SelectTimeslot({ onNext, onBack, bookingDetails }: SelectTimeslotProps)
                     <Card>
                     <CardContent sx={{ display: 'flex', alignItems: 'center' }}>
                             <Box>
-                                <Typography variant="h6">{bookingDetails.provider?.lastName}</Typography>
+                                <Typography variant="h6">{`${bookingDetails.provider?.firstName} ${bookingDetails.provider?.lastName}`}</Typography>
                                 <Typography variant="body2" color="text.secondary">
                                     {bookingDetails.location}
                                 </Typography>

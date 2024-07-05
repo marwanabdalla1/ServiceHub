@@ -538,7 +538,7 @@ export const checkAvailability: RequestHandler = async (req, res) => {
 export const bookTimeslot: RequestHandler = async (req, res) => {
     // const userId = (req as any).user.userId; // consumer id
     console.log(req.body)
-    const { start, end, title, isFixed, isBooked, createdById, requestId } = req.body;
+    const { start, end, title, isFixed, isBooked, createdById, requestId, transitStart, transitEnd } = req.body;
     const session = await mongoose.startSession();
     try {
         session.startTransaction();
@@ -585,6 +585,8 @@ export const bookTimeslot: RequestHandler = async (req, res) => {
         const newTimeslot = new Timeslot({
             start,
             end,
+            transitStart,
+            transitEnd,
             title,
             isFixed,
             isBooked,
@@ -597,17 +599,17 @@ export const bookTimeslot: RequestHandler = async (req, res) => {
 
         // Adjust timeslots based on the booked time
         for (const slot of overlappingSlots) {
-            if (new Date(slot.start) < new Date(start) && new Date(slot.end) > new Date(end)) {
+            if (new Date(slot.start) < new Date(transitStart) && new Date(slot.end) > new Date(transitEnd)) {
                 // Split the timeslot into two parts before and after the booked slot
                 await Timeslot.create([{
                     start: slot.start,
-                    end: start,
+                    end: transitStart,
                     title: "available",
                     isFixed: false, //todo: not sure if this should be true if the original timeslot is fixed
                     createdById: slot.createdById,
                     isBooked: false
                 }, {
-                    start: end,
+                    start: transitEnd,
                     end: slot.end,
                     title: "available",
                     isFixed: false,
@@ -618,10 +620,10 @@ export const bookTimeslot: RequestHandler = async (req, res) => {
                 await Timeslot.findByIdAndDelete(slot._id, { session });
             } else {
                 // Adjust existing slot start or end
-                if (new Date(slot.end) > new Date(end)) {
-                    slot.start = end;
-                } else if (new Date(slot.start) < new Date(start)) {
-                    slot.end = start;
+                if (new Date(slot.end) > new Date(transitEnd)) {
+                    slot.start = transitEnd;
+                } else if (new Date(slot.start) < new Date(transitStart)) {
+                    slot.end = transitStart;
                 }
                 await slot.save({ session });
             }

@@ -27,6 +27,8 @@ const localizer = dateFnsLocalizer({
 export interface TimeSlot {
     start: Date;
     end: Date;
+    transitStart: Date;
+    transitEnd: Date;
     title: string;
     isFixed?: boolean;  // Optional property to indicate if the TimeSlot is fixed
     isBooked: boolean;
@@ -208,8 +210,8 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
         }
 
         // Calculate required start and end time including transit
-        const adjustedStart = new Date(startTime.getTime() - defaultTransitTime * 60000);
-        const adjustedEnd = new Date(endTime.getTime() + defaultTransitTime * 60000);
+        const transitStart = new Date(startTime.getTime() - defaultTransitTime * 60000);
+        const transitEnd = new Date(endTime.getTime() + defaultTransitTime * 60000);
 
 
         // setSelectedTimeSlot(transitTimeSlot)
@@ -234,12 +236,14 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
             const newTimeSlot = {
                 start: startTime,
                 end: endTime,
+                transitStart: transitStart,
+                transitEnd: transitEnd,
                 title: `${Servicetype}`,
                 isFixed: false,
                 isBooked: true,
                 createdById: providerId,
             };
-            console.log("new time slot:", newTimeSlot)
+            console.log("new time slot for booking:", newTimeSlot)
             setSelectedTimeSlot(newTimeSlot);
         } else {
             setClashDialogOpen(true);
@@ -284,11 +288,15 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
             return;
         }
 
-        // Adjust times for transit time before sending to the server
-        const start = new Date(selectedTimeSlot.start.getTime() - defaultTransitTime * 60000);
-        const end = new Date(selectedTimeSlot.end.getTime() + defaultTransitTime * 60000);
+        if (!selectedTimeSlot.transitEnd || !selectedTimeSlot.transitStart){
+            console.error("no transit time included!")
+        }
 
-        const timeSlotWithTransit = new Timeslot (selectedTimeSlot.title, start, end, false, true, undefined, selectedTimeSlot.createdById)
+        // Adjust times for transit time before sending to the server
+        // const start = new Date(selectedTimeSlot.start.getTime() - defaultTransitTime * 60000);
+        // const end = new Date(selectedTimeSlot.end.getTime() + defaultTransitTime * 60000);
+        //
+        // const timeSlotWithTransit = new Timeslot (selectedTimeSlot.title, start, end, false, true, undefined, selectedTimeSlot.createdById)
         // {
         //     ...selectedTimeSlot,
         //     start,
@@ -297,7 +305,7 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
         //     // requestId: //todo: can only be added once the request is created
         // };
 
-        setTimeAndDuration(timeSlotWithTransit);
+        setTimeAndDuration(selectedTimeSlot);
         onNext();
     };
 
