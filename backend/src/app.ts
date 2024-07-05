@@ -59,10 +59,9 @@ app.use("/api/becomepro", PaymentRouter);
 app.use("/api/requests", RequestRouter);
 app.use("/api/jobs", JobRouter);
 app.use("/api/reviews", ReviewRouter);
-app.use("/api/notification", NotificationRouter);
+app.use("/api/notifications", NotificationRouter);
 app.use("/api/email", EmailRouter);
 app.use("/api/feedback", FeedbackRouter);
-
 
 
 app.get("/", async (req, res, next) => {

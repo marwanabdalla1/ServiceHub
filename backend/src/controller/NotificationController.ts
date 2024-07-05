@@ -25,8 +25,13 @@ export const createNotification = async (req: Request, res: Response) => {
 // Get all notifications
 export const getNotifications = async (req: Request, res: Response) => {
     try {
-        const notifications = await Notification.find();
+        //from the token, retrieve all notifications where the recepient is the id from the token
+        const userId = (req as any).user.userId;// Assuming userId is available in the request (e.g., from authentication middleware)
+        console.log("userId: ", userId)
+        const notifications = await Notification.find({ recipient: userId });
+        console.log("notifications: ", notifications)
         res.status(200).json(notifications);
+
     } catch (error) {
         res.status(500).json({ message: (error as Error).message });
     }
