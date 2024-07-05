@@ -9,6 +9,7 @@ export interface ITimeslot extends Document {
     isFixed: boolean;
     isBooked: boolean;
     requestId?: Types.ObjectId;
+    jobId?: Types.ObjectId;
     createdById: Types.ObjectId;
     baseEventId?: Types.ObjectId;
 }
@@ -22,6 +23,7 @@ const TimeslotSchema: Schema = new Schema({
     isFixed: { type: Boolean, required: true },
     isBooked: { type: Boolean, required: true },
     requestId: { type: Schema.Types.ObjectId, ref: "ServiceRequest", required: false  }, //only required if it is booked
+    jobId: { type: Schema.Types.ObjectId, ref: "Job", required: false  }, //only required if it is booked
     createdById: { type: Schema.Types.ObjectId, ref: "Account", required: true },
     baseEventId: { type: Schema.Types.ObjectId, ref: "Timeslot", required: false },
 

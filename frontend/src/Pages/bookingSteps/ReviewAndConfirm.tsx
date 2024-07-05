@@ -190,20 +190,20 @@ function ReviewAndConfirm({onComplete, onBack, bookingDetails}: ReviewAndConfirm
             const timeslotResponse = await bookTimeSlot(timeSlotWithRequest);
             console.log("Timeslot booked successfully", timeslotResponse);
 
-            // step 3: update the request
-            try {
-                const updatedRequestData = { timeslot: timeslotResponse._id };
-                await axios.patch(`/api/requests/${requestId}`, updatedRequestData, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                console.log('Request updated with timeslot ID:', timeslotResponse._id);
-            } catch (error) {
-                console.error('Error updating request with timeslot ID:', error);
-                // Handle the error (e.g., log it, show a message, etc.)
-                // This error does not affect the overall booking confirmation
-            }
+            // step 3: update the request -> not needed anymore because we dont save timeslot in request!
+            // try {
+            //     const updatedRequestData = { timeslot: timeslotResponse._id };
+            //     await axios.patch(`/api/requests/${requestId}`, updatedRequestData, {
+            //         headers: {
+            //             'Authorization': `Bearer ${token}`
+            //         }
+            //     });
+            //     console.log('Request updated with timeslot ID:', timeslotResponse._id);
+            // } catch (error) {
+            //     console.error('Error updating request with timeslot ID:', error);
+            //     // Handle the error (e.g., log it, show a message, etc.)
+            //     // This error does not affect the overall booking confirmation
+            // }
 
 
             // navigate('/confirmation'); // Navigate to a confirmation page or show a confirmation message

@@ -4,7 +4,8 @@ import {
     getServiceRequestsByProvider,
     getIncomingServiceRequestsByProvider,
     getServiceRequestsByRequester,
-    updateServiceRequest
+    updateServiceRequest,
+    // cleanUpServiceRequests
 } from "../controller/RequestController";
 import { authenticate } from "../middleware/authenticate";
 
@@ -16,5 +17,7 @@ router.patch('/:requestId', authenticate, updateServiceRequest);
 router.get('/provider/:providerId', authenticate, getServiceRequestsByProvider);
 router.get('/provider/incoming/:providerId', authenticate, getIncomingServiceRequestsByProvider);
 router.get('/requester/:requesterId', authenticate, getServiceRequestsByRequester);
+
+// router.delete('/cleanup-service-requests', cleanUpServiceRequests);
 
 export default router;

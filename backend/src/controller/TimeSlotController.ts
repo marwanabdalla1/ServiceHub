@@ -656,34 +656,74 @@ export const bookTimeslot: RequestHandler = async (req, res) => {
 };
 
 // Cancel Timeslot Endpoint
+
 export const cancelTimeslot: RequestHandler = async (req, res) => {
-    const timeslotId = req.params;
-    // const session = await mongoose.startSession();
+    const { timeslotId } = req.params;
+
     try {
-        // session.startTransaction();
+        // Fetch the timeslot from the database
+        const timeslot = await Timeslot.findById(timeslotId);
 
-        // Find the timeslot and update isBooked to false
-        const updatedTimeslot = await Timeslot.findByIdAndUpdate(
-            timeslotId,
-            { $set: { isBooked: false } },
-            { new: true }
-        );
-
-        if (!updatedTimeslot) {
+        if (!timeslot) {
             return res.status(404).json({ message: "Timeslot not found" });
         }
 
-        // Merge and clean up timeslots after updating
-        // await mergeAndCleanTimeslots(updatedTimeslot.createdById, session);
+        // Update the timeslot's start and end times
+        if (timeslot.transitStart) {
+            timeslot.start = timeslot.transitStart;
+        }
+        if (timeslot.transitEnd) {
+            timeslot.end = timeslot.transitEnd;
+        }
 
-        // await session.commitTransaction();
-        res.status(200).json({ message: "Timeslot cancelled successfully" });
+        // Remove the transitStart and transitEnd attributes
+        timeslot.transitStart = undefined;
+        timeslot.transitEnd = undefined;
+
+
+        // Set isBooked to false
+        timeslot.isBooked = false;
+        timeslot.requestId = undefined;
+        timeslot.jobId = undefined;
+
+        // Save the updated timeslot back to the database
+        const updatedTimeslot = await timeslot.save();
+
+        res.status(200).json({ message: "Timeslot cancelled successfully", updatedTimeslot });
     } catch (error: any) {
-        // await session.abortTransaction();
         console.error("Error cancelling timeslot:", error);
         res.status(500).json({ message: "Failed to cancel timeslot", error: error.message });
     }
 };
+
+// export const cancelTimeslot: RequestHandler = async (req, res) => {
+//     const timeslotId = req.params;
+//     // const session = await mongoose.startSession();
+//     try {
+//         // session.startTransaction();
+//
+//         // Find the timeslot and update isBooked to false
+//         const updatedTimeslot = await Timeslot.findByIdAndUpdate(
+//             timeslotId,
+//             { $set: { isBooked: false, start: transitStart, end: transitEnd, transitStart: undefined, transitEnd: undefined} },
+//             { new: true }
+//         );
+//
+//         if (!updatedTimeslot) {
+//             return res.status(404).json({ message: "Timeslot not found" });
+//         }
+//
+//         // Merge and clean up timeslots after updating
+//         // await mergeAndCleanTimeslots(updatedTimeslot.createdById, session);
+//
+//         // await session.commitTransaction();
+//         res.status(200).json({ message: "Timeslot cancelled successfully" });
+//     } catch (error: any) {
+//         // await session.abortTransaction();
+//         console.error("Error cancelling timeslot:", error);
+//         res.status(500).json({ message: "Failed to cancel timeslot", error: error.message });
+//     }
+// };
 
 const mergeAndCleanTimeslots = async (providerId: string | Types.ObjectId, session: mongoose.ClientSession) => {
     const timeslots: ITimeslot[] = await Timeslot.find({

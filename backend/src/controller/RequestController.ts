@@ -191,7 +191,14 @@ export const getIncomingServiceRequestsByProvider: RequestHandler = async (req, 
             return res.status(404).json({ message: "No service requests found for this provider." });
         }
 
-        res.status(200).json(filteredRequests);
+        const requestsWithTimeslots = await Promise.all(filteredRequests.map(async (request) => {
+            const timeslot = await Timeslot.findOne({ requestId: request._id }).exec();
+            return { ...request.toObject(), timeslot };
+        }));
+
+        console.log("incoming requests with their timeslots", requestsWithTimeslots)
+
+        res.status(200).json(requestsWithTimeslots);
     } catch (error: any) {
         console.error("Failed to retrieve service requests:", error);
         res.status(500).json({ message: "Internal server error", error: error.message });
@@ -221,9 +228,49 @@ export const getServiceRequestsByRequester: RequestHandler = async (req, res) =>
             return res.status(404).json({ message: "No service requests found for this provider." });
         }
 
-        res.status(200).json(serviceRequests);
+        const requestsWithTimeslots = await Promise.all(serviceRequests.map(async (request) => {
+            const timeslot = await Timeslot.findOne({ requestId: request._id }).exec();
+            return { ...request.toObject(), timeslot };
+        }));
+
+        console.log("incoming requests with their timeslots", requestsWithTimeslots)
+
+        res.status(200).json(requestsWithTimeslots);
+
     } catch (error: any) {
         console.error("Failed to retrieve service requests:", error);
         res.status(500).json({ message: "Internal server error", error: error.message });
     }
 };
+
+
+
+// only one-time method to clean up the DB
+// export const cleanUpServiceRequests: RequestHandler = async (req, res) => {
+//     try {
+//         // Find all service requests
+//         const serviceRequests = await ServiceRequest.find().exec();
+//
+//         // Find and delete service requests without a corresponding timeslot
+//         const deletedRequests = await Promise.all(serviceRequests.map(async (request) => {
+//             const timeslot = await Timeslot.findOne({ requestId: request._id }).exec();
+//             if (!timeslot) {
+//                 await ServiceRequest.findByIdAndDelete(request._id);
+//                 return request._id;
+//             }
+//             return null;
+//         }));
+//
+//         // Filter out null values from the deletedRequests array
+//         const deletedRequestIds = deletedRequests.filter(id => id !== null);
+//
+//         if (deletedRequestIds.length === 0) {
+//             return res.status(200).json({ message: "No service requests without timeslots were found." });
+//         }
+//
+//         res.status(200).json({ message: "Deleted service requests without timeslots", deletedRequestIds });
+//     } catch (error: any) {
+//         console.error("Failed to clean up service requests:", error);
+//         res.status(500).json({ message: "Internal server error", error: error.message });
+//     }
+// };

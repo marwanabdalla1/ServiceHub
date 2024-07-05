@@ -23,7 +23,7 @@ export interface IServiceRequest extends Document {
     provider:Types.ObjectId; // Reference to an Account document
     requestedBy: Types.ObjectId; // Reference to an Account document
     // rating: number;
-    timeslot: Types.ObjectId;
+    // timeslot: Types.ObjectId;
     profileImageUrl: string;
 }
 
@@ -41,7 +41,7 @@ const ServiceRequestSchema: Schema = new Schema({
     job: {type: Schema.Types.ObjectId, ref: 'Job', required: false},
     provider: {type: Schema.Types.ObjectId, ref: 'Account', required: true},
     requestedBy: {type: Schema.Types.ObjectId, ref: 'Account', required: true},
-    timeslot: {type: Schema.Types.ObjectId, ref: 'Timeslot', required: false},
+    // timeslot: {type: Schema.Types.ObjectId, ref: 'Timeslot', required: false},
     // rating: {type: Number, required: true}, //todo: is this needed? rating should only be tied with job and not request
     profileImageUrl: {type: String, required: true},
 }, {

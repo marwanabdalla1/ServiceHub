@@ -15,7 +15,7 @@ export interface IJob extends Document {
     providerImage: string;
     ratingForProvider: number | undefined; //probably not needed
     ratingForConsumer: number | undefined; //probably not needed
-    timeOfService: Types.ObjectId; // Reference to a Timeslot document
+    // timeOfService: Types.ObjectId; // Reference to a Timeslot document
     request: Types.ObjectId; // Reference to a ServiceRequest document
     serviceOffering: Types.ObjectId;
     // reviews: [Types.ObjectId]; //reference to the reviews, probably not needed
@@ -35,7 +35,7 @@ const JobSchema: Schema = new Schema({
     providerImage: {type: String},
     // ratingForProvider: {type: Number, required: false},
     // ratingForConsumer: {type: Number, required: false},
-    timeOfService: {type: Schema.Types.ObjectId, ref: 'Timeslot', required: false}, //todo: maybe change this later
+    // timeOfService: {type: Schema.Types.ObjectId, ref: 'Timeslot', required: false}, //todo: maybe change this later
     request: {type: Schema.Types.ObjectId, ref: 'ServiceRequest', required: true},
     serviceOffering: {type: Schema.Types.ObjectId, ref: 'ServiceOffering', required: true},
     // reviews: [{type: Schema.Types.ObjectId, ref: 'Review', required: false}],
