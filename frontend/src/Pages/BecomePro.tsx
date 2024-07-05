@@ -10,7 +10,7 @@ const stripePromise = loadStripe('pk_test_51NEdzDChuUsrK8kGX1Wcu8TazsmDPprhV212a
 
 const BecomeProPage: React.FC = () => {
   const { token } = useAuth();
-  const [reviews, setReviews] = useState<Feedback[]>([]);
+  const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -20,7 +20,7 @@ const BecomeProPage: React.FC = () => {
             'Authorization': `Bearer ${token}`
           }
         });
-        setReviews(response.data);
+        setFeedbacks(response.data);
       } catch (error) {
         console.error('Error fetching reviews:', error);
       }
@@ -69,13 +69,13 @@ const BecomeProPage: React.FC = () => {
       <div className="w-3/4 mt-8">
         <h2 className="text-3xl font-bold mb-4">What Our Pro Members Say</h2>
         <div className="bg-gray-100 p-4 rounded-lg shadow-md">
-          {reviews.map((review, index) => (
+          {feedbacks.map((feedback, index) => (
             <div className="mb-4" key={index}>
-              <h3 className="font-semibold">{review.firstName}</h3>
-              <p className="text-sm text-gray-600">Reviewed on {new Date(review.createdAt).toLocaleDateString()}</p>
-              <p className="mt-2">{review.title}</p>
-              <p className="text-gray-700">{review.content}</p>
-              {review.rating && <p className="text-yellow-500">Rating: {review.rating}/5</p>}
+              <h4 className="font-semibold">{feedback.givenBy.firstName}</h4>
+              <p className="text-sm text-gray-600">Reviewed on {new Date(feedback.createdAt).toLocaleDateString()}</p>
+              <p className="mt-2">{feedback.title}</p>
+              <p className="text-gray-700">{feedback.content}</p>
+              {feedback.rating && <p className="text-yellow-500">Rating: {feedback.rating}/5</p>}
             </div>
           ))}
         </div>

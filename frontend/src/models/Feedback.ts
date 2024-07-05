@@ -17,7 +17,9 @@ export interface Feedback {
     //     _id: string;
     //     name: string;
     // };
-    firstName: string;
+    givenBy: {
+        firstName: string
+    }
     createdAt: string;
     updatedAt: string;
 }

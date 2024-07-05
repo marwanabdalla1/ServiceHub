@@ -50,7 +50,7 @@ export const getPremiumUpgradeReviews: RequestHandler = async (req, res) => {
     try {
         const reviews = await PlatformFeedback.find({ category: 'Premium Upgrade' })
             .populate('givenBy'); // populate the givenBy field with the entire Account object
-
+            console.log('reviewes' + reviews)
         // const transformedReviews = reviews.map(review => ({
         //     _id: review._id,
         //     title: review.title,
@@ -70,7 +70,6 @@ export const getPremiumUpgradeReviews: RequestHandler = async (req, res) => {
         //     createdAt: review.createdAt,
         //     updatedAt: review.updatedAt
         // }));
-
         res.status(200).json(reviews);
     } catch (error) {
         console.error("Failed to fetch reviews:", error);
