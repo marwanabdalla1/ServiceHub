@@ -10,7 +10,7 @@ export enum ReviewCategory {
 
 export interface Feedback {
     title: string;
-    rating?: number; // rating is optional
+    rating: number; // rating is optional
     content: string;
     category: ReviewCategory;
     // givenBy: {

@@ -68,14 +68,22 @@ const BecomeProPage: React.FC = () => {
       {/* Review Section */}
       <div className="w-3/4 mt-8">
         <h2 className="text-3xl font-bold mb-4">What Our Pro Members Say</h2>
-        <div className="bg-gray-100 p-4 rounded-lg shadow-md">
+        <div className="bg-gray-100 p-6 rounded-lg shadow-md">
           {feedbacks.map((feedback, index) => (
-            <div className="mb-4" key={index}>
-              <h4 className="font-semibold">{feedback.givenBy.firstName}</h4>
-              <p className="text-sm text-gray-600">Reviewed on {new Date(feedback.createdAt).toLocaleDateString()}</p>
-              <p className="mt-2">{feedback.title}</p>
-              <p className="text-gray-700">{feedback.content}</p>
-              {feedback.rating && <p className="text-yellow-500">Rating: {feedback.rating}/5</p>}
+            <div className="mb-6 p-4 bg-white rounded-lg shadow-lg" key={index}>
+              <div className="flex items-center mb-2">
+                <h4 className="font-semibold text-lg text-gray-800">{feedback.givenBy.firstName}</h4>
+                <span className="ml-4 text-sm text-gray-600">{new Date(feedback.createdAt).toLocaleDateString()}</span>
+              </div>
+              <h5 className="text-lg font-bold text-gray-900">{feedback.title}</h5>
+              <p className="mt-2 text-gray-700">{feedback.content}</p>
+              {feedback.rating && (
+                <div className="mt-2">
+                  {[...Array(5)].map((star, i) => (
+                    <i key={i} className={`fas fa-star ${i < feedback.rating ? 'text-yellow-500' : 'text-gray-300'}`}></i>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
         </div>
