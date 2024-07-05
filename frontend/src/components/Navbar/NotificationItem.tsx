@@ -19,7 +19,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
 }) => {
   const timeAgo = formatDistanceToNow(new Date(updatedAt), { addSuffix: true });
   const navigate = useNavigate(); // useNavigate hook to navigate
-
+//TODO: Make sure every notification type has a corresponding URL
   const handleClick = () => {
     // Define the URL based on NotificationType
     let url = '/';
