@@ -40,6 +40,7 @@ export class Account {
     country?: string;
     isProvider?: boolean;
     isPremium?: boolean;
+    isAdmin?:boolean;
     rating?: number;
     reviewCount?: number;
     serviceOfferings: ServiceOffering[];

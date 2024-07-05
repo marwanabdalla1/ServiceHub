@@ -126,6 +126,37 @@ export const getRequesterById: RequestHandler = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 };
+/**
+ * get user details filtered by email, firstName, lastName, accountId
+ * @param req
+ * @param res
+ */
+export const adminUserData: RequestHandler = async (req, res) => {
+    try {
+        const { email, firstName, lastName, accountId } = req.query;
+
+        const query: any = {};
+
+        if (email) {
+            query.email = { $regex: email, $options: 'i' };
+        }
+        if (firstName) {
+            query.firstName = { $regex: firstName, $options: 'i' };
+        }
+        if (lastName) {
+            query.lastName = { $regex: lastName, $options: 'i' };
+        }
+        if (accountId) {
+            query._id = accountId;
+        }
+
+        const accounts = await Account.find(query).select('email firstName lastName role createdOn');
+        res.status(200).json(accounts);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch users' });
+    }
+};
+
 
 /**
  * get user by id
