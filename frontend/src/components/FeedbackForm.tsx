@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Box, MenuItem, Select, FormControl, InputLabel, TextareaAutosize } from '@mui/material';
-import {useAuth} from "../contexts/AuthContext";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Box, MenuItem, Select, FormControl, InputLabel } from '@mui/material';
+import { useAuth } from "../contexts/AuthContext";
 import axios from "axios";
 
 const categories = [
@@ -16,7 +16,8 @@ const FeedbackForm: React.FC = () => {
     const [open, setOpen] = useState(false);
     const [feedback, setFeedback] = useState('');
     const [rating, setRating] = useState('');
-    const {account, token} = useAuth()
+    const [title, setTitle] = useState('');
+    const { account, token } = useAuth();
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -27,19 +28,20 @@ const FeedbackForm: React.FC = () => {
     };
 
     const handleSendFeedback = async () => {
-        if (!feedback || !category) {
+        if (!title || !feedback || !category) {
             alert("Please fill all required fields");
             return;
         }
 
         const feedbackData = {
+            title: title,
             content: feedback,
             category: category,
             rating: Number(rating) // Convert rating to number if using a string input
         };
 
         try {
-            const response = await axios.post(`/api/feedback/`, feedbackData,{
+            const response = await axios.post(`/api/feedback/`, feedbackData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -47,14 +49,13 @@ const FeedbackForm: React.FC = () => {
             alert(`Thanks for your feedback!`);
             // Reset the form fields
             setOpen(false);
+            setTitle('');
             setFeedback('');
             setRating('');
             setCategory('');
         } catch (error) {
-            console.error('Error fetching review:', error);
+            console.error('Error sending feedback:', error);
         }
-
-
     };
 
     return (
@@ -71,6 +72,13 @@ const FeedbackForm: React.FC = () => {
                 <DialogTitle>Feedback on your experience</DialogTitle>
                 <DialogContent>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        <TextField
+                            label="Title"
+                            fullWidth
+                            variant="outlined"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                        />
                         <FormControl fullWidth>
                             <InputLabel>Category</InputLabel>
                             <Select
