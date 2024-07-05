@@ -5,13 +5,13 @@ import SignInPage from './Pages/AuthPages/LoginPage';
 import SignUpPage from './Pages/AuthPages/SignUpPage';
 import NavigationBar from './components/Navbar';
 import ReceivedServicesPage from './Pages/ReceivedServicesPage';
+import AdminNavbar from "./components/adminComponents/AdminNavbar";
 import RequestHistoryPage from './Pages/RequestHistoryPage';
 import IncomingRequestsPage from './Pages/IncomingRequestsPage';
 import HomePage from './Pages/HomePage';
 import AddServicePage from './Pages/AddServicePage';
 import ReviewPage from "./Pages/CustomerReviewPage";
 import ProviderProfilePage from "./Pages/ProviderProfilePage";
-import UserProfilePage from "./Pages/ProfileSettingPage";
 import ProfileSettingPage from "./Pages/ProfileSettingPage";
 import SelectAvailabilityPage from './Pages/SelectAvailabilityPage';
 import SelectTimeslot from './Pages/bookingSteps/SelectTimeslotPage'
@@ -43,6 +43,9 @@ import {ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import {Slide} from "react-toastify";
 import JobDetailsPage from "./Pages/JobDetailsPage";
+import VerifyCertificatePage from "./Pages/AdminPanel/VerifyCertificatePage";
+import AdminUserDataPage from "./Pages/AdminPanel/AdminUserDataPage";
+import AdminHomePage from "./Pages/AdminPanel/AdminHomePage";
 
 function App() {
 
@@ -87,11 +90,18 @@ function MainRoutes() {
         && location.pathname !== "/forgetPassword/emailVerification"
         && location.pathname !== "/forgetPassword/resetPassword"
         && location.pathname !== "/forgetPassword"
-        && location.pathname !== "/forgetPassword/success";
+        && location.pathname !== "/forgetPassword/success"
+        && location.pathname !== "/admin/verifyCertificate"
+        && location.pathname !== "/admin/UserData";
 
+    const showAdminNavBar = location.pathname.includes("/admin");
     return (
         <div className="h-screen flex flex-col">
-            {showNavBar && <NavigationBar toggleDrawer={() => {}} onChange={() => {}} onSearch={() => {}} search={""} />}
+            {showNavBar && !showAdminNavBar && <NavigationBar toggleDrawer={() => {
+            }} onChange={() => {
+            }} onSearch={() => {
+            }} search={""}/>}
+            {showAdminNavBar && <AdminNavbar/>}
             <Routes>
                 {/* Home */}
                 <Route path="/" element={<HomePage/>}/>
@@ -103,8 +113,6 @@ function MainRoutes() {
                 {/* User Profile */}
                 <Route path="/setprofile" element={<ProfileSettingPage/>}/>
                 <Route path="/customer_review/:jobId" element={<ReviewPage/>}/>
-                <Route path="/login" element={<SignInPage/>}/>
-                <Route path="/signup" element={<SignUpPage/>}/>
                 <Route path="/forgetPassword" element={<ForgetPasswordPage/>}/>
                 <Route path="/forgetPassword/emailVerification" element={<OTPPage/>}/>
                 <Route path="/forgetPassword/resetPassword" element={<ResetPasswordPage/>}/>
@@ -148,6 +156,9 @@ function MainRoutes() {
                 <Route path="/write-reviews" element={<ReviewPage/>}/>
                 <Route path="/faq" element={<FAQPage/>}/>
 
+                <Route path="/admin" element={<AdminHomePage/>}/>
+                <Route path="/admin/verifyCertificate" element={<VerifyCertificatePage/>}/>
+                <Route path="/admin/UserData" element={<AdminUserDataPage/>}/>
 
                 <Route path="*" element={<h1>Not Found</h1>}/>
             </Routes>

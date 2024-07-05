@@ -14,6 +14,7 @@ type AccountContextType = {
     isLoggedIn: () => boolean;
     isPremium: () => boolean;
     isProvider: () => boolean;
+    isAdmin: () => boolean;
 }
 
 type Props = { children: React.ReactNode };
@@ -109,12 +110,16 @@ export const AccountProvider = ({children}: Props) => {
             const response = await axios.post('/api/auth/login', user);
             if (response) {
                 handleResponse(response);
-                toast.success('User logged in successfully');
-
                 console.log(`Status: ${response.status}`);
                 console.log(`Status Text: ${response.statusText}`);
-                console.log(response.data);
-                navigate('/');
+                console.log(response.data.isAdmin);
+                if (response.data.isAdmin === true) {
+                    toast.success('Admin logged in successfully');
+                    navigate('/admin');
+                } else {
+                    toast.success('User logged in successfully');
+                    navigate('/');
+                }
             }
         } catch (error) {
             toast.error('Login failed. Please check your credentials and try again.');
@@ -133,7 +138,12 @@ export const AccountProvider = ({children}: Props) => {
         setToken(null);
         setAccount(null);
 
-        toast('User logged out successfully');
+        if (isAdmin()) {
+            toast('Admin logged out successfully');
+        } else {
+            toast('User logged out successfully');
+        }
+
         // Navigate the user back to the login page
         navigate('/login');
     };
@@ -150,10 +160,14 @@ export const AccountProvider = ({children}: Props) => {
         return account?.isProvider === true;
     };
 
+    const isAdmin = () => {
+        return account?.isAdmin === true;
+    };
+
 
     return (
         <AccountContext.Provider
-            value={{token, account, isProvider, isPremium, registerUser, loginUser, logoutUser, isLoggedIn}}>
+            value={{token, account, isProvider, isPremium, registerUser, loginUser, logoutUser, isLoggedIn, isAdmin}}>
             {isReady ? children : null}
         </AccountContext.Provider>
     );

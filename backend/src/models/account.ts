@@ -15,6 +15,7 @@ export interface IAccount extends Document {
     country: string;
     isProvider: boolean;
     isPremium: boolean;
+    isAdmin: boolean;
     stripeId?: string;
     serviceOfferings: Types.ObjectId[]; // Reference to ServiceOffering documents
     availability: Types.ObjectId[];
@@ -40,6 +41,7 @@ const accountSchema: Schema = new Schema({
     location: String,
     isProvider: { type: Boolean, required: true, default: false },
     isPremium: Boolean,
+    isAdmin: Boolean,
     serviceOfferings: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ServiceOffering' }],
     availability: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Availability' }],
     reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Review' }],
