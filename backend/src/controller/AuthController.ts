@@ -46,7 +46,7 @@ export const signup: RequestHandler = async (req, res, next) => {
             lastName: req.body.lastName,
             email: req.body.email,
             password: hashedPassword,
-
+            isAdmin: false,
             isProvider: false,
             isPremium: false,
         };
