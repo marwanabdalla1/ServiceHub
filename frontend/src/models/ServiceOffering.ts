@@ -13,6 +13,7 @@ export class ServiceOffering {
     isCertified: boolean;
     location: string;
     provider: Account;
+    acceptedPaymentMethods: string[]; // New field for accepted payment methods
     baseDuration: number;
     bufferTimeDuration: number;
     reviews: Review[];
@@ -22,7 +23,7 @@ export class ServiceOffering {
 
     constructor(serviceOfferingId: string, serviceType: ServiceType, lastUpdatedOn: Date, createdOn: Date,
         certificate: File | null, hourlyRate: number, description: string, isCertified: boolean, location: string,
-        provider: Account, baseDuration: number, bufferTimeDuration: number, reviews: Review[], reviewCount: number, rating: number) {
+        provider: Account, baseDuration: number, bufferTimeDuration: number, reviews: Review[], acceptedPaymentMethods: string[], reviewCount: number, rating: number) {
         this._id = serviceOfferingId;
         this.serviceType = serviceType;
         this.lastUpdatedOn = lastUpdatedOn;
@@ -35,6 +36,7 @@ export class ServiceOffering {
         this.provider = provider;
         this.baseDuration = baseDuration;
         this.bufferTimeDuration = bufferTimeDuration;
+        this.acceptedPaymentMethods = acceptedPaymentMethods; // New field for accepted payment methods
         this.reviews = reviews;
         this.reviewCount = reviewCount;
         this.rating = rating;

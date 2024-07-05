@@ -1,6 +1,13 @@
 import express from 'express';
-import {deleteReview, findExistingReview, submitReview, updateReview} from "../controller/ReviewController";
-import {authenticate} from "../middleware/authenticate";
+import {
+    deleteReview,
+    findExistingReview,
+    getAllReviewsByOffering,
+    submitReview,
+    updateReview
+} from "../controller/ReviewController";
+import { authenticate } from "../middleware/authenticate";
+
 
 const router = express.Router();
 
@@ -12,6 +19,8 @@ router.get('/by-jobs/:jobId', authenticate, findExistingReview);
 router.patch('/:reviewId', authenticate, updateReview);
 
 router.delete('/:reviewId', authenticate, deleteReview);
+
+router.get('/:offeringId', getAllReviewsByOffering);
 
 export default router;
 

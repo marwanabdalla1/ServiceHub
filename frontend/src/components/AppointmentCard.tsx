@@ -2,6 +2,7 @@ import * as React from 'react';
 import {Box, Typography, Card, CardContent, Avatar} from '@mui/material';
 import {Appointment} from "../models/Appointment";
 
+// todo: delete
 const AppointmentCard: React.FC<Appointment> = ({date, user, service}) => {
     return (
         <Card sx={{mb: 4, height: '80px'}}>

@@ -40,6 +40,7 @@ export class Account {
     country?: string;
     isProvider?: boolean;
     isPremium?: boolean;
+    isAdmin?:boolean;
     rating?: number;
     reviewCount?: number;
     serviceOfferings: ServiceOffering[];
@@ -125,144 +126,145 @@ export class Account {
 
 
 //Test-data to be removed, simply maintained in case required by original developer
-const account: Account = {
-    _id: "1234325413",
-    firstName: "John",
-    lastName: "Doe",
-    email: "john.doe@example.com",
-    phoneNumber: "1234567890",
-    address: "123 Main St",
-    createdOn: new Date(),
-    profileImageUrl: "/images/profiles/profile1.png",
-    description: "Professional bike repair service",
-    location: "New York",
-    postal: "12344",
-    country: "USA",
-    isProvider: false,
-    isPremium: true,
-    serviceOfferings: [],
-    availability: [],
-    reviews: [],
-    requestHistory: [],
-    jobHistory: [],
-    notifications: [],
-    rating: 4.5,
-    reviewCount: 100,
-};
-
-
-// Test-data to be removed, simply maintained in case required by original developer
-export const bikeRepairService: ServiceOffering = {
-    _id: "bikeRepair0",
-    serviceType: ServiceType.bikeRepair,
-    description: "description0",
-    location: "location0",
-    hourlyRate: 50,
-    isCertified: false,
-    createdOn: new Date(),
-    lastUpdatedOn: new Date(),
-    certificate: new File([], "empty.txt", { type: "text/plain" }),
-    baseDuration: 2,
-    bufferTimeDuration: 0.5,
-    reviews: [],
-    rating: 4.5,
-    reviewCount: 2,
-    provider: account
-
-};
-
-// Test-data to be removed, simply maintained in case required by original developer
-export const babysittingService: ServiceOffering = {
-    _id: "babySitting0",
-    serviceType: ServiceType.babySitting,
-    description: "description1",
-    location: "location1",
-    hourlyRate: 50,
-    isCertified: false,
-    createdOn: new Date(),
-    lastUpdatedOn: new Date(),
-    certificate: new File([], "empty.txt", { type: "text/plain" }),
-    baseDuration: 2,
-    bufferTimeDuration: 0.5,
-    reviews: [],
-    reviewCount: 2,
-    rating: 4.5,
-    provider: account
-};
-
-// Test-data to be removed, simply maintained in case required by original developer
-account.serviceOfferings.push(bikeRepairService);
-account.serviceOfferings.push(babysittingService);
-
-export default account;
-
-export const users: Account[] = [
-    {
-        _id: "1",
-        firstName: "John",
-        lastName: "Doe",
-        email: "john.doe@mail.com",
-        phoneNumber: "1234567890",
-        address: "123 Main St",
-        createdOn: new Date(),
-        profileImageUrl: "/images/profiles/profile1.png",
-        description: "Professional bike repair service",
-        location: "New York, NY",
-        isProvider: false,
-        isPremium: true,
-        serviceOfferings: [bikeRepairService],
-        availability: [],
-        reviews: [],
-        requestHistory: [],
-        jobHistory: [],
-        notifications: [],
-        rating: 4.5,
-        reviewCount: 100,
-    },
-    {
-        _id: "2",
-        firstName: "Jane",
-        lastName: "Smith",
-        email: "jane.smith@mail.com",
-        phoneNumber: "1234567890",
-        address: "123 Main St",
-        createdOn: new Date(),
-        profileImageUrl: "/images/profiles/profile2.png",
-        description: "House cleaning service",
-        location: "New York, NY",
-        isProvider: false,
-        isPremium: true,
-        serviceOfferings: [babysittingService],
-        availability: [],
-        reviews: [],
-        requestHistory: [],
-        jobHistory: [],
-        notifications: [],
-        rating: 4.8,
-        reviewCount: 100,
-    },
-    {
-        _id: "3",
-        firstName: "Robert",
-        lastName: "Brown",
-        email: "robert.brown@mail.com",
-        phoneNumber: "1234567890",
-        address: "123 Main St",
-        createdOn: new Date(),
-        profileImageUrl: "/images/profiles/profile3.png",
-        description: "House cleaning service",
-        location: "New York, NY",
-        isProvider: false,
-        isPremium: true,
-        serviceOfferings: [babysittingService],
-        availability: [],
-        reviews: [],
-        requestHistory: [],
-        jobHistory: [],
-        notifications: [],
-        rating: 4.8,
-        reviewCount: 100,
-    },/*
+// const account: Account = {
+//     _id: "1234325413",
+//     firstName: "John",
+//     lastName: "Doe",
+//     email: "john.doe@example.com",
+//     phoneNumber: "1234567890",
+//     address: "123 Main St",
+//     createdOn: new Date(),
+//     profileImageUrl: "/images/profiles/profile1.png",
+//     description: "Professional bike repair service",
+//     location: "New York",
+//     postal: "12344",
+//     country: "USA",
+//     isProvider: false,
+//     isPremium: true,
+//     serviceOfferings: [],
+//     availability: [],
+//     reviews: [],
+//     requestHistory: [],
+//     jobHistory: [],
+//     notifications: [],
+//     rating: 4.5,
+//     reviewCount: 100,
+// };
+//
+//
+// // Test-data to be removed, simply maintained in case required by original developer
+// export const bikeRepairService: ServiceOffering = {
+//     _id: "bikeRepair0",
+//     serviceType: ServiceType.bikeRepair,
+//     description: "description0",
+//     location: "location0",
+//     hourlyRate: 50,
+//     isCertified: false,
+//     createdOn: new Date(),
+//     lastUpdatedOn: new Date(),
+//     certificate: new File([], "empty.txt", { type: "text/plain" }),
+//     baseDuration: 2,
+//     bufferTimeDuration: 0.5,
+//     reviews: [],
+//     rating: 4.5,
+//     reviewCount: 2,
+//     provider: account
+//
+// };
+//
+// // Test-data to be removed, simply maintained in case required by original developer
+// export const babysittingService: ServiceOffering = {
+//     _id: "babySitting0",
+//     serviceType: ServiceType.babySitting,
+//     description: "description1",
+//     location: "location1",
+//     hourlyRate: 50,
+//     isCertified: false,
+//     createdOn: new Date(),
+//     lastUpdatedOn: new Date(),
+//     certificate: new File([], "empty.txt", { type: "text/plain" }),
+//     baseDuration: 2,
+//     bufferTimeDuration: 0.5,
+//     reviews: [],
+//     reviewCount: 2,
+//     rating: 4.5,
+//     provider: account
+// };
+//
+// // Test-data to be removed, simply maintained in case required by original developer
+// account.serviceOfferings.push(bikeRepairService);
+// account.serviceOfferings.push(babysittingService);
+//
+// export default account;
+//
+// export const users: Account[] = [
+//     {
+//         _id: "1",
+//         firstName: "John",
+//         lastName: "Doe",
+//         email: "john.doe@mail.com",
+//         phoneNumber: "1234567890",
+//         address: "123 Main St",
+//         createdOn: new Date(),
+//         profileImageUrl: "/images/profiles/profile1.png",
+//         description: "Professional bike repair service",
+//         location: "New York, NY",
+//         isProvider: false,
+//         isPremium: true,
+//         serviceOfferings: [bikeRepairService],
+//         availability: [],
+//         reviews: [],
+//         requestHistory: [],
+//         jobHistory: [],
+//         notifications: [],
+//         rating: 4.5,
+//         reviewCount: 100,
+//     },
+//     {
+//         _id: "2",
+//         firstName: "Jane",
+//         lastName: "Smith",
+//         email: "jane.smith@mail.com",
+//         phoneNumber: "1234567890",
+//         address: "123 Main St",
+//         createdOn: new Date(),
+//         profileImageUrl: "/images/profiles/profile2.png",
+//         description: "House cleaning service",
+//         location: "New York, NY",
+//         isProvider: false,
+//         isPremium: true,
+//         serviceOfferings: [babysittingService],
+//         availability: [],
+//         reviews: [],
+//         requestHistory: [],
+//         jobHistory: [],
+//         notifications: [],
+//         rating: 4.8,
+//         reviewCount: 100,
+//     },
+//     {
+//         _id: "3",
+//         firstName: "Robert",
+//         lastName: "Brown",
+//         email: "robert.brown@mail.com",
+//         phoneNumber: "1234567890",
+//         address: "123 Main St",
+//         createdOn: new Date(),
+//         profileImageUrl: "/images/profiles/profile3.png",
+//         description: "House cleaning service",
+//         location: "New York, NY",
+//         isProvider: false,
+//         isPremium: true,
+//         serviceOfferings: [babysittingService],
+//         availability: [],
+//         reviews: [],
+//         requestHistory: [],
+//         jobHistory: [],
+//         notifications: [],
+//         rating: 4.8,
+//         reviewCount: 100,
+//     },
+/*
     {
         id: "4",
         firstName: "Emily",
@@ -453,4 +455,4 @@ export const users: Account[] = [
         rating: 4.7,
         reviewCount: 100,
     },*/
-];
+// ];

@@ -1,133 +1,123 @@
-
-import React, { useState } from 'react';
+import * as React from 'react';
 import Card from '@mui/material/Card';
+import CloseIcon from '@mui/icons-material/Close';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
-import Avatar from '@mui/material/Avatar';
-import { Divider, TextField } from '@mui/material';
-import { ServiceRequest as Request } from '../models/ServiceRequest';
+import { ServiceRequest as Request, ServiceRequest} from '../models/ServiceRequest';
 import { GoStarFill } from 'react-icons/go';
 import BlackButton from './inputs/blackbutton';
-import { RequestStatus, ServiceType } from '../models/enums';
-import { Job } from '../models/Job';
-import { generateId } from './helperFunctions';
-import {useNavigate} from "react-router-dom";
-import { useRequest } from '../contexts/RequestContext';
+import Avatar from '@mui/material/Avatar';
+import { Divider } from '@mui/material';
+import { RequestStatus } from '../models/enums';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { Account } from '../models/Account';
+import axios from 'axios';
+import { formatDateTime } from '../utils/dateUtils';
 
 interface MediaCardProps {
   request: Request;
   onClose: () => void;
+  onAccept: (request: Request) => void;
+  onDecline: (request: Request) => void;
+  onCancel: (request: Request) => void;
+  onTimeChange: (value: boolean) => void;
 }
 
+const MediaCard: React.FC<MediaCardProps> = ({ request, onClose, onAccept,onDecline, onCancel, onTimeChange }) => {
+  
+  //const { account, token, isProvider } = useAuth();
+  //const navigate = useNavigate();
 
-const IncomingRequestMediaCard: React.FC<MediaCardProps> = ({ request, onClose }) => {
-  const [description, setDescription] = useState(request.comment);
-  const [appointmentStartTime, setAppointmentStartTime] = useState(request.appointmentStartTime);
-  const [appointmentEndTime, setAppointmentEndTime] = useState(request.appointmentEndTime);
-  const [duration, setDuration] = useState(request.duration);
-  const navigate = useNavigate();
-  const { requestDetails } = useRequest();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const handleDescriptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setDescription(event.target.value);
+  
+  const renderButton = () => {
+if (request.requestStatus === RequestStatus.cancelled ){
+          console.log("No Actions possible for CANCELLED requests!");
+        }
+        else if (request.requestStatus === RequestStatus.declined ){
+          console.log("No Actions possible for DECLINED requests!");
+        }
+        else if (request.requestStatus === RequestStatus.accepted ){
+          return(<BlackButton text="Cancel Request" onClick={() => onCancel (request)} sx={{ marginRight:"1rem" }}/>);
+        }
+        else if (request.requestStatus === RequestStatus.pending ){
+          return(
+            <>
+            <BlackButton text="Decline Request" onClick={() => onDecline (request)} sx={{ marginRight:"1rem" }}/>
+            <BlackButton text="Accept Request" onClick={() => onAccept (request)} sx={{ marginRight:"1rem" }}/>
+            <BlackButton text="Request Time Change" onClick={() => onTimeChange(true)} sx={{ marginTop:"1rem" }} />
+            </>
+          );
+        }
+         else {
+          console.log(request);
+        return (
+          <>
+          <BlackButton text="Cancel Request" onClick={() => onCancel (request)} sx={{ marginRight:"1rem" }}/>
+          <BlackButton text="Request Time Change" onClick={() => onTimeChange(true)} />
+          </>
+        );
+    }
   };
-
-  const handleDurationChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setDuration(parseFloat(event.target.value));
-  };
-
-  function acceptRequest() {
-    /*request.requestStatus =  RequestStatus.accepted;
-
-    const job = new Job(generateId(), request.serviceType, 
-                new Date(request.appointmentTime.getFullYear()+'-'
-                      + request.appointmentTime.getMonth() + '-'
-                      + request.appointmentTime.getDay()),
-                request.serviceFee, JobStatus.open, request.comment, 
-                request.provider, request.provider.profileImageUrl, request.provider.rating,
-                request.);*/
-  }
-
-  function declineRequest() {
-
-  }
-
-  const handleProposeNewTime = () => {
-    navigate('/update-timeslot'); // Navigate to the calendar to select a new Timeslot
-    handleShowModal();
-    
-};
-
-  const handleShowModal = () => {
-    setIsModalOpen(true);
-  }
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  }
-
-
   return (
     <Card>
+      <button
+        style={{
+          position: 'absolute',
+          top: '0.5rem',
+          right: '0.5rem',
+          background: 'transparent',
+          border: 'none',
+          cursor: 'pointer'
+        }}
+        onClick={onClose}
+        aria-label="close"
+      >
+        <CloseIcon />
+      </button>
       <CardContent>
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem' }}>
-          <Avatar alt={ request.requestedBy.firstName + " " + request.requestedBy.lastName } 
-                  src={request.requestedBy.profileImageUrl} sx={{ width: 80, height: 80, marginRight: '1rem' }} />
-          <div>
-            <Typography variant="h6">
-              {request.requestedBy.firstName + " " + request.requestedBy.lastName}
+            {/*const requesterName = request.requestedBy ? `${request.requestedBy.firstName} ${request.requestedBy.lastName}` : 'Account Deleted';*/}
+
+            <Avatar alt={request.requestedBy ? `${request.requestedBy.firstName} ${request.requestedBy.lastName}` : 'Account Deleted'} src={request.profileImageUrl} sx={{ width: 100, height: 100, marginRight: '1rem' }} />
+          <div style={{ marginRight: '1rem' }}>
+            <Typography variant="h6" >
+              Request Detail
             </Typography>
-            <BlackButton text="User Profile" onClick={onClose} />
+            <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
+              Requestor: {request.requestedBy ? `${request.requestedBy.firstName} ${request.requestedBy.lastName}` : 'Account Deleted'}
+            </Typography>
           </div>
-          <div className='flex space-x-1 items-center' style={{ marginLeft: 'auto' }}>
+          <div className='flex space-x-1 items-center'>
             <div style={{ marginRight: '0.25rem' }}>
-              <GoStarFill className='text-yellow-500' />
+              <GoStarFill className='text-yellow-500'/>
             </div>
             <Typography variant="body2" color="text.secondary">
-              {request.requestedBy.rating}
+              {request.rating}
             </Typography>
           </div>
         </div>
-        <Divider sx={{ marginBottom: '1rem' }} />
-        <Typography variant="body2">
-          Request ID: {request._id}
-        </Typography>
+        <Divider sx={{marginBottom:'1rem'}}/>
         <Typography variant="body2">
           Service Type: {request.serviceType}
         </Typography>
         <Typography variant="body2">
-          Appointment Time: {request.appointmentStartTime.toLocaleString()}
+          Appointment Time: {formatDateTime(request.appointmentStartTime)}
         </Typography>
-        <TextField
-          label="est. duration (h)"
-          type="number"
-          value={duration}
-          onChange={handleDurationChange}
-          placeholder={duration.toString()}
-          InputProps={{ style: { height: '40px' }, inputProps: { step: '0.5' } }}
-          sx={{ marginBottom: '1rem', marginTop: '1rem', width: '27%', maxHeight: 1 }}
-        />
-        <Divider sx={{ marginBottom: '1rem' }} />
-        <Typography variant="body2" sx={{ marginBottom: '1rem' }}>
-          Description:
+        <Typography variant="body2" sx={{ marginBottom: '2rem'}}>
+          Service Fee: {request.serviceFee}
         </Typography>
-        <TextField
-          variant="outlined"
-          fullWidth
-          multiline
-          rows={4}
-          value={description}
-          onChange={handleDescriptionChange}
-          placeholder="Enter description here..."
-          sx={{ marginBottom: '1rem' }}
-        />
-        <BlackButton text="Accept" onClick={acceptRequest} sx={{ marginRight:"1rem" }}/>
-        <BlackButton text="Decline" onClick={declineRequest} sx={{ marginRight: "1rem" }} />
-        <BlackButton text="Propose New Time" onClick={handleProposeNewTime}/>
+        <Typography variant="body2" sx={{marginBottom:'1rem'}}>
+          Status: {request.requestStatus}
+        </Typography>
+        <Divider sx={{marginBottom:'1rem'}}/>
+        <Typography variant="body2" sx={{marginBottom:'1rem'}}>
+          Description: {request.comment}
+        </Typography>
+        {renderButton()}
       </CardContent>
     </Card>
   );
 };
 
-export default IncomingRequestMediaCard;
+export default MediaCard;

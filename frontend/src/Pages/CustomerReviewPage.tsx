@@ -1,16 +1,18 @@
 import React, {useEffect} from 'react';
 import {Container, Box, Typography, Card, CardContent, Avatar, Button, TextField, Link as MuiLink} from '@mui/material';
 import Rating from '@mui/material/Rating';
-import {appointments, bobBikerAppointment} from '../models/Appointment';
-import AppointmentCard from '../components/AppointmentCard';
+import { useParams } from 'react-router-dom';
 import {Job} from "../models/Job";
 import {useAuth} from "../contexts/AuthContext";
 import {useLocation, useNavigate} from "react-router-dom";
 import axios from "axios";
 import {Review} from "../models/Review";
+import { Account } from '../models/Account';
 
 const ReviewPage: React.FC = () => {
     const [review, setReview] = React.useState<Review|null>(null); // Holds the existing review data
+    const [job, setJob] = React.useState<Job|null>(null);
+    const [reviewee, setReviewee] = React.useState<Account|null>(null);
     const [rating, setRating] = React.useState<number | null>(0);
     const [reviewText, setReviewText] = React.useState(''); // State to hold the review text
     const [isEditing, setIsEditing] = React.useState(false);  // Tracks if we are editing an existing review
@@ -18,65 +20,62 @@ const ReviewPage: React.FC = () => {
 
     const {token, account} = useAuth();
 
-    const location = useLocation();
-    const job = location.state?.job;
+    const { jobId } = useParams();
 
-
+    
 
     useEffect(() => {
-        console.log("customer review page")
         // This useEffect will always run, but the internal logic runs only under certain conditions.
-        if (job && !review) {  // Condition to perform fetching
-            console.log("Fetching review for job:", job._id);
-            const fetchReview = async () => {
-                try {
-                    const response = await axios.get(`/api/reviews/by-jobs/${job._id}`, {
-                        headers: { Authorization: `Bearer ${token}` }
-                    });
-                    if (response.data.success) {
-                        setReview(response.data.review);
-                        setRating(response.data.review.rating);
-                        setReviewText(response.data.review.content);
-                    } else {
-                        // Handle case where no review is returned
-                        console.log("No review found, possible first-time review setup.");
-                    }
-                } catch (error) {
-                    console.error('Error fetching review:', error);
+        const fetchJobAndReviewee = async () => {
+            if (!jobId || !token) return;
+
+            try {
+                // Fetch job data
+                const jobResponse = await axios.get(`/api/jobs/${jobId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const jobData = jobResponse.data;
+                setJob(jobData);
+
+                // Determine reviewee based on job data and current account
+                let revieweeId;
+                if (account?._id === jobData.provider) {
+                    revieweeId = jobData.receiver;
+                } else if (account?._id === jobData.receiver) {
+                    revieweeId = jobData.provider;
+                } else {
+                    throw new Error("Current user should not have access to this review!");
                 }
-            };
-            fetchReview();
-        }
-    }, [job, review, token]); // Ensure dependencies are correctly listed for reactivity
+
+                // Fetch reviewee data
+                const revieweeResponse = await axios.get(`/api/account/${revieweeId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setReviewee(revieweeResponse.data);
+
+                // Fetch review data
+                const reviewResponse = await axios.get(`/api/reviews/by-jobs/${jobId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (reviewResponse.data.success) {
+                    setReview(reviewResponse.data.review);
+                    setRating(reviewResponse.data.review.rating);
+                    setReviewText(reviewResponse.data.review.content);
+                } else {
+                    console.log("No review found, possible first-time review setup.");
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+
+        fetchJobAndReviewee();
+    }, [jobId, token, account]); // Ensure dependencies are correctly listed for reactivity
 
 
-    if (!job) {
+    if (!jobId) {
         return <Typography variant="h6">No job selected for review.</Typography>;
     }
-
-    // useEffect(() => {
-    //     if (job && !review) {
-    //         console.log("job and no review!")
-    //
-    //         const fetchReview = async () => {
-    //             try {
-    //                 const response = await axios.get(`/api/reviews/by-jobs/${job._id}`, {
-    //                     headers: { Authorization: `Bearer ${token}` }
-    //                 });
-    //                 console.log("response for review: ", response)
-    //                 if (response.data.success) {
-    //                     setReview(response.data.review);
-    //                     setRating(response.data.review.ratingForProvider);
-    //                     setReviewText(response.data.review.content);
-    //                 }
-    //             } catch (error) {
-    //                 console.error('Error fetching review:', error);
-    //             }
-    //         };
-    //         fetchReview();
-    //     } else{}
-    // }, [token]);
-
 
     const handleRatingChange = (event: React.SyntheticEvent, newValue: number | null) => {
         setRating(newValue);
@@ -99,12 +98,12 @@ const ReviewPage: React.FC = () => {
 
 
         const reviewData = {
-            jobId: job._id,
+            jobId: jobId,
             rating: rating,
             content: reviewText,
             serviceOffering: job?.serviceOffering,
             reviewer: account?._id,
-            recipient: job.provider._id, //todo: also make it possible for provider to review
+            recipient: job?.provider, //todo: also make it possible for provider to review
         };
 
         console.log(reviewData)
@@ -115,7 +114,7 @@ const ReviewPage: React.FC = () => {
                 headers: {Authorization: `Bearer ${token}`}
             });
             alert(`Review ${review ? 'updated' : 'submitted'} successfully!`);
-            navigate('/jobs/jobHistory');
+            navigate('/jobs/offeredServices');
         } catch (error) {
             console.error('Failed to submit review:', error);
             alert('Failed to submit review.');
@@ -133,7 +132,7 @@ const ReviewPage: React.FC = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
             alert('Review deleted successfully!');
-            navigate('/jobs/jobhistory');  // Redirect or update local state
+            navigate('/jobs/offeredServices');  // Redirect or update local state
         } catch (error) {
             console.error('Failed to delete review:', error);
             alert('Failed to delete review.');
@@ -141,84 +140,7 @@ const ReviewPage: React.FC = () => {
     };
 
     return (
-        // <Container>
-        //     <Box sx={{display: 'flex', justifyContent: 'space-between', mt: 4}}>
-        //         {/* Left Section: Appointments */}
-        //         {/*<Box sx={{width: '30%', mr: 30}}>*/}
-        //         {/*    <Typography variant="h5" gutterBottom>*/}
-        //         {/*        Upcoming appointments*/}
-        //         {/*    </Typography>*/}
-        //         {/*    {appointments.map((appointment, index) => (*/}
-        //         {/*        <AppointmentCard key={index} {...appointment} />*/}
-        //         {/*    ))}*/}
-        //         {/*    <Typography variant="h5" gutterBottom>*/}
-        //         {/*        Past appointments*/}
-        //         {/*    </Typography>*/}
-        //         {/*    {appointments.map((appointment, index) => (*/}
-        //         {/*        <AppointmentCard key={index} {...appointment} />*/}
-        //         {/*    ))}*/}
-        //         {/*</Box>*/}
-        //
-        //         {/* Right Section: Review Form */}
-        //         <Box sx={{width: '65%'}}>
-        //             <Typography variant="h5" gutterBottom>
-        //                 Happy with the service? Then give <span
-        //                 style={{fontWeight: 'bold'}}>{job?.provider.firstName}</span> a rating!
-        //             </Typography>
-        //             <Card>
-        //                 <CardContent sx={{display: 'flex', alignItems: 'center', mb: 2}}>
-        //                     <Avatar
-        //                         sx={{
-        //                             width: 56,
-        //                             height: 56,
-        //                             mr: 2
-        //                         }}
-        //
-        //                         src={job?.provider.profileImageUrl}
-        //                     />
-        //                     <Box>
-        //                         <Typography
-        //                             variant="h6">{job?.provider.firstName} {job?.provider.lastName}</Typography>
-        //                         <Typography variant="body2" color="text.secondary">
-        //                             {job?.serviceType}, {new Date(job?.appointmentStartTime).toLocaleString()}
-        //                         </Typography>
-        //                         <Typography variant="body2" color="text.secondary">
-        //                             Job ID: {job?._id}
-        //                         </Typography>
-        //                     </Box>
-        //                 </CardContent>
-        //                 <CardContent>
-        //                     <Typography variant="h6" gutterBottom>
-        //                         Rating
-        //                     </Typography>
-        //                     <Rating
-        //                         name="service-rating"
-        //                         value={rating}
-        //                         onChange={handleRatingChange}
-        //                         size="large"
-        //                     />
-        //                     <Typography variant="h6" gutterBottom sx={{mt: 2}}>
-        //                         Review (optional)
-        //                     </Typography>
-        //                     <TextField
-        //                         fullWidth
-        //                         multiline
-        //                         rows={4}
-        //                         variant="outlined"
-        //                     />
-        //                 </CardContent>
-        //                 <CardContent>
-        //                     <Button variant="contained" color="primary" onClick={handleSubmit}>
-        //                         Submit
-        //                     </Button>
-        //                 </CardContent>
-        //             </Card>
-        //         </Box>
-        //     </Box>
-        // </Container>
-
-
-
+        
         <Container>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
                 <Box sx={{ width: '65%' }}>
@@ -235,19 +157,16 @@ const ReviewPage: React.FC = () => {
                         />
                         <Box>
                             <Typography
-                                variant="h6">{job?.provider.firstName} {job?.provider.lastName}</Typography>
+                                variant="h6">{reviewee?.firstName} {reviewee?.lastName}</Typography>
                             <Typography variant="body2" color="text.secondary">
-                                {job?.serviceType}, {new Date(job?.appointmentStartTime).toLocaleString()}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                                Job ID: {job?._id}
+                                {job?.serviceType}, {new Date(job ? job.appointmentStartTime: new Date()).toLocaleString()}
                             </Typography>
                         </Box>
                     </CardContent>
                     {review && !isEditing ? (
                         <>
                             <Typography variant="h5" gutterBottom>
-                                Review for {job?.provider.firstName}
+                                Review for {reviewee?.firstName}
                             </Typography>
                             <Card>
                                 <CardContent>
@@ -267,7 +186,7 @@ const ReviewPage: React.FC = () => {
                     ) : (
                         <>
                             <Typography variant="h5" gutterBottom>
-                                {review ? 'Edit your review' : 'Write a review'} for {job?.provider.firstName}
+                                {review ? 'Edit your review' : 'Write a review'} for {reviewee?.firstName}
                             </Typography>
                             <Card>
 
@@ -295,6 +214,7 @@ const ReviewPage: React.FC = () => {
                             </Card>
                         </>
                     )}
+                    
                     {/*todo: replace with actual email*/}
                     <Typography variant="body2" sx={{ mt: 2, textAlign: 'center' }}>
                         Something wrong? <MuiLink href="mailto:support@example.com" underline="hover">

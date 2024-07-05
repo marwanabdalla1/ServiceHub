@@ -4,14 +4,23 @@ import {
     saveEvents,
     extendFixedSlots,
     deleteTimeslot,
-    getAvailabilityByProviderId, bookTimeslot
+    getAvailabilityByProviderId,
+    bookTimeslot,
+    turnExistingEventIntoFixed,
+    cancelTimeslot,
+    checkAvailability,
+    getEventsByProvider,
+    getNextAvailability
 } from "../controller/TimeSlotController";
-import {authenticate} from "../middleware/authenticate";
+import { authenticate } from "../middleware/authenticate";
 
 const TimeSlotRouter = express.Router();
 
 TimeSlotRouter.get("/", authenticate, getEvents);
-// TimeSlotRouter.get("/:providerId", authenticate, getEventsByProviderId);
+TimeSlotRouter.get("/provider/:providerId", authenticate, getEventsByProvider);
+
+TimeSlotRouter.get("/next-availability/:providerId", getNextAvailability);
+
 TimeSlotRouter.get("/:providerId", getAvailabilityByProviderId);
 
 
@@ -20,5 +29,12 @@ TimeSlotRouter.post("/extend", authenticate, extendFixedSlots)
 TimeSlotRouter.delete("/", authenticate, deleteTimeslot);
 
 TimeSlotRouter.post("/book", bookTimeslot);
+
+
+TimeSlotRouter.patch('/', authenticate, turnExistingEventIntoFixed);
+TimeSlotRouter.patch('/:timeslotId', authenticate, cancelTimeslot);
+
+
+TimeSlotRouter.get('/check-availability', checkAvailability);
 
 export default TimeSlotRouter;

@@ -4,14 +4,14 @@ import FilterPage from './Pages/FilterPage';
 import SignInPage from './Pages/AuthPages/LoginPage';
 import SignUpPage from './Pages/AuthPages/SignUpPage';
 import NavigationBar from './components/Navbar';
-import JobHistoryPage from './Pages/JobHistoryPage';
+import ReceivedServicesPage from './Pages/ReceivedServicesPage';
+import AdminNavbar from "./components/adminComponents/AdminNavbar";
 import RequestHistoryPage from './Pages/RequestHistoryPage';
 import IncomingRequestsPage from './Pages/IncomingRequestsPage';
 import HomePage from './Pages/HomePage';
 import AddServicePage from './Pages/AddServicePage';
 import ReviewPage from "./Pages/CustomerReviewPage";
 import ProviderProfilePage from "./Pages/ProviderProfilePage";
-import UserProfilePage from "./Pages/ProfileSettingPage";
 import ProfileSettingPage from "./Pages/ProfileSettingPage";
 import SelectAvailabilityPage from './Pages/SelectAvailabilityPage';
 import SelectTimeslot from './Pages/bookingSteps/SelectTimeslotPage'
@@ -29,7 +29,6 @@ import BookingPage from "./Pages/bookingSteps/BookingPage";
 import ConfirmationPage from "./Pages/bookingSteps/ConfirmationPage";
 import FAQPage from "./Pages/FAQPage";
 
-import CustomerReviewPage from "./Pages/CustomerReviewPage";
 import BecomeProPage from './Pages/BecomePro';
 import ResetPasswordPage from "./Pages/AuthPages/ForgetPasswordPages/ResetPasswordPage";
 import OTPPage from "./Pages/AuthPages/ForgetPasswordPages/OTPPage";
@@ -37,7 +36,16 @@ import ForgetPasswordPage from "./Pages/AuthPages/ForgetPasswordPages/ForgetPass
 import ResetPasswordSuccessPage from "./Pages/AuthPages/ForgetPasswordPages/ResetPasswordSuccessPage";
 import {RecoveryProvider} from './contexts/RecoveryContext';
 
+import OfferedServicesPage from './Pages/OfferedServicesPage';
+import ChangeBookingTimePage from './Pages/ChangeBookingTimePage';
 // import SelectAvailabilityBooking_temp from "./Pages/SelectAvailabilityBooking_temp";
+import {ToastContainer} from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import {Slide} from "react-toastify";
+import JobDetailsPage from "./Pages/JobDetailsPage";
+import VerifyCertificatePage from "./Pages/AdminPanel/VerifyCertificatePage";
+import AdminUserDataPage from "./Pages/AdminPanel/AdminUserDataPage";
+import AdminHomePage from "./Pages/AdminPanel/AdminHomePage";
 
 function App() {
 
@@ -46,17 +54,31 @@ function App() {
     }, []);
 
     return (
-        <BrowserRouter>
-            <BookingProvider>
-                <RequestProvider>
-                    <AccountProvider>
-                        <RecoveryProvider>
-                            <MainRoutes/>
-                        </RecoveryProvider>
-                    </AccountProvider>
-                </RequestProvider>
-            </BookingProvider>
-        </BrowserRouter>
+        <div>
+            <ToastContainer
+                position="top-right"
+                autoClose={3000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                transition={Slide}
+            />
+            <BrowserRouter>
+                <BookingProvider>
+                    <RequestProvider>
+                        <AccountProvider>
+                            <RecoveryProvider>
+                                <MainRoutes/>
+                            </RecoveryProvider>
+                        </AccountProvider>
+                    </RequestProvider>
+                </BookingProvider>
+            </BrowserRouter>
+        </div>
     );
 }
 
@@ -68,57 +90,77 @@ function MainRoutes() {
         && location.pathname !== "/forgetPassword/emailVerification"
         && location.pathname !== "/forgetPassword/resetPassword"
         && location.pathname !== "/forgetPassword"
-        && location.pathname !== "/forgetPassword/success";
+        && location.pathname !== "/forgetPassword/success"
+        && location.pathname !== "/admin/verifyCertificate"
+        && location.pathname !== "/admin/UserData";
 
+    const showAdminNavBar = location.pathname.includes("/admin");
     return (
         <div className="h-screen flex flex-col">
-            {showNavBar && <NavigationBar toggleDrawer={() => {
+            {showNavBar && !showAdminNavBar && <NavigationBar toggleDrawer={() => {
             }} onChange={() => {
             }} onSearch={() => {
             }} search={""}/>}
+            {showAdminNavBar && <AdminNavbar/>}
             <Routes>
+                {/* Home */}
                 <Route path="/" element={<HomePage/>}/>
-                <Route path="/setprofile" element={<ProfileSettingPage/>}/>
-                <Route path="/customer_review" element={<ReviewPage/>}/>
+
+                {/* User Authentication */}
                 <Route path="/login" element={<SignInPage/>}/>
                 <Route path="/signup" element={<SignUpPage/>}/>
+
+                {/* User Profile */}
+                <Route path="/setprofile" element={<ProfileSettingPage/>}/>
+                <Route path="/customer_review/:jobId" element={<ReviewPage/>}/>
                 <Route path="/forgetPassword" element={<ForgetPasswordPage/>}/>
                 <Route path="/forgetPassword/emailVerification" element={<OTPPage/>}/>
                 <Route path="/forgetPassword/resetPassword" element={<ResetPasswordPage/>}/>
                 <Route path="/forgetPassword/success" element={<ResetPasswordSuccessPage/>}/>
                 <Route path="/filter" element={<FilterPage/>}/>
-                <Route path="/jobs/jobHistory" element={<JobHistoryPage/>}/>
+                <Route path="/jobs/receivedServices" element={<ReceivedServicesPage/>}/>
                 <Route path="/jobs/requestHistory" element={<RequestHistoryPage/>}/>
+                <Route path="/jobs/offeredServices" element={<OfferedServicesPage/>}/>
                 <Route path="/incomingRequests" element={<IncomingRequestsPage/>}/>
                 <Route path="/addservice" element={<AddServicePage/>}/>
-                <Route path="/provider-profile/:id" element={<ProviderProfilePage/>}/>
+                {/*<Route path="/provider-profile/:id" element={<ProviderProfilePage/>}/>*/}
                 <Route path="/select-availability" element={<SelectAvailabilityPage/>}/>
+                <Route path="/change-booking-time/:providerId/:requestId" element={<ChangeBookingTimePage/>}/>
                 {/*<Route path="/select-availability-booking" element={<SelectAvailabilityBooking_temp/>}/>*/}
 
+                {/* Booking */}
+                <Route path="/offerings/:offeringId" element={<ProviderProfilePage/>} />
+                <Route path="/offerings/:offeringId/booking/:step" element={<BookingPage/>} />
+                <Route path="/select-availability" element={<SelectAvailabilityPage/>}/>
                 <Route path="/update-timeslot" element={<UpdateTimeslot/>}/>
                 <Route path="/becomepro" element={<BecomeProPage/>}/>
 
 
+
                 {/*booking*/}
-                <Route path="/offerings/:offeringId" element={<ProviderProfilePage />} />
-                <Route path="/offerings/:could /booking/:step" element={<BookingPage />} />
-                <Route path="/offerings/:requestId/confirm" element={<ConfirmationPage />} />
+                {/* <Route path="/offerings/:offeringId" element={<ProviderProfilePage/>}/>
+                <Route path="/offerings/:offeringId/booking/:step" element={<BookingPage/>}/> */}
+                <Route path="/offerings/:requestId/confirm" element={<ConfirmationPage/>}/>
+
+                {/*todo: get this once it's done*/}
+                <Route path="/jobs/:jobId" element={<JobDetailsPage />} />
 
                 {/*old ones*/}
                 {/*<Route path="/create-account-or-sign-in" element={<CreateAccountOrSignIn/>}/>*/}
                 {/*<Route path="/update-profile" element={<UpdateProfile/>}/>*/}
                 {/*<Route path="/review-and-confirm" element={<ReviewAndConfirm/>}/>*/}
 
-                <Route path="/listsLandingPage" element={<ListsLandingPage/>}/>
-                <Route path="/update-timeslot/" element={<UpdateTimeslot/>} />
-                <Route path="/proposeNewTime" element={<ProposeNewtimePage />} />
-                <Route path="/write-reviews" element={<ReviewPage />} />
+                {/*<Route path="/listsLandingPage" element={<ListsLandingPage/>}/>*/}
+                <Route path="/update-timeslot/" element={<UpdateTimeslot/>}/>
+                <Route path="/proposeNewTime" element={<ProposeNewtimePage/>}/>
+                <Route path="/write-reviews" element={<ReviewPage/>}/>
                 <Route path="/faq" element={<FAQPage/>}/>
 
+                <Route path="/admin" element={<AdminHomePage/>}/>
+                <Route path="/admin/verifyCertificate" element={<VerifyCertificatePage/>}/>
+                <Route path="/admin/UserData" element={<AdminUserDataPage/>}/>
 
                 <Route path="*" element={<h1>Not Found</h1>}/>
-
-
             </Routes>
         </div>
     );
