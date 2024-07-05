@@ -4,6 +4,28 @@ import {useNavigate} from "react-router-dom";
 import * as React from "react";
 import axios, {AxiosResponse} from 'axios';
 import {toast} from "react-toastify";
+import {jwtDecode} from 'jwt-decode';
+
+interface DecodedToken {
+    exp: number;
+}
+
+/**
+ * Checks if the JWT token is expired.
+ * @param token - The JWT token to check.
+ * @returns true if the token is expired, false otherwise.
+ */
+const isTokenExpired = (token: string): boolean => {
+    try {
+        const decoded: DecodedToken = jwtDecode(token);
+        const currentTime = Date.now() / 1000;
+        console.log('Token expiry:', decoded.exp, 'Current time:', currentTime);
+        return decoded.exp < currentTime;
+    } catch (error) {
+        console.error('Error decoding token:', error);
+        return true;
+    }
+};
 
 type AccountContextType = {
     token: string | null;
@@ -104,6 +126,7 @@ export const AccountProvider = ({children}: Props) => {
         const user = {
             email: data.get('email'),
             password: data.get('password'),
+            rememberMe: data.get('rememberMe') === 'remember',
         };
 
         try {
@@ -149,7 +172,10 @@ export const AccountProvider = ({children}: Props) => {
     };
 
     const isLoggedIn = () => {
-        return token !== null && token !== undefined;
+        if (token !== null && token !== undefined && isTokenExpired(token)) {
+            logoutUser().then(r => console.log('User logged out due to expired token'));
+        }
+        return token !== null && token !== undefined && !isTokenExpired(token);
     };
 
     const isPremium = () => {

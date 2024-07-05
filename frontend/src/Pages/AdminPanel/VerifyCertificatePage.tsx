@@ -150,14 +150,10 @@ export default function VerifyCertificates(): React.ReactElement {
             });
             setCertificate(certificateResponse.data);
 
-            if (certificate) {
-                const link = document.createElement('a');
-                link.href = window.URL.createObjectURL(certificate);
-                link.download = filename;
-                document.body.appendChild(link); // Ensure the link is in the document
-                link.click();
-                window.URL.revokeObjectURL(link.href); // Clean up the object URL
-                document.body.removeChild(link); // Remove the link from the document
+            if (certificate && certificate.size > 0) {
+                const url = window.URL.createObjectURL(certificate);
+                window.open(url);
+                window.URL.revokeObjectURL(url);
             }
 
             console.log('Certificate fetched:', certificateResponse.data)
@@ -192,7 +188,7 @@ export default function VerifyCertificates(): React.ReactElement {
                                         variant="contained"
                                         onClick={() => fetchCertificate(service.serviceId, `${user.email}-${service.serviceType}.pdf`)}
                                     >
-                                        Download
+                                        View
                                     </Button>
                                 </TableCell>
                                 <TableCell align="center">
