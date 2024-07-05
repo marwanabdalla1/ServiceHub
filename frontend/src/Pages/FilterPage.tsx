@@ -78,7 +78,7 @@ function FilterPage() {
   };
 
   useEffect(() => {
-    setSearch(searchTerm)
+    // setSearch(searchTerm)
     fetchOfferings();
   }, [filterState, search, sortKey]);
 
@@ -208,7 +208,7 @@ function FilterPage() {
 
   return (
     <div>
-      <NavigationBar toggleDrawer={toggleDrawer} onChange={handleInputChange} onSearch={handleSearch} search={search} />
+      <NavigationBar toggleDrawer={toggleDrawer} onChange={handleInputChange} onSearch={handleSearch} search={search}  setSearch={setSearch}/>
       <div className='flex-col items-center'>
         <DrawerFilter
           openDrawer={isDrawerOpen}

@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {BrowserRouter, Routes, Route, useLocation} from "react-router-dom";
 import FilterPage from './Pages/FilterPage';
 import SignInPage from './Pages/AuthPages/LoginPage';
@@ -48,6 +48,7 @@ import AdminUserDataPage from "./Pages/AdminPanel/AdminUserDataPage";
 import AdminHomePage from "./Pages/AdminPanel/AdminHomePage";
 
 function App() {
+    const [search, setSearch] = useState('');
 
     useEffect(() => {
         axios.defaults.baseURL = "http://localhost:8080";
@@ -72,7 +73,7 @@ function App() {
                     <RequestProvider>
                         <AccountProvider>
                             <RecoveryProvider>
-                                <MainRoutes/>
+                                <MainRoutes search={search} setSearch={setSearch}/>
                             </RecoveryProvider>
                         </AccountProvider>
                     </RequestProvider>
@@ -82,7 +83,7 @@ function App() {
     );
 }
 
-function MainRoutes() {
+function MainRoutes({search, setSearch}: {search: any, setSearch: any}) {
     const location = useLocation();
     const showNavBar = location.pathname !== "/login"
         && location.pathname !== "/signup"
@@ -97,10 +98,12 @@ function MainRoutes() {
     const showAdminNavBar = location.pathname.includes("/admin");
     return (
         <div className="h-screen flex flex-col">
-            {showNavBar && !showAdminNavBar && <NavigationBar toggleDrawer={() => {
-            }} onChange={() => {
-            }} onSearch={() => {
-            }} search={""}/>}
+            {showNavBar && !showAdminNavBar && <NavigationBar
+                toggleDrawer={() => {}}
+                onChange={() => {}}
+                onSearch={() => {}}
+                search={search}
+                setSearch={setSearch}/>}
             {showAdminNavBar && <AdminNavbar/>}
             <Routes>
                 {/* Home */}
