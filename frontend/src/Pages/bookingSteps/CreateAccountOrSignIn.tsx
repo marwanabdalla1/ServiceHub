@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import {useNavigate, useParams} from 'react-router-dom';
+import {useLocation, useNavigate, useParams} from 'react-router-dom';
 import { Container, Box, Typography, Button, Card, CardContent } from '@mui/material';
 import {BookingDetails, useBooking } from '../../contexts/BookingContext';
 import {Account} from "../../models/Account";
@@ -18,6 +18,7 @@ function CreateAccountOrSignIn({ onNext, onBack, bookingDetails }: CreateAccount
     const { offeringId } = useParams<{ offeringId: string }>(); // Get the offeringId from the route params
     const {token, account} = useAuth();
 
+    const location = useLocation();
     // const isAuthenticated = true; // todo: Replace this with actual authentication logic
 
     useEffect(() => {
@@ -63,11 +64,11 @@ function CreateAccountOrSignIn({ onNext, onBack, bookingDetails }: CreateAccount
 
     // todo: make these navigate back to the booking page!
     const handleSignUpClick = () => {
-        navigate('/signup');
+        navigate('/signup', { state: { from: location } });
     };
 
     const handleLoginClick = () => {
-        navigate('/login');
+        navigate('/login', { state: { from: location } });
         // loginUser()
     };
 
@@ -76,12 +77,14 @@ function CreateAccountOrSignIn({ onNext, onBack, bookingDetails }: CreateAccount
             <Container>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
                     <Box sx={{ width: '60%' }}>
-                        <Typography variant="h6" gutterBottom>
-                            Step 1 of 3
-                        </Typography>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-                            <Button variant="outlined" onClick={onBack}>Back</Button>
-                            {/*<Button variant="contained" onClick={onNext}>Next</Button>*/}
+                        <Box sx={{width: '100%', display:"flex", flexDirection:"row", justifyContent: 'space-between'}}>
+                            <Typography variant="h6" gutterBottom>
+                                Step 1 of 4
+                            </Typography>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', ml: 5 }}>
+                                <Button variant="outlined" onClick={onBack}>Back</Button>
+                                {/*<Button variant="contained" onClick={onNext}>Next</Button>*/}
+                            </Box>
                         </Box>
                         <Typography variant="h4" gutterBottom>
                             Create account or sign in

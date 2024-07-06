@@ -30,8 +30,8 @@ const isTokenExpired = (token: string): boolean => {
 type AccountContextType = {
     token: string | null;
     account: Account | null;
-    registerUser: (event: React.FormEvent<HTMLFormElement>) => Promise<void>;
-    loginUser: (event: React.FormEvent<HTMLFormElement>) => Promise<void>;
+    registerUser: (event: React.FormEvent<HTMLFormElement>, redirect:string) => Promise<void>;
+    loginUser: (event: React.FormEvent<HTMLFormElement>, redirect:string) => Promise<void>;
     logoutUser: () => void;
     isLoggedIn: () => boolean;
     isPremium: () => boolean;
@@ -91,7 +91,7 @@ export const AccountProvider = ({children}: Props) => {
         // setAccount(response.data);
     }
 
-    const registerUser = async (event: React.FormEvent<HTMLFormElement>) => {
+    const registerUser = async (event: React.FormEvent<HTMLFormElement>, redirect='/') => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
         const newaccount = {
@@ -111,7 +111,7 @@ export const AccountProvider = ({children}: Props) => {
                 console.log(`Status Text: ${response.statusText}`);
 
                 console.log(response.data);
-                navigate('/');
+                navigate(redirect);
             }
         } catch
             (error) {
@@ -120,7 +120,7 @@ export const AccountProvider = ({children}: Props) => {
         }
     };
 
-    const loginUser = async (event: React.FormEvent<HTMLFormElement>) => {
+    const loginUser = async (event: React.FormEvent<HTMLFormElement>, redirect:string='/') => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
         const user = {
@@ -141,7 +141,7 @@ export const AccountProvider = ({children}: Props) => {
                     navigate('/admin');
                 } else {
                     toast.success('User logged in successfully');
-                    navigate('/');
+                    navigate(redirect);
                 }
             }
         } catch (error) {

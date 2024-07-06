@@ -43,7 +43,7 @@ function SelectTimeslot({ onNext, onBack, bookingDetails }: SelectTimeslotProps)
         <Container>
             <Box sx={{ display: 'center', justifyContent: 'space-between', mt: 4 }}>
                 <Box sx={{width: '70%'}}>
-                    <Box sx={{width: '70%', display:"flex", flexDirection:"row"}}>
+                    <Box sx={{width: '100%', display:"flex", flexDirection:"row", justifyContent: "space-between"}}>
                     <Typography variant="h6" gutterBottom>
                         Step 2 of 4
                     </Typography>

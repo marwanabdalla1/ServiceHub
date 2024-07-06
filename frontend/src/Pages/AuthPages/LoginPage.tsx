@@ -23,7 +23,7 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import {createTheme, ThemeProvider} from '@mui/material/styles';
 import {blue} from "@mui/material/colors";
-import {useNavigate} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 import axios from "axios";
 import {useAuth} from "../../contexts/AuthContext";
 
@@ -49,11 +49,19 @@ const defaultTheme = createTheme({
 });
 
 export default function SignIn() {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const { from } = location.state || { from: { pathname: "/" } };
     const { loginUser } = useAuth();
+
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        await loginUser(event);
+        await loginUser(event, from.pathname);
+    };
+
+    const handleLogoClick = () => {
+        navigate('/');  // Navigate to the homepage
     };
 
     return (
@@ -68,7 +76,7 @@ export default function SignIn() {
                         alignItems: 'center',
                     }}
                 >
-                    <Avatar sx={{bgcolor: 'primary.main'}}>
+                    <Avatar sx={{bgcolor: 'primary.main'}} onClick={handleLogoClick}>
                         <img src="/images/logo_short.png" alt="Logo" className="md:h-6"/>
                     </Avatar>
                     <Typography component="h1" variant="h5">
