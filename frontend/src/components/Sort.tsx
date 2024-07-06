@@ -1,12 +1,13 @@
 import React from 'react';
 
 interface SortProps {
-  onSortChange: (sortKey: string) => void;
+  onSortChange: (sortKey: string | null) => void; // Updated type
 }
 
 const Sort: React.FC<SortProps> = ({ onSortChange }) => {
   const handleSortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    onSortChange(event.target.value);
+    const value = event.target.value;
+    onSortChange(value === 'null' ? null : value); // Handle 'null' option
   };
 
   return (
@@ -16,7 +17,9 @@ const Sort: React.FC<SortProps> = ({ onSortChange }) => {
         id="sort" 
         onChange={handleSortChange} 
         className="block w-full md:w-1/3 bg-white border border-gray-300 rounded-md py-2 px-3 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+        defaultValue="null" // Set default value to 'null'
       >
+        <option value="null">None</option> {/* Added None option */}
         <option value="priceAsc">Price: Low to High</option>
         <option value="priceDesc">Price: High to Low</option>
         <option value="ratingAsc">Rating: Low to High</option>
