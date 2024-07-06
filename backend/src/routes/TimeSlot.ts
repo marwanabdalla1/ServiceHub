@@ -10,7 +10,7 @@ import {
     cancelTimeslot,
     checkAvailability,
     getEventsByProvider,
-    getNextAvailability
+    getNextAvailability, cancelTimeslotWithRequestId
 } from "../controller/TimeSlotController";
 import { authenticate } from "../middleware/authenticate";
 
@@ -33,6 +33,8 @@ TimeSlotRouter.post("/book", bookTimeslot);
 
 TimeSlotRouter.patch('/', authenticate, turnExistingEventIntoFixed);
 TimeSlotRouter.patch('/:timeslotId', authenticate, cancelTimeslot);
+TimeSlotRouter.patch('/cancel-with-request/:requestId', authenticate, cancelTimeslotWithRequestId);
+
 
 
 TimeSlotRouter.get('/check-availability', checkAvailability);

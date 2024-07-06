@@ -4,7 +4,17 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './calendarStyles.css';
 import { format, startOfWeek, parseISO, getDay, startOfDay, endOfDay } from 'date-fns';
 import { enUS } from '@mui/material/locale';
-import { Dialog, Button, DialogActions, DialogContent, DialogTitle, Box } from '@mui/material';
+import {
+    Dialog,
+    Button,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Box,
+    Alert,
+    LinearProgress,
+    AlertTitle
+} from '@mui/material';
 import axios from 'axios';
 import moment from 'moment';
 import { useAuth } from '../contexts/AuthContext';
@@ -58,7 +68,7 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
     const providerId = mode === 'change' ? providerIdInput : bookingDetails.provider?._id;
     const requestId = mode === 'change' ? requestIdInput : null;
 
-    const { triggerAlert, closeAlert } = useAlert();
+    const { alert, triggerAlert, closeAlert } = useAlert();
     const [availability, setAvailability] = useState<Timeslot[]>([]);
     const [selectedTimeSlot, setSelectedTimeSlot] = useState<Timeslot | null>(null);
     // const [selectedTimeSlotWithTransit, setSelectedTimeSlotWithTransit] = useState<TimeSlot | null>(null);
@@ -341,10 +351,14 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
 
         if (mode ==="change"){
             try {
+                // todo: make sure to cancel old timeslot first if not yet done
+
+
                 const timeslotResponse = await changeTimeSlot(selectedTimeSlot, token)
                 console.log("Timeslot updated", timeslotResponse);
+
                 triggerAlert("Timeslot updated successfully", "success");
-                navigate(`/confirmation/${requestId}/timeslotChange`);
+                // navigate(`/confirmation/${requestId}/timeslotChange`);
             } catch (error: any){
                 console.error('Error changing Timeslot booking:', error);
 
@@ -358,7 +372,7 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
 
                 } else {
                     // alert('An error occurred while confirming your booking. Please try again.');
-                    triggerAlert("Failed to update timeslot", "error");
+                    triggerAlert("Failed to update timeslot. Please try again later", "error");
                 }
             }
 
@@ -542,6 +556,10 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
     //     }
     // };
 
+    const handleError = () => {
+        triggerAlert("An error occurred!", "error");
+    };
+
 
     return (
         <div>
@@ -556,7 +574,7 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
                 events={validEvents}
                 startAccessor="start"
                 endAccessor="end"
-                style={{ height: 500 }}
+                style={{height: 500}}
                 selectable
                 onSelectSlot={handleSelect}
                 onSelectEvent={handleSelectTimeSlot}
@@ -575,17 +593,25 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
             {/*        /!*<Button onClick={handleDelete} color="secondary">Delete</Button>*!/*/}
             {/*    </DialogActions>*/}
             {/*</Dialog>*/}
+            <div>
+                {alert.open && (
+                    <Alert severity={alert.severity} onClose={closeAlert}>
+                        {alert.message}
+                    </Alert>
+                )}
+            </div>
+
             <Dialog open={clashDialogOpen} onClose={handleClashDialogClose}>
                 <DialogTitle>TimeSlot Clash</DialogTitle>
                 <DialogContent>
-                    Provider not available! This could be due to the need to adjust to minimum slot duration ({defaultSlotDuration} minutes)
+                    Provider not available! This could be due to the need to adjust to minimum slot duration
+                    ({defaultSlotDuration} minutes)
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClashDialogClose}>OK</Button>
                 </DialogActions>
             </Dialog>
-            <Box display="flex" justifyContent="flex-end" sx={{ mt: 4 }}>
-                {/*todo: edit the onClick*/}
+            <Box display="flex" justifyContent="flex-end" sx={{mt: 4}}>
                 <Button variant="contained" color="primary" onClick={confirmBooking}>
                     {mode === 'create' ? 'Confirm Booking Time' : 'Update Booking Time'}
                 </Button>

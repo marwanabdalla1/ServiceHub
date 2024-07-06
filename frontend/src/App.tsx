@@ -128,7 +128,7 @@ function MainRoutes({search, setSearch}: {search: any, setSearch: any}) {
                 <Route path="/addservice" element={<AddServicePage/>}/>
                 {/*<Route path="/provider-profile/:id" element={<ProviderProfilePage/>}/>*/}
                 <Route path="/select-availability" element={<SelectAvailabilityPage/>}/>
-                <Route path="/change-booking-time/:providerId/:requestId" element={<ChangeBookingTimePage/>}/>
+                <Route path="/change-booking-time/:requestId" element={<ChangeBookingTimePage/>}/>
                 {/*<Route path="/select-availability-booking" element={<SelectAvailabilityBooking_temp/>}/>*/}
 
                 {/* Booking */}

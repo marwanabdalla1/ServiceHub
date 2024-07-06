@@ -85,7 +85,7 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration }: ServiceSched
     const [deleteOptionDialogOpen, setDeleteOptionDialogOpen] = useState(false);
 
     const [clashDialogOpen, setClashDialogOpen] = useState(false);
-    const { token } = useAuth();
+    const { token,account } = useAuth();
 
 
     console.log(token);
@@ -170,7 +170,8 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration }: ServiceSched
                 adjustedEnd = new Date(start.getTime() + defaultSlotDuration * 60000);
             }
 
-            const adjustedTimeSlot: TimeSlot = { start: start, end: adjustedEnd, title: 'available', isFixed: false, isBooked: false, createdById: '' };
+            console.log("account:", account)
+            const adjustedTimeSlot: TimeSlot = { start: start, end: adjustedEnd, title: 'available', isFixed: false, isBooked: false, createdById: account?._id || '' };
             // setAvailability([...availability, adjustedTimeSlot]);
             setFetchedEvents([...fetchedEvents, adjustedTimeSlot]);
 

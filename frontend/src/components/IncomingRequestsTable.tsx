@@ -23,6 +23,7 @@ import {useAuth} from "../contexts/AuthContext";
 import axios from "axios";
 import {formatDateTime} from '../utils/dateUtils';
 
+// todo: replace ALL appointmentstarttime/endtime
 
 export default function IncomingRequestTable() {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -68,7 +69,7 @@ export default function IncomingRequestTable() {
 
         console.log("job data at frontend:", jobData);
 
-// post new job
+        // post new job
         try {
             const jobResponse = await axios.post("api/jobs/", jobData, {
                 headers: {Authorization: `Bearer ${token}`}
@@ -103,7 +104,7 @@ export default function IncomingRequestTable() {
                 // Prepare notification data
                 const notificationData = {
                     isViewed: false,
-                    content: `Your service request for ${selectedRequest.serviceType} on the ${formatDateTime(selectedRequest.appointmentStartTime)} has been accepted`,
+                    content: `Your service request for ${selectedRequest.serviceType} on the ${formatDateTime(selectedRequest.timeslot?.start)} has been accepted`,
                     serviceRequest: selectedRequest._id,
                     job: jobResponse.data._id,
                     recipient: selectedRequest.requestedBy._id,
@@ -172,7 +173,7 @@ export default function IncomingRequestTable() {
         // Prepare notification data
         const notificationData = {
             isViewed: false,
-            content: `Your service request for ${selectedRequest.serviceType} on the ${formatDateTime(selectedRequest.appointmentStartTime)}has been declined `,
+            content: `Your service request for ${selectedRequest.serviceType} on the ${formatDateTime(selectedRequest.timeslot?.start)} has been declined `,
             serviceRequest: selectedRequest._id,
             recipient: selectedRequest.requestedBy._id,
             ...rest,
@@ -219,6 +220,7 @@ export default function IncomingRequestTable() {
             console.log('Request Updated:', updateResponse.data);
 
 
+            // todo: also cancel the timeslot
             // Update local state to reflect these changes
             const updatedServiceRequests = serviceRequests.map(req => {
                 if (req._id === selectedRequest._id) {
@@ -237,7 +239,7 @@ export default function IncomingRequestTable() {
         // Prepare notification data
         const notificationData = {
             isViewed: false,
-            content: `Your service request for ${selectedRequest.serviceType} on the ${formatDateTime(selectedRequest.appointmentStartTime)} has been cancelled`,
+            content: `Your service request for ${selectedRequest.serviceType} on the ${formatDateTime(selectedRequest.timeslot?.start)} has been cancelled`,
             serviceRequest: selectedRequest._id,
             recipient: selectedRequest.requestedBy._id,
             ...rest,
@@ -277,10 +279,11 @@ export default function IncomingRequestTable() {
         // Prepare notification data
         const notificationData = {
             isViewed: false,
-            content: `Please change the booking time for your service request ${selectedRequest.serviceType} on the ${formatDateTime(selectedRequest.appointmentStartTime)}.
+            content: `Please change the booking time for your service request ${selectedRequest.serviceType} on the ${formatDateTime(selectedRequest.timeslot?.start)}.
             \n Comment from the provider: ${comment}`,
             serviceRequest: selectedRequest._id,
             recipient: selectedRequest.requestedBy._id,
+            notificationType: 'Time Request Changed',
             ...rest,
         };
 
@@ -322,7 +325,7 @@ export default function IncomingRequestTable() {
                     // setLoading(false);
                 });
         }
-    }, [account?._id]);
+    }, [token]);
 
     return (
         <Box sx={{minWidth: 275, margin: 2}}>

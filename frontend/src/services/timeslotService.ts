@@ -32,27 +32,61 @@ export const bookTimeSlot = (timeSlot: any, token: string|null) => {
     });
 };
 
-export const changeTimeSlot = (timeSlot: any, token: string|null) => {
-    return new Promise((resolve, reject) => {
-        console.log("changing timeslot to this:", timeSlot)
-        axios.post('/api/requests/change-timeslots', {...timeSlot, isUpdate:true}, {
-            headers: {'Authorization': `Bearer ${token}`}
-        })
-            .then(response => {
-                resolve(response.data);
+// export const changeTimeSlot = (timeSlot: any, token: string|null) => {
+//
+//     return new Promise((resolve, reject) => {
+//         console.log("changing timeslot to this:", timeSlot)
+//
+//         // this includes changing timeslot AND sending notification
+//         axios.post('/api/requests/change-timeslots', {...timeSlot, isUpdate:true}, {
+//             headers: {'Authorization': `Bearer ${token}`}
+//         })
+//             .then(response => {
+//                 resolve(response.data);
+//
+//             })
+//             .catch(error => {
+//                 if (error.response) {
+//                     if (error.response.status === 409) {
+//                         reject(new BookingError("Timeslot is no longer available", 409));
+//                     } else {
+//                         console.log(error)
+//                         reject(new BookingError("An error occurred while booking the timeslot", error.response));
+//                     }
+//                 } else {
+//                     reject(new Error("Network or other error"));
+//                 }
+//             });
+//     });
+// };
 
-            })
-            .catch(error => {
-                if (error.response) {
-                    if (error.response.status === 409) {
-                        reject(new BookingError("Timeslot is no longer available", 409));
-                    } else {
-                        console.log(error)
-                        reject(new BookingError("An error occurred while booking the timeslot", error.response));
-                    }
-                } else {
-                    reject(new Error("Network or other error"));
-                }
-            });
-    });
+
+export const changeTimeSlot = async (timeSlot: any, token: string|null) => {
+    const requestId = timeSlot.requestId;
+    try {
+        // try to cancel the timeslot first if it is not yet done:
+        const cancelResponse = await axios.patch(`/api/timeslots/cancel-with-request/${requestId}`, {...timeSlot, isUpdate: true}, {
+            headers: {'Authorization': `Bearer ${token}`}
+        });
+
+        console.log(cancelResponse)
+
+
+        // Proceed to change the timeslot
+        const response = await axios.post('/api/requests/change-timeslots', {...timeSlot, isUpdate: true}, {
+            headers: {'Authorization': `Bearer ${token}`}
+        });
+
+        // Return the successful response data
+        return response.data;
+    } catch (error: any) {
+        console.error("Error in changing timeslot:", error);
+        if (error.response && error.response.status === 409) {
+            throw new BookingError("Timeslot is no longer available", 409);
+        } else if (error.response) {
+            throw new BookingError("An error occurred while updating the timeslot", error.response);
+        } else {
+            throw new Error("Network or other error");
+        }
+    }
 };

@@ -35,7 +35,9 @@ interface ServiceRequest {
 }
 
 const ChangeBookingTimePage: React.FC = () => {
-    const { providerId, requestId } = useParams();
+    const { requestId } = useParams();
+    const [providerId,setProviderId] = useState<string | null>(null);
+
     const [request, setRequest] = useState<ServiceRequest | null>(null);
     // const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string| null>(null);
@@ -52,12 +54,13 @@ const ChangeBookingTimePage: React.FC = () => {
                     },
                 });
 
-                // make sure only the requestor can access this
-                if (response.data.requestedBy._id !== account?._id) {
-                    setError('Access Denied');
-                    return;
-                }
+                // // make sure only the requestor can access this
+                // if (response.data.requestedBy._id !== account?._id) {
+                //     setError('Access Denied');
+                //     return;
+                // }
                 setRequest(response.data);
+                setProviderId(response.data.provider)
                 console.log("fetched request when changing booking time:", request)
             } catch (err: any) {
                 setError(err.message);

@@ -11,7 +11,7 @@ export interface ITimeslot extends Document {
     requestId?: Types.ObjectId;
     jobId?: Types.ObjectId;
     createdById: Types.ObjectId;
-    baseEventId?: Types.ObjectId;
+    // baseEventId?: Types.ObjectId;
 }
 
 const TimeslotSchema: Schema = new Schema({
@@ -22,10 +22,10 @@ const TimeslotSchema: Schema = new Schema({
     transitEnd: { type: Date, required: false },
     isFixed: { type: Boolean, required: true },
     isBooked: { type: Boolean, required: true },
-    requestId: { type: Schema.Types.ObjectId, ref: "ServiceRequest", required: false  }, //only required if it is booked
-    jobId: { type: Schema.Types.ObjectId, ref: "Job", required: false  }, //only required if it is booked
+    requestId: { type: Schema.Types.ObjectId, ref: "ServiceRequest", required: false, unique:true  }, //only required if it is booked
+    jobId: { type: Schema.Types.ObjectId, ref: "Job", required: false, unique:true  }, //only required if it is booked
     createdById: { type: Schema.Types.ObjectId, ref: "Account", required: true },
-    baseEventId: { type: Schema.Types.ObjectId, ref: "Timeslot", required: false },
+    // baseEventId: { type: Schema.Types.ObjectId, ref: "Timeslot", required: false },
 
 
 }, {timestamps: true});

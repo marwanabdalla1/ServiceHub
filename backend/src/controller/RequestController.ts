@@ -7,7 +7,7 @@ import Timeslot from "../models/timeslot";
 import {createNotification, createNotificationDirect} from "./NotificationController";
 import Notification from "../models/notification";
 import {NotificationType} from "../models/enums";
-import {bookTimeslot} from "./TimeSlotController";
+import {bookTimeslot, cancelTimeslotDirect} from "./TimeSlotController";
 
 
 
@@ -300,11 +300,61 @@ export const getServiceRequestsByRequester: RequestHandler = async (req, res) =>
 
 
 
+// when provider requests the consumer to select a new timeslot
+// todo: to finish
+export const requestChangeTimeslot: RequestHandler = async (req, res, next) => {
+    const { createdById, requestId } = req.body;
+    let success = true;  // Flag to track success of booking
+
+    // todo: first cancel the existing timeslot if not yet done
+    try {
+
+        const timeslotFound = await Timeslot.findOne({request: requestId})
+        if (timeslotFound){
+            // const hi = await cancelTimeslotDirect(timeslotFound._id.toString());
+        }
+
+        // // Check if the response has been sent by bookTimeslot
+        // if (res.headersSent) {
+        //     return; // If the response is sent, bookTimeslot was successful
+        // }
+
+    } catch (error) {
+        console.error("Error in handling timeslot change:", error);
+        success = false;  // Update success flag to false on error
+        // Only send this error response if headers have not been sent
+        if (!res.headersSent) {
+            res.status(500).json({ message: "Failed to process timeslot change." });
+        }
+    } finally {
+        // Notification should happen regardless of the booking outcome
+        const notificationContent = success
+            ? `The timeslot of the existing request ${requestId} has been successfully changed.`
+            : `Failed to change the timeslot of the existing request ${requestId}.`;
+        const notificationType = NotificationType.timeRequestChanged; // Adjust if you have specific types for success/failure
+
+        // Perform notification creation
+        try {
+            await createNotificationDirect({
+                content: notificationContent,
+                serviceRequest: requestId,
+                notificationType,
+                recipient: createdById,
+                job: undefined,
+                review: undefined
+            });
+        } catch (notificationError) {
+            console.error("Failed to create notification:", notificationError);
+            // Optionally handle the failure of notification creation
+        }
+    }
+};
+
+// when consumer changes the timeslot
 export const handleChangeTimeslot: RequestHandler = async (req, res, next) => {
     const { createdById, requestId } = req.body;
     let success = true;  // Flag to track success of booking
 
-    // todo: first delete the existing timeslot if not yet done
     try {
         const hi = await bookTimeslot(req, res, next);
 

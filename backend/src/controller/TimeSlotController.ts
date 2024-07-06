@@ -4,8 +4,8 @@ import Timeslot, {ITimeslot} from '../models/timeslot';
 import mongoose, {Types} from "mongoose";
 import ServiceRequest from "../models/serviceRequest";
 
-// Function to generate weekly instances (existing code)
-function generateWeeklyInstances(events: ITimeslot[], startDate: moment.Moment, endDate: moment.Moment) {
+function generateWeeklyInstances(events: ITimeslot[], existingTimeslots: ITimeslot[], startDate: moment.Moment, endDate: moment.Moment) {
+    console.log("existing ones:", existingTimeslots)
     const weekInstances: ITimeslot[] = [];
     events.forEach(event => {
         const dayOfWeek = moment(event.start).day();
@@ -24,25 +24,40 @@ function generateWeeklyInstances(events: ITimeslot[], startDate: moment.Moment, 
                     minute: moment(event.end).minutes(),
                     second: moment(event.end).seconds()
                 }).toDate();
+                //
+                // const exists = weekInstances.some(instance =>
+                //         instance.start.getTime() === start.getTime() &&
+                //         instance.end.getTime() === end.getTime() &&
+                //         instance.createdById === event.createdById
+                //     // instance.baseEventId === event.baseEventId
+                // );
+                //
+                //
+                // if (!exists) {
+                //     weekInstances.push({
+                //         title: event.title,
+                //         start,
+                //         end,
+                //         isFixed: event.isFixed,
+                //         isBooked: event.isBooked,
+                //         createdById: event.createdById,
+                //         // baseEventId: event.baseEventId
+                //     } as ITimeslot);
+                // }
 
-                const exists = weekInstances.some(instance =>
-                        instance.start.getTime() === start.getTime() &&
-                        instance.end.getTime() === end.getTime() &&
-                        instance.createdById === event.createdById
-                    // instance.baseEventId === event.baseEventId
-                );
+                // check overlaps and handle them
+                let tempInstance = {
+                    title: event.title,
+                    start: start,
+                    end: end,
+                    isFixed: event.isFixed,
+                    isBooked: event.isBooked,
+                    createdById: event.createdById
+                } as ITimeslot;
 
-                if (!exists) {
-                    weekInstances.push({
-                        title: event.title,
-                        start,
-                        end,
-                        isFixed: event.isFixed,
-                        isBooked: event.isBooked,
-                        createdById: event.createdById,
-                        // baseEventId: event.baseEventId
-                    } as ITimeslot);
-                }
+                // Filter out existing overlaps and adjust the times
+                const adjustedInstances = adjustForOverlaps(tempInstance, existingTimeslots);
+                weekInstances.push(...adjustedInstances);
             }
 
             currentDate.add(1, 'week'); // Move to the same day in the next week
@@ -51,6 +66,166 @@ function generateWeeklyInstances(events: ITimeslot[], startDate: moment.Moment, 
 
     return weekInstances;
 }
+
+// Helper function to adjust new instances based on overlaps
+function adjustForOverlaps(newInstance: ITimeslot, existingTimeslots: ITimeslot[]): ITimeslot[] {
+    let adjustedInstances = [newInstance];
+
+    for (let slot of existingTimeslots) {
+        const existingStart = slot.transitStart || slot.start;
+        const existingEnd = slot.transitEnd || slot.end;
+
+        adjustedInstances = adjustedInstances.reduce((acc: ITimeslot[], current) => {
+            if (current.end <= existingStart|| current.start >= existingEnd) {
+                acc.push(current);
+            } else {
+                // Adjust the current instance to remove the overlapping part
+                if (current.start < existingStart) {
+                    acc.push({
+                        ...current, end: existingStart} as ITimeslot);
+                }
+                if (current.end > existingEnd) {
+                    acc.push({...current, start: existingEnd} as ITimeslot);
+                }
+            }
+            return acc;
+        }, []);
+    }
+
+    return adjustedInstances;
+}
+
+// async function generateWeeklyInstances(events: ITimeslot[], userId: any, startDate: moment.Moment, endDate: moment.Moment): Promise<ITimeslot[]> {
+//     let existingTimeslots: any[] = [];
+//     try {
+//         // Asynchronously get existing timeslots
+//         existingTimeslots = await getEventsDirect(userId);
+//     } catch (error) {
+//         console.error("Error fetching existing timeslots:", error);
+//         existingTimeslots = []; // Continue with empty array if error
+//     }
+//
+//     const weekInstances: ITimeslot[] = [];
+//     events.forEach(event => {
+//         const dayOfWeek = moment(event.start).day();
+//         let currentDate = moment(startDate).day(dayOfWeek);
+//
+//         while (currentDate.isBefore(endDate)) {
+//             if (currentDate.isBetween(startDate, endDate, 'day', '[]')) {
+//                 // Use regular times for weekly event
+//                 const start = moment(currentDate).set({
+//                     hour: moment(event.start).hours(),
+//                     minute: moment(event.start).minutes(),
+//                     second: moment(event.start).seconds()
+//                 }).toDate();
+//
+//                 const end = moment(currentDate).set({
+//                     hour: moment(event.end).hours(),
+//                     minute: moment(event.end).minutes(),
+//                     second: moment(event.end).seconds()
+//                 }).toDate();
+//
+//                 let tempInstances = [{
+//                     ...event,
+//                     start,
+//                     end
+//                 }];
+//
+//                 // Check for overlaps and adjust timeslots using transit times if available
+//                 existingTimeslots.forEach(e => {
+//                     // Use transit times if available to determine overlap
+//                     const existingStart = e.transitStart || e.start;
+//                     const existingEnd = e.transitEnd || e.end;
+//
+//                     tempInstances = tempInstances.reduce<ITimeslot[]>((acc, current) => {
+//                         if (current.end <= existingStart || current.start >= existingEnd) {
+//                             // No overlap
+//                             acc.push(current);
+//                         } else {
+//                             // Split the timeslot around the existing timeslot
+//                             if (current.start < existingStart) {
+//                                 acc.push({
+//                                     ...current,
+//                                     end: existingStart
+//                                 });
+//                             }
+//                             if (current.end > existingEnd) {
+//                                 acc.push({
+//                                     ...current,
+//                                     start: existingEnd
+//                                 });
+//                             }
+//                         }
+//                         return acc;
+//                     }, []);
+//                 });
+//
+//                 weekInstances.push(...tempInstances);
+//             }
+//
+//             currentDate.add(1, 'week'); // Move to the next week
+//         }
+//     });
+//
+//     return weekInstances;
+// }
+
+// * Adjusts available timeslots based on overlaps with booked timeslots.
+// const adjustAvailableSlots = (availableSlots: ITimeslot[], bookedSlots: ITimeslot[]) => {
+//     let adjustedSlots = [];
+//
+//     // Sort both arrays by start time for proper comparison
+//     availableSlots.sort((a, b) => a.start.getTime() - b.start.getTime());
+//     bookedSlots.sort((a, b) => a.start.getTime() - b.start.getTime());
+//
+//     let ai = 0, bi = 0;
+//
+//     while (ai < availableSlots.length) {
+//         let availSlot = availableSlots[ai];
+//         let isAdjusted = false;
+//
+//         while (bi < bookedSlots.length && bookedSlots[bi].end <= availSlot.start) {
+//             bi++; // Move past booked slots that end before the available slot starts
+//         }
+//
+//         while (bi < bookedSlots.length && bookedSlots[bi].start < availSlot.end) {
+//             const bookedSlot = bookedSlots[bi];
+//
+//             if (bookedSlot.start <= availSlot.start && bookedSlot.end >= availSlot.end) {
+//                 // Booked slot completely covers available slot, no part of this slot is available
+//                 isAdjusted = true;
+//                 break;
+//             } else if (bookedSlot.start > availSlot.start && bookedSlot.end < availSlot.end) {
+//                 // Booked slot splits available slot into two
+//                 adjustedSlots.push({
+//                     ...availSlot,
+//                     end: new Date(bookedSlot.start)
+//                 });
+//                 availSlot = {
+//                     ...availSlot,
+//                     start: new Date(bookedSlot.end)
+//                 };
+//                 isAdjusted = true;
+//             } else if (bookedSlot.start <= availSlot.start && bookedSlot.end < availSlot.end) {
+//                 // Booked slot cuts off the start of the available slot
+//                 availSlot.start = new Date(bookedSlot.end);
+//                 isAdjusted = true;
+//             } else if (bookedSlot.start > availSlot.start && bookedSlot.end >= availSlot.end) {
+//                 // Booked slot cuts off the end of the available slot
+//                 availSlot.end = new Date(bookedSlot.start);
+//                 isAdjusted = true;
+//             }
+//             bi++;
+//         }
+//
+//         if (!isAdjusted) {
+//             adjustedSlots.push(availSlot);
+//         }
+//         ai++;
+//     }
+//
+//     return adjustedSlots;
+// };
 
 // New Endpoint to Extend Fixed Slots (updated code)
 export const extendFixedSlots: RequestHandler = async (req, res, next) => {
@@ -68,8 +243,17 @@ export const extendFixedSlots: RequestHandler = async (req, res, next) => {
             end: {$lte: endDate.toDate()},
         });
 
+        // first get existing timeslots
+        let existingTimeslots: ITimeslot[] = [];
+        try {
+            // Asynchronously get existing timeslots
+            existingTimeslots = await getEventsDirect(userId);
+        } catch (error) {
+            console.error("Error fetching existing timeslots:", error);
+            existingTimeslots = []; // Continue with empty array if error
+        }
         // Generate new instances
-        const futureInstances = generateWeeklyInstances(fixedEvents, moment(start), moment(end));
+        const futureInstances = generateWeeklyInstances(fixedEvents, existingTimeslots, moment(start), moment(end));
 
         // Insert future instances into the database
         await Timeslot.insertMany(futureInstances.map(instance => ({
@@ -107,6 +291,7 @@ export const deleteTimeslot: RequestHandler = async (req, res, next) => {
         const deletedOne = await Timeslot.deleteOne({start: startTime, end: endTime, createdById: userId});
 
         console.log(event, deletedOne)
+        console.log("delete all", deleteAllFuture)
 
         // If the event is fixed, delete its future instances
         if (isFixed && deleteAllFuture) {
@@ -150,7 +335,7 @@ export const deleteTimeslot: RequestHandler = async (req, res, next) => {
     }
 };
 
-// PATCH Timeslot Endpoint
+// PATCH Timeslot Endpoint, not used
 export const updateTimeslot: RequestHandler = async (req, res, next) => {
     try {
         const userId = (req as any).user.userId;
@@ -221,7 +406,8 @@ export const updateTimeslot: RequestHandler = async (req, res, next) => {
 export const getEvents: RequestHandler = async (req, res, next) => {
     const userId = (req as any).user.userId; // Assuming userId is available in the request (e.g., from authentication middleware)
     try {
-        const timeslots = await Timeslot.find({createdById: userId});
+        //
+        const timeslots = await getEventsDirect(userId)
         res.json(timeslots);
     } catch (error: unknown) {
         const err = error as Error;
@@ -229,6 +415,16 @@ export const getEvents: RequestHandler = async (req, res, next) => {
     }
 };
 
+// Define a function to fetch timeslots
+async function getEventsDirect(userId: any) {
+    try {
+        const timeslots = Timeslot.find({createdById: userId});
+        return timeslots;
+    } catch (error) {
+        console.error("Error fetching timeslots for user:", error);
+        throw error; // Rethrow to handle it in the calling function
+    }
+}
 
 // merge overlapping timeslots
 // const mergeAndCleanTimeslots = async (providerId: string) => {
@@ -363,8 +559,16 @@ export const saveEvents: RequestHandler = async (req, res, next) => {
         const fixedEvents = events.filter((event: ITimeslot) => event.isFixed);
         let futureInstances: ITimeslot[] = [];
         if (fixedEvents.length > 0) {
+            let existingTimeslots: ITimeslot[] = [];
+            try {
+                // Asynchronously get existing timeslots
+                existingTimeslots = await getEventsDirect(userId);
+            } catch (error) {
+                console.error("Error fetching existing timeslots:", error);
+                existingTimeslots = []; // Continue with empty array if error
+            }
             const futureEndDate = moment(fixedEvents[0].end).endOf('week').add(6, 'months');
-            futureInstances = generateWeeklyInstances(fixedEvents, moment(fixedEvents[0].start).add(1, 'week'), futureEndDate);
+            futureInstances = generateWeeklyInstances(fixedEvents, existingTimeslots, moment(fixedEvents[0].start).add(1, 'week'), futureEndDate);
         }
 
         // Insert new events
@@ -433,7 +637,15 @@ export const turnExistingEventIntoFixed: RequestHandler = async (req, res, next)
         let futureInstances: ITimeslot[] = [];
         if (eventToUpdate.isFixed) {
             const futureEndDate = moment(eventToUpdate.end).endOf('week').add(6, 'months');
-            futureInstances = generateWeeklyInstances([eventToUpdate], moment(eventToUpdate.start).add(1, 'week'), futureEndDate);
+            let existingTimeslots: ITimeslot[] = [];
+            try {
+                // Asynchronously get existing timeslots
+                existingTimeslots = await getEventsDirect(userId);
+            } catch (error) {
+                console.error("Error fetching existing timeslots:", error);
+                existingTimeslots = []; // Continue with empty array if error
+            }
+            futureInstances = generateWeeklyInstances([eventToUpdate], existingTimeslots, moment(eventToUpdate.start).add(1, 'week'), futureEndDate);
         }
 
         // Insert new events
@@ -533,7 +745,18 @@ export const checkAvailability: RequestHandler = async (req, res) => {
 export const bookTimeslot: RequestHandler = async (req, res, next) => {
     // const userId = (req as any).user.userId; // consumer id
     console.log(req.body)
-    const {start, end, title, isFixed, isBooked, createdById, requestId, transitStart, transitEnd, isUpdate} = req.body;
+    const {
+        start,
+        end,
+        title,
+        isFixed,
+        isBooked,
+        createdById,
+        requestId,
+        transitStart,
+        transitEnd,
+        isUpdate
+    } = req.body;
     const session = await mongoose.startSession();
     try {
         session.startTransaction();
@@ -562,7 +785,8 @@ export const bookTimeslot: RequestHandler = async (req, res, next) => {
         console.log("merged", merged)
 
         for (const slot of merged) {
-            if (slot.start <= new Date(start) && slot.end >= new Date(end)) {
+            // if we find one unbooked slot that covers the booking duration, it is good
+            if (slot.start <= new Date(transitStart) && slot.end >= new Date(transitEnd)) {
                 console.log("good!")
                 available = true;
                 break;
@@ -599,6 +823,7 @@ export const bookTimeslot: RequestHandler = async (req, res, next) => {
         // Adjust timeslots based on the booked time
         for (const slot of overlappingSlots) {
             if (new Date(slot.start) < new Date(transitStart) && new Date(slot.end) > new Date(transitEnd)) {
+                console.log("need to split!")
                 // Split the timeslot into two parts before and after the booked slot
                 await Timeslot.create([{
                     start: slot.start,
@@ -659,45 +884,99 @@ export const bookTimeslot: RequestHandler = async (req, res, next) => {
 };
 
 // Cancel Timeslot Endpoint
-
 export const cancelTimeslot: RequestHandler = async (req, res) => {
     const {timeslotId} = req.params;
 
     try {
-        // Fetch the timeslot from the database
-        const timeslot = await Timeslot.findById(timeslotId);
-
-        if (!timeslot) {
-            return res.status(404).json({message: "Timeslot not found"});
-        }
-
-        // Update the timeslot's start and end times
-        if (timeslot.transitStart) {
-            timeslot.start = timeslot.transitStart;
-        }
-        if (timeslot.transitEnd) {
-            timeslot.end = timeslot.transitEnd;
-        }
-
-        // Remove the transitStart and transitEnd attributes
-        timeslot.transitStart = undefined;
-        timeslot.transitEnd = undefined;
-
-
-        // Set isBooked to false
-        timeslot.isBooked = false;
-        timeslot.requestId = undefined;
-        timeslot.jobId = undefined;
-
-        // Save the updated timeslot back to the database
-        const updatedTimeslot = await timeslot.save();
-
+        const updatedTimeslot = await cancelTimeslotDirect(timeslotId);
         res.status(200).json({message: "Timeslot cancelled successfully", updatedTimeslot});
     } catch (error: any) {
         console.error("Error cancelling timeslot:", error);
         res.status(500).json({message: "Failed to cancel timeslot", error: error.message});
     }
 };
+
+export const cancelTimeslotWithRequestId: RequestHandler = async (req, res) => {
+    const {requestId} = req.params;
+
+    try {
+        // Await the finding of the timeslot by requestId
+        const foundTimeslot = await findTimeslotByRequestId(requestId);
+
+        // If no timeslot is found, just proceed without cancellation
+        if (!foundTimeslot) {
+            console.log(`No timeslot found with requestId: ${requestId}, proceeding without cancellation.`);
+            return res.status(200).json({message: "No timeslot to cancel, proceeding..."});
+        }
+        // console.log(foundTimeslot._id)
+
+        // @ts-ignore
+        const updatedTimeslot = await cancelTimeslotDirect(foundTimeslot._id);
+        res.status(200).json({message: "Timeslot cancelled successfully", updatedTimeslot});
+    } catch (error: any) {
+        console.error("Error cancelling timeslot:", error);
+        res.status(500).json({message: "Failed to cancel timeslot", error: error.message});
+    }
+};
+
+// export const cancelTimeslotByRequestId: RequestHandler = async (req, res) => {
+//     const {requestId} = req.params;
+//
+//     try {
+//         const timeslotId = await Timeslot.findOne({request:requestId})
+//         const updatedTimeslot = await cancelTimeslotDirect(timeslotId);
+//         res.status(200).json({message: "Timeslot cancelled successfully", updatedTimeslot});
+//     } catch (error: any) {
+//         console.error("Error cancelling timeslot:", error);
+//         res.status(500).json({message: "Failed to cancel timeslot", error: error.message});
+//     }
+// };
+
+export async function cancelTimeslotDirect(timeslotId: String | Types.ObjectId) {
+    try {
+        console.log(timeslotId)
+        // const timeslot = await Timeslot.findById(timeslotId);
+        // if (!timeslot) {
+        //     throw new Error("Timeslot not found");
+        // }
+        //
+        // if (timeslot.transitStart) {
+        //     timeslot.start = timeslot.transitStart;
+        // }
+        // if (timeslot.transitEnd) {
+        //     timeslot.end = timeslot.transitEnd;
+        // }
+        //
+        // timeslot.transitStart = undefined;
+        // timeslot.transitEnd = undefined;
+        // timeslot.isBooked = false;
+        // timeslot.requestId = undefined;
+        // timeslot.jobId = undefined;
+        //
+        // const updatedTimeslot = await timeslot.save();
+        // return updatedTimeslot; // Return the updated timeslot for further processing or response
+    } catch (error) {
+        console.error("Failed to cancel timeslot:", error);
+        throw error; // Rethrow the error to handle it in the caller function
+    }
+}
+
+
+// find a timeslot by requestId
+export async function findTimeslotByRequestId(requestId: String | Types.ObjectId): Promise<ITimeslot | null> {
+    try {
+        const timeslot = await Timeslot.findOne({requestId: requestId});
+        if (!timeslot) {
+            console.log(`No timeslot found for requestId: ${requestId}`);
+            return null;
+        }
+        return timeslot;
+    } catch (error) {
+        // Log unexpected errors and return null instead of throwing
+        console.error("Database error in findTimeslotByRequestId:", error);
+        return null; // Or handle differently if critical
+    }
+}
 
 // export const cancelTimeslot: RequestHandler = async (req, res) => {
 //     const timeslotId = req.params;
