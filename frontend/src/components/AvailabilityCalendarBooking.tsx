@@ -68,14 +68,18 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
     const providerId = mode === 'change' ? providerIdInput : bookingDetails.provider?._id;
     const requestId = mode === 'change' ? requestIdInput : null;
 
-    const { alert, triggerAlert, closeAlert } = useAlert();
+    const { alert, triggerAlert, closeAlert } = useAlert(3000);
     const [availability, setAvailability] = useState<Timeslot[]>([]);
     const [selectedTimeSlot, setSelectedTimeSlot] = useState<Timeslot | null>(null);
     // const [selectedTimeSlotWithTransit, setSelectedTimeSlotWithTransit] = useState<TimeSlot | null>(null);
 
     const [deleteDialog, setDeleteDialog] = useState(false);
-    const [clashDialogOpen, setClashDialogOpen] = useState(false);
+    const [clashDialogOpen, setClashDialogOpen] = useState({ open: false, message: '' });
     const { token } = useAuth();
+
+    const [currentDate, setCurrentDate] = useState<Date|undefined>(undefined);
+    const [nextAvailable, setNextAvailable] = useState<Date|undefined>(undefined);
+
 
     const navigate = useNavigate();
 
@@ -83,6 +87,20 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
     // const [previewSlot, setPreviewSlot] = useState<Date | null>(null);
     // const [previewStart, setPreviewStart] = useState<Date | null>(null);
     // const [previewEnd, setPreviewEnd] = useState<Date| null>(null);
+
+
+    const findNextAvailableSlot = (events: any[]) => {
+        const now = new Date();
+        const futureEvents = events.filter(event => new Date(event.start) > now);
+        // Explicitly parse dates for sorting
+        futureEvents.sort((a, b) => {
+            const dateA = new Date(a.start).getTime();
+            const dateB = new Date(b.start).getTime();
+            return dateA - dateB;
+        });
+        return futureEvents.length > 0 ? futureEvents[0].start : now;
+    };
+
 
 
     const fetchAndSetAvailability = (options: {start: any, end: any} | undefined) => {
@@ -132,6 +150,9 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
             //         isBooked: event.isBooked,
             //     }));
             setAvailability(events);
+
+            const nextDate = findNextAvailableSlot(events);
+            if (nextDate) setNextAvailable(new Date(nextDate));
         }).catch(error => {
             console.error("Error fetching timeslots:", error);
         });
@@ -141,6 +162,14 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
     useEffect(() => {
         fetchAndSetAvailability(undefined);
     }, [token, providerId, defaultTransitTime]);
+
+
+    // This effect runs only once when the component mounts
+    useEffect(() => {
+        if (!currentDate && nextAvailable) { // If currentDate is not set yet
+            setCurrentDate(nextAvailable); // Initially set to nextAvailable
+        }
+    }, [nextAvailable]);
 
 
     // const providerId = "6670176384da135b691a27bd"
@@ -221,9 +250,17 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
     // };
 
     const handleSelect = ({ start, end }: SlotInfo) => {
+        const now = new Date();
 
         const startTime = new Date(start);
         let endTime = new Date(end);
+
+        if (startTime < now) {
+            setClashDialogOpen({open: true, message:"Cannot book a time in the past, please select another time."})
+            resetSelection()
+            return;
+        }
+
 
         // Calculate the difference in minutes
         const durationInMinutes = (endTime.getTime() - startTime.getTime()) / (1000 * 60);
@@ -283,7 +320,8 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
             console.log("new time slot for booking:", newTimeSlot)
             setSelectedTimeSlot(newTimeSlot);
         } else {
-            setClashDialogOpen(true);
+            setClashDialogOpen({open: true, message: "Provider not available! This could be due to the need to adjust to minimum slot duration\n" +
+                    `(${defaultSlotDuration} minutes)!`});
         }
 
         // const transitTimeSlot = {
@@ -411,7 +449,7 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
     };
 
     const handleClashDialogClose = () => {
-        setClashDialogOpen(false);
+        setClashDialogOpen({open: false, message: ""});
     };
 
     // Optional: Reset selection on clash dialog close or other conditions
@@ -560,6 +598,8 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
         triggerAlert("An error occurred!", "error");
     };
 
+    const scrollToTime = new Date();
+    scrollToTime.setHours(9, 0, 0, 0);
 
     return (
         <div>
@@ -569,12 +609,15 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
                 step={15}
                 localizer={localizer}
                 // events={availability}
+                scrollToTime={scrollToTime} // Calendar will scroll to 9:00 AM on load
+                date={currentDate} //go to next availability
+                onNavigate={date => setCurrentDate(date)} // Update internal state when manually navigating
 
                 backgroundEvents={availability}
                 events={validEvents}
                 startAccessor="start"
                 endAccessor="end"
-                style={{height: 500}}
+                style={{height:500}}
                 selectable
                 onSelectSlot={handleSelect}
                 onSelectEvent={handleSelectTimeSlot}
@@ -601,11 +644,10 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
                 )}
             </div>
 
-            <Dialog open={clashDialogOpen} onClose={handleClashDialogClose}>
-                <DialogTitle>TimeSlot Clash</DialogTitle>
+            <Dialog open={clashDialogOpen.open} onClose={handleClashDialogClose}>
+                <DialogTitle>Timeslot Unavailable</DialogTitle>
                 <DialogContent>
-                    Provider not available! This could be due to the need to adjust to minimum slot duration
-                    ({defaultSlotDuration} minutes)
+                    {clashDialogOpen.message}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClashDialogClose}>OK</Button>
