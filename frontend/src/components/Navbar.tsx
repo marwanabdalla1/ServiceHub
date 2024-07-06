@@ -108,6 +108,8 @@ const Navbar: React.FC<NavbarProps> = ({toggleDrawer, onChange, onSearch, search
           <div className="relative">
             <button className="text-customBlack font-semibold text-sm">EXPLORE</button>
             {/* Dropdown content */}
+            {/*  todo: handle this!!!*/}
+              {/*worst case scenario: just link to /filter page*/}
             <div className="absolute hidden bg-white text-black rounded shadow-md mt-2">
               <a href="/option1" className="block px-4 py-2 hover:bg-gray-200">Option 1</a>
               <a href="/option2" className="block px-4 py-2 hover:bg-gray-200">Option 2</a>

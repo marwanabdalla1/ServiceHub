@@ -16,6 +16,9 @@ const HomePage = () => {
         }
     }, [navigate]);
 
+    const handleCategoryClick = (category: string) => {
+        navigate('/filter', {state: {searchTerm: category}});
+    };
 
     return (
         <div className='flex flex-col items-center justify-center mt-4'>
@@ -36,54 +39,73 @@ const HomePage = () => {
             <div className="w-1/2 text-center mt-12">
                 <h2 className="text-3xl font-bold mb-6">Service Categories</h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    <div className="flex flex-col items-center">
-                        <div className="bg-blue-200 p-4 rounded-full mb-2">
-                            <i className="fas fa-bicycle text-2xl"></i>
+                    {[
+                        {icon: 'fas fa-bicycle', label: 'Bike Repair'},
+                        {icon: 'fas fa-truck-moving', label: 'Moving'},
+                        {icon: 'fas fa-baby', label: 'Babysitting'},
+                        {icon: 'fas fa-chalkboard-teacher', label: 'Tutoring'},
+                        {icon: 'fas fa-paw', label: 'Petsitting'},
+                        {icon: 'fas fa-seedling', label: 'Landscaping'},
+                        {icon: 'fas fa-tools', label: 'Remodeling'},
+                        {icon: 'fas fa-broom', label: 'Cleaning'}
+                    ].map(service => (
+                        <div key={service.label} className="flex flex-col items-center cursor-pointer"
+                             onClick={() => handleCategoryClick(service.label)}>
+                            <div className="bg-blue-200 p-4 rounded-full mb-2">
+                                <i className={`${service.icon} text-2xl`}></i>
+                            </div>
+                            <span>{service.label}</span>
                         </div>
-                        <span>Bike Repair</span>
-                    </div>
-                    <div className="flex flex-col items-center">
-                        <div className="bg-blue-200 p-4 rounded-full mb-2">
-                            <i className="fas fa-truck-moving text-2xl"></i>
-                        </div>
-                        <span>Moving</span>
-                    </div>
-                    <div className="flex flex-col items-center">
-                        <div className="bg-blue-200 p-4 rounded-full mb-2">
-                            <i className="fas fa-baby text-2xl"></i>
-                        </div>
-                        <span>Babysitting</span>
-                    </div>
-                    <div className="flex flex-col items-center">
-                        <div className="bg-blue-200 p-4 rounded-full mb-2">
-                            <i className="fas fa-chalkboard-teacher text-2xl"></i>
-                        </div>
-                        <span>Tutoring</span>
-                    </div>
-                    <div className="flex flex-col items-center">
-                        <div className="bg-blue-200 p-4 rounded-full mb-2">
-                            <i className="fas fa-paw text-2xl"></i>
-                        </div>
-                        <span>Petsitting</span>
-                    </div>
-                    <div className="flex flex-col items-center">
-                        <div className="bg-blue-200 p-4 rounded-full mb-2">
-                            <i className="fas fa-seedling text-2xl"></i>
-                        </div>
-                        <span>Landscaping</span>
-                    </div>
-                    <div className="flex flex-col items-center">
-                        <div className="bg-blue-200 p-4 rounded-full mb-2">
-                            <i className="fas fa-tools text-2xl"></i>
-                        </div>
-                        <span>Remodeling</span>
-                    </div>
-                    <div className="flex flex-col items-center">
-                        <div className="bg-blue-200 p-4 rounded-full mb-2">
-                            <i className="fas fa-broom text-2xl"></i>
-                        </div>
-                        <span>Cleaning</span>
-                    </div>
+                    ))}
+
+                    {/*<div className="flex flex-col items-center">*/}
+                    {/*    <div className="bg-blue-200 p-4 rounded-full mb-2">*/}
+                    {/*        <i className="fas fa-bicycle text-2xl"></i>*/}
+                    {/*    </div>*/}
+                    {/*    <span>Bike Repair</span>*/}
+                    {/*</div>*/}
+                    {/*<div className="flex flex-col items-center">*/}
+                    {/*    <div className="bg-blue-200 p-4 rounded-full mb-2">*/}
+                    {/*        <i className="fas fa-truck-moving text-2xl"></i>*/}
+                    {/*    </div>*/}
+                    {/*    <span>Moving</span>*/}
+                    {/*</div>*/}
+                    {/*<div className="flex flex-col items-center">*/}
+                    {/*    <div className="bg-blue-200 p-4 rounded-full mb-2">*/}
+                    {/*        <i className="fas fa-baby text-2xl"></i>*/}
+                    {/*    </div>*/}
+                    {/*    <span>Babysitting</span>*/}
+                    {/*</div>*/}
+                    {/*<div className="flex flex-col items-center">*/}
+                    {/*    <div className="bg-blue-200 p-4 rounded-full mb-2">*/}
+                    {/*        <i className="fas fa-chalkboard-teacher text-2xl"></i>*/}
+                    {/*    </div>*/}
+                    {/*    <span>Tutoring</span>*/}
+                    {/*</div>*/}
+                    {/*<div className="flex flex-col items-center">*/}
+                    {/*    <div className="bg-blue-200 p-4 rounded-full mb-2">*/}
+                    {/*        <i className="fas fa-paw text-2xl"></i>*/}
+                    {/*    </div>*/}
+                    {/*    <span>Petsitting</span>*/}
+                    {/*</div>*/}
+                    {/*<div className="flex flex-col items-center">*/}
+                    {/*    <div className="bg-blue-200 p-4 rounded-full mb-2">*/}
+                    {/*        <i className="fas fa-seedling text-2xl"></i>*/}
+                    {/*    </div>*/}
+                    {/*    <span>Landscaping</span>*/}
+                    {/*</div>*/}
+                    {/*<div className="flex flex-col items-center">*/}
+                    {/*    <div className="bg-blue-200 p-4 rounded-full mb-2">*/}
+                    {/*        <i className="fas fa-tools text-2xl"></i>*/}
+                    {/*    </div>*/}
+                    {/*    <span>Remodeling</span>*/}
+                    {/*</div>*/}
+                    {/*<div className="flex flex-col items-center">*/}
+                    {/*    <div className="bg-blue-200 p-4 rounded-full mb-2">*/}
+                    {/*        <i className="fas fa-broom text-2xl"></i>*/}
+                    {/*    </div>*/}
+                    {/*    <span>Cleaning</span>*/}
+                    {/*</div>*/}
                 </div>
             </div>
         </div>

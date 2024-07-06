@@ -35,14 +35,16 @@ export enum RequestStatus {
     pending, // 1
     cancelled, // 2
     declined, // 3
+    requestorActionNeeded ,
+
 }
 
 export enum ServiceType {
     bikeRepair = "Bike Repair", // 0
     houseCleaning = "House Cleaning", // 1
-    babySitting = "Baby Sitting", // 2
+    babysitting = "Babysitting", // 2
     tutoring = "Tutoring", // 3
-    petSitting = "Pet Sitting", // 4
+    petsitting = "Petsitting", // 4
     landscapingServices = "Landscaping Services", // 5
     homeRemodeling = "Home Remodeling", // 6
     movingServices = "Moving Services", // 7
