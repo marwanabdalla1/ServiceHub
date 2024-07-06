@@ -18,6 +18,8 @@ import {RequestStatus} from "../../models/enums";
 import {useAuth} from "../../contexts/AuthContext";
 import {Timeslot} from "../../models/Timeslot";
 import { bookTimeSlot, BookingError } from '../../services/timeslotService';
+import useAlert from "../../hooks/useAlert";
+import AlertCustomized from "../../components/AlertCustomized";
 
 
 
@@ -37,7 +39,7 @@ function ReviewAndConfirm({onComplete, onBack, bookingDetails}: ReviewAndConfirm
     const [alertSeverity, setAlertSeverity] = useState<AlertColor>('success');
     const [showAlert, setShowAlert] = useState(false);
     const [countdown, setCountdown] = useState(5); // Countdown timer in seconds
-
+    const {triggerAlert, alert, closeAlert} = useAlert(3000);
 
     const {token} = useAuth();
     const [requestId, setRequestId] = useState('');
@@ -65,19 +67,7 @@ function ReviewAndConfirm({onComplete, onBack, bookingDetails}: ReviewAndConfirm
         }
         return () => clearInterval(timer);
     }, [showAlert, countdown]);
-    // const bookTimeSlot = (timeSlot: any) => {
-    //     axios.post('/api/timeslots/book', timeSlot, {
-    //         headers: {
-    //             'Authorization': `Bearer ${token}`
-    //         }
-    //     }).then(response => {
-    //         // Update local state with new timeslots after booking
-    //         console.log("timeslot booked successfully", response.data)
-    //         // fetchAvailability();
-    //     }).catch(error => {
-    //         console.error("Error booking timeslot:", error);
-    //     });
-    // };
+
 
 
     const checkTimeslotAvailability = async (start: Date, end: Date, createdById: string) => {
@@ -125,28 +115,10 @@ function ReviewAndConfirm({onComplete, onBack, bookingDetails}: ReviewAndConfirm
     };
 
 
-    // const bookTimeSlot = (timeSlot: any): Promise<any> => {
-    //     return new Promise((resolve, reject) => {
-    //         axios.post('/api/timeslots/book', timeSlot, {
-    //             headers: {
-    //                 'Authorization': `Bearer ${token}`
-    //             }
-    //         })
-    //             .then(response => {
-    //                 console.log("timeslot booked successfully", response.data);
-    //                 resolve(response.data);  // Resolve the promise with the response data
-    //             })
-    //             .catch(error => {
-    //                 console.error("Error booking timeslot:", error);
-    //                 reject(error);  // Reject the promise if there's an error
-    //             });
-    //     });
-    // };
 
     const handleConfirmBooking = async () => {
 
         const apiEndpoint = '/api/requests'
-
 
         const requestData = {
             requestStatus: RequestStatus.pending, // Set default or transformed values
@@ -165,6 +137,12 @@ function ReviewAndConfirm({onComplete, onBack, bookingDetails}: ReviewAndConfirm
             // rating:  0, // Set default if not provided //no rating for the request, only for jobs
             profileImageUrl: "URL placeholder "
         };
+
+        if (bookingDetails.provider?._id === bookingDetails.requestedBy?._id) {
+            // Trigger the error dialog
+            triggerAlert("Error", "You cannot book from your own service! \n Redirecting back to homepage...", "error", 5000, "dialog", "center", "/");
+            return;
+        }
 
         console.log((bookingDetails))
         console.log(requestData)
@@ -245,32 +223,6 @@ function ReviewAndConfirm({onComplete, onBack, bookingDetails}: ReviewAndConfirm
         //     navigate(`/offerings/${bookingDetails.serviceOffering?._id}`);
         // }
 
-
-        // example from the signup page
-        // const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-        //         event.preventDefault();
-        //         const data = new FormData(event.currentTarget);
-        //
-        //         // Prepare the user data
-        //         const account = {
-        //             firstName: data.get('firstName'),
-        //             lastName: data.get('lastName'),
-        //             email: data.get('email'),
-        //             password: data.get('password'),
-        //         };
-        //
-        //         try {
-        //             // Make a POST request to the /signup endpoint
-        //             const response = await axios.post('/api/auth/signup', account);
-        //             // Log the status and status text of the response
-        //             console.log(`Status: ${response.status}`);
-        //             console.log(`Status Text: ${response.statusText}`);
-        //
-        //             console.log(response.data);
-        //         } catch (error) {
-        //             // Handle the error here. For example, you might display an error message to the user
-        //             console.error('Error creating user:', error);
-        //         }
     };
 
     // Handle booking confirmation logic
@@ -296,6 +248,12 @@ function ReviewAndConfirm({onComplete, onBack, bookingDetails}: ReviewAndConfirm
 
     return (
         <Container>
+            <div>
+                {/*<button onClick={handleAction}>Do Something</button>*/}
+                <AlertCustomized alert={alert} closeAlert={closeAlert}/>
+            </div>
+
+            {/*todo: modify this to use the component*/}
             {showAlert && (
                 <Box sx={{position: 'relative', mb: 2, maxWidth: '500px', margin: 'auto'}}>
                     <LinearProgress variant="determinate" value={(countdown / 5) * 100}

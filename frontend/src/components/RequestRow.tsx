@@ -18,9 +18,8 @@ const RequestRow: React.FC<RequestRowProps> = ({ request, onViewDetails }) => {
     return (
     <TableRow>
       <TableCell>{request.serviceType}</TableCell>
-      <TableCell>{RequestStatus[request.requestStatus as keyof typeof RequestStatus]}</TableCell>
-        {/*todo: no such thing as appointmentstarttime anymore*/}
-        <TableCell>{formatDateTime(request.appointmentStartTime)}</TableCell>
+      <TableCell>{request.requestStatus}</TableCell>
+        <TableCell>{formatDateTime(request.timeslot?.start)}</TableCell>
       <TableCell>
         <BlackButton text="View" onClick={() => onViewDetails(request)}/>
       </TableCell>
