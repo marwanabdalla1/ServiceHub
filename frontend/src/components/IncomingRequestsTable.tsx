@@ -22,6 +22,7 @@ import {useEffect} from "react";
 import {useAuth} from "../contexts/AuthContext";
 import axios from "axios";
 import {formatDateTime} from '../utils/dateUtils';
+import {useNavigate} from "react-router-dom";
 
 // todo: replace ALL appointmentstarttime/endtime
 
@@ -33,6 +34,7 @@ export default function IncomingRequestTable() {
     const [comment, setComment] = useState('');
     const {token, account} = useAuth();
     const [timeChangePopUp, setTimeChangePopUp] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         console.log(token)
@@ -351,7 +353,7 @@ export default function IncomingRequestTable() {
         } catch (error) {
             console.error('Error cancelling Request:', error);
         }
-        // cancel the existing timeslot
+        navigate("/select-availability")
         setTimeChangePopUp(false);
     };
 
@@ -421,7 +423,7 @@ export default function IncomingRequestTable() {
                         Please update your availabilities accordingly.
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={handleTimeChange}>Notify Requester</Button>
+                        <Button onClick={handleTimeChange}>Notify Requester and Update My Availability</Button>
                     </DialogActions>
                 </Dialog>
                 {showMediaCard && selectedRequest && (
