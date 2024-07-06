@@ -250,7 +250,8 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration }: ServiceSched
 
 
 
-                setFetchedEvents(fetchedEvents.filter(a => a.start.getTime() !== selectedTimeSlot.start.getTime() && a.end.getTime() !== selectedTimeSlot.end.getTime()));
+                setFetchedEvents(fetchedEvents.filter(a =>
+                    !(a.start.getTime() === selectedTimeSlot.start.getTime() && a.end.getTime() === selectedTimeSlot.end.getTime())));
                 console.log(fetchedEvents.length)
                 setDeleteDialog(false);
                 setDeleteOptionDialogOpen(false);
@@ -606,6 +607,8 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration }: ServiceSched
 
 
 
+    const scrollToTime = new Date();
+    scrollToTime.setHours(9, 0, 0, 0);
 
     return (
         <div>
@@ -614,6 +617,7 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration }: ServiceSched
                 views={['week']}
                 step={15}
                 localizer={localizer}
+                scrollToTime={scrollToTime}
                 events={fetchedEvents/*[...fetchedEvents, ...availability]*/}
                 startAccessor={getStartAccessor}
                 endAccessor={getEndAccessor}

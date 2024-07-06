@@ -389,14 +389,11 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
 
         if (mode ==="change"){
             try {
-                // todo: make sure to cancel old timeslot first if not yet done
-
-
                 const timeslotResponse = await changeTimeSlot(selectedTimeSlot, token)
                 console.log("Timeslot updated", timeslotResponse);
 
                 triggerAlert("Timeslot updated successfully", "success");
-                // navigate(`/confirmation/${requestId}/timeslotChange`);
+                navigate(`/confirmation/${requestId}/timeslotChange`);
             } catch (error: any){
                 console.error('Error changing Timeslot booking:', error);
 

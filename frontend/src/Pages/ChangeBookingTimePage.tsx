@@ -5,6 +5,7 @@ import { useParams } from 'react-router-dom';
 import {BookingDetails} from "../contexts/BookingContext";
 import {useAuth} from "../contexts/AuthContext";
 import axios from "axios";
+import {RequestStatus} from "../models/enums";
 
 // interface ChangeBookingTimeslotProps {
 //     onNext: () => void;
@@ -45,7 +46,7 @@ const ChangeBookingTimePage: React.FC = () => {
 
     // get the booking details
     useEffect(() => {
-        console.log(requestId)
+        console.log("change booking:", requestId, token, account)
         const fetchRequest = async () => {
             try {
                 const response = await axios.get(`/api/requests/${requestId}`, {
@@ -54,11 +55,12 @@ const ChangeBookingTimePage: React.FC = () => {
                     },
                 });
 
-                // // make sure only the requestor can access this
-                // if (response.data.requestedBy._id !== account?._id) {
-                //     setError('Access Denied');
-                //     return;
-                // }
+                console.log(response.data.requestedBy._id, account?._id)
+                // make sure only the requestor can access this and only upon request
+                if (response.data.requestedBy !== account?._id || response.data.requestStatus.toString()!= RequestStatus.requestorActionNeeded.toString()) {
+                    setError('Access Denied...');
+                    return;
+                }
                 setRequest(response.data);
                 setProviderId(response.data.provider)
                 console.log("fetched request when changing booking time:", request)

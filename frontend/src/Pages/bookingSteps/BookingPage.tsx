@@ -60,7 +60,7 @@ const BookingPage = () => {
     };
 
     const previousStep = () => {
-        if (step > 1) setStep(step - 1); // Decrement step to go back
+        if (step > 1 && step!=2) setStep(step - 1); // Decrement step to go back
         else goToServiceOfferingProfile();
     };
 

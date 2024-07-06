@@ -1,7 +1,8 @@
 import React from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { Notification } from '../../models/Notification'; // Import Notification interface
-import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
+import { useNavigate } from 'react-router-dom';
+import {useAuth} from "../../contexts/AuthContext"; // Import useNavigate for navigation
 
 interface NotificationItemProps extends Notification {
   markAsRead: (_id: string) => void;
@@ -13,17 +14,20 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
   isViewed,
   updatedAt,
   markAsRead,
-  NotificationType,
+  notificationType,
   review,
-  job, request,
+  job, serviceRequest,
 }) => {
   const timeAgo = formatDistanceToNow(new Date(updatedAt), { addSuffix: true });
   const navigate = useNavigate(); // useNavigate hook to navigate
+  const {token, account} = useAuth();
+
 //TODO: Make sure every notification type has a corresponding URL
   const handleClick = () => {
+    console.log(_id, notificationType, serviceRequest, content)
     // Define the URL based on NotificationType
     let url = '/';
-    switch (NotificationType) {
+    switch (notificationType) {
       case 'New Review':
         url = `/customer_review/${review}`;
         break;
@@ -31,9 +35,14 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
         url = `/jobs/${job}`;
         break;
       // Add more cases here as needed
-      case 'Time Request Changed':
-        url = `/change-booking-time/${request}`;
+      case 'Timeslot Change Request':
+        url = `/change-booking-time/${serviceRequest}`;
         break;
+      case 'Time Request Changed':
+        url = `/change-booking-time/${serviceRequest}`;
+        break;
+      //declined/cancel requests: just go back to home page
+        // case '':
       default:
         url = '/';
     }

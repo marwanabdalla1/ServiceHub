@@ -76,13 +76,14 @@ function adjustForOverlaps(newInstance: ITimeslot, existingTimeslots: ITimeslot[
         const existingEnd = slot.transitEnd || slot.end;
 
         adjustedInstances = adjustedInstances.reduce((acc: ITimeslot[], current) => {
-            if (current.end <= existingStart|| current.start >= existingEnd) {
+            if (current.end <= existingStart || current.start >= existingEnd) {
                 acc.push(current);
             } else {
                 // Adjust the current instance to remove the overlapping part
                 if (current.start < existingStart) {
                     acc.push({
-                        ...current, end: existingStart} as ITimeslot);
+                        ...current, end: existingStart
+                    } as ITimeslot);
                 }
                 if (current.end > existingEnd) {
                     acc.push({...current, start: existingEnd} as ITimeslot);
@@ -822,8 +823,12 @@ export const bookTimeslot: RequestHandler = async (req, res, next) => {
 
         // Adjust timeslots based on the booked time
         for (const slot of overlappingSlots) {
-            if (new Date(slot.start) < new Date(transitStart) && new Date(slot.end) > new Date(transitEnd)) {
+            if (new Date(slot.start) === new Date(transitStart) && new Date(slot.end) === new Date(transitEnd)) {
+                // Case where the new slot exactly matches the existing one, remove the old slot
+                await Timeslot.findByIdAndDelete(slot._id, {session});
+            } else if (new Date(slot.start) < new Date(transitStart) && new Date(slot.end) > new Date(transitEnd)) {
                 console.log("need to split!")
+
                 // Split the timeslot into two parts before and after the booked slot
                 await Timeslot.create([{
                     start: slot.start,
@@ -842,6 +847,7 @@ export const bookTimeslot: RequestHandler = async (req, res, next) => {
                 }], {session});
                 // Remove the original slot
                 await Timeslot.findByIdAndDelete(slot._id, {session});
+
             } else {
                 // Adjust existing slot start or end
                 if (new Date(slot.end) > new Date(transitEnd)) {
@@ -896,28 +902,53 @@ export const cancelTimeslot: RequestHandler = async (req, res) => {
     }
 };
 
-export const cancelTimeslotWithRequestId: RequestHandler = async (req, res) => {
-    const {requestId} = req.params;
 
+// direct method
+export async function cancelTimeslotWithRequestId(requestId: string): Promise<{ success: boolean, message: string }> {
     try {
-        // Await the finding of the timeslot by requestId
         const foundTimeslot = await findTimeslotByRequestId(requestId);
-
-        // If no timeslot is found, just proceed without cancellation
         if (!foundTimeslot) {
             console.log(`No timeslot found with requestId: ${requestId}, proceeding without cancellation.`);
-            return res.status(200).json({message: "No timeslot to cancel, proceeding..."});
+            return {success: true, message: "No timeslot to cancel, proceeding..."};
         }
-        // console.log(foundTimeslot._id)
 
         // @ts-ignore
-        const updatedTimeslot = await cancelTimeslotDirect(foundTimeslot._id);
-        res.status(200).json({message: "Timeslot cancelled successfully", updatedTimeslot});
-    } catch (error: any) {
+        await cancelTimeslotDirect(foundTimeslot._id);
+        return {success: true, message: "Timeslot cancelled successfully"};
+    } catch (error) {
         console.error("Error cancelling timeslot:", error);
-        res.status(500).json({message: "Failed to cancel timeslot", error: error.message});
+        throw new Error("Failed to cancel timeslot");
     }
-};
+}
+
+// API endpoint
+// export const cancelTimeslotWithRequestId: RequestHandler = async (req, res, next) => {
+//     const {requestId} = req.params;
+//
+//     try {
+//         // Await the finding of the timeslot by requestId
+//         const foundTimeslot = await findTimeslotByRequestId(requestId);
+//
+//         // If no timeslot is found, just proceed without cancellation
+//         if (!foundTimeslot) {
+//             console.log(`No timeslot found with requestId: ${requestId}, proceeding without cancellation.`);
+//             // return res.status(200).json({message: "No timeslot to cancel, proceeding..."});
+//             next();
+//             return;
+//         }
+//         // console.log(foundTimeslot._id)
+//
+//         // @ts-ignore
+//         const updatedTimeslot = await cancelTimeslotDirect(foundTimeslot._id);
+//         console.log("updated timeslot")
+//         next();
+//         // res.status(200).json({message: "Timeslot cancelled successfully", updatedTimeslot});
+//     } catch (error: any) {
+//         console.error("Error cancelling timeslot:", error);
+//         next(error);
+//         // res.status(500).json({message: "Failed to cancel timeslot", error: error.message});
+//     }
+// };
 
 // export const cancelTimeslotByRequestId: RequestHandler = async (req, res) => {
 //     const {requestId} = req.params;
@@ -935,26 +966,27 @@ export const cancelTimeslotWithRequestId: RequestHandler = async (req, res) => {
 export async function cancelTimeslotDirect(timeslotId: String | Types.ObjectId) {
     try {
         console.log(timeslotId)
-        // const timeslot = await Timeslot.findById(timeslotId);
-        // if (!timeslot) {
-        //     throw new Error("Timeslot not found");
-        // }
-        //
-        // if (timeslot.transitStart) {
-        //     timeslot.start = timeslot.transitStart;
-        // }
-        // if (timeslot.transitEnd) {
-        //     timeslot.end = timeslot.transitEnd;
-        // }
-        //
-        // timeslot.transitStart = undefined;
-        // timeslot.transitEnd = undefined;
-        // timeslot.isBooked = false;
-        // timeslot.requestId = undefined;
-        // timeslot.jobId = undefined;
-        //
-        // const updatedTimeslot = await timeslot.save();
-        // return updatedTimeslot; // Return the updated timeslot for further processing or response
+        const timeslot = await Timeslot.findById(timeslotId);
+        if (!timeslot) {
+            throw new Error("Timeslot not found");
+        }
+
+        if (timeslot.transitStart) {
+            timeslot.start = timeslot.transitStart;
+        }
+        if (timeslot.transitEnd) {
+            timeslot.end = timeslot.transitEnd;
+        }
+
+        timeslot.title = "available"
+        timeslot.transitStart = undefined;
+        timeslot.transitEnd = undefined;
+        timeslot.isBooked = false;
+        timeslot.requestId = undefined;
+        timeslot.jobId = undefined;
+
+        const updatedTimeslot = await timeslot.save();
+        return updatedTimeslot; // Return the updated timeslot for further processing or response
     } catch (error) {
         console.error("Failed to cancel timeslot:", error);
         throw error; // Rethrow the error to handle it in the caller function

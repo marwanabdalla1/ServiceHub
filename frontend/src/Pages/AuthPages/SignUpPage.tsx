@@ -24,6 +24,7 @@ import {createTheme, ThemeProvider} from '@mui/material/styles';
 import {blue} from "@mui/material/colors";
 import axios from 'axios';
 import {useAuth} from "../../contexts/AuthContext";
+import {useLocation, useNavigate} from "react-router-dom";
 
 function Copyright(props: any) {
     return (
@@ -48,10 +49,19 @@ const defaultTheme = createTheme({
 
 export default function SignUp() {
     const { registerUser } = useAuth();
+    const location = useLocation();
+    const { from } = location.state || { from: { pathname: "/" } };
+    const navigate = useNavigate();
+
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        await registerUser(event);
+        await registerUser(event, from.pathname);
+    };
+
+
+    const handleLogoClick = () => {
+        navigate('/');  // Navigate to the homepage
     };
 
     return (
@@ -66,7 +76,7 @@ export default function SignUp() {
                         alignItems: 'center',
                     }}
                 >
-                    <Avatar sx={{bgcolor: 'primary.main'}}>
+                    <Avatar sx={{bgcolor: 'primary.main'}} onClick={handleLogoClick}>
                         <img src="/images/logo_short.png" alt="Logo" className="md:h-6"/>
                     </Avatar>
                     <Typography component="h1" variant="h5">

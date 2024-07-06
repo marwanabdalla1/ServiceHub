@@ -6,8 +6,8 @@ import mongoose, {Document, Types} from 'mongoose';
 import Timeslot from "../models/timeslot";
 import {createNotification, createNotificationDirect} from "./NotificationController";
 import Notification from "../models/notification";
-import {NotificationType} from "../models/enums";
-import {bookTimeslot, cancelTimeslotDirect} from "./TimeSlotController";
+import {NotificationType, RequestStatus} from "../models/enums";
+import {bookTimeslot, cancelTimeslotDirect, cancelTimeslotWithRequestId} from "./TimeSlotController";
 
 
 
@@ -91,7 +91,7 @@ async function updateUserRequestHistory(userId: string, requestId: string) {
 }
 
 
-export const updateServiceRequest: RequestHandler = async (req: Request, res: Response) => {
+export const updateServiceRequest: RequestHandler = async (req: Request, res: Response, next) => {
     // Get the userId from the JWT token
     const userId = (req as any).user.userId;
     const { requestId } = req.params; //get request ID from parameter
@@ -112,6 +112,17 @@ export const updateServiceRequest: RequestHandler = async (req: Request, res: Re
     }
 
     try {
+        // Check if status is being updated to one of the specific statuses
+        const requiresCancellation = [RequestStatus.declined, RequestStatus.cancelled, RequestStatus.requestorActionNeeded].includes(updates.requestStatus);
+        console.log("requires cancellation: ", RequestStatus.requestorActionNeeded)
+        if (requiresCancellation) {
+            // Cancel the associated timeslot
+            const cancellationResult = await cancelTimeslotWithRequestId(requestId);
+            console.log(cancellationResult.message);
+        }
+
+        console.log("cancellation done", requestId)
+
         // Update the user in the database using the userId from the JWT token
         const updatedRequest = await ServiceRequest.findByIdAndUpdate(requestId, updates, { new: true, upsert: true, strict: true });
         // if (!updatedRequest) {
@@ -120,7 +131,7 @@ export const updateServiceRequest: RequestHandler = async (req: Request, res: Re
         // res.send(updatedRequest);
 
 
-        // todo: Create and send notification
+        // todo: modify Create and send notification (now this is in frontend)
         // Assuming recipient is determined by logic - can be provider or requester based on context
         // const notificationContent = `Service request ${requestId} has been updated.`;
 
@@ -199,7 +210,7 @@ export const getIncomingServiceRequestsByProvider: RequestHandler = async (req, 
             return res.status(403).json({ message: "Unauthorized access." });
         }
 
-        const serviceRequests = await ServiceRequest.find({ provider: providerId, requestStatus: "pending" })
+        const serviceRequests = await ServiceRequest.find({ provider: providerId, requestStatus: {$in: ["pending", RequestStatus.requestorActionNeeded]} })
             .populate([
                 { path: 'requestedBy', select: 'firstName lastName' }, // Exclude _id
                 { path: 'provider', select: 'firstName lastName' },
@@ -208,7 +219,7 @@ export const getIncomingServiceRequestsByProvider: RequestHandler = async (req, 
 
         // remove everything where the requestor account is deleted
         const filteredRequests = serviceRequests.filter(request => request.requestedBy !== null);
-
+        // get the requests that need to have consumer actions
 
         if (filteredRequests.length === 0) {
             return res.status(404).json({ message: "No service requests found for this provider." });
@@ -216,7 +227,7 @@ export const getIncomingServiceRequestsByProvider: RequestHandler = async (req, 
 
         const requestsWithTimeslots = await Promise.all(filteredRequests.map(async (request) => {
             const timeslot = await Timeslot.findOne({ requestId: request._id }).exec();
-            return { ...request.toObject(), timeslot };
+            return { ...request.toObject(), timeslot: timeslot || undefined };
         }));
 
         console.log("incoming requests with their timeslots", requestsWithTimeslots)
@@ -357,6 +368,10 @@ export const handleChangeTimeslot: RequestHandler = async (req, res, next) => {
 
     try {
         const hi = await bookTimeslot(req, res, next);
+
+        // update the request status to pending again
+        const updatedRequest = await ServiceRequest.findByIdAndUpdate(requestId, {requestStatus: RequestStatus.pending}, { new: true, upsert: true, strict: true });
+
 
         // // Check if the response has been sent by bookTimeslot
         // if (res.headersSent) {
