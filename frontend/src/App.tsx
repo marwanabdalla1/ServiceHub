@@ -46,6 +46,7 @@ import JobDetailsPage from "./Pages/JobDetailsPage";
 import VerifyCertificatePage from "./Pages/AdminPanel/VerifyCertificatePage";
 import AdminUserDataPage from "./Pages/AdminPanel/AdminUserDataPage";
 import AdminHomePage from "./Pages/AdminPanel/AdminHomePage";
+import ErrorPage from "./Pages/ErrorPage";
 
 function App() {
     const [search, setSearch] = useState('');
@@ -163,7 +164,9 @@ function MainRoutes({search, setSearch}: {search: any, setSearch: any}) {
                 <Route path="/admin/verifyCertificate" element={<VerifyCertificatePage/>}/>
                 <Route path="/admin/UserData" element={<AdminUserDataPage/>}/>
 
-                <Route path="*" element={<h1>Not Found</h1>}/>
+                <Route path="/unauthorized" element={<ErrorPage title="Unauthorized Access" message="You do not have permission to view this page." />} />
+                <Route path="*" element={<ErrorPage title="404 Not Found" message="The page you are looking for does not exist." />} />
+                {/*<Route path="*" element={<h1>Not Found</h1>}/>*/}
             </Routes>
         </div>
     );
