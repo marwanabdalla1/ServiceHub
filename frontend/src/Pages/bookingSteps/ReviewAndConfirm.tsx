@@ -17,6 +17,8 @@ import axios from "axios";
 import {RequestStatus} from "../../models/enums";
 import {useAuth} from "../../contexts/AuthContext";
 import {Timeslot} from "../../models/Timeslot";
+import { bookTimeSlot, BookingError } from '../../services/timeslotService';
+
 
 
 interface ReviewAndConfirmProps {
@@ -98,6 +100,7 @@ function ReviewAndConfirm({onComplete, onBack, bookingDetails}: ReviewAndConfirm
 
     const bookTimeSlot = (timeSlot: any): Promise<any> => {
         return new Promise((resolve, reject) => {
+            console.log("bookTimeSlot:", timeSlot)
             axios.post('/api/timeslots/book', timeSlot, {
                 headers: {'Authorization': `Bearer ${token}`}
             })
@@ -189,18 +192,24 @@ function ReviewAndConfirm({onComplete, onBack, bookingDetails}: ReviewAndConfirm
             const timeslotResponse = await bookTimeSlot(timeSlotWithRequest);
             console.log("Timeslot booked successfully", timeslotResponse);
 
-            // step 3: update the request
-            const updatedRequestData = {timeslot: timeslotResponse._id};
-            await axios.patch(`/api/requests/${requestId}`, updatedRequestData, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            console.log('Request updated with timeslot ID:', timeslotResponse._id);
+            // step 3: update the request -> not needed anymore because we dont save timeslot in request!
+            // try {
+            //     const updatedRequestData = { timeslot: timeslotResponse._id };
+            //     await axios.patch(`/api/requests/${requestId}`, updatedRequestData, {
+            //         headers: {
+            //             'Authorization': `Bearer ${token}`
+            //         }
+            //     });
+            //     console.log('Request updated with timeslot ID:', timeslotResponse._id);
+            // } catch (error) {
+            //     console.error('Error updating request with timeslot ID:', error);
+            //     // Handle the error (e.g., log it, show a message, etc.)
+            //     // This error does not affect the overall booking confirmation
+            // }
 
-            // todo: actually go to confirmation page
+
             // navigate('/confirmation'); // Navigate to a confirmation page or show a confirmation message
-            navigate(`/offerings/${requestId}/confirm`); // Navigate to a confirmation page or show a confirmation message
+            navigate(`/confirmation/${requestId}/booking`); // Navigate to a confirmation page or show a confirmation message
 
             //     if booking timeslot fails, then roll back the request
         } catch (error: any) {

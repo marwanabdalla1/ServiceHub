@@ -4,7 +4,7 @@ import { Notification } from '../../models/Notification'; // Import Notification
 import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
 
 interface NotificationItemProps extends Notification {
-  markAsRead: (id: string) => void;
+  markAsRead: (_id: string) => void;
 }
 
 const NotificationItem: React.FC<NotificationItemProps> = ({
@@ -15,7 +15,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
   markAsRead,
   NotificationType,
   review,
-  job
+  job, request,
 }) => {
   const timeAgo = formatDistanceToNow(new Date(updatedAt), { addSuffix: true });
   const navigate = useNavigate(); // useNavigate hook to navigate
@@ -31,6 +31,9 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
         url = `/jobs/${job}`;
         break;
       // Add more cases here as needed
+      case 'Time Request Changed':
+        url = `/change-booking-time/${request}`;
+        break;
       default:
         url = '/';
     }

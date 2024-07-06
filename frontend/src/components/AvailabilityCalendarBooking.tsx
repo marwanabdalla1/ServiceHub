@@ -1,16 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, dateFnsLocalizer, SlotInfo } from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import './calendarStyles.css'; 
+import './calendarStyles.css';
 import { format, startOfWeek, parseISO, getDay, startOfDay, endOfDay } from 'date-fns';
 import { enUS } from '@mui/material/locale';
-import { Dialog, Button, DialogActions, DialogContent, DialogTitle, Box } from '@mui/material';
+import {
+    Dialog,
+    Button,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Box,
+    Alert,
+    LinearProgress,
+    AlertTitle
+} from '@mui/material';
 import axios from 'axios';
 import moment from 'moment';
 import { useAuth } from '../contexts/AuthContext';
 import {BookingDetails, useBooking} from '../contexts/BookingContext';
 import {ServiceType} from "../models/enums";
 import {Timeslot} from "../models/Timeslot";
+import {bookTimeSlot, BookingError, changeTimeSlot} from '../services/timeslotService';
+import {useNavigate} from "react-router-dom";
+import useAlert from '../hooks/useAlert'; // Adjust the path as necessary
+
 
 const locales = {
     'en-US': enUS,
@@ -24,35 +38,47 @@ const localizer = dateFnsLocalizer({
     locales,
 });
 
-export interface TimeSlot {
-    start: Date;
-    end: Date;
-    title: string;
-    isFixed?: boolean;  // Optional property to indicate if the TimeSlot is fixed
-    isBooked: boolean;
-    createdById: string | undefined;
-}
+// export interface TimeSlot {
+//     start: Date;
+//     end: Date;
+//     transitStart: Date;
+//     transitEnd: Date;
+//     title: string;
+//     isFixed?: boolean;  // Optional property to indicate if the TimeSlot is fixed
+//     isBooked: boolean;
+//     createdById: string | undefined;
+// }
 
 type RangeType = Date[] | { start: Date; end: Date };
 
 interface ServiceScheduleProps {
-    Servicetype: ServiceType | undefined;
+    Servicetype: ServiceType | undefined | string;
     defaultSlotDuration: number;
     defaultTransitTime: number;
+    providerIdInput: string| null|undefined;
+    requestIdInput: string|null|undefined;
+    mode:"create" | "change"; //"create" or "change"
+    onRequestChange: () => void;
     onNext: () => void;
 }
 
-function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, defaultTransitTime, onNext }: ServiceScheduleProps) {
+function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, defaultTransitTime, providerIdInput, requestIdInput, mode, onRequestChange, onNext }: ServiceScheduleProps) {
     const {bookingDetails, setTimeAndDuration} = useBooking();
-    const providerId = bookingDetails.provider?._id;
+    // const providerId = bookingDetails.provider?._id;
+    const providerId = mode === 'change' ? providerIdInput : bookingDetails.provider?._id;
+    const requestId = mode === 'change' ? requestIdInput : null;
 
-    const [availability, setAvailability] = useState<TimeSlot[]>([]);
-    const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot | null>(null);
+    const { alert, triggerAlert, closeAlert } = useAlert();
+    const [availability, setAvailability] = useState<Timeslot[]>([]);
+    const [selectedTimeSlot, setSelectedTimeSlot] = useState<Timeslot | null>(null);
     // const [selectedTimeSlotWithTransit, setSelectedTimeSlotWithTransit] = useState<TimeSlot | null>(null);
 
     const [deleteDialog, setDeleteDialog] = useState(false);
     const [clashDialogOpen, setClashDialogOpen] = useState(false);
     const { token } = useAuth();
+
+    const navigate = useNavigate();
+
 
     // const [previewSlot, setPreviewSlot] = useState<Date | null>(null);
     // const [previewStart, setPreviewStart] = useState<Date | null>(null);
@@ -117,7 +143,7 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
     }, [token, providerId, defaultTransitTime]);
 
 
-                    // const providerId = "6670176384da135b691a27bd"
+    // const providerId = "6670176384da135b691a27bd"
     console.log(bookingDetails);
     // useEffect(() => {
     //     axios.get(`/api/timeslots/${providerId}`, {
@@ -208,8 +234,8 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
         }
 
         // Calculate required start and end time including transit
-        const adjustedStart = new Date(startTime.getTime() - defaultTransitTime * 60000);
-        const adjustedEnd = new Date(endTime.getTime() + defaultTransitTime * 60000);
+        const transitStart = new Date(startTime.getTime() - defaultTransitTime * 60000);
+        const transitEnd = new Date(endTime.getTime() + defaultTransitTime * 60000);
 
 
         // setSelectedTimeSlot(transitTimeSlot)
@@ -231,29 +257,44 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
         //
         // // Check if the combined range of these slots covers the entire requested period
         if (isWithinAvailableSlot.length > 0) {
-            const newTimeSlot = {
-                start: startTime,
-                end: endTime,
-                title: `${Servicetype}`,
-                isFixed: false,
-                isBooked: true,
-                createdById: providerId,
-            };
-            console.log("new time slot:", newTimeSlot)
+            // const newTimeSlot = {
+            //     start: startTime,
+            //     end: endTime,
+            //     transitStart: transitStart,
+            //     transitEnd: transitEnd,
+            //     title: `${Servicetype}`,
+            //     isFixed: false,
+            //     isBooked: true,
+            //     createdById: providerId,
+            // };
+
+            const newTimeSlot = new Timeslot(
+                `${Servicetype}`,
+                startTime,
+                endTime,
+                transitStart,
+                transitEnd,
+                false,
+                true,
+                requestId,
+                undefined, providerId,
+            )
+            // const timeslot = new Timeslot(...newTimeSlot)
+            console.log("new time slot for booking:", newTimeSlot)
             setSelectedTimeSlot(newTimeSlot);
         } else {
             setClashDialogOpen(true);
         }
 
-            // const transitTimeSlot = {
-            //     start: adjustedStart,
-            //     end: adjustedEnd,
-            //     title: `${Servicetype} (including transit)`,
-            //     isFixed: false,
-            //     isBooked: true,
-            //     createdById: providerId
-            // };
-            // setSelectedTimeSlotWithTransit(transitTimeSlot);
+        // const transitTimeSlot = {
+        //     start: adjustedStart,
+        //     end: adjustedEnd,
+        //     title: `${Servicetype} (including transit)`,
+        //     isFixed: false,
+        //     isBooked: true,
+        //     createdById: providerId
+        // };
+        // setSelectedTimeSlotWithTransit(transitTimeSlot);
 
 
         // // Check if there's at least one unbooked slot that can fully contain the selected time slot
@@ -278,17 +319,24 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
         // }
     };
 
-    const confirmBooking = () => {
+
+
+    const confirmBooking = async () => {
         if (!selectedTimeSlot) {
             console.error("No timeslot selected");
+            triggerAlert("No timeslot selected", "error");
             return;
         }
 
-        // Adjust times for transit time before sending to the server
-        const start = new Date(selectedTimeSlot.start.getTime() - defaultTransitTime * 60000);
-        const end = new Date(selectedTimeSlot.end.getTime() + defaultTransitTime * 60000);
+        if (!selectedTimeSlot.transitEnd || !selectedTimeSlot.transitStart){
+            console.error("no transit time included!")
+        }
 
-        const timeSlotWithTransit = new Timeslot (selectedTimeSlot.title, start, end, false, true, undefined, selectedTimeSlot.createdById)
+        // Adjust times for transit time before sending to the server
+        // const start = new Date(selectedTimeSlot.start.getTime() - defaultTransitTime * 60000);
+        // const end = new Date(selectedTimeSlot.end.getTime() + defaultTransitTime * 60000);
+        //
+        // const timeSlotWithTransit = new Timeslot (selectedTimeSlot.title, start, end, false, true, undefined, selectedTimeSlot.createdById)
         // {
         //     ...selectedTimeSlot,
         //     start,
@@ -296,9 +344,39 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
         //     isBooked: true, // Now set as booked
         //     // requestId: //todo: can only be added once the request is created
         // };
+        if (mode === "create"){
+            setTimeAndDuration(selectedTimeSlot);
+            onNext();
+        }
 
-        setTimeAndDuration(timeSlotWithTransit);
-        onNext();
+        if (mode ==="change"){
+            try {
+                // todo: make sure to cancel old timeslot first if not yet done
+
+
+                const timeslotResponse = await changeTimeSlot(selectedTimeSlot, token)
+                console.log("Timeslot updated", timeslotResponse);
+
+                triggerAlert("Timeslot updated successfully", "success");
+                // navigate(`/confirmation/${requestId}/timeslotChange`);
+            } catch (error: any){
+                console.error('Error changing Timeslot booking:', error);
+
+                if (error instanceof BookingError && error.code === 409) {
+                    triggerAlert("Unfortunately, the selected timeslot is no longer available. Please select another time.", "error");
+                    // await axios.delete(`/api/requests/${requestId}`, {
+                    //     headers: {'Authorization': `Bearer ${token}`}
+                    // });
+                    // console.error('Rolled back the created request due to timeslot booking failure.');
+                    // alert('Unfortunately, the selected timeslot is no longer available. Please select another time.');
+
+                } else {
+                    // alert('An error occurred while confirming your booking. Please try again.');
+                    triggerAlert("Failed to update timeslot. Please try again later", "error");
+                }
+            }
+
+        }
     };
 
 
@@ -322,7 +400,7 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
     //     }
     // };
 
-    const handleSelectTimeSlot = (TimeSlot: TimeSlot) => {
+    const handleSelectTimeSlot = (TimeSlot: Timeslot) => {
         // setSelectedTimeSlot(TimeSlot);
         // console.log("selectedTimeslot:", selectedTimeSlot)
         setDeleteDialog(true);
@@ -382,9 +460,9 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
                     //     }));
                     //     setAvailability(events);
                     fetchAndSetAvailability(undefined);
-                    }).catch(error => {
-                        console.error("Error fetching timeslots:", error);
-                    });
+                }).catch(error => {
+                    console.error("Error fetching timeslots:", error);
+                });
                 // }).catch(error => {
                 //     console.error("Error extending fixed slots:", error);
                 // });
@@ -452,7 +530,7 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
     // };
 
 
-    let validEvents:TimeSlot[] = [];
+    let validEvents:Timeslot[] = [];
     if (selectedTimeSlot) {
         validEvents = [selectedTimeSlot]
     }
@@ -478,6 +556,10 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
     //     }
     // };
 
+    const handleError = () => {
+        triggerAlert("An error occurred!", "error");
+    };
+
 
     return (
         <div>
@@ -492,7 +574,7 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
                 events={validEvents}
                 startAccessor="start"
                 endAccessor="end"
-                style={{ height: 500 }}
+                style={{height: 500}}
                 selectable
                 onSelectSlot={handleSelect}
                 onSelectEvent={handleSelectTimeSlot}
@@ -511,19 +593,27 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
             {/*        /!*<Button onClick={handleDelete} color="secondary">Delete</Button>*!/*/}
             {/*    </DialogActions>*/}
             {/*</Dialog>*/}
+            <div>
+                {alert.open && (
+                    <Alert severity={alert.severity} onClose={closeAlert}>
+                        {alert.message}
+                    </Alert>
+                )}
+            </div>
+
             <Dialog open={clashDialogOpen} onClose={handleClashDialogClose}>
                 <DialogTitle>TimeSlot Clash</DialogTitle>
                 <DialogContent>
-                    Provider Not Available!
+                    Provider not available! This could be due to the need to adjust to minimum slot duration
+                    ({defaultSlotDuration} minutes)
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClashDialogClose}>OK</Button>
                 </DialogActions>
             </Dialog>
-            <Box display="flex" justifyContent="flex-end" sx={{ mt: 4 }}>
-                {/*todo: edit the onClick*/}
+            <Box display="flex" justifyContent="flex-end" sx={{mt: 4}}>
                 <Button variant="contained" color="primary" onClick={confirmBooking}>
-                    Confirm Booking Time
+                    {mode === 'create' ? 'Confirm Booking Time' : 'Update Booking Time'}
                 </Button>
             </Box>
         </div>

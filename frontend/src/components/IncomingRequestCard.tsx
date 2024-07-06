@@ -102,7 +102,10 @@ if (request.requestStatus === RequestStatus.cancelled ){
           Service Type: {request.serviceType}
         </Typography>
         <Typography variant="body2">
-          Appointment Time: {formatDateTime(request.appointmentStartTime)}
+          Appointment Start Time: {formatDateTime(request.timeslot?.start)}
+        </Typography>
+        <Typography variant="body2">
+              Appointment End Time: {formatDateTime(request.timeslot?.end)}
         </Typography>
         <Typography variant="body2" sx={{ marginBottom: '2rem'}}>
           Service Fee: {request.serviceFee}

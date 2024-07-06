@@ -29,7 +29,7 @@ const MediaCard: React.FC<MediaCardProps> = ({ request, onClose, onDecline, onPr
   const navigate = useNavigate();
 
   const handleProposeNewTime = (request: ServiceRequest) => {
-    navigate(`/change-booking-time/${request.provider}/${request._id}`); // Navigate to the calendar to select a new Timeslot
+    navigate(`/change-booking-time/${request._id}`); // Navigate to the calendar to select a new Timeslot
   }
   
   const renderButton = () => {
