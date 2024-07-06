@@ -21,30 +21,81 @@ const transporter = nodemailer.createTransport({
     }
 });
 
+const generatePasswordResetEmail = (firstName: any, otp:string) => {
+    return `
+    <div style="font-family: Arial, sans-serif; margin: 0; padding: 0;">
+      <table style="max-width: 600px; margin: auto; border-collapse: collapse; border: 1px solid #ddd;">
+        <tr>
+          <td style="background-color: #007bff; padding: 20px; text-align: center; color: #fff; font-size: 24px; font-weight: bold;">
+            Reset Password OTP
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 20px; font-size: 16px; line-height: 1.5;">
+            <b>Dear ${firstName},</b>
+            <br /><br />
+            To proceed further with your password reset process, please enter the OTP below.
+            <br /><br />
+            Your password reset OTP is:
+            <br /><br />
+            <div style="text-align: center;">
+              <span style="display: inline-block; background-color: #007bff; color: #fff; padding: 10px 20px; border-radius: 5px; font-size: 24px; font-weight: bold;">
+                ${otp}
+              </span>
+            </div>
+            <br /><br />
+            Please note that this OTP will only be valid for 60 seconds.
+            <br /><br />
+            Please feel free to contact us in case of any issues. If you did not request this email, please reach out to our email 
+            <a href="servicehub.seba22@gmail.com" style="color: #007bff;">servicehub.seba22@gmail.com</a>.
+            <br /><br />
+            Cheers,
+            <br />
+            <b>Your ServiceHub Team</b>
+          </td>
+        </tr>
+        <tr>
+          <td style="background-color: #007bff; padding: 10px; text-align: center; color: #fff;">
+            <a href="https://servicehub.com" style="color: #fff; text-decoration: none;">Visit Our Website</a>
+          </td>
+        </tr>
+      </table>
+    </div>
+  `;
+};
+
 /**
  * Send an OTP to the user's email
  * @param req
  * @param res
  */
-export const sendResetPasswordEmail = (req: Request, res: Response): void => {
+export const sendResetPasswordEmail = async (req: Request, res: Response): Promise<void> => {
     const { otp, email } = req.body;
-    // Store the OTP with the email
-    otpStore[email] = otp;
 
-    const mailOptions = {
-        from: process.env.MY_EMAIL,
-        to: email,
-        subject: 'Reset Password OTP',
-        text: `Your OTP for password reset is: ${otp}`
-    };
-
-    transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-            res.status(500).send(error.toString());
-        } else {
-            res.status(200).send('OTP sent to email');
+    try {
+        const account = await Account.findOne({ email: email });
+        if (!account) {
+             res.status(400).json({
+                error: "User with this email does not exist"
+            });
+             return;
         }
-    });
+
+        otpStore[email] = otp;
+
+        const mailOptions = {
+            from: process.env.MY_EMAIL,
+            to: email,
+            subject: 'Reset Password OTP',
+            text: `Your OTP for password reset is: ${otp}`,
+            html: generatePasswordResetEmail(account?.get("firstName"), otp)
+        };
+
+        await transporter.sendMail(mailOptions);
+        res.status(200).send('OTP sent to email');
+    } catch (error:any) {
+        res.status(500).send(error.toString());
+    }
 };
 
 /**

@@ -163,9 +163,12 @@ export const AccountProvider = ({children}: Props) => {
                 navigate(redirect);
             }
         } catch
-            (error) {
-            console.error('Error creating user:', error);
-            toast('User registration failed. Please try again.');
+            (error: any) {
+            if (axios.isAxiosError(error) && error.response?.status === 400) {
+                toast.error('User already exists.');
+            } else {
+                toast.error('User registration failed. Please try again.');
+            }
         }
     };
 
