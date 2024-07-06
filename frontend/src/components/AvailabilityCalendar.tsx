@@ -680,7 +680,6 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration }: ServiceSched
                 </DialogActions>
             </Dialog>
 
-
             {/*delete confirmation dialog*/}
             <Dialog open={deleteDialog} onClose={() => setDeleteDialog(false)}>
                 <DialogTitle>Delete This Slot?</DialogTitle>
