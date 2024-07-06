@@ -13,7 +13,7 @@ interface FilterState {
   type: string;
   priceRange: number[];
   locations: string[];
-  isLicensed?: boolean; // Allow it to be undefined
+  isLicensed?: boolean;
 }
 
 function FilterPage() {
@@ -22,38 +22,18 @@ function FilterPage() {
     type: '',
     priceRange: [15, 60],
     locations: [],
-    isLicensed: undefined, // Set initial state to undefined
+    isLicensed: undefined,
   });
   const [offerings, setOfferings] = useState<Account[]>([]);
   const location = useLocation();
   const searchTerm = location.state?.searchTerm ? location.state?.searchTerm : "";
   const [search, setSearch] = useState<string>(searchTerm);
-  const [sortKey, setSortKey] = useState<string | null>(null); // Initialize to null
+  const [sortKey, setSortKey] = useState<string | null>(null);
   const [profileImages, setProfileImages] = useState<{ [key: string]: string }>({});
   const [loading, setLoading] = useState<boolean>(true);
 
   const navigate = useNavigate();
 
-  const fetchOfferings = () => {
-    setLoading(true);
-    const params = {
-      type: filterState.type,
-      priceRange: filterState.priceRange.join(','),
-      locations: filterState.locations.join(','),
-      isLicensed: filterState.isLicensed,
-      searchTerm: search,
-    };
-
-    axios.get<Account[]>('/api/offerings', { params })
-      .then(response => {
-        setOfferings(response.data);
-        fetchProfileImages(response.data);
-      })
-      .catch(error => {
-        console.error('Error fetching data:', error);
-        setLoading(false); // Set loading to false even if there's an error
-      });
-  };
 
   const fetchProfileImages = async (accounts: Account[]) => {
     const newProfileImages: { [key: string]: string } = {};
@@ -73,7 +53,7 @@ function FilterPage() {
     }));
 
     setProfileImages(newProfileImages);
-    setLoading(false); // Set loading to false after images are fetched
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -91,7 +71,6 @@ function FilterPage() {
         const response = await axios.get<Account[]>('/api/offerings', { params });
         let data = response.data;
 
-        // Sorting function
         const sortAccounts = (accounts: Account[]) => {
           if (sortKey === "priceAsc") {
             accounts.sort((a, b) => {
@@ -120,32 +99,21 @@ function FilterPage() {
           }
         };
 
-        // Apply sorting to the data
         sortAccounts(data);
-
-        // Collect all premium accounts after sorting
         const premiumAccounts = data.filter(account => account.isPremium);
-
-        // Check if filter and sort parameters are set
-        const isFilterDefault = 
-          filterState.type === '' && 
-          filterState.priceRange[0] === 15 && 
-          filterState.priceRange[1] === 60 && 
-          filterState.locations.length === 0 && 
+        const isFilterDefault =
+          filterState.type === '' &&
+          filterState.priceRange[0] === 15 &&
+          filterState.priceRange[1] === 60 &&
+          filterState.locations.length === 0 &&
           filterState.isLicensed === undefined &&
           sortKey === null;
 
         if (isFilterDefault) {
-          // If filter and sort parameters are not set, place all premium accounts at the top
           data = [...premiumAccounts, ...data.filter(account => !account.isPremium)];
         } else {
-          // Select the first 4 premium accounts
           const topPremiumAccounts = premiumAccounts.slice(0, 4);
-
-          // Remove the selected premium accounts from the original list to avoid duplication
           const remainingAccounts = data.filter(account => !topPremiumAccounts.includes(account));
-
-          // Combine the top premium accounts with the remaining accounts
           data = [...topPremiumAccounts, ...remainingAccounts];
         }
 
@@ -153,44 +121,18 @@ function FilterPage() {
         fetchProfileImages(data);
       } catch (error) {
         console.error('Error fetching data:', error);
-        setLoading(false); // Set loading to false even if there's an error
+        setLoading(false);
       }
     };
 
     fetchAndSortOfferings();
-  }, [filterState, search, sortKey]); // Depend on filterState, search, and sortKey
+  }, [filterState, search, sortKey]);
 
   const toggleDrawer = () => {
     setIsDrawerOpen(!isDrawerOpen);
   };
 
-  const handlePriceChange = (newValue: number[]) => {
-    setFilterState(prevState => ({
-      ...prevState,
-      priceRange: newValue,
-    }));
-  };
-
-  const handleLocationChange = (value: string[]) => {
-    setFilterState(prevState => ({
-      ...prevState,
-      locations: value,
-    }));
-  };
-
-  const handleTypeChange = (value: string) => {
-    setFilterState(prevState => ({
-      ...prevState,
-      type: value,
-    }));
-  };
-
-  const handleLicensedChange = (value?: boolean) => {
-    setFilterState(prevState => ({
-      ...prevState,
-      isLicensed: value,
-    }));
-  };
+  
 
   const handleSearch = () => {
     navigate("/filter");
@@ -206,13 +148,17 @@ function FilterPage() {
       type: '',
       priceRange: [15, 60],
       locations: [],
-      isLicensed: undefined, // Reset to undefined
+      isLicensed: undefined,
     });
   };
 
-  const handleSortChange = (sortKey: string | null) => { // Updated type
+  const handleSortChange = (sortKey: string | null) => {
     console.log('Sort key:', sortKey);
     setSortKey(sortKey);
+  };
+
+  const handleApplyFilters = (newFilterState: FilterState) => {
+    setFilterState(newFilterState);
   };
 
   return (
@@ -223,10 +169,7 @@ function FilterPage() {
           openDrawer={isDrawerOpen}
           toggleDrawer={toggleDrawer}
           filterState={filterState}
-          onPriceChange={handlePriceChange}
-          onLocationChange={handleLocationChange}
-          onTypeChange={handleTypeChange}
-          onLicensedChange={handleLicensedChange}
+          onApplyFilters={handleApplyFilters}
           onClearFilters={clearFilters}
         />
         <Sort onSortChange={handleSortChange} />
