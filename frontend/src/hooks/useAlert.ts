@@ -1,6 +1,5 @@
-// hooks/useAlert.ts
-import { useState, useCallback } from 'react';
-import { Alert, AlertColor } from '@mui/material';
+import { useState, useCallback, useEffect } from 'react';
+import { AlertColor } from '@mui/material';
 
 interface AlertState {
     open: boolean;
@@ -8,20 +7,40 @@ interface AlertState {
     severity: AlertColor;
 }
 
-function useAlert() {
+function useAlert(defaultDuration: number | null) {
+    const durationTimeout = defaultDuration || 3000 //default is 3000
     const [alert, setAlert] = useState<AlertState>({
         open: false,
         message: '',
         severity: 'info',
     });
-
-    const triggerAlert = useCallback((message: string, severity: AlertColor = 'info') => {
-        setAlert({ open: true, message, severity });
-    }, []);
+    const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
 
     const closeAlert = useCallback(() => {
-        setAlert({ ...alert, open: false });
-    }, [alert]);
+        if (timeoutId) {
+            clearTimeout(timeoutId);  // Clear the timeout if the alert is manually closed
+            setTimeoutId(null);
+        }
+        setAlert(prev => ({ ...prev, open: false }));
+    }, [timeoutId]);
+
+    const triggerAlert = useCallback((message: string, severity: AlertColor = 'info', duration: number = durationTimeout) => {
+        setAlert({ open: true, message, severity });
+
+        const id = setTimeout(() => {
+            closeAlert();
+        }, duration);
+        setTimeoutId(id);
+    }, [closeAlert, durationTimeout]);
+
+    // Cleanup timeout when component using this hook unmounts
+    useEffect(() => {
+        return () => {
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+            }
+        };
+    }, [timeoutId]);
 
     return {
         alert,

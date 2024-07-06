@@ -43,16 +43,19 @@ function SelectTimeslot({ onNext, onBack, bookingDetails }: SelectTimeslotProps)
         <Container>
             <Box sx={{ display: 'center', justifyContent: 'space-between', mt: 4 }}>
                 <Box sx={{width: '70%'}}>
+                    <Box sx={{width: '70%', display:"flex", flexDirection:"row"}}>
                     <Typography variant="h6" gutterBottom>
-                        Step 2 of 3
+                        Step 2 of 4
                     </Typography>
-                    <Typography variant="h4" gutterBottom>
-                        Select time
-                    </Typography>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', ml: 5 }}>
                         <Button variant="outlined" onClick={onBack}>Back</Button>
                         {/*<Button variant="contained" onClick={onNext}>Next</Button>*/}
                     </Box>
+
+                    </Box>
+                    <Typography variant="h4" gutterBottom>
+                        Select time
+                    </Typography>
                     {/*<Grid container spacing={2}>*/}
                     {/*    /!* Sample dates *!/*/}
                     {/*    {['11', '12', '16', '17', '18', '19', '23', '24', '25', '26', '30', '31'].map((date) => (*/}
@@ -77,11 +80,11 @@ function SelectTimeslot({ onNext, onBack, bookingDetails }: SelectTimeslotProps)
 
                     {/*    ))}*/}
                     {/*</Box>*/}
-                    <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mt: 4, mb: 4 }}>
-                        <Typography variant="h4">
-                            Book from provider
-                        </Typography>
-                    </Box>
+                    {/*<Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mt: 4, mb: 4 }}>*/}
+                    {/*    <Typography variant="h4">*/}
+                    {/*        Book from provider*/}
+                    {/*    </Typography>*/}
+                    {/*</Box>*/}
                     <AvailabilityCalendarBooking
                         Servicetype={bookingDetails?.serviceType}
                         providerIdInput={null}
