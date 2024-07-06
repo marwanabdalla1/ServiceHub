@@ -10,7 +10,7 @@ import Modal from "./inputs/Modal";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, MenuItem } from '@mui/material';
 import { useAuth } from "../contexts/AuthContext";
-import NotificationBell from './Navbar/NotificationBell';
+import NotificationBell from './Notification/NotificationBell';
 interface NavbarProps {
     toggleDrawer: () => void;
     onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -97,25 +97,13 @@ const Navbar: React.FC<NavbarProps> = ({toggleDrawer, onChange, onSearch, search
     };
 
   return (
-    <nav className="bg-blue-300 shadow-md h-20">
+    <div className="bg-blue-300 shadow-md h-20">
       {/* Navbar content */}
       <div className="flex justify-between items-center h-full">
-        {/* Left Section: Logo and Explore */}
-        <div className="flex items-center space-x-4">
-          <Link to="/" className="flex items-center">
-            <img src="/images/logo.png" alt="Logo" className="md:h-32 md:mr-2" />
+        {/* Left Section: Logo */}
+          <Link to="/">
+            <img src="/images/logo.png" alt="Logo" className=" h-16 ml-4" />
           </Link>
-          <div className="relative">
-            <button className="text-customBlack font-semibold text-sm">EXPLORE</button>
-            {/* Dropdown content */}
-            {/*  todo: handle this!!!*/}
-              {/*worst case scenario: just link to /filter page*/}
-            <div className="absolute hidden bg-white text-black rounded shadow-md mt-2">
-              <a href="/option1" className="block px-4 py-2 hover:bg-gray-200">Option 1</a>
-              <a href="/option2" className="block px-4 py-2 hover:bg-gray-200">Option 2</a>
-            </div>
-          </div>
-        </div>
 
         {/* Middle Section: Search Bar */}
         <div className="flex items-center bg-white rounded-full shadow-inner px-2 py-1 w-1/2 ml-2">
@@ -199,7 +187,7 @@ const Navbar: React.FC<NavbarProps> = ({toggleDrawer, onChange, onSearch, search
         <MenuItem component={Link} to="/jobs/requestHistory" onClick={handleMenuClose}>Request History</MenuItem>
         <MenuItem component={Link} to="/incomingRequests" onClick={handleMenuClose}>Incoming Requests</MenuItem>
       </Menu>
-    </nav>
+    </div>
   );
 };
 
