@@ -32,11 +32,9 @@ const generatePasswordResetEmail = (firstName: any, otp:string) => {
         </tr>
         <tr>
           <td style="padding: 20px; font-size: 16px; line-height: 1.5;">
-            Hi,
+            <b>Dear ${firstName},</b>
             <br /><br />
             To proceed further with your password reset process, please enter the OTP below.
-            <br /><br />
-            <b>Dear ${firstName},</b>
             <br /><br />
             Your password reset OTP is:
             <br /><br />

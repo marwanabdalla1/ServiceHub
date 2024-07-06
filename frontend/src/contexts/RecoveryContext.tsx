@@ -63,7 +63,7 @@ export const RecoveryProvider: React.FC<RecoveryProviderProps> = ({children}) =>
         const response = await axios.post('/api/forgetPassword/resetPassword', {email: email, otp: otp})
             .then((res) => {
                 console.log(res);
-            })
+            });
         setEmail(email);
         setOtp(otp);
         startTimer(() => setOtp('')); // Reset the OTP when the timer ends
