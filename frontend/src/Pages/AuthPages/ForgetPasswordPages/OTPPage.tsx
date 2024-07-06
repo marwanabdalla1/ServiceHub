@@ -39,7 +39,9 @@ const defaultTheme = createTheme({
 export default function EmailVerification() {
     const navigate = useNavigate();
     const refs = Array.from({length: 4}).map(() => createRef<HTMLInputElement>());
-    const {otp, email, resetPasswordEmail} = useRecovery();
+    const {otp, email, resetPasswordEmail, timer} = useRecovery();
+    const [isTimerVisible, setIsTimerVisible] = React.useState(true);
+
 
     const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>, index: number) => {
         if (event.target.value.length === 1 && index < refs.length - 1) {
@@ -50,6 +52,7 @@ export default function EmailVerification() {
     const handleResendOTP = async () => {
         try {
             await resetPasswordEmail(email);
+            setIsTimerVisible(true);
         } catch (error) {
             console.error('There was an error resending the OTP', error);
         }
@@ -64,7 +67,6 @@ export default function EmailVerification() {
             if (input_otp === otp) {
                 navigate('/forgetPassword/resetPassword');
             } else {
-                console.error("Invalid OTP");
                 toast("Invalid OTP");
             }
 
@@ -80,7 +82,7 @@ export default function EmailVerification() {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                minHeight: '100vh' // Center the container vertically
+                minHeight: '50vh' // Center the container vertically
             }}>
                 <CssBaseline/>
                 <Box
@@ -123,6 +125,11 @@ export default function EmailVerification() {
                         >
                             Verify Account
                         </Button>
+                        {isTimerVisible && timer > 0 && timer < 60 && (
+                            <Typography component="p" variant="body2" align="center">
+                                Time left for OTP verification: {timer} seconds
+                            </Typography>
+                        )}
                     </Box>
                     <Grid container justifyContent="center">
                         <Grid item>

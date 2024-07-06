@@ -14,6 +14,7 @@ import {blue} from '@mui/material/colors';
 import {useNavigate} from 'react-router-dom';
 import {useRecovery} from "../../../contexts/RecoveryContext";
 import {toast} from "react-toastify";
+import axios from "axios";
 
 const defaultTheme = createTheme({
     palette: {
@@ -39,13 +40,15 @@ export default function ForgetPassword() {
         }
 
         try {
-            await resetPasswordEmail(email).then((res) => {
-                navigate('/forgetPassword/emailVerification', {state: {email}});
-            }).catch((err) => {
-                console.error(err);
-            });
-        } catch (error) {
-            console.error('There was an error sending the reset password email', error);
+            await resetPasswordEmail(email);
+            // Only navigate if resetPasswordEmail does not throw an error
+            navigate('/forgetPassword/emailVerification', {state: {email}});
+        } catch (error: any) {
+            if (axios.isAxiosError(error) && error.response?.status === 400) {
+                toast.error("No account exists with this email.");
+            } else {
+                toast.error('There was an error sending the reset password email');
+            }
         }
     };
 
@@ -56,7 +59,7 @@ export default function ForgetPassword() {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                minHeight: '80vh'
+                minHeight: '40vh'
             }}>
                 <CssBaseline/>
                 <Box
