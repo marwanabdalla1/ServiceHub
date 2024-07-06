@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { CgProfile } from "react-icons/cg";
-import { IoSettingsOutline, IoNotificationsOutline } from "react-icons/io5";
 import { CiSearch } from "react-icons/ci";
 import { FiFilter } from "react-icons/fi";
 import { BsQuestionCircle } from "react-icons/bs";
 import BlackButton from "./inputs/blackbutton";
 import RequestListButton from "./inputs/requestListButton";
-import Modal from "./inputs/Modal";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, MenuItem } from '@mui/material';
 import { useAuth } from "../contexts/AuthContext";
@@ -93,7 +91,6 @@ const Navbar: React.FC<NavbarProps> = ({toggleDrawer, onChange, onSearch, search
 
     const handleSearch = () => {
         navigate(`/filter`, {state: {searchTerm: search}});
-        // setSearchTerm("")
     };
 
   return (

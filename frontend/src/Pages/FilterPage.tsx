@@ -69,7 +69,7 @@ function FilterPage() {
           newProfileImages[account._id] = URL.createObjectURL(profileImageResponse.data);
         }
       } catch (error) {
-        // console.error('Error fetching profile image:', error);
+         console.error('Error fetching profile image:', error);
       }
     }));
 
@@ -78,7 +78,6 @@ function FilterPage() {
   };
 
   useEffect(() => {
-    // setSearch(searchTerm)
     fetchOfferings();
   }, [filterState, search, sortKey]);
 
