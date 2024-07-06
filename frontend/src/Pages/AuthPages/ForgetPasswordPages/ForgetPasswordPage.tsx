@@ -42,10 +42,10 @@ export default function ForgetPassword() {
             await resetPasswordEmail(email).then((res) => {
                 navigate('/forgetPassword/emailVerification', {state: {email}});
             }).catch((err) => {
-                console.error(err);
+                toast.error(err);
             });
-        } catch (error) {
-            console.error('There was an error sending the reset password email', error);
+        } catch (error: any) {
+            toast.error('There was an error sending the reset password email', error);
         }
     };
 
@@ -56,7 +56,7 @@ export default function ForgetPassword() {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                minHeight: '80vh'
+                minHeight: '40vh'
             }}>
                 <CssBaseline/>
                 <Box
