@@ -46,6 +46,7 @@ import JobDetailsPage from "./Pages/JobDetailsPage";
 import VerifyCertificatePage from "./Pages/AdminPanel/VerifyCertificatePage";
 import AdminUserDataPage from "./Pages/AdminPanel/AdminUserDataPage";
 import AdminHomePage from "./Pages/AdminPanel/AdminHomePage";
+import ErrorPage from "./Pages/ErrorPage";
 
 function App() {
     const [search, setSearch] = useState('');
@@ -128,7 +129,7 @@ function MainRoutes({search, setSearch}: {search: any, setSearch: any}) {
                 <Route path="/addservice" element={<AddServicePage/>}/>
                 {/*<Route path="/provider-profile/:id" element={<ProviderProfilePage/>}/>*/}
                 <Route path="/select-availability" element={<SelectAvailabilityPage/>}/>
-                <Route path="/change-booking-time/:providerId/:requestId" element={<ChangeBookingTimePage/>}/>
+                <Route path="/change-booking-time/:requestId" element={<ChangeBookingTimePage/>}/>
                 {/*<Route path="/select-availability-booking" element={<SelectAvailabilityBooking_temp/>}/>*/}
 
                 {/* Booking */}
@@ -143,7 +144,7 @@ function MainRoutes({search, setSearch}: {search: any, setSearch: any}) {
                 {/*booking*/}
                 {/* <Route path="/offerings/:offeringId" element={<ProviderProfilePage/>}/>
                 <Route path="/offerings/:offeringId/booking/:step" element={<BookingPage/>}/> */}
-                <Route path="/offerings/:requestId/confirm" element={<ConfirmationPage/>}/>
+                <Route path="/confirmation/:requestId/:type" element={<ConfirmationPage/>}/>
 
                 {/*todo: get this once it's done*/}
                 <Route path="/jobs/:jobId" element={<JobDetailsPage />} />
@@ -163,7 +164,9 @@ function MainRoutes({search, setSearch}: {search: any, setSearch: any}) {
                 <Route path="/admin/verifyCertificate" element={<VerifyCertificatePage/>}/>
                 <Route path="/admin/UserData" element={<AdminUserDataPage/>}/>
 
-                <Route path="*" element={<h1>Not Found</h1>}/>
+                <Route path="/unauthorized" element={<ErrorPage title="Unauthorized Access" message="You do not have permission to view this page." />} />
+                <Route path="*" element={<ErrorPage title="404 Not Found" message="The page you are looking for does not exist." />} />
+                {/*<Route path="*" element={<h1>Not Found</h1>}/>*/}
             </Routes>
         </div>
     );

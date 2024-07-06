@@ -44,6 +44,18 @@
   background-color: #f0f0f0; /* Very light grey */
 }
 
+.booked-event {
+  pointer-events: auto; /* Allow pointer events for the tooltip */
+}
+
+.booked-event-content {
+  pointer-events: none; /* Prevent pointer events on the event content */
+}
+
+.editable-event {
+  pointer-events: auto; /* Allow pointer events for editable events */
+}
+
 
 
 /*!* Ensure the time slot group has minimal padding to allow full height utilization *!*/

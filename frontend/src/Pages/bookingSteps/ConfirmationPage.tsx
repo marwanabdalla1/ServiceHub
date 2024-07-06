@@ -9,10 +9,31 @@ interface Styles {
     highlight: CSSProperties;
 }
 
+type MessageType = 'booking' | 'timeslotChange';
+
 const ConfirmationPage: FC = () => {
 
-    const { requestId } = useParams<{ requestId: string }>();
+    const { requestId, type } = useParams<{ requestId: string; type?: MessageType }>();
     const { account } = useAuth();
+
+
+    const messages = {
+        booking: {
+            thankYou: "Thank you for your order!",
+            confirmationInfo: "We'll send your confirmation to",
+        },
+        timeslotChange: {
+            thankYou: "Your timeslot change was successful!",
+            confirmationInfo: "Your new timeslot details will be sent to",
+        },
+        default: {
+            thankYou: "Thank you!",
+            confirmationInfo: "Information will be sent to",
+        }
+    };
+
+    const currentMessage = messages[type as MessageType] || messages.default;
+
 
     const styles: Styles = {
         container: {
@@ -52,10 +73,10 @@ const ConfirmationPage: FC = () => {
         <div>
             <div style={styles.container}>
                 <h1 style={styles.header}>Hi {account?.firstName} {account?.lastName}</h1>
-                <h2 style={styles.header}>Thank you for your order!</h2>
+                <h2 style={styles.header}>{currentMessage.thankYou}</h2>
                 <div style={styles.content}>
                     <p>Your booking number is <span style={styles.highlight}>{requestId}</span></p>
-                    <p>We'll send your confirmation to <span style={styles.highlight}>{account?.email}</span></p>
+                    <p>{currentMessage.confirmationInfo} <span style={styles.highlight}>{account?.email}</span></p>
                     <p>It might not arrive immediately. Make sure to check your spam folder.</p>
                 </div>
             </div>

@@ -2,6 +2,7 @@ import { Request, Response, NextFunction, RequestHandler } from 'express';
 import Account from '../models/account';
 import ServiceOffering from "../models/serviceOffering";
 import ServiceRequest, { IServiceRequest } from "../models/serviceRequest";
+import Notification from "../models/notification"
 import Job, { IJob } from "../models/job";
 
 import { Document } from 'mongoose';
@@ -76,6 +77,20 @@ export const createJob: RequestHandler = async (req: Request, res: Response) => 
         if (!newJob._id) {
             return res.status(400).send({ message: "Failed to create service request." });
         }
+
+        // push notification to receiver
+        // const notificationContent = `A new job has been created.`;
+
+        // todo: move the create notification here from IncomingRequestsTable
+        // const newNotification = new Notification({
+        //     isViewed: false,
+        //     content: notificationContent,
+        //     job: newJob._id,
+        //     recipient: user.userId,  // Assuming 'recipient' should be notified
+        // });
+        // const createdNnotification = await Notification.create(newNotification);
+
+        // console.log(createdNnotification)
 
         await updateUserJobHistory(req.body.provider, newJob._id.toString());
 

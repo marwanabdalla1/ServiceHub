@@ -4,7 +4,19 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './calendarStyles.css'; 
 import { format, startOfWeek, parseISO, getDay, startOfDay, endOfDay } from 'date-fns';
 import { enUS } from '@mui/material/locale';
-import {Dialog, Button, DialogActions, DialogContent, DialogTitle, Box, FormControl, IconButton, TextField, InputAdornment} from '@mui/material';
+import {
+    Dialog,
+    Button,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Box,
+    FormControl,
+    IconButton,
+    TextField,
+    InputAdornment,
+    Tooltip
+} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
@@ -35,6 +47,8 @@ const localizer = dateFnsLocalizer({
 export interface TimeSlot {
     start: Date;
     end: Date;
+    transitStart?: Date;
+    transitEnd?: Date;
     title: string;
     isFixed?: boolean;  // Optional property to indicate if the TimeSlot is fixed
     isBooked: boolean;
@@ -71,26 +85,38 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration }: ServiceSched
     const [deleteOptionDialogOpen, setDeleteOptionDialogOpen] = useState(false);
 
     const [clashDialogOpen, setClashDialogOpen] = useState(false);
-    const { token } = useAuth();
+    const { token,account } = useAuth();
 
 
     console.log(token);
     useEffect(() => {
-        axios.get('/api/timeslots', {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        }).then(response => {
-            const events = response.data.map((event: any) => ({
-                ...event,
-                start: new Date(event.start),
-                end: new Date(event.end)
-            }));
-            setFetchedEvents(events);
-        }).catch(error => {
-            console.error("Error fetching timeslots:", error);
-        });
-    }, [token, selectedTimeSlot]);
+        fetchEvents(new Date(), new Date());
+        // const events = fetched.map((event: any) => ({
+        //             ...event,
+        //             transitStart: new Date(event.transitStart),
+        //             transitEnd: new Date(event.transitEnd),
+        //             start: new Date(event.start),
+        //             end: new Date(event.end)
+        //         }));
+        // setFetchedEvents(events);
+        // axios.get('/api/timeslots', {
+        //     headers: {
+        //         'Authorization': `Bearer ${token}`
+        //     }
+        // }).then(response => {
+        //     const events = response.data.map((event: any) => ({
+        //         ...event,
+        //         transitStart: new Date(event.transitStart),
+        //         transitEnd: new Date(event.transitEnd),
+        //         start: new Date(event.start),
+        //         end: new Date(event.end)
+        //     }));
+        //     console.log("use effect:", events)
+        //     setFetchedEvents(events);
+        // }).catch(error => {
+        //     console.error("Error fetching timeslots:", error);
+        // });
+    }, [token]);
     //
     // const saveAvailability = () => {
     //     console.log('Submitted token' + token + availability)
@@ -118,10 +144,17 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration }: ServiceSched
         const isClashing = /*[...fetchedEvents, ...availability]*/
             fetchedEvents.some(TimeSlot => {
                 const newTimeSlotEnd = new Date(newTimeSlot.start.getTime() + defaultSlotDuration * 60000);
+                if (TimeSlot.transitStart && TimeSlot.transitEnd){
+                    return (
+                        (newTimeSlot.start < TimeSlot.transitEnd && newTimeSlot.end > TimeSlot.transitStart) ||
+                        (newTimeSlot.start < TimeSlot.transitEnd && newTimeSlotEnd > TimeSlot.transitStart)
+                    );
+                } else{
                 return (
                     (newTimeSlot.start < TimeSlot.end && newTimeSlot.end > TimeSlot.start) ||
                     (newTimeSlot.start < TimeSlot.end && newTimeSlotEnd > TimeSlot.start)
-                );
+
+                );}
 
             });
 
@@ -137,7 +170,8 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration }: ServiceSched
                 adjustedEnd = new Date(start.getTime() + defaultSlotDuration * 60000);
             }
 
-            const adjustedTimeSlot: TimeSlot = { start: start, end: adjustedEnd, title: 'available', isFixed: false, isBooked: false, createdById: '' };
+            console.log("account:", account)
+            const adjustedTimeSlot: TimeSlot = { start: start, end: adjustedEnd, title: 'available', isFixed: false, isBooked: false, createdById: account?._id || '' };
             // setAvailability([...availability, adjustedTimeSlot]);
             setFetchedEvents([...fetchedEvents, adjustedTimeSlot]);
 
@@ -287,7 +321,9 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration }: ServiceSched
 
     const handleSelectTimeSlot = (TimeSlot: TimeSlot) => {
         setSelectedTimeSlot(TimeSlot);
+        console.log("selected clicked:", TimeSlot)
         setActionDialogOpen(true);
+        console.log(fetchedEvents)
     };
 
     // const handleFixWeekly = () => {
@@ -370,14 +406,16 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration }: ServiceSched
                 ...event,
                 start: new Date(event.start),
                 end: new Date(event.end),
-                isBooked: event.isBooked
+                isBooked: event.isBooked,
+                transitStart: event.transitStart ? new Date(event.transitStart) : undefined,
+                transitEnd: event.transitEnd ? new Date(event.transitEnd) : undefined
             }));
             const bookedEvents = allEvents.filter((event: TimeSlot) => event.isBooked);
             const editableEvents = allEvents.filter((event: TimeSlot) => !event.isBooked);
             // setBookedEvents(bookedEvents);
             // setAvailability(editableEvents);
             setFetchedEvents(allEvents)
-            console.log(fetchedEvents)
+            console.log("fetched", fetchedEvents)
         } catch (error) {
             console.error("Error fetching timeslots:", error);
         }
@@ -447,18 +485,123 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration }: ServiceSched
         }
     };
 
+
+
     // const eventPropGetter = (event: TimeSlot) => {
-    //     const backgroundColor = event.isFixed ? 'purple' : 'blue';
-    //     return { style: { backgroundColor } };
+    //     if (event.isBooked) {
+    //         return { style: { backgroundColor: 'grey', pointerEvents: 'none' as 'none', opacity: 0.6, zIndex:1 } };
+    //     }
+    //     return { style: { backgroundColor: event.isFixed ? 'purple' : 'blue', zIndex: 2 } };
     // };
+
+    // const eventPropGetter = (event: TimeSlot) => {
+    //     const style = { zIndex: 2 };
+    //
+    //     if (event.isBooked) {
+    //         if (event.transitStart && event.transitEnd) {
+    //             // Styles for transit times
+    //             if (new Date(event.start) >= new Date(event.transitStart) && new Date(event.end) <= new Date(event.transitEnd)) {
+    //                 return { style: { ...style, backgroundColor: 'lightgrey', pointerEvents: 'none' as 'none', opacity: 0.6, zIndex: 1 } };
+    //             }
+    //             // Styles for the main booked event time
+    //             return { style: { ...style, backgroundColor: 'grey', pointerEvents: 'none' as 'none', opacity: 0.6, zIndex: 1 } };
+    //         }
+    //         return { style: { ...style, backgroundColor: 'grey', pointerEvents: 'none' as 'none', opacity: 0.6, zIndex: 1 } };
+    //     }
+    //     return { style: { ...style, backgroundColor: event.isFixed ? 'purple' : 'blue' } };
+    // };
+
+
+    const EventTooltip = ({ event }: { event: TimeSlot }) => (
+        <Tooltip
+            title={
+                <>
+                    {/*<div>Provider: {event.providerName}</div>*/}
+                    <div>Actual Start: {new Date(event.start).toLocaleString()}</div>
+                    <div>Actual End: {new Date(event.end).toLocaleString()}</div>
+                    {event.transitStart && event.transitEnd && (
+                        <>
+                            <div>Transit Start: {new Date(event.transitStart).toLocaleString()}</div>
+                            <div>Transit End: {new Date(event.transitEnd).toLocaleString()}</div>
+                        </>
+                    )}
+                </>
+            }
+            arrow
+        >
+            <div className="booked-event-content">{event.title}</div>
+        </Tooltip>
+    );
+
 
     const eventPropGetter = (event: TimeSlot) => {
         if (event.isBooked) {
-            return { style: { backgroundColor: 'grey', pointerEvents: 'none' as 'none', opacity: 0.6, zIndex:1 } };
+            // Check for transit times
+            // const hasTransit = event.transitStart && event.transitEnd;
+
+            if (event.transitStart && event.transitEnd) {
+                const transitStart = new Date(event.transitStart).getTime();
+                const transitEnd = new Date(event.transitEnd).getTime();
+                const eventStart = new Date(event.start).getTime();
+                const eventEnd = new Date(event.end).getTime();
+
+                const totalDuration = transitEnd - transitStart;
+                const transitBeforeDuration = eventStart - transitStart;
+                const transitAfterDuration = transitEnd - eventEnd;
+                const eventDuration = eventEnd - eventStart;
+
+                const beforePercent = (transitBeforeDuration / totalDuration) * 100;
+                const eventPercent = (eventDuration / totalDuration) * 100;
+                const afterPercent = (transitAfterDuration / totalDuration) * 100;
+
+                return {
+                    className: 'booked-event',
+                    style: {
+                        background: `linear-gradient(
+                        to bottom,
+                        lightblue ${beforePercent}%,
+                        grey ${beforePercent}%,
+                        grey ${beforePercent + eventPercent}%,
+                        lightblue ${beforePercent + eventPercent}%
+                    )`,
+                        color: 'black',
+                        pointerEvents: 'none' as 'none',
+                        opacity: 0.6,
+                        zIndex: 1,
+                    }
+                };
+            }
+
+            // Default style for booked events without transit times
+            return {
+                className: 'booked-event',
+                style: {
+                    backgroundColor: 'grey',
+                    pointerEvents: 'none' as 'none',
+                    opacity: 0.6,
+                    zIndex: 1,
+                }
+            };
         }
-        return { style: { backgroundColor: event.isFixed ? 'purple' : 'blue', zIndex: 2 } };
+
+        // Style for editable events
+        return {
+            className: 'editable-event',
+            style: {
+                backgroundColor: event.isFixed ? 'purple' : 'blue',
+                zIndex: 2,
+            }
+        };
     };
 
+
+    const getStartAccessor = (event: TimeSlot) => {
+        return event.transitStart ? new Date(event.transitStart) : new Date(event.start);
+    };
+
+    const getEndAccessor = (event: TimeSlot) => {
+        return event.transitEnd ? new Date(event.transitEnd) : new Date(event.end);
+    };
 
 
 
@@ -472,8 +615,8 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration }: ServiceSched
                 step={15}
                 localizer={localizer}
                 events={fetchedEvents/*[...fetchedEvents, ...availability]*/}
-                startAccessor="start"
-                endAccessor="end"
+                startAccessor={getStartAccessor}
+                endAccessor={getEndAccessor}
                 style={{ height: 500 }}
                 // onEventDrop={handleEventDrop}
                 // onEventResize={handleEventResize}
@@ -484,6 +627,9 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration }: ServiceSched
                 eventPropGetter={eventPropGetter}
                 // backgroundEvents={bookedEvents}
                 className="bg-black-300" // Apply Tailwind class here
+                // components={{
+                //     event: ({ event }) => <EventTooltip event={event} />
+                // }}
             />
             {/*<Dialog open={deleteDialog} onClose={handleClose}>*/}
             {/*    <DialogTitle>Delete Slot?</DialogTitle>*/}
@@ -533,7 +679,6 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration }: ServiceSched
                     </Button>
                 </DialogActions>
             </Dialog>
-
 
             {/*delete confirmation dialog*/}
             <Dialog open={deleteDialog} onClose={() => setDeleteDialog(false)}>
