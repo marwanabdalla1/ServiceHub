@@ -17,7 +17,7 @@ import {
     SelectChangeEvent
 } from '@mui/material';
 import {GoStarFill} from "react-icons/go";
-import {Account as ServiceProvider} from '../models/Account';
+import {Account, Account as ServiceProvider} from '../models/Account';
 import {DaysOfWeek, ServiceType, JobStatus, ResponseStatus, RequestStatus} from '../models/enums';
 import {styled} from '@mui/system';
 import SearchIcon from '@mui/icons-material/Search';
@@ -34,7 +34,10 @@ import {useBooking} from "../contexts/BookingContext";
 import axios from "axios";
 import Select from "@mui/material/Select";
 import {format} from 'date-fns';
-
+import {useAuth} from "../contexts/AuthContext";
+import {response} from "express";
+import * as url from "node:url";
+import StarIcon from '@mui/icons-material/Star';
 
 // !todo s
 // 1. link reviews
@@ -80,18 +83,29 @@ function ProviderProfilePage() {
     const [reviews, setReviews] = useState<Review[]>([]);
 
     const [searchTerm, setSearchTerm] = useState<string>("");
-    const [sortOption, setSortOption] = useState<string>("stars");
+    const [sortOption, setSortOption] = useState<string>("dateDesc");
     const [filterStars, setFilterStars] = useState<number | null>(null);
 
     const [nextAvailability, setNextAvailability] = useState<any>(null);
-
+    const [profileImage, setProfileImage] = useState<File | null>(null);
+    const [reviewerProfileImages, setReviewerProfileImages] = useState<{ [key: string]: string }>({});
 
     // const provider = mockProvider;
     const {offeringId} = useParams<{ offeringId: string }>(); //use this to then make a request to the user with the id to get the user data
 
-    console.log("offeringId", offeringId);
-
     const navigate = useNavigate();
+
+    const fetchProfileImage = async (_id: string) => {
+        try {
+            // Fetch profile image
+            const profileImageResponse = await axios.get(`/api/file/profileImage/${_id}`, {
+                responseType: 'blob'
+            });
+            setProfileImage(profileImageResponse.data);
+        } catch (error) {
+            console.error('Error fetching profile data:', error);
+        }
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -101,14 +115,12 @@ function ProviderProfilePage() {
                     setOffering(fetchedOffering);
 
                     try {
-                        console.log("fetched Offering:", fetchedOffering);
                         const response = await axios.get(`/api/timeslots/next-availability/${fetchedOffering.provider}`, {
                             params: {
                                 transitTime: fetchedOffering.bufferTimeDuration,
                                 defaultDuration: fetchedOffering.baseDuration
                             }
                         });
-                        console.log("next availability:", response.data);
                         setNextAvailability(response.data.nextAvailability);
                     } catch (error) {
                         console.error("Failed to fetch next availability:", error);
@@ -117,10 +129,11 @@ function ProviderProfilePage() {
                     console.error("Failed to fetch offering details:", error);
                 }
                 try {
-                    const fetchedProvider = await fetchAccountDetails(offeringId); // Confirm this should use offeringId
-                    console.log("fetched provider:", fetchedProvider)
-
+                    const fetchedProvider = await fetchAccountDetails(offeringId);
                     setProvider(fetchedProvider);
+                    fetchProfileImage(fetchedProvider._id).then(() => {
+                        console.log("profile image fetched");
+                    });
 
 
                 } catch (error) {
@@ -128,19 +141,45 @@ function ProviderProfilePage() {
                 }
                 try {
                     const reviewResponse = await axios.get(`/api/reviews/${offeringId}`);
-                    console.log("reviews: ", reviewResponse.data);
                     setReviews(reviewResponse.data.review);
+
+
                 } catch (error) {
                     console.error("Failed to fetch reviews:", error);
                 }
-
-
             }
         };
-
-
         fetchData();
     }, [offeringId]);
+
+
+    // Define the new function to fetch reviewer profile images
+    const fetchReviewerProfileImages = async (reviews: Review[]) => {
+        const newProfileImages: { [key: string]: string } = {};
+
+        await Promise.all(reviews.map(async (review) => {
+            console.log("current review: ", review);
+            try {
+                const profileImageResponse = await axios.get(`/api/file/profileImage/${review.reviewer._id}`, {
+                    responseType: 'blob'
+                });
+                if (profileImageResponse.status === 200) {
+                    newProfileImages[review.reviewer._id] = URL.createObjectURL(profileImageResponse.data);
+                }
+            } catch (error) {
+                console.error('Error fetching profile image:', error);
+            }
+        }));
+
+        setReviewerProfileImages(newProfileImages);
+    };
+
+// Use the useEffect hook to call the new function when reviews change
+    useEffect(() => {
+        if (reviews.length > 0) {
+            fetchReviewerProfileImages(reviews).then(r => { console.log("reviewer profile images fetched") });
+        }
+    }, [reviews]);
 
     // Calculate rating distribution
     const ratingCounts = [0, 0, 0, 0, 0];
@@ -192,10 +231,38 @@ function ProviderProfilePage() {
         return <div>Loading...</div>; // You can replace this with a more sophisticated loading indicator if desired
     }
 
+    const styles = {
+        nameContainer: {
+            display: 'inline-block',
+            position: 'relative',
+        },
+        label: {
+            color: '#388e3c', // Color for "Licensed"
+            fontWeight: 'bold',
+            marginLeft: '10px',
+        },
+        premiumContainer: {
+            display: 'flex',
+            alignItems: 'center',
+            position: 'absolute',
+            top: '0px',
+            right: '-90px',
+        },
+        premiumText: {
+            color: '#5e63b6', // Blue color for "Premium"
+            fontWeight: 'bold',
+            marginRight: '5px',
+        },
+        starIcon: {
+            color: '#ffbf00', // Yellow color for the star
+            fontSize: '1.2rem', // Adjust the size as needed
+        },
+    };
+
+
     // handle "book now" button
     return (
         <Container>
-
             <Box sx={{mt: 4}}>
                 <Breadcrumb paths={[
                     // todo: change breadcrumb!
@@ -206,20 +273,32 @@ function ProviderProfilePage() {
                 ]}/>
                 <Grid container spacing={4} sx={{mt: 2}}>
                     <Grid item xs={3}>
-                        <Avatar variant="square" sx={{width: '100%', height: 200, bgcolor: 'lightblue'}}/>
+                        <Avatar
+                            variant="square"
+                            sx={{width: '100%', height: 200}}
+                            src={profileImage ? URL.createObjectURL(profileImage) : undefined}
+                        />
                     </Grid>
                     <Grid item xs={9}>
-                        <Box sx={{display: "flex", alignItems: 'center', justifyContent: 'space-between'}}>
-                            <Typography variant="h4" gutterBottom>
-                                {provider.firstName} {provider.lastName}
-                            </Typography>
-                            <Box sx={{justifyContent: 'space-between'}}>
-                                {/*<LightBlueButton className = 'px-3 py-2 rounded bg-white mr-3' text='Check Next Availability' onClick={() => console.log('booking button pressed')}></LightBlueButton>*/}
-                                {/*<Link to={`/select-timeslot/${id}`}>*/}
-                                <LightBlueButton className='px-3 py-2 rounded' text='Book Now'
-                                                 onClick={handleBookNow}></LightBlueButton>
-                                {/*</Link>*/}
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                <Box sx={{ position: 'relative' }}>
+                                    <Typography variant="h4" gutterBottom>
+                                        {provider.firstName} {provider.lastName}
+                                    </Typography>
+                                    {provider.isPremium && (
+                                        <Box sx={styles.premiumContainer}>
+                                            <Typography variant="body2" sx={styles.premiumText}>Premium</Typography>
+                                            <StarIcon sx={styles.starIcon} />
+                                        </Box>
+                                    )}
+                                </Box>
                             </Box>
+                            <LightBlueButton
+                                className='px-3 py-2 rounded'
+                                text='Book Now'
+                                onClick={handleBookNow}
+                            />
                         </Box>
 
                         <Box sx={{display: 'flex', alignItems: 'center', mt: 2, justifyContent: 'space-between'}}>
@@ -237,11 +316,18 @@ function ProviderProfilePage() {
                                     </Typography>
                                 )}
                             </Box>
-                            <Typography variant="body2" color="text.secondary">
-                                {offering.serviceType}
-                            </Typography>
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                <Typography variant="body2" color="text.secondary">
+                                    {offering.serviceType}
+                                </Typography>
+                                {offering.isCertified && (
+                                    <Typography variant="body2" style={styles.label}>
+                                        Licensed
+                                    </Typography>
+                                )}
+                            </Box>
                             <Typography variant="body2" gutterBottom>
-                                {offering.location}
+                                {`${provider.country}, ${provider.location}, ${provider.postal}`}
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
                                 Next
@@ -353,106 +439,101 @@ function ProviderProfilePage() {
 
                     </Grid>
                     {totalReviews > 0 && (
-                    <Grid item xs={9}>
+                        <Grid item xs={9}>
 
 
-                        <Box sx={{mt: 4}}>
-                            <Box sx={{display: 'flex', alignItems: 'center', mb: 2}}>
-                                <TextField
-                                    fullWidth
-                                    placeholder="Search in reviews"
-                                    value={searchTerm}
-                                    onChange={handleSearchChange}
-                                    InputProps={{
-                                        endAdornment: (
-                                            <IconButton>
-                                                <SearchIcon/>
-                                            </IconButton>
-                                        )
-                                    }}
-                                />
-                            </Box>
-
-                            <Box sx={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                mb: 2
-                            }}>
-                                <FormControl sx={{display: 'flex', width: "20%"}}>
-                                    <InputLabel sx={{mb: 2}}>Sort by</InputLabel>
-                                    <Select
-                                        value={sortOption}
-                                        onChange={handleSortChange}
-                                        label="Sort"
-                                        displayEmpty
-                                    >
-                                        <MenuItem value="starsAsc">Stars Ascending</MenuItem>
-                                        <MenuItem value="starsDesc">Stars Descending</MenuItem>
-                                        <MenuItem value="dateAsc">Date Ascending</MenuItem>
-                                        <MenuItem value="dateDesc">Date Descending</MenuItem>
-                                    </Select>
-                                </FormControl>
-                                {/*</Box>*/}
-                                <Box sx={{display: 'flex', mb: 2}}>
-                                    {[5, 4, 3, 2, 1].map((star) => (
-                                        <Button
-                                            key={star}
-                                            variant={filterStars === star ? 'contained' : 'outlined'}
-                                            onClick={() => handleFilterStars(star)}
-                                            // fullWidth
-                                            sx={{mr: 1}}
-                                        >
-                                            {star} Stars
-                                        </Button>
-                                    ))}
-                                    <Button
-                                        sx={{mr: 1}}
-                                        variant={filterStars === null ? 'contained' : 'outlined'}
-                                        onClick={() => handleFilterStars(null)}
-                                        // fullWidth
-                                    >
-                                        All Stars
-                                    </Button>
-
+                            <Box sx={{mt: 4}}>
+                                <Box sx={{display: 'flex', alignItems: 'center', mb: 2}}>
+                                    <TextField
+                                        fullWidth
+                                        placeholder="Search in reviews"
+                                        value={searchTerm}
+                                        onChange={handleSearchChange}
+                                        InputProps={{
+                                            endAdornment: (
+                                                <IconButton>
+                                                    <SearchIcon/>
+                                                </IconButton>
+                                            )
+                                        }}
+                                    />
                                 </Box>
-                            </Box>
 
-                            <Divider sx={{mb: 2}}/>
+                                <Box sx={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    mb: 2
+                                }}>
+                                    <FormControl sx={{display: 'flex', width: "20%"}}>
+                                        <InputLabel>Sort by</InputLabel>
+                                        <Select
+                                            value={sortOption}
+                                            onChange={handleSortChange}
+                                            label="Sort"
+                                            displayEmpty
+                                        >
+                                            <MenuItem value="starsAsc">Stars Ascending</MenuItem>
+                                            <MenuItem value="starsDesc">Stars Descending</MenuItem>
+                                            <MenuItem value="dateAsc">Date Oldest</MenuItem>
+                                            <MenuItem value="dateDesc">Date Latest</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                    <FormControl sx={{display: 'flex', width: "20%", ml: 2}}>
+                                        <InputLabel>Star Rating</InputLabel>
+                                        <Select
+                                            value={filterStars !== null ? filterStars.toString() : 'all'}
+                                            onChange={(event) => handleFilterStars(event.target.value !== 'all' ? parseInt(event.target.value, 10) : null)}
+                                            label="Star Rating"
+                                            displayEmpty
+                                        >
+                                            <MenuItem value="all">All Stars</MenuItem>
+                                            {[5, 4, 3, 2, 1].map((star) => (
+                                                <MenuItem key={star} value={star.toString()}>{star} Stars</MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                </Box>
 
-                            {/*todo: update the reviews part once the review controllers etc. are done!*/}
+                                <Divider sx={{mb: 2}}/>
 
-                            {reviews ? filteredReviews.map((review) => (
-                                <Card key={review._id} sx={{mb: 2}}>
-                                    <CardContent>
-                                        <Box sx={{display: 'flex', alignItems: 'center', mb: 1}}>
-                                            <Avatar sx={{mr: 2}}/>
-                                            <Typography
-                                                variant="h6">{review.reviewer.firstName + " " + review.reviewer.lastName}</Typography>
-                                        </Box>
-                                        <Box sx={{display: 'flex', alignItems: 'center', mb: 2}}>
-                                            {/*<GoStarFill className='text-yellow-500'/>*/}
-                                            <Rating precision={0.5} defaultValue={review.rating}
-                                                    readOnly={true}/>
-                                            <Typography variant="body2" sx={{ml: 1}}>
-                                                {review.rating.toFixed(2)} stars
+                                {/*todo: update the reviews part once the review controllers etc. are done!*/}
+
+                                {reviews ? filteredReviews.map((review) => (
+                                    <Card key={review._id} sx={{mb: 2}}>
+                                        <CardContent>
+                                            <Box sx={{display: 'flex', alignItems: 'center', mb: 2}}>
+                                                <Avatar
+                                                    src={reviewerProfileImages[review.reviewer._id] || "../../public/images/profiles/default-profile-image.png"}
+                                                    sx={{mr: 2}}
+                                                    alt={`${review.reviewer.firstName} ${review.reviewer.lastName}`}
+                                                />
+                                                <Typography
+                                                    variant="h6">{review.reviewer.firstName + " " + review.reviewer.lastName}</Typography>
+                                            </Box>
+                                            <Box sx={{display: 'flex', alignItems: 'center', mb: 2}}>
+                                                {/*<GoStarFill className='text-yellow-500'/>*/}
+                                                <Rating precision={0.5} defaultValue={review.rating}
+                                                        readOnly={true}/>
+                                                <Typography variant="body2" sx={{ml: 1}}>
+                                                    {review.rating.toFixed(2)} stars
+                                                </Typography>
+                                            </Box>
+                                            <Typography variant="body2" color="text.secondary" paragraph>
+                                                {review.content}
                                             </Typography>
-                                        </Box>
-                                        <Typography variant="body2" color="text.secondary" paragraph>
-                                            {review.content}
-                                        </Typography>
-                                        <Typography variant="body2" color="text.secondary">
-                                            Reviewed on {new Date(review.createdAt).toLocaleDateString()}
-                                        </Typography>
-                                        {/*<Box sx={{display: 'flex', justifyContent: 'space-between', mt: 2}}>*/}
-                                        {/*    <Button size="small">Helpful</Button>*/}
-                                        {/*    <Button size="small">Report Abuse</Button>*/}
-                                        {/*</Box>*/}
-                                    </CardContent>
-                                </Card>
-                            )) : ""}
-                        </Box>
-                    </Grid> )}
+                                            <Typography variant="body2" color="text.secondary">
+                                                Reviewed on {new Date(review.createdAt).toLocaleDateString()}
+                                            </Typography>
+                                            {/*<Box sx={{display: 'flex', justifyContent: 'space-between', mt: 2}}>*/}
+                                            {/*    <Button size="small">Helpful</Button>*/}
+                                            {/*    <Button size="small">Report Abuse</Button>*/}
+                                            {/*</Box>*/}
+                                        </CardContent>
+                                    </Card>
+                                )) : ""}
+                            </Box>
+                        </Grid>)}
                 </Grid>
             </Box>
         </Container>
