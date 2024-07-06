@@ -132,6 +132,10 @@ export const getCertificate: RequestHandler = async (req, res) => {
 
             const downloadStream = bucket.openDownloadStream(_id);
 
+            // Specify the response type and disposition
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', 'inline; filename="certificate.pdf"');
+
             downloadStream.on('data', (chunk) => {
                 res.write(chunk);
             });

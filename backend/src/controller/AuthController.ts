@@ -60,14 +60,12 @@ export const signup: RequestHandler = async (req, res, next) => {
                 message: "Access token secret not found."
             });
         }
-        const token = jwt.sign({ userId: account._id }, process.env.ACCESS_TOKEN_SECRET);
+        const token = jwt.sign({ userId: account._id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
         // send the token to the user
         res.setHeader('Authorization', 'Bearer ' + token);
         res.status(201).json({
             token,
             accountId: account._id,
-            isProvider: account.isProvider,
-            isPremium: account.isPremium,
         });
     } catch (err: any) {
         let message = '';
@@ -133,14 +131,19 @@ export const login: RequestHandler = async (req, res, next) => {
                 message: "Access token secret not found."
             });
         }
-        const token = jwt.sign({ userId: account._id }, process.env.ACCESS_TOKEN_SECRET);
+
+        let token;
+        console.log(req.body.rememberMe);
+        if (req.body.rememberMe) {
+            token = jwt.sign({ userId: account._id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '7d' });
+        } else {
+            token = jwt.sign({ userId: account._id }, process.env.ACCESS_TOKEN_SECRET,{ expiresIn: '1h' });
+        }
         // Send the token to the user
         res.setHeader('Authorization', 'Bearer ' + token);
         return res.status(200).json({
             token,
             accountId: account._id,
-            isProvider: account.isProvider,
-            isPremium: account.isPremium,
             isAdmin: account.isAdmin
         });
 
