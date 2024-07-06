@@ -6,21 +6,22 @@ import { Types } from 'mongoose';
 interface NotificationInput {
     content: string;
     notificationType: string; // Use string if enum types are causing complexity
-    serviceRequest?: string;
     job?: string;
+    serviceRequest?: string;
     review?: string;
     recipient: string;
 }
 // Create a new notification
 export const createNotification = async (req: Request, res: Response) => {
     try {
-        const { content, serviceRequest, notificationType, job, review, recipient } = req.body;
+        console.log("notification data:", req.body)
+        const { content, notificationType, job, review, recipient, serviceRequest } = req.body;
         const newNotification = new Notification({
             isViewed: false,
             content,
             notificationType,
-            serviceRequest: serviceRequest ? new Types.ObjectId(serviceRequest) : undefined,
             job: job ? new Types.ObjectId(job) : undefined,
+            serviceRequest: serviceRequest ? new Types.ObjectId(serviceRequest) : undefined,
             review: review ? new Types.ObjectId(review) : undefined,
             recipient: new Types.ObjectId(recipient)
         });
@@ -33,14 +34,14 @@ export const createNotification = async (req: Request, res: Response) => {
 
 
 // Refactored to accept parameters directly, NOT from API endpoint
-export async function createNotificationDirect({ content, serviceRequest, notificationType, job, review, recipient }: NotificationInput) {
+export async function createNotificationDirect({ content, notificationType, job, review, recipient, serviceRequest }: NotificationInput) {
     try {
         const newNotification = new Notification({
             isViewed: false,
             content,
             notificationType,
-            serviceRequest: serviceRequest ? new Types.ObjectId(serviceRequest) : undefined,
             job: job ? new Types.ObjectId(job) : undefined,
+            serviceRequest: serviceRequest ? new Types.ObjectId(serviceRequest) : undefined,
             review: review ? new Types.ObjectId(review) : undefined,
             recipient: new Types.ObjectId(recipient)
         });
@@ -79,14 +80,14 @@ export const getNotificationById = async (req: Request, res: Response) => {
 // Update a notification by ID
 export const updateNotification = async (req: Request, res: Response) => {
     try {
-        const { isViewed, content, serviceRequest, job, review, recipient } = req.body;
+        const { isViewed, content, job, review, recipient, serviceRequest } = req.body;
         const updatedNotification = await Notification.findByIdAndUpdate(
             req.params.id,
             {
                 isViewed,
                 content,
-                serviceRequest: serviceRequest ? new Types.ObjectId(serviceRequest) : undefined,
                 job: job ? new Types.ObjectId(job) : undefined,
+                serviceRequest: serviceRequest ? new Types.ObjectId(serviceRequest) : undefined,
                 review: review ? new Types.ObjectId(review) : undefined,
                 recipient: new Types.ObjectId(recipient)
             },

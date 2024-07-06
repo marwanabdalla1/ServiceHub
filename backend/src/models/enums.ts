@@ -31,11 +31,11 @@ export enum ResponseStatus {
 }
 
 export enum RequestStatus {
-    accepted, // 0
-    pending, // 1
-    cancelled, // 2
-    declined, // 3
-    requestorActionNeeded ,
+    accepted = "accepted",
+    pending = "pending",
+    cancelled = "cancelled",
+    declined = "declined",
+    requestorActionNeeded = "action needed from requestor"
 
 }
 

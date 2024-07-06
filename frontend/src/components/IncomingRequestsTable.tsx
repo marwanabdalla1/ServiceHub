@@ -84,7 +84,7 @@ export default function IncomingRequestTable() {
                 };
                 console.log("selected request id:", selectedRequest._id, updateRequestData);
 
-                const updateResponse = await axios.put(`/api/requests/${selectedRequest._id}`, updateRequestData, {
+                const updateResponse = await axios.patch(`/api/requests/${selectedRequest._id}`, updateRequestData, {
                     headers: {Authorization: `Bearer ${token}`}
                 });
                 console.log('Request Updated:', updateResponse.data);
@@ -149,7 +149,7 @@ export default function IncomingRequestTable() {
                 requestStatus: RequestStatus.declined,
             };
             console.log("selected request id:", selectedRequest._id, updateRequestData)
-            const updateResponse = await axios.put(`/api/requests/${selectedRequest._id}`, updateRequestData, {
+            const updateResponse = await axios.patch(`/api/requests/${selectedRequest._id}`, updateRequestData, {
                 headers: {Authorization: `Bearer ${token}`}
             });
             console.log('Request Updated:', updateResponse.data);
@@ -214,7 +214,7 @@ export default function IncomingRequestTable() {
                 requestStatus: RequestStatus.cancelled,
             };
             console.log("selected request id:", selectedRequest._id, updateRequestData)
-            const updateResponse = await axios.put(`/api/requests/${selectedRequest._id}`, updateRequestData, {
+            const updateResponse = await axios.patch(`/api/requests/${selectedRequest._id}`, updateRequestData, {
                 headers: {Authorization: `Bearer ${token}`}
             });
             console.log('Request Updated:', updateResponse.data);
@@ -276,6 +276,7 @@ export default function IncomingRequestTable() {
         // get data from the request (selectedRequest)
         const {requestStatus, job, _id, requestedBy, provider, ...rest} = selectedRequest;
 
+        console.log(selectedRequest)
         // Prepare notification data
         const notificationData = {
             isViewed: false,
@@ -283,7 +284,7 @@ export default function IncomingRequestTable() {
             \n Comment from the provider: ${comment}`,
             serviceRequest: selectedRequest._id,
             recipient: selectedRequest.requestedBy._id,
-            notificationType: 'Time Request Changed',
+            notificationType: 'Timeslot Change Request',
             ...rest,
         };
 
@@ -291,16 +292,43 @@ export default function IncomingRequestTable() {
 
         // generate new notification
         try {
-            const notification = await axios.post("api/notification/", notificationData, {
+            const notification = await axios.post("api/notifications/", notificationData, {
                 headers: {Authorization: `Bearer ${token}`}
             });
             console.log("Notification sent!", notification);
 
+            //  update request status
 
         } catch (notificationError) {
             console.error('Error sending notification:', notificationError);
         }
 
+        try {
+
+            // update the request status
+            const updateRequestData = {
+                requestStatus: RequestStatus.requestorActionNeeded,
+            };
+            console.log("selected request id:", selectedRequest._id, updateRequestData)
+            const updateResponse = await axios.patch(`/api/requests/${selectedRequest._id}`, updateRequestData, {
+                headers: {Authorization: `Bearer ${token}`}
+            });
+            console.log('Request Updated:', updateResponse.data);
+
+            // Update local state to reflect these changes
+            const updatedServiceRequests = serviceRequests.map(req => {
+                if (req._id === selectedRequest._id) {
+                    return {...req, ...updateRequestData};
+                }
+                return req;
+            });
+
+            console.log("updates after sending timeslot change:", updatedServiceRequests);
+            setServiceRequests(updatedServiceRequests);
+            setShowMediaCard(false);
+        } catch (error) {
+            console.error('Error cancelling Request:', error);
+        }
         // cancel the existing timeslot
         setTimeChangePopUp(false);
     };
@@ -349,7 +377,8 @@ export default function IncomingRequestTable() {
                                     <TableHead>
                                         <TableRow>
                                             <TableCell>Type</TableCell>
-                                            <TableCell>Published Date</TableCell>
+                                            <TableCell>Status</TableCell>
+                                            <TableCell>Appointment Date</TableCell>
                                             <TableCell></TableCell>
                                         </TableRow>
                                     </TableHead>

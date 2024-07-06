@@ -84,11 +84,11 @@ export const AccountProvider = ({children}: Props) => {
         localStorage.setItem('token', response?.data.token);
         localStorage.setItem('isProvider', response?.data.isProvider);
         localStorage.setItem('isPremium', response?.data.isPremium);
-        // localStorage.setItem('account', response?.data);
+        localStorage.setItem('account', response?.data);
 
 
         setToken(response?.data.token!);
-        // setAccount(response.data);
+        setAccount(response.data);
     }
 
     const registerUser = async (event: React.FormEvent<HTMLFormElement>, redirect='/') => {

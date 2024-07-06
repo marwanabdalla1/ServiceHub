@@ -11,11 +11,12 @@ const SelectAvailabilityPage: React.FC = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (!isProvider || !token) {
+        console.log("you are in the select availability page:", isProvider(), account, token)
+        if (!isProvider() || !token) {
             // If not a provider, redirect to home or another appropriate page
             navigate('/unauthorized'); // Make sure you have a route for '/unauthorized' or change as needed
         }
-    }, [isProvider, token]);
+    }, [isProvider(), token]);
 
     return (
         <Container maxWidth="lg">

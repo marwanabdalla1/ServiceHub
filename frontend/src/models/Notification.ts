@@ -8,7 +8,7 @@ export interface Notification {
   review?: string;
   updatedAt: string;
   recipient: string;
-  request?:string;
+  serviceRequest?:string;
   job?: string;
-  NotificationType: string;
+  notificationType: string;
 }

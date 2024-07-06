@@ -62,16 +62,8 @@ export const bookTimeSlot = (timeSlot: any, token: string|null) => {
 
 
 export const changeTimeSlot = async (timeSlot: any, token: string|null) => {
-    const requestId = timeSlot.requestId;
+    // const requestId = timeSlot.requestId;
     try {
-        // try to cancel the timeslot first if it is not yet done:
-        const cancelResponse = await axios.patch(`/api/timeslots/cancel-with-request/${requestId}`, {...timeSlot, isUpdate: true}, {
-            headers: {'Authorization': `Bearer ${token}`}
-        });
-
-        console.log(cancelResponse)
-
-
         // Proceed to change the timeslot
         const response = await axios.post('/api/requests/change-timeslots', {...timeSlot, isUpdate: true}, {
             headers: {'Authorization': `Bearer ${token}`}
