@@ -34,6 +34,28 @@ export default function IncomingRequestTable() {
     const {token, account} = useAuth();
     const [timeChangePopUp, setTimeChangePopUp] = useState(false);
 
+    useEffect(() => {
+        console.log(token)
+        if (token && account) {
+            console.log("this is the logged in account in request table:", account)
+            // setLoading(true);
+            axios.get<ServiceRequest[]>(`/api/requests/provider/incoming/${account._id}`, {
+                headers: {Authorization: `Bearer ${token}`}
+            })
+                .then(response => {
+                    console.log("getting requests ...", response.data)
+                    setServiceRequests(response.data);
+                    // setLoading(false);
+                })
+                .catch(error => {
+                    console.error('Failed to fetch service requests:', error);
+                    setServiceRequests([]);
+                    // setError('Failed to load service requests');
+                    // setLoading(false);
+                });
+        }
+    }, [token, account]);
+
     const openModal = (request: Request) => {
         setSelectedRequest(request);
         setIsModalOpen(true);
@@ -318,7 +340,7 @@ export default function IncomingRequestTable() {
             // Update local state to reflect these changes
             const updatedServiceRequests = serviceRequests.map(req => {
                 if (req._id === selectedRequest._id) {
-                    return {...req, ...updateRequestData};
+                    return {...req, ...updateRequestData, timeslot: undefined};
                 }
                 return req;
             });
@@ -332,28 +354,6 @@ export default function IncomingRequestTable() {
         // cancel the existing timeslot
         setTimeChangePopUp(false);
     };
-
-    useEffect(() => {
-        console.log(token)
-        if (token && account) {
-            console.log("this is the logged in account in request table:", account)
-            // setLoading(true);
-            axios.get<ServiceRequest[]>(`/api/requests/provider/incoming/${account._id}`, {
-                headers: {Authorization: `Bearer ${token}`}
-            })
-                .then(response => {
-                    console.log("getting requests ...", response.data)
-                    setServiceRequests(response.data);
-                    // setLoading(false);
-                })
-                .catch(error => {
-                    console.error('Failed to fetch service requests:', error);
-                    setServiceRequests([]);
-                    // setError('Failed to load service requests');
-                    // setLoading(false);
-                });
-        }
-    }, [token]);
 
     return (
         <Box sx={{minWidth: 275, margin: 2}}>
