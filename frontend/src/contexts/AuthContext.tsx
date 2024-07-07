@@ -37,6 +37,7 @@ type AccountContextType = {
     isPremium: () => boolean;
     isProvider: () => boolean;
     isAdmin: () => boolean;
+    isReady: boolean;
 }
 
 type Props = { children: React.ReactNode };
@@ -84,14 +85,14 @@ export const AccountProvider = ({children}: Props) => {
         localStorage.setItem('token', response?.data.token);
         localStorage.setItem('isProvider', response?.data.isProvider);
         localStorage.setItem('isPremium', response?.data.isPremium);
-        // localStorage.setItem('account', response?.data);
+        localStorage.setItem('account', response?.data);
 
 
         setToken(response?.data.token!);
-        // setAccount(response.data);
+        setAccount(response.data);
     }
 
-    const registerUser = async (event: React.FormEvent<HTMLFormElement>) => {
+    const registerUser = async (event: React.FormEvent<HTMLFormElement>,) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
         const newaccount = {
@@ -111,15 +112,12 @@ export const AccountProvider = ({children}: Props) => {
                 console.log(`Status Text: ${response.statusText}`);
 
                 console.log(response.data);
-                navigate('/');
+                // navigate(redirect);
             }
         } catch
-            (error: any) {
-            if (axios.isAxiosError(error) && error.response?.status === 400) {
-                toast.error('User already exists.');
-            } else {
-                toast.error('User registration failed. Please try again.');
-            }
+            (error) {
+            console.error('Error creating user:', error);
+            toast('User registration failed. Please try again.');
         }
     };
 
@@ -144,7 +142,7 @@ export const AccountProvider = ({children}: Props) => {
                     navigate('/admin');
                 } else {
                     toast.success('User logged in successfully');
-                    navigate('/');
+                    // navigate(redirect);
                 }
             }
         } catch (error) {
@@ -196,7 +194,7 @@ export const AccountProvider = ({children}: Props) => {
 
     return (
         <AccountContext.Provider
-            value={{token, account, isProvider, isPremium, registerUser, loginUser, logoutUser, isLoggedIn, isAdmin}}>
+            value={{token, account, isProvider, isPremium, registerUser, loginUser, logoutUser, isLoggedIn, isAdmin, isReady}}>
             {isReady ? children : null}
         </AccountContext.Provider>
     );
