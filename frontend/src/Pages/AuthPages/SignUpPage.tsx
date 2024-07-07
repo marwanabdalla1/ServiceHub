@@ -56,7 +56,9 @@ export default function SignUp() {
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        await registerUser(event, from.pathname);
+        // await registerUser(event, from.pathname);
+        // todo: improve this to enable redirect
+        await registerUser(event);
     };
 
 

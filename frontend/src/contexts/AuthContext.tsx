@@ -30,14 +30,14 @@ const isTokenExpired = (token: string): boolean => {
 type AccountContextType = {
     token: string | null;
     account: Account | null;
-    isReady: boolean;
-    registerUser: (event: React.FormEvent<HTMLFormElement>, redirect:string) => Promise<void>;
-    loginUser: (event: React.FormEvent<HTMLFormElement>, redirect:string) => Promise<void>;
+    registerUser: (event: React.FormEvent<HTMLFormElement>) => Promise<void>;
+    loginUser: (event: React.FormEvent<HTMLFormElement>) => Promise<void>;
     logoutUser: () => void;
     isLoggedIn: () => boolean;
     isPremium: () => boolean;
     isProvider: () => boolean;
     isAdmin: () => boolean;
+    isReady: boolean;
 }
 
 type Props = { children: React.ReactNode };
@@ -48,99 +48,51 @@ export const AccountProvider = ({children}: Props) => {
     const navigate = useNavigate();
     const [token, setToken] = useState<string | null>(null);
     const [isReady, setIsReady] = useState<boolean>(false);
-    const [account, setAccount] = useState<Account | null >(null);
+    const [account, setAccount] = useState<Account | null>(null);
     // const [nextPath, setNextPath] = useState('/');  // Default to home
 
 
     useEffect(() => {
         // const account = localStorage.getItem('account');
         const token = localStorage.getItem('token');
-        // Fetch the item from localStorage and store it in a variable
-        // const accountData = localStorage.getItem('account');
-    // Check if the accountData is not null before parsing
 
         if (token) {
             setToken(token);
         }
-        // if (accountData){
-        //     setAccount(accountData as unknown as Account)
-        // }
-        // setIsReady(true);
+        setIsReady(true);
     }, []);
 
+
     useEffect(() => {
-        let isMounted = true;
-
-        const fetchAccountDetails = async () => {
-            if (!token || isTokenExpired(token)) {
-                console.log('Token is missing or expired');
-                return;
-            }
-
-            try {
-                const response = await axios.get('/api/account', {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                if (isMounted) {
-                    setAccount(response.data);
-                    console.log("Account fetched and set:", response.data);
+        if (token) {
+            axios.get('/api/account', {
+                headers: {
+                    Authorization: `Bearer ${token}`
                 }
-            } catch (error) {
-                console.error('Error fetching user data:', error);
-            }
-
-            setIsReady(true);
-        };
-
-        if (isMounted && token) {
-            fetchAccountDetails();
+            })
+                .then(response => {
+                    console.log("account:", response.data)
+                    setAccount(response.data);
+                    localStorage.setItem('account', response?.data);
+                })
+                .catch(error => {
+                    console.error('Error fetching user data:', error);
+                });
         }
-
-        return () => {
-            isMounted = false;
-        };
     }, [token]);
 
-
-
-
-
-    // useEffect(() => {
-    //     if (token) {
-    //         axios.get('/api/account', {
-    //             headers: {
-    //                 Authorization: `Bearer ${token}`
-    //             }
-    //         })
-    //             .then(response => {
-    //                 console.log("account:", response.data)
-    //                 setAccount(response.data);
-    //                 localStorage.setItem('account', response?.data);
-
-    //             })
-    //             .catch(error => {
-    //                 console.error('Error fetching user data:', error);
-    //             });
-    //     }
-    // }, [token]);
-    //
     function handleResponse(response: AxiosResponse<any>) {
         localStorage.setItem('token', response?.data.token);
         localStorage.setItem('isProvider', response?.data.isProvider);
         localStorage.setItem('isPremium', response?.data.isPremium);
         localStorage.setItem('account', response?.data);
-    //
-    //
+
+
         setToken(response?.data.token!);
-        console.log("setting account in handle response")
         setAccount(response.data);
     }
 
-
-
-
-
-    const registerUser = async (event: React.FormEvent<HTMLFormElement>, redirect='/') => {
+    const registerUser = async (event: React.FormEvent<HTMLFormElement>,) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
         const newaccount = {
@@ -160,19 +112,16 @@ export const AccountProvider = ({children}: Props) => {
                 console.log(`Status Text: ${response.statusText}`);
 
                 console.log(response.data);
-                navigate(redirect);
+                // navigate(redirect);
             }
         } catch
-            (error: any) {
-            if (axios.isAxiosError(error) && error.response?.status === 400) {
-                toast.error('User already exists.');
-            } else {
-                toast.error('User registration failed. Please try again.');
-            }
+            (error) {
+            console.error('Error creating user:', error);
+            toast('User registration failed. Please try again.');
         }
     };
 
-    const loginUser = async (event: React.FormEvent<HTMLFormElement>, redirect:string='/') => {
+    const loginUser = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
         const user = {
@@ -193,7 +142,7 @@ export const AccountProvider = ({children}: Props) => {
                     navigate('/admin');
                 } else {
                     toast.success('User logged in successfully');
-                    navigate(redirect);
+                    // navigate(redirect);
                 }
             }
         } catch (error) {
@@ -211,7 +160,6 @@ export const AccountProvider = ({children}: Props) => {
 
         // Clear the token and account state
         setToken(null);
-        console.log("logging out user now")
         setAccount(null);
 
         if (isAdmin()) {
