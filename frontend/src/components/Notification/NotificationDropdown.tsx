@@ -4,26 +4,23 @@ import { Notification } from '../../models/Notification'; // Import Notification
 
 interface NotificationDropdownProps {
   data: Notification[];
-  markAsRead: (id: string) => void;
   header?: string;
 }
 
 const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   data,
-  markAsRead,
   header = 'Notifications',
 }) => {
   return (
-    <div className="absolute right-0 mt-2 w-80 bg-white shadow-lg rounded-lg">
-      <div className="p-4 border-b border-gray-200">
+    <div className="absolute right-0 mt-2 w-96 bg-white shadow-lg rounded-lg">
+      <div className="p-4 border-b border-gray-200 rounded-t-lg">
         <h3 className="text-lg font-semibold">{header}</h3>
       </div>
-      <div className="max-h-60 overflow-y-auto">
+      <div className="max-h-96 overflow-y-auto rounded-b-lg">
         {data.map(notification => (
           <NotificationItem
             key={notification._id}
             {...notification}
-            markAsRead={markAsRead}
           />
         ))}
       </div>

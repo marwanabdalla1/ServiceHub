@@ -409,30 +409,6 @@ export const handleChangeTimeslot: RequestHandler = async (req, res, next) => {
     }
 };
 
-// export const handleChangeTimeslot: RequestHandler = async (req, res, next) => {
-//     const { createdById, requestId } = req.body;
-//
-//     try {
-//         const result = await bookTimeslot(req, res, next);  // Assume bookTimeslot now just handles logic and throws
-//         console.log("request controller change timeslot result:", result)
-//         res.json(result);
-//         await createNotificationDirect({
-//             content: `The timeslot of the existing request ${requestId} has been successfully changed.`,
-//             serviceRequest: requestId,
-//             notificationType: NotificationType.timeRequestChanged,
-//             recipient: createdById
-//         });
-//     } catch (error) {
-//         console.error("Error in handling timeslot change:", error);
-//         res.status(500).json({ message: "Failed to process timeslot change." });
-//         await createNotificationDirect({
-//             content: `Failed to change the timeslot of the existing request ${requestId}.`,
-//             serviceRequest: requestId,
-//             notificationType: NotificationType.timeRequestChanged,
-//             recipient: createdById
-//         });
-//     }
-// };
 
 
 export const getRequestById: RequestHandler = async (req, res) => {
