@@ -1,7 +1,7 @@
 import React from 'react';
 import { Container, Button, Box, Typography, Grid, Link as MuiLink} from '@mui/material';
 import FAQAccordion from '../components/FAQAccordion';
-import FeedbackForm from "../components/FeedbackForm"; // Import the reusable component
+import FeedbackForm from "../components/FeedbackForm";
 
 const FAQPage = () => {
     // example FAQs
@@ -16,39 +16,37 @@ const FAQPage = () => {
     ];
 
     return (
-
         <Container maxWidth="lg">
             <Grid container spacing={2} sx={{ mt: 4, mb: 4 }}>
-                <Grid item xs={12} md={4}>
+                {/* FAQs Section */}
+                <Grid item xs={12}>
                     <Typography variant="h4" gutterBottom>
                         Frequently Asked Questions
                     </Typography>
-                    {/*todo: change the email*/}
-                    <Box sx={{ my: 4, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 0 }}>
+                    {faqs.map((faq, index) => (
+                        <FAQAccordion key={index} question={faq.question} answer={faq.answer.split('\n').map((line, idx) => (
+                            <span key={idx}>{line}<br /></span>
+                        ))} />
+                    ))}
+                </Grid>
+                
+                {/* Contact Us and Provide Feedback Section */}
+                <Grid item xs={12}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', mt: 4 }}>
                         <Typography variant="subtitle1" sx={{ mb: 2 }}>
                             Got more questions? Feel free to contact us for more information.
                         </Typography>
                         <Button variant="contained" color="primary" href="mailto:servicehub.seba22@yoursite.com">
                             Contact us
                         </Button>
-                    <Box sx={{ mt: 5}}>
-                        <Typography variant="subtitle1" sx={{  }}>
+
+                        <Box sx={{ mt: 5 }}>
+                            <Typography variant="subtitle1">
                                 Enjoyed ServiceHub? Or have some suggestions to tell us? We would love to hear your feedback!
                             </Typography>
-                        <FeedbackForm />
+                            <FeedbackForm />
+                        </Box>
                     </Box>
-
-                    </Box>
-                </Grid>
-                <Grid item xs={12} md={8} sx={{ overflowY: 'auto', maxHeight: '100vh' }}>
-                    {/*{faqs.map((faq, index) => (*/}
-                    {/*    <FAQAccordion key={index} question={faq.question} answer={faq.answer} />*/}
-                    {/*))}*/}
-                    {faqs.map((faq, index) => (
-                        <FAQAccordion key={index} question={faq.question} answer={faq.answer.split('\n').map((line, idx) => (
-                            <span key={idx}>{line}<br /></span>
-                        ))} />
-                    ))}
                 </Grid>
             </Grid>
         </Container>
