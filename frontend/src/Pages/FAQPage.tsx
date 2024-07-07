@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container, Button, Box, Typography, Grid, Link as MuiLink} from '@mui/material';
+import { Container, Button, Box, Typography, Grid, Link as MuiLink, Divider} from '@mui/material';
 import FAQAccordion from '../components/FAQAccordion';
 import FeedbackForm from "../components/FeedbackForm";
 
@@ -23,6 +23,7 @@ const FAQPage = () => {
                     <Typography variant="h4" gutterBottom>
                         Frequently Asked Questions
                     </Typography>
+                    <Divider sx={{ mb: 4 }} />
                     {faqs.map((faq, index) => (
                         <FAQAccordion key={index} question={faq.question} answer={faq.answer.split('\n').map((line, idx) => (
                             <span key={idx}>{line}<br /></span>
