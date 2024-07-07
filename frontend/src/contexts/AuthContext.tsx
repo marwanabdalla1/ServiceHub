@@ -1,6 +1,6 @@
 import {Account} from "../models/Account";
 import {createContext, useEffect, useState} from "react";
-import {useNavigate} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 import * as React from "react";
 import axios, {AxiosResponse} from 'axios';
 import {toast} from "react-toastify";
@@ -46,6 +46,8 @@ const AccountContext = createContext<AccountContextType | undefined>(undefined);
 
 export const AccountProvider = ({children}: Props) => {
     const navigate = useNavigate();
+    const location = useLocation();
+
     const [token, setToken] = useState<string | null>(null);
     const [isReady, setIsReady] = useState<boolean>(false);
     const [account, setAccount] = useState<Account | null>(null);
@@ -112,6 +114,9 @@ export const AccountProvider = ({children}: Props) => {
                 console.log(`Status Text: ${response.statusText}`);
 
                 console.log(response.data);
+                const from = location.state?.from || '/';  // Default path if no redirect was set
+                navigate(from);  // Redirect to the intended page or a default path
+
                 // navigate(redirect);
             }
         } catch
@@ -142,7 +147,9 @@ export const AccountProvider = ({children}: Props) => {
                     navigate('/admin');
                 } else {
                     toast.success('User logged in successfully');
-                    // navigate(redirect);
+
+                    const from = location.state?.from || '/';  // Default path if no redirect was set
+                    navigate(from);  // Redirect to the intended page or a default path
                 }
             }
         } catch (error) {
