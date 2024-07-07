@@ -42,12 +42,18 @@ if (request.requestStatus === RequestStatus.cancelled ){
         else if (request.requestStatus === RequestStatus.accepted ){
           return(<BlackButton text="Cancel Request" onClick={onCancel} sx={{ marginRight:"1rem" }}/>);
         }
+        else if (request.requestStatus === RequestStatus.requestorActionNeeded ){
+            return(
+                <>
+                <BlackButton text="Cancel Request" onClick={onCancel} sx={{ marginRight:"1rem" }}/>
+                <BlackButton text="Action Needed: Change Time" onClick={() => handleProposeNewTime(request)} /> </>
+            );
+        }
          else {
           console.log(request);
         return (
           <>
           <BlackButton text="Cancel Request" onClick={onCancel} sx={{ marginRight:"1rem" }}/>
-          <BlackButton text="Change Time" onClick={() => handleProposeNewTime(request)} />
           </>
         );
     }
@@ -92,9 +98,12 @@ if (request.requestStatus === RequestStatus.cancelled ){
         <Typography variant="body2">
           Service Type: {request.serviceType}
         </Typography>
-        <Typography variant="body2">
-          Appointment Time: {formatDateTime(request.appointmentStartTime)}
-        </Typography>
+          <Typography variant="body2">
+              Appointment Start Time: {formatDateTime(request.timeslot?.start)}
+          </Typography>
+          <Typography variant="body2">
+              Appointment End Time: {formatDateTime(request.timeslot?.end)}
+          </Typography>
         <Typography variant="body2" sx={{ marginBottom: '2rem'}}>
           Service Fee: {request.serviceFee}
         </Typography>

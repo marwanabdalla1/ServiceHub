@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, dateFnsLocalizer, SlotInfo } from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import './calendarStyles.css'; 
+import './calendarStyles.css';
 import { format, startOfWeek, parseISO, getDay, startOfDay, endOfDay } from 'date-fns';
 import { enUS } from '@mui/material/locale';
 import {
@@ -150,11 +150,11 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration }: ServiceSched
                         (newTimeSlot.start < TimeSlot.transitEnd && newTimeSlotEnd > TimeSlot.transitStart)
                     );
                 } else{
-                return (
-                    (newTimeSlot.start < TimeSlot.end && newTimeSlot.end > TimeSlot.start) ||
-                    (newTimeSlot.start < TimeSlot.end && newTimeSlotEnd > TimeSlot.start)
+                    return (
+                        (newTimeSlot.start < TimeSlot.end && newTimeSlot.end > TimeSlot.start) ||
+                        (newTimeSlot.start < TimeSlot.end && newTimeSlotEnd > TimeSlot.start)
 
-                );}
+                    );}
 
             });
 
@@ -719,9 +719,9 @@ function AvailabilityCalendar({ Servicetype, defaultSlotDuration }: ServiceSched
                 </DialogActions>
             </Dialog>
             {/*<Box display="flex" justifyContent="flex-end" sx={{ mt: 4 }}>*/}
-                {/*<Button variant="contained" color="primary" onClick={saveAvailability}>*/}
-                {/*    Save Availability*/}
-                {/*</Button>*/}
+            {/*<Button variant="contained" color="primary" onClick={saveAvailability}>*/}
+            {/*    Save Availability*/}
+            {/*</Button>*/}
             {/*</Box>*/}
         </div>
     );

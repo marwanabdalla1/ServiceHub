@@ -57,7 +57,10 @@ export default function SignIn() {
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        await loginUser(event, from.pathname);
+        // todo: improve this
+        // await loginUser(event, from.pathname);
+        await loginUser(event);
+
     };
 
     const handleLogoClick = () => {
