@@ -141,12 +141,12 @@ const generateCancellationEmail = (firstName: string, serviceType: ServiceType, 
           We are sorry to inform you that your scheduled appointment for ${serviceType} on ${formattedStartTime} has been cancelled. Please try rebooking another appointment. We apologize for any inconvenience.
           <br /><br />
           </div>
-          <br /><br />
           Thank you for understanding!
           <br /><br />
           Please feel free to contact us in case of any issues. 
             <a href="servicehub.seba22@gmail.com" style="color: #007bff;">servicehub.seba22@gmail.com</a>.
-          Kind regards,
+            <br /><br />
+            Kind regards,
           <br />
           <b>Your ServiceHub Team</b>
         </td>
