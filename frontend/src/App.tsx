@@ -128,7 +128,7 @@ function MainRoutes({search, setSearch}: {search: any, setSearch: any}) {
                 <Route path="/jobs/requestHistory" element={<RequestHistoryPage/>}/>
                 <Route path="/jobs/offeredServices" element={<OfferedServicesPage/>}/>
                 <Route path="/incomingRequests" element={<IncomingRequestsPage/>}/>
-                {/*<Route path="/incoming" element={<CombinedServicePage/>}/>*/}
+                <Route path="/incoming" element={<CombinedServicePage/>}/>
 
                 <Route path="/addservice" element={<AddServicePage/>}/>
                 {/*<Route path="/provider-profile/:id" element={<ProviderProfilePage/>}/>*/}
