@@ -48,6 +48,8 @@ import AdminUserDataPage from "./Pages/AdminPanel/AdminUserDataPage";
 import AdminHomePage from "./Pages/AdminPanel/AdminHomePage";
 import ErrorPage from "./Pages/ErrorPage";
 import CombinedServicePage from "./Pages/CombinedIncomingPage";
+import Footer from './components/Footer';
+import { Divider } from '@mui/material';
 
 function App() {
     const [search, setSearch] = useState('');
@@ -172,6 +174,8 @@ function MainRoutes({search, setSearch}: {search: any, setSearch: any}) {
                 <Route path="*" element={<ErrorPage title="404 Not Found" message="The page you are looking for does not exist." />} />
                 {/*<Route path="*" element={<h1>Not Found</h1>}/>*/}
             </Routes>
+            <Divider variant="middle" style={{ backgroundColor: 'white', height: '50px' }} />
+            <Footer/>
         </div>
     );
 }

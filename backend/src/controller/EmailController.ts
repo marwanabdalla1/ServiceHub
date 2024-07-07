@@ -3,26 +3,26 @@ import nodemailer from 'nodemailer';
 import * as dotenv from "dotenv";
 import crypto from 'crypto';
 import Account from "../models/account";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 dotenv.config();
 
 interface OTPStore {
-    [email: string]: string;
+  [email: string]: string;
 }
 
 const otpStore: OTPStore = {};
 
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.MY_EMAIL,
-        pass: process.env.MY_PASSWORD
-    }
+  service: 'gmail',
+  auth: {
+    user: process.env.MY_EMAIL,
+    pass: process.env.MY_PASSWORD
+  }
 });
 
-const generatePasswordResetEmail = (firstName: any, otp:string) => {
-    return `
+const generatePasswordResetEmail = (firstName: any, otp: string) => {
+  return `
     <div style="font-family: Arial, sans-serif; margin: 0; padding: 0;">
       <table style="max-width: 600px; margin: auto; border-collapse: collapse; border: 1px solid #ddd;">
         <tr>
@@ -70,32 +70,32 @@ const generatePasswordResetEmail = (firstName: any, otp:string) => {
  * @param res
  */
 export const sendResetPasswordEmail = async (req: Request, res: Response): Promise<void> => {
-    const { otp, email } = req.body;
+  const { otp, email } = req.body;
 
-    try {
-        const account = await Account.findOne({ email: email });
-        if (!account) {
-             res.status(400).json({
-                error: "User with this email does not exist"
-            });
-             return;
-        }
-
-        otpStore[email] = otp;
-
-        const mailOptions = {
-            from: process.env.MY_EMAIL,
-            to: email,
-            subject: 'Reset Password OTP',
-            text: `Your OTP for password reset is: ${otp}`,
-            html: generatePasswordResetEmail(account?.get("firstName"), otp)
-        };
-
-        await transporter.sendMail(mailOptions);
-        res.status(200).send('OTP sent to email');
-    } catch (error:any) {
-        res.status(500).send(error.toString());
+  try {
+    const account = await Account.findOne({ email: email });
+    if (!account) {
+      res.status(400).json({
+        error: "User with this email does not exist"
+      });
+      return;
     }
+
+    otpStore[email] = otp;
+
+    const mailOptions = {
+      from: process.env.MY_EMAIL,
+      to: email,
+      subject: 'Reset Password OTP',
+      text: `Your OTP for password reset is: ${otp}`,
+      html: generatePasswordResetEmail(account?.get("firstName"), otp)
+    };
+
+    await transporter.sendMail(mailOptions);
+    res.status(200).send('OTP sent to email');
+  } catch (error: any) {
+    res.status(500).send(error.toString());
+  }
 };
 
 /**
@@ -104,24 +104,24 @@ export const sendResetPasswordEmail = async (req: Request, res: Response): Promi
  * @param res
  */
 export const setNewPassword: RequestHandler = async (req, res) => {
-    const { email, password } = req.body;
+  const { email, password } = req.body;
 
-    try {
-        // Hash the user's password
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const updates = { password: hashedPassword };
-        const updatedUser = await Account.findOneAndUpdate({ email: email }, updates, {
-            new: true,
-            upsert: true,
-            strict: false
-        });
-        if (!updatedUser) {
-            return res.status(404).send({ message: 'User not found' });
-        }
-        res.status(200).send('Password reset successful');
-    } catch (error: any) {
-        res.status(500).send(error.toString());
+  try {
+    // Hash the user's password
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const updates = { password: hashedPassword };
+    const updatedUser = await Account.findOneAndUpdate({ email: email }, updates, {
+      new: true,
+      upsert: true,
+      strict: false
+    });
+    if (!updatedUser) {
+      return res.status(404).send({ message: 'User not found' });
     }
+    res.status(200).send('Password reset successful');
+  } catch (error: any) {
+    res.status(500).send(error.toString());
+  }
 };
 
 /**
@@ -130,25 +130,25 @@ export const setNewPassword: RequestHandler = async (req, res) => {
  * @param res
  */
 export const sendCancellationNotificationEmail = (req: Request, res: Response): void => {
-    const { email, serviceType, startTime, name } = req.body;
+  const { email, serviceType, startTime, name } = req.body;
 
-    const mailOptions = {
-        from: process.env.MY_EMAIL,
-        to: email,
-        subject: `${serviceType} Appointment Cancellation`,
-        text: `Dear ${name}, \n We are sorry to inform you that your scheduled service appointment for ${serviceType} at ${startTime} has been cancelled. \n Please find an alternative timeslot. \n Thank you for understanding. \n Kind regards, \n The ServiceHub Team`
-    };
+  const mailOptions = {
+    from: process.env.MY_EMAIL,
+    to: email,
+    subject: `${serviceType} Appointment Cancellation`,
+    text: `Dear ${name}, \n We are sorry to inform you that your scheduled service appointment for ${serviceType} at ${startTime} has been cancelled. \n Please find an alternative timeslot. \n Thank you for understanding. \n Kind regards, \n The ServiceHub Team`
+  };
 
-    transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-            res.status(500).send(error.toString());
-        } else {
-            res.status(200).send(`Cancellation notification sent to  sent to ${email}`);
-        }
-    });
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      res.status(500).send(error.toString());
+    } else {
+      res.status(200).send(`Cancellation notification sent to  sent to ${email}`);
+    }
+  });
 };
 
 function formatDateTime(startTime: any) {
-    throw new Error('Function not implemented.');
+  throw new Error('Function not implemented.');
 }
 
