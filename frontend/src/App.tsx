@@ -47,6 +47,7 @@ import VerifyCertificatePage from "./Pages/AdminPanel/VerifyCertificatePage";
 import AdminUserDataPage from "./Pages/AdminPanel/AdminUserDataPage";
 import AdminHomePage from "./Pages/AdminPanel/AdminHomePage";
 import ErrorPage from "./Pages/ErrorPage";
+import CombinedServicePage from "./Pages/CombinedIncomingPage";
 
 function App() {
     const [search, setSearch] = useState('');
@@ -122,10 +123,13 @@ function MainRoutes({search, setSearch}: {search: any, setSearch: any}) {
                 <Route path="/forgetPassword/resetPassword" element={<ResetPasswordPage/>}/>
                 <Route path="/forgetPassword/success" element={<ResetPasswordSuccessPage/>}/>
                 <Route path="/filter" element={<FilterPage/>}/>
+
                 <Route path="/jobs/receivedServices" element={<ReceivedServicesPage/>}/>
                 <Route path="/jobs/requestHistory" element={<RequestHistoryPage/>}/>
                 <Route path="/jobs/offeredServices" element={<OfferedServicesPage/>}/>
                 <Route path="/incomingRequests" element={<IncomingRequestsPage/>}/>
+                {/*<Route path="/incoming" element={<CombinedServicePage/>}/>*/}
+
                 <Route path="/addservice" element={<AddServicePage/>}/>
                 {/*<Route path="/provider-profile/:id" element={<ProviderProfilePage/>}/>*/}
                 <Route path="/select-availability" element={<SelectAvailabilityPage/>}/>
