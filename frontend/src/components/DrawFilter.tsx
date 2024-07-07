@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useState } from 'react';
 import Drawer from '@mui/joy/Drawer';
 import Button from '@mui/joy/Button';
 import Card from '@mui/joy/Card';
@@ -33,6 +33,10 @@ import BuildIcon from '@mui/icons-material/Build';
 import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
 import Box from '@mui/material/Box';
 
+const germanCities = [
+  'Berlin', 'Munich', 'Hamburg', 'Cologne', 'Frankfurt', 'Stuttgart', 'Düsseldorf', 'Dortmund', 'Essen', 'Leipzig'
+];
+
 interface DrawerFilterProps {
   openDrawer: boolean;
   toggleDrawer: () => void;
@@ -40,248 +44,272 @@ interface DrawerFilterProps {
     type: string;
     priceRange: number[];
     locations: string[];
-    isLicensed?: boolean; // Allow it to be undefined
+    isLicensed?: boolean;
   };
-  onPriceChange: (value: number[]) => void;
-  onLocationChange: (value: string[]) => void;
-  onTypeChange: (value: string) => void;
-  onLicensedChange: (value?: boolean) => void; // Allow it to be undefined
+  onApplyFilters: (filterState: {
+    type: string;
+    priceRange: number[];
+    locations: string[];
+    isLicensed?: boolean;
+  }) => void;
   onClearFilters: () => void;
 }
 
-const germanCities = [
-  'Berlin', 'Munich', 'Hamburg', 'Cologne', 'Frankfurt', 'Stuttgart', 'Düsseldorf', 'Dortmund', 'Essen', 'Leipzig'
-];
-
 export const DrawerFilter: React.FC<DrawerFilterProps> = ({
-  toggleDrawer, openDrawer, filterState, onPriceChange, onLocationChange, onTypeChange, onLicensedChange, onClearFilters
+  toggleDrawer, openDrawer, filterState, onApplyFilters, onClearFilters
 }) => {
+  const [localFilterState, setLocalFilterState] = useState(filterState);
 
   const handlePriceChange = (event: Event, newValue: number | number[]) => {
-    onPriceChange(newValue as number[]);
+    setLocalFilterState(prevState => ({
+      ...prevState,
+      priceRange: newValue as number[]
+    }));
   };
 
   const handleLocationChange = (event: SelectChangeEvent<string[]>) => {
     const {
       target: { value },
     } = event;
-    onLocationChange(typeof value === 'string' ? value.split(',') : value);
+    setLocalFilterState(prevState => ({
+      ...prevState,
+      locations: typeof value === 'string' ? value.split(',') : value
+    }));
   };
 
   const handleTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onTypeChange(event.target.value);
+    setLocalFilterState(prevState => ({
+      ...prevState,
+      type: event.target.value
+    }));
   };
 
   const handleLicensedChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onLicensedChange(event.target.checked ? true : undefined); // Set to undefined if unchecked
+    setLocalFilterState(prevState => ({
+      ...prevState,
+      isLicensed: event.target.checked ? true : undefined
+    }));
+  };
+
+  const handleApplyFilters = () => {
+    onApplyFilters(localFilterState);
+    toggleDrawer();
   };
 
   return (
-      <Drawer
-        size="md"
-        variant="plain"
-        open={openDrawer}
-        onClose={toggleDrawer}
-        slotProps={{
-          content: {
-            sx: {
-              bgcolor: 'transparent',
-              p: { md: 3, sm: 0 },
-              boxShadow: 'none',
-            },
+    <Drawer
+      size="md"
+      variant="plain"
+      open={openDrawer}
+      onClose={toggleDrawer}
+      slotProps={{
+        content: {
+          sx: {
+            bgcolor: 'transparent',
+            p: { md: 3, sm: 0 },
+            boxShadow: 'none',
           },
+        },
+      }}
+    >
+      <Sheet
+        sx={{
+          borderRadius: 'md',
+          p: 2,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2,
+          height: '100%',
+          overflow: 'auto',
         }}
       >
-        <Sheet
-          sx={{
-            borderRadius: 'md',
-            p: 2,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 2,
-            height: '100%',
-            overflow: 'auto',
-          }}
-        >
-          <DialogTitle>Filters</DialogTitle>
-          <ModalClose />
-          <Divider sx={{ mt: 'auto' }} />
-          <DialogContent sx={{ gap: 2 }}>
-            <FormControl>
-              <FormLabel sx={{ typography: 'title-md', fontWeight: 'bold' }}>
-                Service type
-              </FormLabel>
-              <RadioGroup
-                value={filterState.type}
-                onChange={handleTypeChange}
+        <DialogTitle>Filters</DialogTitle>
+        <ModalClose />
+        <Divider sx={{ mt: 'auto' }} />
+        <DialogContent sx={{ gap: 2 }}>
+          <FormControl>
+            <FormLabel sx={{ typography: 'title-md', fontWeight: 'bold' }}>
+              Service type
+            </FormLabel>
+            <RadioGroup
+              value={localFilterState.type}
+              onChange={handleTypeChange}
+            >
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns:
+                    'repeat(auto-fill, minmax(140px, 1fr))',
+                  gap: 1.5,
+                }}
               >
-                <Box
-                  sx={{
-                    display: 'grid',
-                    gridTemplateColumns:
-                      'repeat(auto-fill, minmax(140px, 1fr))',
-                    gap: 1.5,
-                  }}
-                >
-                  {[
-                    {
-                      name: 'Bike Repair',
-                      icon: <DirectionsBikeIcon />,
-                    },
-                    {
-                      name: 'Moving',
-                      icon: <LocalShippingIcon />,
-                    },
-                    {
-                      name: 'Babysitting',
-                      icon: <ChildFriendlyIcon />,
-                    },
-                    {
-                      name: 'Tutoring',
-                      icon: <SchoolIcon />,
-                    },
-                    {
-                      name: 'Petsitting',
-                      icon: <PetsIcon />,
-                    },
-                    {
-                      name: 'Landscaping',
-                      icon: <SpaIcon />,
-                    },
-                    {
-                      name: 'Remodeling',
-                      icon: <BuildIcon />,
-                    },
-                    {
-                      name: 'Cleaning',
-                      icon: <CleaningServicesIcon />,
-                    },
-                  ].map((item) => (
-                    <Card
-                      key={item.name}
-                      sx={{
-                        boxShadow: 'none',
-                        '&:hover': { bgcolor: 'background.level1' },
-                      }}
-                    >
-                      <CardContent>
-                        {item.icon}
-                        <Typography level="title-md">{item.name}</Typography>
-                      </CardContent>
-                      <Radio
-                        disableIcon
-                        overlay
-                        checked={filterState.type === item.name}
-                        variant="outlined"
-                        color="neutral"
-                        value={item.name}
-                        sx={{ mt: -2 }}
-                        slotProps={{
-                          action: {
-                            sx: {
-                              ...(filterState.type === item.name && {
-                                borderWidth: 2,
-                                borderColor:
-                                  'var(--joy-palette-primary-outlinedBorder)',
-                              }),
-                              '&:hover': {
-                                bgcolor: 'transparent',
-                              },
+                {[
+                  {
+                    name: 'Bike Repair',
+                    icon: <DirectionsBikeIcon />,
+                  },
+                  {
+                    name: 'Moving',
+                    icon: <LocalShippingIcon />,
+                  },
+                  {
+                    name: 'Babysitting',
+                    icon: <ChildFriendlyIcon />,
+                  },
+                  {
+                    name: 'Tutoring',
+                    icon: <SchoolIcon />,
+                  },
+                  {
+                    name: 'Petsitting',
+                    icon: <PetsIcon />,
+                  },
+                  {
+                    name: 'Landscaping',
+                    icon: <SpaIcon />,
+                  },
+                  {
+                    name: 'Remodeling',
+                    icon: <BuildIcon />,
+                  },
+                  {
+                    name: 'Cleaning',
+                    icon: <CleaningServicesIcon />,
+                  },
+                ].map((item) => (
+                  <Card
+                    key={item.name}
+                    sx={{
+                      boxShadow: 'none',
+                      '&:hover': { bgcolor: 'background.level1' },
+                    }}
+                  >
+                    <CardContent>
+                      {item.icon}
+                      <Typography level="title-md">{item.name}</Typography>
+                    </CardContent>
+                    <Radio
+                      disableIcon
+                      overlay
+                      checked={localFilterState.type === item.name}
+                      variant="outlined"
+                      color="neutral"
+                      value={item.name}
+                      sx={{ mt: -2 }}
+                      slotProps={{
+                        action: {
+                          sx: {
+                            ...(localFilterState.type === item.name && {
+                              borderWidth: 2,
+                              borderColor:
+                                'var(--joy-palette-primary-outlinedBorder)',
+                            }),
+                            '&:hover': {
+                              bgcolor: 'transparent',
                             },
                           },
-                        }}
-                      />
-                    </Card>
+                        },
+                      }}
+                    />
+                  </Card>
+                ))}
+              </Box>
+            </RadioGroup>
+          </FormControl>
+
+          <Typography level="title-md" fontWeight="bold" sx={{ mt: 2 }}>
+            Booking options
+          </Typography>
+          <FormControl orientation="horizontal">
+            <Box sx={{ flex: 1, pr: 1 }}>
+              <FormLabel sx={{ typography: 'title-sm' }}>
+                Certified Service
+              </FormLabel>
+              <FormHelperText sx={{ typography: 'body-sm' }}>
+                Show service providers with verified credentials.
+              </FormHelperText>
+            </Box>
+            <Switch
+              checked={localFilterState.isLicensed ?? false}
+              onChange={handleLicensedChange}
+            />
+          </FormControl>
+
+          <Typography level="title-md" fontWeight="bold" sx={{ mt: 2 }}>
+            Price Range
+          </Typography>
+          <FormControl sx={{ width: '100%', mt: 2 }}>
+            <Slider
+              sx={{ width: '90%', mx: 'auto' }}
+              value={localFilterState.priceRange}
+              onChange={handlePriceChange}
+              valueLabelDisplay="auto"
+              min={15}
+              max={60}
+              step={1}
+              marks={[
+                { value: 15, label: '$15' },
+                { value: 37.5, label: '$37.5' },
+                { value: 60, label: '$60' }
+              ]}
+            />
+          </FormControl>
+
+          <Typography level="title-md" fontWeight="bold" sx={{ mt: 2 }}>
+            Location
+          </Typography>
+          <FormControl sx={{ width: '100%', mt: 2 }}>
+            <Select
+              multiple
+              value={localFilterState.locations}
+              onChange={handleLocationChange}
+              displayEmpty
+              renderValue={(selected) => (
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                  {selected.length === 0 ? <em>Select City</em> : null}
+                  {selected.map((value) => (
+                    <Chip key={value} label={value} />
                   ))}
                 </Box>
-              </RadioGroup>
-            </FormControl>
-
-            <Typography level="title-md" fontWeight="bold" sx={{ mt: 2 }}>
-              Booking options
-            </Typography>
-            <FormControl orientation="horizontal">
-              <Box sx={{ flex: 1, pr: 1 }}>
-                <FormLabel sx={{ typography: 'title-sm' }}>
-                  Certified Service
-                </FormLabel>
-                <FormHelperText sx={{ typography: 'body-sm' }}>
-                  Show service providers with verified credentials.
-                </FormHelperText>
-              </Box>
-              <Switch
-                checked={filterState.isLicensed ?? false}
-                onChange={handleLicensedChange}
-              />
-            </FormControl>
-
-            <Typography level="title-md" fontWeight="bold" sx={{ mt: 2 }}>
-              Price Range
-            </Typography>
-            <FormControl sx={{ width: '100%', mt: 2 }}>
-              <Slider
-                sx={{ width: '90%', mx: 'auto' }}
-                value={filterState.priceRange}
-                onChange={handlePriceChange}
-                valueLabelDisplay="auto"
-                min={15}
-                max={60}
-                step={1}
-                marks={[
-                  { value: 15, label: '$15' },
-                  { value: 37.5, label: '$37.5' },
-                  { value: 60, label: '$60' }
-                ]}
-              />
-            </FormControl>
-
-            <Typography level="title-md" fontWeight="bold" sx={{ mt: 2 }}>
-              Location
-            </Typography>
-            <FormControl sx={{ width: '100%', mt: 2 }}>
-              <Select
-                multiple
-                value={filterState.locations}
-                onChange={handleLocationChange}
-                displayEmpty
-                renderValue={(selected) => (
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                    {selected.length === 0 ? <em>Select City</em> : null}
-                    {selected.map((value) => (
-                      <Chip key={value} label={value} />
-                    ))}
-                  </Box>
-                )}
-              >
-                <MenuItem disabled value="">
-                  <em>Select City</em>
-                </MenuItem>
-                {germanCities.map((city) => (
-                  <MenuItem key={city} value={city}>
-                    {city}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </DialogContent>
-
-          <Divider sx={{ mt: 'auto' }} />
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            useFlexGap
-            spacing={1}
-          >
-            <Button
-              variant="outlined"
-              color="neutral"
-              onClick={onClearFilters}
+              )}
             >
-              Clear
-            </Button>
-            <Button onClick={toggleDrawer}>Apply</Button>
-          </Stack>
-        </Sheet>
-      </Drawer>
+              <MenuItem disabled value="">
+                <em>Select City</em>
+              </MenuItem>
+              {germanCities.map((city) => (
+                <MenuItem key={city} value={city}>
+                  {city}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </DialogContent>
+
+        <Divider sx={{ mt: 'auto' }} />
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          useFlexGap
+          spacing={1}
+        >
+          <Button
+            variant="outlined"
+            color="neutral"
+            onClick={() => {
+              setLocalFilterState({
+                type: '',
+                priceRange: [15, 60],
+                locations: [],
+                isLicensed: undefined,
+              });
+              onClearFilters();
+            }}
+          >
+            Clear
+          </Button>
+          <Button onClick={handleApplyFilters}>Apply</Button>
+        </Stack>
+      </Sheet>
+    </Drawer>
   );
-}
+};

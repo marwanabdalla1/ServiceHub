@@ -72,18 +72,18 @@ const BecomeProPage: React.FC = () => {
           {feedbacks.map((feedback, index) => (
             <div className="mb-6 p-4 bg-white rounded-lg shadow-lg" key={index}>
               <div className="flex items-center mb-2">
-                <h4 className="font-semibold text-lg text-gray-800">{feedback.givenBy.firstName}</h4>
-                <span className="ml-4 text-sm text-gray-600">{new Date(feedback.createdAt).toLocaleDateString()}</span>
-              </div>
-              <h5 className="text-lg font-bold text-gray-900">{feedback.title}</h5>
-              <p className="mt-2 text-gray-700">{feedback.content}</p>
-              {feedback.rating && (
-                <div className="mt-2">
+                <h5 className="text-lg font-bold text-gray-900 mr-2">{feedback.title}</h5>
+                <div className='mb-1'>
                   {[...Array(5)].map((star, i) => (
                     <i key={i} className={`fas fa-star ${i < feedback.rating ? 'text-yellow-500' : 'text-gray-300'}`}></i>
                   ))}
-                </div>
-              )}
+                  </div>
+              </div>
+              <p className="text-lg text-gray-700 mb-2">{feedback.content}</p>
+              <div className="flex items-center text-sm text-gray-600">
+                <span className="mr-2">{feedback.givenBy.firstName + " " + feedback.givenBy.lastName}</span>
+                <span>{new Date(feedback.createdAt).toLocaleDateString()}</span>
+              </div>
             </div>
           ))}
         </div>
