@@ -37,7 +37,7 @@ const SelectAvailabilityPage: React.FC = () => {
                 defaultSlotDuration={defaultSlotDuration}
                 // globalAvailabilities={globalAvailabilities}
             />
-            
+
         </Container>
     );
 };
