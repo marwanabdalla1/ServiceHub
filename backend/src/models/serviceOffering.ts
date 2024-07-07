@@ -25,7 +25,6 @@ export interface IServiceOffering extends Document {
 const ServiceOfferingSchema: Schema = new Schema({
     serviceType: { type: String, enum: Object.values(ServiceType), required: true },
     lastUpdatedOn: { type: Date, required: true },
-    // createdOn: { type: Date, required: true },
     certificateId: { type: String, required: false},
     hourlyRate: { type: Number, required: true },
     description: { type: String, required: false },
@@ -35,11 +34,11 @@ const ServiceOfferingSchema: Schema = new Schema({
     provider: { type: Schema.Types.ObjectId, ref: 'Account', required: true },
     baseDuration: { type: Number, required: true },
     bufferTimeDuration: { type: Number, required: true },
-    acceptedPaymentMethods: { type: [String], required: false }, // New field
-    reviews: [{ type: Schema.Types.ObjectId, ref: 'Review', required: true }],
+    acceptedPaymentMethods: { type: [String], required: true }, // New field
+    reviews: [{ type: Schema.Types.ObjectId, ref: 'Review', required: false }],
     rating: { type: Number, required: true },
-    totalRating: { type: Number, required: true },
-    reviewCount: { type: Number, required: true }
+    totalRating: { type: Number, required: false },
+    reviewCount: { type: Number, required: false }
 }, { timestamps: true });
 
 
