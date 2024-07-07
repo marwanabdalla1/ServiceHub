@@ -6,16 +6,13 @@ import FeedbackForm from "../components/FeedbackForm"; // Import the reusable co
 const FAQPage = () => {
     // example FAQs
     const faqs = [
-        { question: "What is ServiceHub?", answer: "Here's how you can manage..." },
-        { question: "Who can be a provider? How to provide a service?", answer: "" },
-        { question: "What is upgrading to Pro?", answer: "" },
-        { question: "How do I book an appointment?", answer: "" },
-        { question: "How do I reschedule or cancel an appointment?",
-            answer: "normal way: ... \n" +
-                    "in case of emergency, please contact your provider/consumer directly via the number they provide blablablabl"},
-        { question: "How do I ?", answer: "" },
-
-
+        { question: "What is ServiceHub?", answer: "Service Hub is a platform to help connect service consumers and service providers to bridge the gap between the demand and supply of basic services that can be offered by individuals for compensation by offering a one-stop platform where services can be listed, compared and booked." },
+        { question: "Who can be a provider? How to provide a service?", answer: "To become a service provider, you have two options: click the 'Provide a Service' button in the navigation bar if you haven't provided a service before, or go to your profile and click 'Add a Service' in the Service Provider Settings section." },
+        { question: "What is upgrading to Pro?", answer: "By upgrading to Pro to make sure that your service offerings get more visibility, by appearing at the top of the search results." },
+        { question: "How do I book an appointment?", answer: "To book an appointment, simply click on a service offering, fill out your personal information, and choose an available time slot from the provider and confirm." },
+        { question: "What payment methods are available?", answer: "Every provider can indicate which payment methods the prefer. The available options are cash, PayPal and bank transfer." },
+        { question: "Which services can be offered on Service Hub?", answer: "The service that are currently available on Service Hub are: petsitting, babysitting, bike repair, cleaning, moving, tutoring, landscaping, and remodeling." },
+        { question: "What does the 'licensed' tag next to a service offering mean?", answer: "The 'licensed' tag indicates that the provider has an official certification, enhancing their qualifications for the service they offer." },
     ];
 
     return (
