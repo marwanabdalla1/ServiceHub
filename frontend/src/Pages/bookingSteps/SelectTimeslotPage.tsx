@@ -56,35 +56,6 @@ function SelectTimeslot({ onNext, onBack, bookingDetails }: SelectTimeslotProps)
                     <Typography variant="h4" gutterBottom>
                         Select time
                     </Typography>
-                    {/*<Grid container spacing={2}>*/}
-                    {/*    /!* Sample dates *!/*/}
-                    {/*    {['11', '12', '16', '17', '18', '19', '23', '24', '25', '26', '30', '31'].map((date) => (*/}
-                    {/*        <Grid item key={date} onClick={() => handleDateClick(date)}>*/}
-                    {/*            <Button variant={date === selectedDate ? 'contained' : 'outlined'}>*/}
-                    {/*                {`May ${date}`}*/}
-                    {/*            </Button>*/}
-                    {/*        </Grid>*/}
-                    {/*    ))}*/}
-                    {/*</Grid>*/}
-                    {/*<Box sx={{ mt: 4 }}>*/}
-                    {/*    /!* Available time slots *!/*/}
-                    {/*    {availableTimes.map((time) => (*/}
-                    {/*            <Card key={time} sx={{ mb: 1, cursor: 'pointer' }} onClick={() => {}}>*/}
-                    {/*            <CardContent>*/}
-                    {/*            <Link to={`/review-and-confirm/${id}`}>*/}
-                    {/*                <Typography>{time}</Typography>*/}
-                    {/*                </Link>*/}
-                    {/*            </CardContent>*/}
-                    {/*            </Card>*/}
-
-
-                    {/*    ))}*/}
-                    {/*</Box>*/}
-                    {/*<Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mt: 4, mb: 4 }}>*/}
-                    {/*    <Typography variant="h4">*/}
-                    {/*        Book from provider*/}
-                    {/*    </Typography>*/}
-                    {/*</Box>*/}
                     <AvailabilityCalendarBooking
                         Servicetype={bookingDetails?.serviceType}
                         providerIdInput={null}
@@ -94,7 +65,6 @@ function SelectTimeslot({ onNext, onBack, bookingDetails }: SelectTimeslotProps)
                         defaultTransitTime={bookingDetails.serviceOffering?.bufferTimeDuration || 30}
                         onNext={onNext}
                         onRequestChange={()=>{}}
-                        // globalAvailabilities={globalAvailabilities}
                     />
                 </Box>
                 <Box sx={{width: '20%'}}>
