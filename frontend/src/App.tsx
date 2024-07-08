@@ -29,7 +29,7 @@ import {ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import {Slide} from "react-toastify";
 import VerifyCertificatePage from "./Pages/AdminPanel/VerifyCertificatePage";
-import AdminUserDataPage from "./Pages/AdminPanel/AdminUserDataPage";
+import AdminUserDataPage from "./Pages/AdminPanel/UserDataPages/AdminUserDataPage";
 import AdminHomePage from "./Pages/AdminPanel/AdminHomePage";
 import ErrorPage from "./Pages/ErrorPage";
 import Footer from './components/Footer';
@@ -173,9 +173,10 @@ function MainRoutes({search, setSearch}: { search: any, setSearch: any }) {
                     <Route path="/write-reviews" element={<ReviewPage/>}/>
                     <Route path="/faq" element={<FAQPage/>}/>
 
-                    <Route path="/admin" element={<AdminHomePage/>}/>
-                    <Route path="/admin/verifyCertificate" element={<VerifyCertificatePage/>}/>
-                    <Route path="/admin/UserData" element={<AdminUserDataPage/>}/>
+                <Route path="/admin" element={<AdminHomePage/>}/>
+                <Route path="/admin/verifyCertificate" element={<VerifyCertificatePage/>}/>
+                <Route path="/admin/UserData" element={<AdminUserDataPage/>}/>
+                {/*<Route path="/admin/viewUserData" element={<ViewUserDataPage/>}/>*/}
 
                     <Route path="/unauthorized" element={<ErrorPage title="Unauthorized Access"
                                                                     message="You do not have permission to view this page."/>}/>

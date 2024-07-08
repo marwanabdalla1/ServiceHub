@@ -6,9 +6,9 @@ import {
     getAccountDetails,
     adminUserData,
     getAccountById,
-    getRequesterById
+    getRequesterById, deleteAccountById
 } from "../controller/AccountController";
-import {authenticate} from "../middleware/authenticate";
+import {authenticate, isAdmin} from "../middleware/authenticate";
 
 const router = express.Router();
 router.get('/:id', authenticate, getAccountById);
@@ -17,6 +17,7 @@ router.get('/requester/:requesterId', authenticate, getRequesterById);
 router.delete("/", authenticate, deleteAccount);
 router.put('/', authenticate, updateAccountDetails);
 router.get('/', authenticate, getAccountDetails);
-router.get('/admin/userdata', authenticate, adminUserData);
+router.get('/admin/userdata', authenticate, isAdmin, adminUserData);
+router.delete('/admin/userdata/:accountId', authenticate, isAdmin, deleteAccountById);
 
 export default router;
