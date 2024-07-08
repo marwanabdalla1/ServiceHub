@@ -1,27 +1,51 @@
 // src/components/JobDetailsPage.tsx
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import {useNavigate, useParams} from 'react-router-dom';
 import axios from 'axios';
 import { Job } from '../models/Job';
 import { Container, Typography, Box } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
-import MediaCard from '../components/OfferedServiceCard';
+import MediaCard from '../components/tableComponents/unused/OfferedServiceCard';
 // import ReviewList from './ReviewList';
 import {Review} from "../models/Review"; // Assuming you have a component to list reviews
+import handleAccept from "./TablePages/IncomingRequestsTable"
+import GenericProviderCard from "../components/tableComponents/generic/GenericProviderCard";
+import GenericConsumerCard from "../components/tableComponents/generic/GenericConsumerCard";
+import {handleCancel, handleComplete, handleRevoke} from "../utils/jobHandler";
+import {ServiceRequest} from "../models/ServiceRequest";
+import useAlert from "../hooks/useAlert";
 
-const JobDetailsPage: React.FC = () => {
+// Define the props interface
+interface JobDetailsPageProps {
+    role: string;
+}
+
+type Item = ServiceRequest | Job;
+
+
+// tood: modify this
+const JobDetailsPage: React.FC<JobDetailsPageProps>  = ({ role }) => {
     const { jobId } = useParams<{ jobId: string }>();
     const [job, setJob] = useState<Job | null>(null);
-    const { token } = useAuth();
+    const { token, account } = useAuth();
     const [reviews, setReviews] = useState<Review[]>([]);
+
+    const { alert, triggerAlert, closeAlert } = useAlert(100000);
+
+
+    const navigate = useNavigate();
+
 
     useEffect(() => {
         const fetchJob = async () => {
             try {
+
                 const response = await axios.get<Job>(`/api/jobs/${jobId}`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setJob(response.data);
+
+                // todo: set
 
                 // Fetch reviews for the job
                 const reviewsResponse = await axios.get<Review[]>(`/api/reviews/job/${jobId}`, {
@@ -42,21 +66,93 @@ const JobDetailsPage: React.FC = () => {
         return <div>Loading...</div>;
     }
 
-    const handleCancel = () => {
-        // Implement cancel logic
+    // Authorization check
+    if ((role === "provider" && account?._id !== job.provider._id) ||
+        (role === "consumer" && account?._id !== job.receiver._id)) {
+        // You could alternatively redirect to a different page or display a modal
+        navigate("/unauthorized")
+    }
+
+    const onCancel = () => {
+        if (!job) {
+            console.error('No job selected');
+            return;
+        }
+        handleCancel({
+            selectedJob:job,
+            jobs: [],
+            setJobs: null,
+            token:token,
+            account:account,
+            setShowMediaCard: () => {},
+        });
     };
 
-    const handleReview = () => {
-        // Implement review logic
+    const onComplete = () => {
+        if (!job) {
+            console.error('No job selected');
+            return;
+        }
+        handleComplete({
+            selectedJob:job,
+            jobs: [],
+            setJobs: null,
+            token:token,
+            setShowMediaCard: () => {},
+            triggerAlert,
+        });
     };
 
-    const handleComplete = () => {
-        // Implement complete logic
+    // handle revoking completed job
+    const onRevoke = () => {
+        if (!job) {
+            console.error('No job selected');
+            return;
+        }
+        handleRevoke({
+            selectedJob:job,
+            jobs: [],
+            setJobs: null,
+            token:token,
+            setShowMediaCard: () => {},
+        });
     };
 
-    const handleRevoke = () => {
-        // Implement revoke logic
+    const handleReview = (job: Item) => {
+        navigate(`/customer_review/${job._id}`);
     };
+
+
+    const providerProps = {
+        item: job,
+        provider: job.provider,
+        receiver: job.receiver,
+        onClose: () => {},
+        inDetailPage: true,
+
+        actions:{
+            cancelJob: onCancel,      // Placeholder function
+            complete: onComplete,
+            review: () => handleReview(job),
+            revoke: onRevoke
+        }
+    };
+
+    const consumerProps = {
+        item: job,
+        provider: job.provider,
+        receiver: job.receiver,
+        onClose: () => {},
+        inDetailPage: true,
+        actions:{
+            cancelJob: onCancel,      // Placeholder function
+            review: () => handleReview(job)
+        }
+    };
+
+
+    const CardComponent = role === "provider" ? GenericProviderCard : GenericConsumerCard;
+    const cardProps = role === "provider" ? providerProps : consumerProps;
 
     return (
         <Container>
@@ -64,17 +160,19 @@ const JobDetailsPage: React.FC = () => {
                 <Typography variant="h4" gutterBottom>
                     {job.serviceType} Job Details
                 </Typography>
-                <MediaCard
-                    offeredService={job}
-                    provider={job.provider}
-                    receiver={job.receiver}
-                    onComplete={handleComplete}
-                    onCancel={handleCancel}
-                    onReview={handleReview}
-                    onRevoke={handleRevoke}
-                    onClose={handleCancel}
-                    // showExpandIcon={false} // Disable the expand icon for the details page
-                />
+                <CardComponent {...cardProps} />
+
+                {/*<MediaCard*/}
+                {/*    offeredService={job}*/}
+                {/*    provider={job.provider}*/}
+                {/*    receiver={job.receiver}*/}
+                {/*    onComplete={handleAccept}*/}
+                {/*    onCancel={handleCancel}*/}
+                {/*    onReview={handleReview}*/}
+                {/*    onRevoke={handleRevoke}*/}
+                {/*    onClose={handleCancel}*/}
+                {/*    // showExpandIcon={false} // Disable the expand icon for the details page*/}
+                {/*/>*/}
                 <Box sx={{ mt: 4 }}>
                     <Typography variant="h5">Reviews</Typography>
                     {/*<ReviewList reviews={reviews} /> /!* Render reviews *!/*/}

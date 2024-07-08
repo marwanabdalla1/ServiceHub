@@ -9,7 +9,7 @@ export interface IJob extends Document {
     dateOfService: Date;
     serviceFee: string;
     status: JobStatus;
-    description: string | false;
+    comment: string;
     provider: Types.ObjectId; // Reference to an Account document
     receiver: Types.ObjectId; // Reference to an Account document, the receiver of the job
     providerImage: string;

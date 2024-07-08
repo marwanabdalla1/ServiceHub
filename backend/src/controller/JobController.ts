@@ -6,6 +6,8 @@ import Notification from "../models/notification"
 import Job, { IJob } from "../models/job";
 
 import { Document } from 'mongoose';
+import {updateTimeslotWithRequestId} from "./TimeSlotController";
+import Timeslot from "../models/timeslot";
 
 
 
@@ -78,6 +80,8 @@ export const createJob: RequestHandler = async (req: Request, res: Response) => 
             return res.status(400).send({ message: "Failed to create service request." });
         }
 
+        await updateTimeslotWithRequestId(newJob.request.toString(), newJob._id.toString())
+
         // push notification to receiver
         // const notificationContent = `A new job has been created.`;
 
@@ -91,6 +95,8 @@ export const createJob: RequestHandler = async (req: Request, res: Response) => 
         // const createdNnotification = await Notification.create(newNotification);
 
         // console.log(createdNnotification)
+
+        // update timeslot
 
         await updateUserJobHistory(req.body.provider, newJob._id.toString());
 
@@ -141,7 +147,16 @@ export const getJobsByProvider: RequestHandler = async (req, res) => {
             return res.status(404).json({ message: "No jobs found for this provider." });
         }
 
-        res.status(200).json(jobs);
+
+        const jobsWithTimeslots = await Promise.all(jobs.map(async (job) => {
+            const timeslot = await Timeslot.findOne({ jobId: job._id }).exec();
+            return { ...job.toObject(), timeslot: timeslot || undefined };
+        }));
+
+        console.log("jobs with their timeslots", jobsWithTimeslots)
+
+
+        res.status(200).json(jobsWithTimeslots);
     } catch (error: any) {
         console.error("Failed to retrieve jobs:", error);
         res.status(500).json({ message: "Internal server error", error: error.message });
@@ -163,7 +178,15 @@ export const getJobsByRequester: RequestHandler = async (req, res) => {
             return res.status(404).json({ message: "No requested services found for this receiver." });
         }
 
-        res.status(200).json(jobs);
+
+        const jobsWithTimeslots = await Promise.all(jobs.map(async (job) => {
+            const timeslot = await Timeslot.findOne({ jobId: job._id }).exec();
+            return { ...job.toObject(), timeslot: timeslot || undefined };
+        }));
+
+        console.log("jobs with their timeslots", jobsWithTimeslots)
+
+        res.status(200).json(jobsWithTimeslots);
     } catch (error: any) {
         console.error("Failed to retrieve jobs:", error);
         res.status(500).json({ message: "Internal server error", error: error.message });
@@ -207,7 +230,9 @@ export const getJobById: RequestHandler = async (req, res) => {
 
     try {
         // Fetch the job where the '_id' field matches 'jobId'
-        const job = await Job.findById(jobId).exec();
+        const job = await Job.findById(jobId).populate([
+            { path: 'receiver', select: 'firstName lastName email profileImageId' }, // todo: also include profile pic
+            { path: 'provider', select: 'firstName lastName email profileImageId' }]).exec();
 
         if (!job) {
             return res.status(404).json({ message: "No job found for this ID." });

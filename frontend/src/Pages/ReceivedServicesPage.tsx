@@ -1,7 +1,7 @@
 import React from 'react';
 import NavigationBar from '../components/Navbar';
 import MediaCard from '../components/ProfileCard';
-import ReceivedServiceTable from '../components/ReceivedServiceTable';
+import ReceivedServiceTable from './TablePages/ReceivedServiceTable';
 
 
 function ReceivedServicePage() {

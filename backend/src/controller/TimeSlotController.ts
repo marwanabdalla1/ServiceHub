@@ -3,6 +3,7 @@ import moment from 'moment';
 import Timeslot, {ITimeslot} from '../models/timeslot';
 import mongoose, {Types} from "mongoose";
 import ServiceRequest from "../models/serviceRequest";
+import {ObjectId} from "mongodb";
 
 function generateWeeklyInstances(events: ITimeslot[], existingTimeslots: ITimeslot[], startDate: moment.Moment, endDate: moment.Moment) {
     console.log("existing ones:", existingTimeslots)
@@ -915,6 +916,26 @@ export async function cancelTimeslotWithRequestId(requestId: string): Promise<{ 
         // @ts-ignore
         await cancelTimeslotDirect(foundTimeslot._id);
         return {success: true, message: "Timeslot cancelled successfully"};
+    } catch (error) {
+        console.error("Error cancelling timeslot:", error);
+        throw new Error("Failed to cancel timeslot");
+    }
+}
+
+// update the timeslot to add jobid
+export async function updateTimeslotWithRequestId(requestId: string, jobId: string): Promise<{ success: boolean, message: string }> {
+    try {
+        const foundTimeslot = await findTimeslotByRequestId(requestId);
+        if (!foundTimeslot) {
+            console.log(`No timeslot found with requestId: ${requestId}`);
+            return {success: false, message: "No timeslot to cancel, proceeding..."};
+        }
+
+        foundTimeslot.jobId = new Types.ObjectId(jobId)
+
+        const updatedTimeslot = await foundTimeslot.save();
+        console.log("Timeslot updated successfully with the job", foundTimeslot)
+        return {success: true, message: "Timeslot updated successfully with the job"}; // Return the updated timeslot for further processing or response
     } catch (error) {
         console.error("Error cancelling timeslot:", error);
         throw new Error("Failed to cancel timeslot");

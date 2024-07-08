@@ -49,6 +49,9 @@ import AdminHomePage from "./Pages/AdminPanel/AdminHomePage";
 import ErrorPage from "./Pages/ErrorPage";
 import CombinedServicePage from "./Pages/CombinedIncomingPage";
 
+import OfferedServicesTable from "./Pages/TablePages/OfferedServicesTable";
+import IncomingRequestsTable from "./Pages/TablePages/IncomingRequestsTable";
+
 function App() {
     const [search, setSearch] = useState('');
 
@@ -128,7 +131,12 @@ function MainRoutes({search, setSearch}: {search: any, setSearch: any}) {
                 <Route path="/jobs/requestHistory" element={<RequestHistoryPage/>}/>
                 <Route path="/jobs/offeredServices" element={<OfferedServicesPage/>}/>
                 <Route path="/incomingRequests" element={<IncomingRequestsPage/>}/>
-                <Route path="/incoming" element={<CombinedServicePage/>}/>
+                {/*<Route path="/incoming" element={<CombinedServicePage/>}/>*/}
+
+                <Route path="/incoming" element={<CombinedServicePage />} >
+                    <Route path="requests" element={<IncomingRequestsTable />} />
+                    <Route path="jobs" element={<OfferedServicesTable />} />
+                </Route>
 
                 <Route path="/addservice" element={<AddServicePage/>}/>
                 {/*<Route path="/provider-profile/:id" element={<ProviderProfilePage/>}/>*/}
@@ -151,7 +159,10 @@ function MainRoutes({search, setSearch}: {search: any, setSearch: any}) {
                 <Route path="/confirmation/:requestId/:type" element={<ConfirmationPage/>}/>
 
                 {/*todo: get this once it's done*/}
-                <Route path="/jobs/:jobId" element={<JobDetailsPage />} />
+                {/*<Route path="incoming/jobs/:jobId" element={<JobDetailsPage />} />*/}
+                <Route path="/incoming/jobs/:jobId" element={<JobDetailsPage role="provider" />} />
+                <Route path="/outgoing/jobs/:jobId" element={<JobDetailsPage role="consumer" />} />
+
 
                 {/*old ones*/}
                 {/*<Route path="/create-account-or-sign-in" element={<CreateAccountOrSignIn/>}/>*/}
