@@ -162,23 +162,29 @@ export default function ReceivedServiceTable() {
     }
 
 
-    let email = "";
-    let addressee = "";
+    let receiverEmail = "";
+    let receiverName = "";
+    let initiatorEmail = "";
+    let initiatorName = "";
 
     if (account?._id === selectedReceivedService.provider._id) {
 
-      email = selectedReceivedService.receiver.email;
-      addressee = selectedReceivedService.receiver.firstName + " " + selectedReceivedService.receiver.lastName;
+      receiverEmail = selectedReceivedService.receiver.email;
+      receiverName = selectedReceivedService.receiver.firstName;
+      initiatorEmail = selectedReceivedService.provider.email;
+      initiatorName = selectedReceivedService.provider.firstName;
       
     } else if (account?._id === selectedReceivedService.receiver._id) {
-      email = selectedReceivedService.provider.email;
-      addressee = selectedReceivedService.provider.firstName + " " +  selectedReceivedService.provider.lastName;
+      initiatorEmail = selectedReceivedService.receiver.email;
+      initiatorName = selectedReceivedService.receiver.firstName;
+      receiverEmail = selectedReceivedService.provider.email;
+      receiverName = selectedReceivedService.provider.firstName;
     }
 
     // send Email notification
     try {
-      await axios.post('/api/email/cancelNotification', {email: email, serviceType: selectedReceivedService.serviceType,
-         startTime: selectedReceivedService.appointmentStartTime, name: addressee}).then(
+      await axios.post('/api/email/cancelNotification', {initiatorEmail: initiatorEmail, initiatorName: initiatorName, receiverEmail: receiverEmail, receiverName: receiverName, serviceType: selectedReceivedService.serviceType,
+         startTime: selectedReceivedService.appointmentStartTime}).then(
           (res) => {
               console.log(res);
           }

@@ -256,23 +256,29 @@ export default function OfferedServicesTable() {
       console.error('Error sending notification:', notificationError);
     }
 
-    let email = "";
-    let addressee = "";
+    let receiverEmail = "";
+    let receiverName = "";
+    let initiatorEmail = "";
+    let initiatorName = "";
 
     if (account?._id === selectedJob.provider._id) {
 
-      email = selectedJob.receiver.email;
-      addressee = selectedJob.receiver.firstName + " " + selectedJob.receiver.lastName;
+      receiverEmail = selectedJob.receiver.email;
+      receiverName = selectedJob.receiver.firstName;
+      initiatorEmail = selectedJob.provider.email;
+      initiatorName = selectedJob.provider.firstName;
       
     } else if (account?._id === selectedJob.receiver._id) {
-      email = selectedJob.provider.email;
-      addressee = selectedJob.provider.firstName + " " + selectedJob.provider.lastName;
+      initiatorEmail = selectedJob.receiver.email;
+      initiatorName = selectedJob.receiver.firstName;
+      receiverEmail = selectedJob.provider.email;
+      receiverName = selectedJob.provider.firstName;
     }
 
     // send Email notification
     try {
-      await axios.post('/api/email/cancelNotification', {email: email, serviceType: selectedJob.serviceType,
-         startTime: selectedJob.appointmentStartTime, name: addressee}).then(
+      await axios.post('/api/email/cancelNotification', {initiatorEmail: initiatorEmail, initiatorName: initiatorName, receiverEmail: receiverEmail, receiverName: receiverName, serviceType: selectedJob.serviceType,
+         startTime: selectedJob.appointmentStartTime}).then(
           (res) => {
               console.log(res);
           }

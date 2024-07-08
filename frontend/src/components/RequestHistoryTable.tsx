@@ -218,6 +218,40 @@ try {
   console.error('Error sending notification:', notificationError);
 }
 
+let receiverEmail = "";
+let receiverName = "";
+let initiatorEmail = "";
+let initiatorName = "";
+
+if (account?._id === selectedRequest.provider._id) {
+
+      receiverEmail = selectedRequest.requestedBy.email;
+      receiverName = selectedRequest.requestedBy.firstName;
+      initiatorEmail = selectedRequest.provider.email;
+      initiatorName = selectedRequest.provider.firstName;
+      
+    } else if (account?._id === selectedRequest.requestedBy._id) {
+      initiatorEmail = selectedRequest.requestedBy.email;
+      initiatorName = selectedRequest.requestedBy.firstName;
+      receiverEmail = selectedRequest.provider.email;
+      receiverName = selectedRequest.provider.firstName;
+    }
+
+    // send Email notification
+    try {
+      await axios.post('/api/email/cancelNotification', {initiatorEmail: initiatorEmail, initiatorName: initiatorName, receiverEmail: receiverEmail, receiverName: receiverName, serviceType: selectedRequest.serviceType,
+         startTime: selectedRequest.appointmentStartTime}).then(
+          (res) => {
+              console.log(res);
+          }
+      ).catch((err) => {
+              console.error(err);
+          }
+      );
+
+  } catch (error) {
+      console.error("There was an error sending the email", error);
+  }
 
 }};
 

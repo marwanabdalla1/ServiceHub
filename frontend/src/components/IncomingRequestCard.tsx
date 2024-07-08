@@ -47,12 +47,8 @@ const MediaCard: React.FC<MediaCardProps> = ({request, onClose, onAccept, onDecl
                 </>
             );
         } else {
-            console.log(request);
             return (
-                <>
-                    <BlackButton text="Cancel Request" onClick={() => onCancel(request)} sx={{marginRight: "1rem"}}/>
-                    <BlackButton text="Request Time Change" onClick={() => onTimeChange(true)}/>
-                </>
+                <Typography>No action possible for this request.</Typography>
             );
         }
     };
