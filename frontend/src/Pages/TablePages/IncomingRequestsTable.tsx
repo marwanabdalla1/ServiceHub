@@ -1,6 +1,8 @@
 import React, {useState} from 'react';
 import CardContent from '@mui/material/Box';
 import {Dialog, Button, DialogActions, DialogContent, DialogTitle, Box, TextField} from '@mui/material';
+
+import {Link} from 'react-router-dom'
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -431,12 +433,17 @@ export default function IncomingRequestTable() {
             <div style={{flex: 1, padding: '20px'}}>
                 <Box sx={{minWidth: 275, margin: 2}}>
                     <Box>
-                        <Breadcrumbs separator={<NavigateNextIcon fontSize="small"/>} aria-label="breadcrumb"
-                                     sx={{marginBottom: '16px'}}>
-                            <Typography color="textPrimary">Incoming Requests</Typography>
-                        </Breadcrumbs>
+                        {/*<Breadcrumbs separator={<NavigateNextIcon fontSize="small"/>} aria-label="breadcrumb"*/}
+                        {/*             sx={{marginBottom: '16px'}}>*/}
+                        {/*    <Typography color="textPrimary">Incoming Requests</Typography>*/}
+                        {/*</Breadcrumbs>*/}
                         <Typography variant="h6" component="div" sx={{marginBottom: '16px'}}>
                             Incoming Requests
+                        </Typography>
+                        <Typography variant="body2" component="div" sx={{marginBottom: '16px'}}>
+                            Here are the requests that are not accepted. {"\n"}
+                            Accepted requests automatically turn into
+                            <Link to="/incoming/jobs"> jobs</Link>.
                         </Typography>
                     </Box>
                     <Box style={{display: 'flex'}}>
@@ -479,8 +486,7 @@ export default function IncomingRequestTable() {
                             <DialogTitle>Request Time Slot Update</DialogTitle>
                             <DialogContent>
                                 In case you're not available anymore or think the service will take a longer time,
-                                please let
-                                the requester know in the comment.
+                                please let the requester know in the comment.
                                 <TextField
                                     fullWidth
                                     multiline

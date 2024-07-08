@@ -227,6 +227,7 @@ export const updateJob: RequestHandler = async (req: Request, res: Response) => 
 
 export const getJobById: RequestHandler = async (req, res) => {
     const { jobId } = req.params;  // Extract the Job ID from URL parameters
+    const userId = (req as any).user.userId;
 
     try {
         // Fetch the job where the '_id' field matches 'jobId'
@@ -237,6 +238,18 @@ export const getJobById: RequestHandler = async (req, res) => {
         if (!job) {
             return res.status(404).json({ message: "No job found for this ID." });
         }
+
+        //make sure only the provider/consumer him/herself can get this
+        if (userId !== job.receiver._id.toString() && userId !== job.provider._id.toString()) {
+            console.log("userId: ", userId, "\n receiver ID: ", job.receiver._id, "provider ID:", job.provider._id)
+            return res.status(403).json({ message: "Unauthorized access." });
+        }
+
+
+        const timeslot = await Timeslot.findOne({ jobId: jobId }).exec();
+        const jobWithTimeslot = { ...job.toObject(), timeslot: timeslot || undefined };
+
+        console.log("incoming requests with their timeslots", jobWithTimeslot)
 
         res.status(200).json(job);
     } catch (error: any) {

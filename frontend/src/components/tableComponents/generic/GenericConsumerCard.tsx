@@ -113,10 +113,13 @@ const GenericConsumerCard: React.FC<GenericConsumerCardProps> = ({
     const handleIconClick = () => {
         setIsInDetailPage(!isInDetailPage);
         if (inDetailPage) {
-            // Suppose '/table-page' is your table page route
-            navigate('/outgoing');
+            if (isJob(item)) {
+                navigate('/outgoing/jobs');
+            } else{
+                navigate('/outgoing/requests');
+            }
+
         } else {
-            // Suppose '/detail-page' is your detail page route
             if (isJob(item)) {
                 navigate(`/outgoing/jobs/${item._id}`);
             } else {

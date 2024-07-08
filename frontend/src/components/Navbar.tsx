@@ -1,14 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import { CgProfile } from "react-icons/cg";
-import { CiSearch } from "react-icons/ci";
-import { FiFilter } from "react-icons/fi";
-import { BsQuestionCircle } from "react-icons/bs";
+import React, {useEffect, useState} from 'react';
+import {CgProfile} from "react-icons/cg";
+import {CiSearch} from "react-icons/ci";
+import {FiFilter} from "react-icons/fi";
+import {BsQuestionCircle} from "react-icons/bs";
 import BlackButton from "./inputs/blackbutton";
 import RequestListButton from "./inputs/requestListButton";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, MenuItem } from '@mui/material';
-import { useAuth } from "../contexts/AuthContext";
+import {Link, useLocation, useNavigate} from "react-router-dom";
+import {Menu, MenuItem} from '@mui/material';
+import {useAuth} from "../contexts/AuthContext";
 import NotificationBell from './Notification/NotificationBell';
+
 interface NavbarProps {
     toggleDrawer: () => void;
     onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -18,35 +19,35 @@ interface NavbarProps {
 }
 
 interface ServiceButtonProps {
-  isLoggedIn: boolean;
-  isProvider: boolean;
-  isPremium: boolean;
+    isLoggedIn: boolean;
+    isProvider: boolean;
+    isPremium: boolean;
 }
 
-const ServiceButton: React.FC<ServiceButtonProps> = ({ isLoggedIn, isProvider, isPremium }) => {
-  const getButtonText = () => {
-    if (isProvider && !isPremium) {
-      return "Become Pro";
-    }
-    return "Provide a Service";
-  };
+const ServiceButton: React.FC<ServiceButtonProps> = ({isLoggedIn, isProvider, isPremium}) => {
+    const getButtonText = () => {
+        if (isProvider && !isPremium) {
+            return "Become Pro";
+        }
+        return "Provide a Service";
+    };
 
-  const getLinkDestination = () => {
-    if (isProvider && !isPremium) {
-      return "/becomepro";
-    }
-    return isLoggedIn ? "/addservice" : "/login";
-  };
+    const getLinkDestination = () => {
+        if (isProvider && !isPremium) {
+            return "/becomepro";
+        }
+        return isLoggedIn ? "/addservice" : "/login";
+    };
 
-  return (
-    <Link to={getLinkDestination()} className="text-current">
-      <BlackButton
-        className="py-2"
-        text={getButtonText()}
-        onClick={() => console.log('Black button pressed')}
-      />
-    </Link>
-  );
+    return (
+        <Link to={getLinkDestination()} className="text-current">
+            <BlackButton
+                className="py-2"
+                text={getButtonText()}
+                onClick={() => console.log('Black button pressed')}
+            />
+        </Link>
+    );
 };
 
 const Navbar: React.FC<NavbarProps> = ({toggleDrawer, onChange, onSearch, search, setSearch}) => {
@@ -66,23 +67,23 @@ const Navbar: React.FC<NavbarProps> = ({toggleDrawer, onChange, onSearch, search
         setSearch(search);
     }, [search]);
 
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
+    const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+        setAnchorEl(event.currentTarget);
+    };
 
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
+    const handleMenuClose = () => {
+        setAnchorEl(null);
+    };
 
-  const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    console.log(token);
-    console.log("isLoggedIn: " + isLoggedIn());
-    setProfileAnchorEl(event.currentTarget);
-  };
+    const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+        console.log(token);
+        console.log("isLoggedIn: " + isLoggedIn());
+        setProfileAnchorEl(event.currentTarget);
+    };
 
-  const handleProfileMenuClose = () => {
-    setProfileAnchorEl(null);
-  };
+    const handleProfileMenuClose = () => {
+        setProfileAnchorEl(null);
+    };
 
 
     const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -93,99 +94,104 @@ const Navbar: React.FC<NavbarProps> = ({toggleDrawer, onChange, onSearch, search
         navigate(`/filter`, {state: {searchTerm: search}});
     };
 
-  return (
-    <div className="bg-blue-300 shadow-md h-20">
-      {/* Navbar content */}
-      <div className="flex justify-between items-center h-full">
-        {/* Left Section: Logo */}
-          <Link to="/">
-            <img src="/images/logo.png" alt="Logo" className=" h-16 ml-4" />
-          </Link>
+    return (
+        <div className="bg-blue-300 shadow-md h-20">
+            {/* Navbar content */}
+            <div className="flex justify-between items-center h-full">
+                {/* Left Section: Logo */}
+                <Link to="/">
+                    <img src="/images/logo.png" alt="Logo" className=" h-16 ml-4"/>
+                </Link>
 
-        {/* Middle Section: Search Bar */}
-        <div className="flex items-center bg-white rounded-full shadow-inner px-2 py-1 w-1/2 ml-2">
-          <div className="flex items-center flex-grow">
-            <input
-              type="text"
-              placeholder={"Search for a service"}
-              className="flex-grow px-2 py-1 rounded-l-full focus:outline-none"
-              value={search}
-              onChange={handleSearchChange}
-            />
-            <button className="text-blue-500" onClick={handleSearch}>
-              <CiSearch className="h-6 w-6" />
-            </button>
-          </div>
-          {location.pathname === '/filter' && (
-            <button onClick={toggleDrawer}>
-              <FiFilter className="h-6 w-6 text-blue-500 ml-2" />
-            </button>
-          )}
+                {/* Middle Section: Search Bar */}
+                <div className="flex items-center bg-white rounded-full shadow-inner px-2 py-1 w-1/2 ml-2">
+                    <div className="flex items-center flex-grow">
+                        <input
+                            type="text"
+                            placeholder={"Search for a service"}
+                            className="flex-grow px-2 py-1 rounded-l-full focus:outline-none"
+                            value={search}
+                            onChange={handleSearchChange}
+                        />
+                        <button className="text-blue-500" onClick={handleSearch}>
+                            <CiSearch className="h-6 w-6"/>
+                        </button>
+                    </div>
+                    {location.pathname === '/filter' && (
+                        <button onClick={toggleDrawer}>
+                            <FiFilter className="h-6 w-6 text-blue-500 ml-2"/>
+                        </button>
+                    )}
+                </div>
+
+                {/* Right Section: Provide Service Button and Icons */}
+                <div className="flex items-center space-x-4 m-4">
+                    <ServiceButton
+                        isLoggedIn={isLoggedIn()}
+                        isProvider={isProvider}
+                        isPremium={isPremium}
+                    />
+
+                    {
+                        isLoggedIn() ? (
+                            <>
+                                <RequestListButton className="h-6 w-6" onClick={handleMenuOpen}/>
+                                <div className="flex items-center">
+                                    <NotificationBell header="Notifications"/>
+                                </div>
+                            </>
+                        ) : (<div></div>)}
+                    <div onClick={handleProfileMenuOpen}>
+                        <CgProfile className="h-6 w-6"/>
+                    </div>
+                    <Menu
+                        anchorEl={profileAnchorEl}
+                        open={Boolean(profileAnchorEl)}
+                        onClose={handleProfileMenuClose}
+                        anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'center',
+                        }}
+                        transformOrigin={{
+                            vertical: 'top',
+                            horizontal: 'center',
+                        }}
+                    >
+                        {isLoggedIn() ? [
+                            <MenuItem key="profile" component={Link} to="/setprofile"
+                                      onClick={handleProfileMenuClose}>Profile</MenuItem>,
+                            <MenuItem key="logout" onClick={logoutUser}>Logout</MenuItem>
+                        ] : (
+                            <MenuItem component={Link} to="/login" onClick={handleProfileMenuClose}>Login</MenuItem>
+                        )}
+                    </Menu>
+                    <div className="h-6 w-0.5 bg-gray-800"></div>
+                    {/*<IoSettingsOutline className="h-6 w-6"/>*/}
+                    <Link to="/faq" className="h-6 w-6" style={{outline: 'none'}}>
+                        <BsQuestionCircle className="h-6 w-6" style={{color: 'black'}}/>
+                    </Link>
+                </div>
+            </div>
+
+            <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleMenuClose}
+                anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                }}
+                transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                }}
+            >
+                <MenuItem component={Link} to="/incoming" onClick={handleMenuClose}>Incoming Bookings</MenuItem>
+                <MenuItem component={Link} to="/outgoing" onClick={handleMenuClose}>Outgoing Bookings</MenuItem>
+            </Menu>
         </div>
-
-        {/* Right Section: Provide Service Button and Icons */}
-        <div className="flex items-center space-x-4 m-4">
-          <ServiceButton
-            isLoggedIn={isLoggedIn()}
-            isProvider={isProvider}
-            isPremium={isPremium}
-          />
-          <RequestListButton className="h-6 w-6" onClick={handleMenuOpen} />
-          <div className="flex items-center">
-            <NotificationBell header="Notifications" />
-          </div>
-          <div onClick={handleProfileMenuOpen}>
-            <CgProfile className="h-6 w-6" />
-          </div>
-          <Menu
-            anchorEl={profileAnchorEl}
-            open={Boolean(profileAnchorEl)}
-            onClose={handleProfileMenuClose}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'center',
-            }}
-            transformOrigin={{
-              vertical: 'top',
-              horizontal: 'center',
-            }}
-          >
-            {isLoggedIn() ? [
-              <MenuItem key="profile" component={Link} to="/setprofile"
-                onClick={handleProfileMenuClose}>Profile</MenuItem>,
-              <MenuItem key="logout" onClick={logoutUser}>Logout</MenuItem>
-            ] : (
-              <MenuItem component={Link} to="/login" onClick={handleProfileMenuClose}>Login</MenuItem>
-            )}
-          </Menu>
-          <div className="h-6 w-0.5 bg-gray-800"></div>
-          {/*<IoSettingsOutline className="h-6 w-6"/>*/}
-          <Link to="/faq" className="h-6 w-6" style={{ outline: 'none' }}>
-            <BsQuestionCircle className="h-6 w-6" style={{ color: 'black' }} />
-          </Link>
-        </div>
-      </div>
-
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-        anchorOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
-      >
-        <MenuItem component={Link} to="/jobs/receivedServices" onClick={handleMenuClose}>Received Services</MenuItem>
-        <MenuItem component={Link} to="/jobs/offeredServices" onClick={handleMenuClose}>Offered Services</MenuItem>
-        <MenuItem component={Link} to="/jobs/requestHistory" onClick={handleMenuClose}>Request History</MenuItem>
-        <MenuItem component={Link} to="/incomingRequests" onClick={handleMenuClose}>Incoming Requests</MenuItem>
-      </Menu>
-    </div>
-  );
+    )
+        ;
 };
 
 export default Navbar;

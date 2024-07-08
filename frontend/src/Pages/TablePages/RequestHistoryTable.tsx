@@ -158,65 +158,69 @@ export default function RequestHistoryTable() {
     };
 
     return (
-        <Box sx={{minWidth: 275, margin: 2}}>
-            <Box>
-                <Breadcrumbs separator={<NavigateNextIcon fontSize="small"/>} aria-label="breadcrumb"
-                             sx={{marginBottom: '16px'}}>
-                    <Link color="inherit" href="/frontend/public" underline="hover">
-                        History
-                    </Link>
-                    <Typography color="textPrimary">Request History</Typography>
-                </Breadcrumbs>
-                <Typography variant="h6" component="div" sx={{marginBottom: '16px'}}>
-                    Request History
-                </Typography>
-            </Box>
-            <Box style={{display: 'flex'}}>
-                <Box sx={{flexGrow: 1, marginRight: 2}}>
+        <div style={{display: 'flex'}}>
+            <div style={{flex: 1, padding: '20px'}}>
+                <Box sx={{minWidth: 275, margin: 2}}>
                     <Box>
-                        {serviceRequests.length === 0 ? (
-                            <Typography variant="body1">You haven't requested anything yet..</Typography>
-                        ) : (
-                            <TableContainer component={Paper} sx={{overflow: 'auto'}}>
-                                <Table sx={{minWidth: 650}} aria-label="simple table">
-                                    <TableHead>
-                                        <TableRow>
-                                            <TableCell>Type</TableCell>
-                                            <TableCell>Status</TableCell>
-                                            <TableCell>Appointment Date</TableCell>
-                                            <TableCell></TableCell>
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        {serviceRequests.map((request) => (
-                                            <GenericTableRow key={request._id} item={request}
-                                                        onViewDetails={handleToggleMediaCard}/>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </TableContainer>)}
+                        {/*<Breadcrumbs separator={<NavigateNextIcon fontSize="small"/>} aria-label="breadcrumb"*/}
+                        {/*             sx={{marginBottom: '16px'}}>*/}
+                        {/*    <Link color="inherit" href="/frontend/public" underline="hover">*/}
+                        {/*        History*/}
+                        {/*    </Link>*/}
+                        {/*    <Typography color="textPrimary">Request History</Typography>*/}
+                        {/*</Breadcrumbs>*/}
+                        <Typography variant="h6" component="div" sx={{marginBottom: '16px'}}>
+                            Request History
+                        </Typography>
+                    </Box>
+                    <Box style={{display: 'flex'}}>
+                        <Box sx={{flexGrow: 1, marginRight: 2}}>
+                            <Box>
+                                {serviceRequests.length === 0 ? (
+                                    <Typography variant="body1">You haven't requested anything yet..</Typography>
+                                ) : (
+                                    <TableContainer component={Paper} sx={{overflow: 'auto'}}>
+                                        <Table sx={{minWidth: 650}} aria-label="simple table">
+                                            <TableHead>
+                                                <TableRow>
+                                                    <TableCell>Type</TableCell>
+                                                    <TableCell>Status</TableCell>
+                                                    <TableCell>Appointment Date</TableCell>
+                                                    <TableCell></TableCell>
+                                                </TableRow>
+                                            </TableHead>
+                                            <TableBody>
+                                                {serviceRequests.map((request) => (
+                                                    <GenericTableRow key={request._id} item={request}
+                                                                     onViewDetails={handleToggleMediaCard}/>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </TableContainer>)}
+                            </Box>
+                        </Box>
+                        {showMediaCard && selectedRequest && (
+                            <div style={{position: 'relative', flexShrink: 0, width: 400, marginLeft: 2}}>
+                                {/*<MediaCard request={selectedRequest}*/}
+                                {/*           onClose={() => setShowMediaCard(false)}*/}
+                                {/*           onDecline={() => console.log('declined.')}*/}
+                                {/*           onProposeNewTime={() => console.log('New Time: ')}*/}
+                                {/*           onCancel={onCancel}/>*/}
+
+                                <GenericConsumerCard item={selectedRequest}
+                                                     provider={selectedRequest.provider}
+                                                     receiver={selectedRequest.requestedBy}
+                                                     onClose={() => setShowMediaCard(false)}
+                                                     inDetailPage={false}
+                                                     actions={{
+                                                         cancelRequest: onCancel,
+                                                     }}
+                                />
+                            </div>
+                        )}
                     </Box>
                 </Box>
-                {showMediaCard && selectedRequest && (
-                    <div style={{position: 'relative', flexShrink: 0, width: 400, marginLeft: 2}}>
-                        {/*<MediaCard request={selectedRequest}*/}
-                        {/*           onClose={() => setShowMediaCard(false)}*/}
-                        {/*           onDecline={() => console.log('declined.')}*/}
-                        {/*           onProposeNewTime={() => console.log('New Time: ')}*/}
-                        {/*           onCancel={onCancel}/>*/}
-
-                        <GenericConsumerCard item={selectedRequest}
-                                             provider={selectedRequest.provider}
-                                             receiver={selectedRequest.requestedBy}
-                                             onClose={() => setShowMediaCard(false)}
-                                             inDetailPage={false}
-                                             actions={{
-                                                 cancelRequest: onCancel,
-                                             }}
-                        />
-                    </div>
-                )}
-            </Box>
-        </Box>
+            </div>
+        </div>
     );
 }

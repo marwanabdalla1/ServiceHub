@@ -8,7 +8,7 @@ import {NavigateFunction} from "react-router-dom";
 interface RequestHandlerParams {
     selectedRequest: ServiceRequest;
     serviceRequests: ServiceRequest[];
-    setServiceRequests: (requests: ServiceRequest[]) => void;
+    setServiceRequests: ((requests: ServiceRequest[]) => void) | null;
     token: string | null;
     setShowMediaCard: (show: boolean) => void;
 
@@ -74,7 +74,9 @@ export const handleAccept = async ({
             });
 
             console.log(updatedServiceRequests);
-            setServiceRequests(updatedServiceRequests);
+            if (setServiceRequests){
+                setServiceRequests(updatedServiceRequests);
+            }
             setShowMediaCard(false);
 
             // Prepare notification data
@@ -145,7 +147,9 @@ export const handleDecline = async ({
         });
 
         console.log(updatedServiceRequests);
-        setServiceRequests(updatedServiceRequests);
+        if (setServiceRequests){
+            setServiceRequests(updatedServiceRequests);
+        }
         setShowMediaCard(false);
     } catch (error) {
         console.error('Error declining Request:', error);
@@ -214,7 +218,9 @@ export const handleCancel = async ({
         });
 
         console.log(updatedServiceRequests);
-        setServiceRequests(updatedServiceRequests);
+        if (setServiceRequests){
+            setServiceRequests(updatedServiceRequests);
+        }
         setShowMediaCard(false);
     } catch (error) {
         console.error('Error cancelling Request:', error);
@@ -331,7 +337,9 @@ export const handleTimeChange = async ({
         });
 
         console.log("updates after sending timeslot change:", updatedServiceRequests);
-        setServiceRequests(updatedServiceRequests);
+        if (setServiceRequests){
+            setServiceRequests(updatedServiceRequests);
+        }
         setShowMediaCard(false);
     } catch (error) {
         console.error('Error cancelling Request:', error);

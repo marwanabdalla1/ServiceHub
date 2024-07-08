@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {BrowserRouter, Routes, Route, useLocation} from "react-router-dom";
+import {BrowserRouter, Routes, Route, useLocation, Navigate} from "react-router-dom";
 import FilterPage from './Pages/FilterPage';
 import SignInPage from './Pages/AuthPages/LoginPage';
 import SignUpPage from './Pages/AuthPages/SignUpPage';
@@ -51,6 +51,10 @@ import CombinedServicePage from "./Pages/CombinedIncomingPage";
 
 import OfferedServicesTable from "./Pages/TablePages/OfferedServicesTable";
 import IncomingRequestsTable from "./Pages/TablePages/IncomingRequestsTable";
+import RequestDetailsPage from "./Pages/RequestDetailsPage";
+import ReceivedServiceTable from "./Pages/TablePages/ReceivedServiceTable";
+import CombinedOutgoingPage from "./Pages/CombinedOutgoingPage";
+import RequestHistoryTable from "./Pages/TablePages/RequestHistoryTable";
 
 function App() {
     const [search, setSearch] = useState('');
@@ -133,10 +137,7 @@ function MainRoutes({search, setSearch}: {search: any, setSearch: any}) {
                 <Route path="/incomingRequests" element={<IncomingRequestsPage/>}/>
                 {/*<Route path="/incoming" element={<CombinedServicePage/>}/>*/}
 
-                <Route path="/incoming" element={<CombinedServicePage />} >
-                    <Route path="requests" element={<IncomingRequestsTable />} />
-                    <Route path="jobs" element={<OfferedServicesTable />} />
-                </Route>
+
 
                 <Route path="/addservice" element={<AddServicePage/>}/>
                 {/*<Route path="/provider-profile/:id" element={<ProviderProfilePage/>}/>*/}
@@ -158,10 +159,25 @@ function MainRoutes({search, setSearch}: {search: any, setSearch: any}) {
                 <Route path="/offerings/:offeringId/booking/:step" element={<BookingPage/>}/> */}
                 <Route path="/confirmation/:requestId/:type" element={<ConfirmationPage/>}/>
 
+                <Route path="/incoming" element={<CombinedServicePage />} >
+                    <Route index element={<Navigate replace to="requests" />} />
+                    <Route path="requests" element={<IncomingRequestsTable />} />
+                    <Route path="jobs" element={<OfferedServicesTable />} />
+                </Route>
+
+                <Route path="/outgoing" element={<CombinedOutgoingPage />} >
+                    <Route index element={<Navigate replace to="requests" />} />
+                    <Route path="requests" element={<RequestHistoryTable />} />
+                    <Route path="jobs" element={<ReceivedServiceTable />} />
+                </Route>
                 {/*todo: get this once it's done*/}
                 {/*<Route path="incoming/jobs/:jobId" element={<JobDetailsPage />} />*/}
                 <Route path="/incoming/jobs/:jobId" element={<JobDetailsPage role="provider" />} />
                 <Route path="/outgoing/jobs/:jobId" element={<JobDetailsPage role="consumer" />} />
+
+
+                <Route path="/incoming/requests/:requestId" element={<RequestDetailsPage role="provider" />} />
+                <Route path="/outgoing/requests/:requestId" element={<RequestDetailsPage role="consumer" />} />
 
 
                 {/*old ones*/}

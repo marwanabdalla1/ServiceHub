@@ -127,10 +127,13 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
 
     const handleIconClick = () => {
         if (inDetailPage) {
-            // Suppose '/table-page' is your table page route
-            navigate('/incoming');
+
+            if (isJob(item)) {
+                navigate('/incoming/jobs');
+            } else{
+                navigate('/incoming/requests');
+            }
         } else {
-            // Suppose '/detail-page' is your detail page route
             if (isJob(item)) {
                 navigate(`/incoming/jobs/${item._id}`);
             } else {

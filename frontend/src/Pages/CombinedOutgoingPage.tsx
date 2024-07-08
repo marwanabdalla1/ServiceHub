@@ -6,7 +6,7 @@ import {useNavigate, Outlet} from "react-router-dom";
 import AlertCustomized from "../components/AlertCustomized";
 import useAlert from "../hooks/useAlert";
 
-function CombinedServicePage() {
+function CombinedOutgoingPage() {
     const [selectedTab, setSelectedTab] = useState(0);
     const navigate = useNavigate();
 
@@ -14,9 +14,9 @@ function CombinedServicePage() {
         setSelectedTab(newValue);
 
         if (newValue === 0) {
-            navigate('/incoming/requests');
+            navigate('/outgoing/requests');
         } else if (newValue === 1) {
-            navigate('/incoming/jobs');
+            navigate('/outgoing/jobs');
         }
     };
 
@@ -38,8 +38,8 @@ function CombinedServicePage() {
                             '& .MuiTab-root': {textTransform: 'none', marginTop: 2}
                         }}
                     >
-                        <Tab label="Incoming Requests"/>
-                        <Tab label="Offered Services (Jobs)"/>
+                        <Tab label="Sent Requests"/>
+                        <Tab label="Confirmed Services (Jobs)"/>
                     </Tabs>
                 </Box>
                 <Box sx={{flex: 1, p: 1}}>
@@ -53,4 +53,4 @@ function CombinedServicePage() {
     );
 }
 
-export default CombinedServicePage;
+export default CombinedOutgoingPage;

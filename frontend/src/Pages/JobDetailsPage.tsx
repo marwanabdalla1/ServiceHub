@@ -14,6 +14,7 @@ import GenericConsumerCard from "../components/tableComponents/generic/GenericCo
 import {handleCancel, handleComplete, handleRevoke} from "../utils/jobHandler";
 import {ServiceRequest} from "../models/ServiceRequest";
 import useAlert from "../hooks/useAlert";
+import AlertCustomized from "../components/AlertCustomized";
 
 // Define the props interface
 interface JobDetailsPageProps {
@@ -156,7 +157,12 @@ const JobDetailsPage: React.FC<JobDetailsPageProps>  = ({ role }) => {
 
     return (
         <Container>
-            <Box sx={{ mt: 4 }}>
+            <div>
+                {/*<button onClick={handleAction}>Do Something</button>*/}
+                <AlertCustomized alert={alert} closeAlert={closeAlert}/>
+            </div>
+
+            <Box sx={{mt: 4}}>
                 <Typography variant="h4" gutterBottom>
                     {job.serviceType} Job Details
                 </Typography>
@@ -173,7 +179,7 @@ const JobDetailsPage: React.FC<JobDetailsPageProps>  = ({ role }) => {
                 {/*    onClose={handleCancel}*/}
                 {/*    // showExpandIcon={false} // Disable the expand icon for the details page*/}
                 {/*/>*/}
-                <Box sx={{ mt: 4 }}>
+                <Box sx={{mt: 4}}>
                     <Typography variant="h5">Reviews</Typography>
                     {/*<ReviewList reviews={reviews} /> /!* Render reviews *!/*/}
                 </Box>
