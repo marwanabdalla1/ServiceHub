@@ -824,10 +824,11 @@ export const bookTimeslot: RequestHandler = async (req, res, next) => {
 
         // Adjust timeslots based on the booked time
         for (const slot of overlappingSlots) {
-            if (new Date(slot.start) === new Date(transitStart) && new Date(slot.end) === new Date(transitEnd)) {
+            if (moment(new Date(slot.start)).isSame(moment(new Date(transitStart))) && moment(new Date(slot.end)).isSame(moment(new Date(transitEnd)))) {
                 // Case where the new slot exactly matches the existing one, remove the old slot
                 await Timeslot.findByIdAndDelete(slot._id, {session});
-            } else if (new Date(slot.start) < new Date(transitStart) && new Date(slot.end) > new Date(transitEnd)) {
+            } else if (moment(new Date(slot.start)).isBefore(moment(new Date(transitStart))) &&
+                moment(new Date(slot.end)).isAfter(moment(new Date(transitEnd)))) {
                 console.log("need to split!")
 
                 // Split the timeslot into two parts before and after the booked slot
@@ -851,9 +852,9 @@ export const bookTimeslot: RequestHandler = async (req, res, next) => {
 
             } else {
                 // Adjust existing slot start or end
-                if (new Date(slot.end) > new Date(transitEnd)) {
+                if (moment(new Date(slot.end)).isAfter(moment(new Date(transitEnd)))) {
                     slot.start = transitEnd;
-                } else if (new Date(slot.start) < new Date(transitStart)) {
+                } else if (moment(new Date(slot.start)).isBefore(moment(new Date(transitStart)))) {
                     slot.end = transitStart;
                 }
                 await slot.save({session});

@@ -17,10 +17,7 @@ import SelectAvailabilityPage from './Pages/SelectAvailabilityPage';
 import SelectTimeslot from './Pages/bookingSteps/SelectTimeslotPage'
 import UpdateTimeslot from './Pages/UpdateTimeslotPage'
 import {BookingProvider} from "./contexts/BookingContext";
-import UpdateProfile from "./Pages/bookingSteps/UpdateProfile";
-import ReviewAndConfirm from "./Pages/bookingSteps/ReviewAndConfirm";
-import CreateAccountOrSignIn from "./Pages/bookingSteps/CreateAccountOrSignIn";
-import ListsLandingPage from "./Pages/listsLandingPage";
+
 import {RequestProvider} from './contexts/RequestContext';
 import axios from "axios";
 import ProposeNewtimePage from './Pages/ProposeNewTimePage';
