@@ -72,6 +72,7 @@ export default function AdminUserData(): React.ReactElement {
     };
 
     const handleView = (account:Account) => {
+        console.log('View user data:', account);
         navigate('/admin/viewUserData', {state: {account}});
     };
 

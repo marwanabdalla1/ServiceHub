@@ -1,0 +1,100 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    display: flex;
+    height: 100vh;
+}
+
+.sidebar {
+    position: fixed;
+    left: 0;
+    width: 200px;
+    height: 100%;
+    border-right: 1px solid #ccc;
+    padding: 20px;
+    background-color: #f8f8f8;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+}
+
+.sidebar button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: none;
+    background-color: #fff;
+    cursor: pointer;
+    text-align: left;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.sidebar button:hover {
+    background-color: #e0e0e0;
+}
+
+.content {
+    position: relative;
+    margin-left: 220px; /* width of the sidebar + some padding */
+    padding: 20px;
+    flex: 1;
+    overflow-y: auto;
+}
+
+h2 {
+    margin-top: 0;
+    font-size: 36px; /* Increased from 24px to 28px */
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.edit-button {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    padding: 10px 20px;
+    border: none;
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 4px;
+}
+
+.edit-button:hover {
+    background-color: #0056b3;
+}
+
+.form label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.form input {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.details p {
+    margin: 10px 0;
+    font-size: 16px;
+}
+
+.details p strong {
+    display: inline-block;
+    width: 150px;
+    font-weight: bold;
+}

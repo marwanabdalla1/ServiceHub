@@ -33,9 +33,10 @@ const AdminNavbar: React.FC<AdminNavbarProps> = () => {
         <nav className="bg-blue-300 shadow-md h-20">
             <div className="flex justify-between items-center h-full">
                 {/* Left Section: Logo */}
-                <div className="flex items-center space-x-4">
-                    <Link to="/admin" className="flex items-center">
-                        <img src="/images/logo.png" alt="Logo" className="md:h-32 md:mr-2"/>
+                <div className="flex justify-between items-center h-full">
+                    {/* Left Section: Logo */}
+                    <Link to="/">
+                        <img src="/images/logo.png" alt="Logo" className=" h-16 ml-4"/>
                     </Link>
                 </div>
 

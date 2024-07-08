@@ -32,6 +32,8 @@ import VerifyCertificatePage from "./Pages/AdminPanel/VerifyCertificatePage";
 import AdminUserDataPage from "./Pages/AdminPanel/UserDataPages/AdminUserDataPage";
 import AdminHomePage from "./Pages/AdminPanel/AdminHomePage";
 import ErrorPage from "./Pages/ErrorPage";
+import CombinedServicePage from "./Pages/CombinedIncomingPage";
+import ViewUserDataPage from "./Pages/AdminPanel/UserDataPages/ViewUserDataPage";
 import Footer from './components/Footer';
 import {Divider} from '@mui/material';
 
@@ -176,7 +178,7 @@ function MainRoutes({search, setSearch}: { search: any, setSearch: any }) {
                 <Route path="/admin" element={<AdminHomePage/>}/>
                 <Route path="/admin/verifyCertificate" element={<VerifyCertificatePage/>}/>
                 <Route path="/admin/UserData" element={<AdminUserDataPage/>}/>
-                {/*<Route path="/admin/viewUserData" element={<ViewUserDataPage/>}/>*/}
+                <Route path="/admin/viewUserData" element={<ViewUserDataPage/>}/>
 
                     <Route path="/unauthorized" element={<ErrorPage title="Unauthorized Access"
                                                                     message="You do not have permission to view this page."/>}/>
