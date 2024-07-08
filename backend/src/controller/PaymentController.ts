@@ -40,6 +40,7 @@ export const pay: RequestHandler = async (req, res) => {
       ],
       mode: 'subscription',
       success_url: 'http://localhost:3000/setprofile', 
+      //TODO: create an actual page for this indiciating that the payment was unsuccessful
       cancel_url: 'http://localhost:3000/dontexit',
     });
 

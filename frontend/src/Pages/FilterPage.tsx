@@ -17,7 +17,7 @@ interface FilterState {
 }
 
 function FilterPage() {
-    const defaultProfileImage = '/images/default-profile.jpg'; // Use relative path for public folder
+    const defaultProfileImage = '/images/default-profile.png'; // Use relative path for public folder
 
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [filterState, setFilterState] = useState<FilterState>({
