@@ -17,7 +17,6 @@ router.get('/requester/:requesterId', authenticate, getRequesterById);
 router.delete("/", authenticate, deleteAccount);
 router.put('/', authenticate, updateAccountDetails);
 router.get('/', authenticate, getAccountDetails);
-router.get('/admin/userdata', authenticate, isAdmin, adminUserData);
-router.delete('/admin/userdata/:id', authenticate, isAdmin, deleteAccount);
+router.get('/admin/userdata', authenticate, adminUserData);
 
 export default router;
