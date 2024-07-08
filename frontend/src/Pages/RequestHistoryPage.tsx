@@ -1,7 +1,7 @@
 import React from 'react';
 import NavigationBar from '../components/Navbar';
 import MediaCard from '../components/ProfileCard';
-import RequestHistoryTable from '../components/RequestHistoryTable';
+import RequestHistoryTable from './TablePages/RequestHistoryTable';
 
 
 function RequestHistoryPage() {

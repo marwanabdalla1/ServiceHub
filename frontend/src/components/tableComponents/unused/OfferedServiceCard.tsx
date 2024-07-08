@@ -5,17 +5,17 @@ import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import OpenInFullIcon from '@mui/icons-material/OpenInFull';
 import Button from '@mui/material/Button';
-import {Job} from '../models/Job';
+import {Job} from '../../../models/Job';
 import {GoStarFill} from 'react-icons/go';
-import BlackButton from './inputs/blackbutton';
+import BlackButton from '../../inputs/blackbutton';
 import Avatar from '@mui/material/Avatar';
 import {Divider, IconButton} from '@mui/material';
-import {JobStatus} from '../models/enums';
-import {useAuth} from '../contexts/AuthContext';
+import {JobStatus} from '../../../models/enums';
+import {useAuth} from '../../../contexts/AuthContext';
 import axios from 'axios';
-import {Account} from '../models/Account';
+import {Account} from '../../../models/Account';
 import {useEffect} from 'react';
-import {formatDateTime} from '../utils/dateUtils';
+import {formatDateTime} from '../../../utils/dateUtils';
 import {useNavigate} from "react-router-dom";
 
 interface MediaCardProps {
@@ -131,7 +131,7 @@ const MediaCard: React.FC<MediaCardProps> = ({
                 </Typography>
                 <Divider sx={{marginBottom: '1rem'}}/>
                 <Typography variant="body2" sx={{marginBottom: '1rem'}}>
-                    Description: {offeredService.description}
+                    Description: {offeredService.comment}
                 </Typography>
                 {renderButton()}
             </CardContent>

@@ -1,7 +1,7 @@
 import React from 'react';
 import NavigationBar from '../components/Navbar';
 import MediaCard from '../components/ProfileCard';
-import IncomingRequestsTable from '../components/IncomingRequestsTable';
+import IncomingRequestsTable from './TablePages/IncomingRequestsTable';
 
 
 function IncomingRequestsPage() {

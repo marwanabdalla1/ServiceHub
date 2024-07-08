@@ -2,10 +2,10 @@ import * as React from 'react';
 import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 import Button from '@mui/material/Button';
-import { Job } from '../models/Job';
-import BlackButton from './inputs/blackbutton';
-import { ServiceType, JobStatus } from '../models/enums';
-import {formatDateTime} from "../utils/dateUtils";
+import { Job } from '../../../models/Job';
+import BlackButton from '../../inputs/blackbutton';
+import { ServiceType, JobStatus } from '../../../models/enums';
+import {formatDateTime} from "../../../utils/dateUtils";
 
 interface ReceivedServiceRowProps {
   receivedService: Job;

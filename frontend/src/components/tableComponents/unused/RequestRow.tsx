@@ -2,10 +2,10 @@ import * as React from 'react';
 import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 import Button from '@mui/material/Button';
-import { ServiceRequest as Request } from '../models/ServiceRequest';
-import BlackButton from './inputs/blackbutton';
-import { ServiceType, RequestStatus } from '../models/enums';
-import {formatDateTime} from "../utils/dateUtils";
+import { ServiceRequest as Request } from '../../../models/ServiceRequest';
+import BlackButton from '../../inputs/blackbutton';
+import { ServiceType, RequestStatus } from '../../../models/enums';
+import {formatDateTime} from "../../../utils/dateUtils";
 
 interface RequestRowProps {
   request: Request;

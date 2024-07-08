@@ -2,7 +2,7 @@ import React from 'react';
 import NavigationBar from '../components/Navbar';
 import MediaCard from '../components/ProfileCard';
 import {User} from '../models/Account';
-import OfferedServicesTable from '../components/OfferedServicesTable';
+import OfferedServicesTable from './TablePages/OfferedServicesTable';
 
 
 function OfferedServicesPage() {

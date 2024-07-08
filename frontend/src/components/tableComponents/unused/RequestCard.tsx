@@ -3,23 +3,23 @@ import Card from '@mui/material/Card';
 import CloseIcon from '@mui/icons-material/Close';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
-import { ServiceRequest as Request, ServiceRequest} from '../models/ServiceRequest';
+import { ServiceRequest as Request, ServiceRequest} from '../../../models/ServiceRequest';
 import { GoStarFill } from 'react-icons/go';
-import BlackButton from './inputs/blackbutton';
+import BlackButton from '../../inputs/blackbutton';
 import Avatar from '@mui/material/Avatar';
 import { Divider } from '@mui/material';
-import { RequestStatus } from '../models/enums';
-import { useAuth } from '../contexts/AuthContext';
+import { RequestStatus } from '../../../models/enums';
+import { useAuth } from '../../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Account } from '../models/Account';
+import { Account } from '../../../models/Account';
 import axios from 'axios';
-import { formatDateTime } from '../utils/dateUtils';
+import { formatDateTime } from '../../../utils/dateUtils';
 
 interface MediaCardProps {
   request: Request;
   onClose: () => void;
   onDecline: (request: Request) => void;
-  onProposeNewTime: (request: Request, newTime: Date) => void;
+  onProposeNewTime: (request: Request) => void;
   onCancel: () => void;
 }
 
