@@ -2,10 +2,10 @@ import * as React from 'react';
 import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 import Button from '@mui/material/Button';
-import { ServiceRequest } from '../../../models/ServiceRequest';
-import BlackButton from '../../inputs/blackbutton';
-import {ServiceType, RequestStatus, JobStatus} from '../../../models/enums';
-import {Job} from "../../../models/Job";
+import { ServiceRequest } from '../../models/ServiceRequest';
+import BlackButton from '../inputs/blackbutton';
+import {ServiceType, RequestStatus, JobStatus} from '../../models/enums';
+import {Job} from "../../models/Job";
 
 type Item = ServiceRequest | Job;
 

@@ -11,8 +11,8 @@ import Typography from '@mui/material/Typography';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
 import {Job} from '../../models/Job';
 
-import GenericProviderCard from '../../components/tableComponents/generic/GenericProviderCard'
-import GenericTableRow from '../../components/tableComponents/generic/GenericTableRow'
+import GenericProviderCard from '../../components/tableComponents/GenericProviderCard'
+import GenericTableRow from '../../components/tableComponents/GenericTableRow'
 
 
 import {ServiceRequest} from '../../models/ServiceRequest';

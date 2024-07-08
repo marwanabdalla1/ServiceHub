@@ -5,12 +5,10 @@ import axios from 'axios';
 import { Job } from '../models/Job';
 import { Container, Typography, Box } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
-import MediaCard from '../components/tableComponents/unused/OfferedServiceCard';
-// import ReviewList from './ReviewList';
 import {Review} from "../models/Review"; // Assuming you have a component to list reviews
 import handleAccept from "./TablePages/IncomingRequestsTable"
-import GenericProviderCard from "../components/tableComponents/generic/GenericProviderCard";
-import GenericConsumerCard from "../components/tableComponents/generic/GenericConsumerCard";
+import GenericProviderCard from "../components/tableComponents/GenericProviderCard";
+import GenericConsumerCard from "../components/tableComponents/GenericConsumerCard";
 import {handleCancel, handleComplete, handleRevoke} from "../utils/jobHandler";
 import {ServiceRequest} from "../models/ServiceRequest";
 import useAlert from "../hooks/useAlert";

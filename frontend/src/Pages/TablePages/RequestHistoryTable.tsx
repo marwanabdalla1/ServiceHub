@@ -14,15 +14,15 @@ import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import {ServiceRequest} from '../../models/ServiceRequest';
 
 
-import GenericProviderCard from '../../components/tableComponents/generic/GenericProviderCard'
-import GenericTableRow from '../../components/tableComponents/generic/GenericTableRow'
+import GenericProviderCard from '../../components/tableComponents/GenericProviderCard'
+import GenericTableRow from '../../components/tableComponents/GenericTableRow'
 
 import axios from "axios";
 import {useEffect} from "react";
 import {useAuth} from "../../contexts/AuthContext";
 import {formatDateTime} from '../../utils/dateUtils';
 import {handleCancel} from "../../utils/requestHandler";
-import GenericConsumerCard from "../../components/tableComponents/generic/GenericConsumerCard";
+import GenericConsumerCard from "../../components/tableComponents/GenericConsumerCard";
 import {Job} from "../../models/Job";
 
 type Item = ServiceRequest | Job;

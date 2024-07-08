@@ -16,8 +16,8 @@ import {
 } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
 import {Review} from "../models/Review"; // Assuming you have a component to list reviews
-import GenericProviderCard from "../components/tableComponents/generic/GenericProviderCard";
-import GenericConsumerCard from "../components/tableComponents/generic/GenericConsumerCard";
+import GenericProviderCard from "../components/tableComponents/GenericProviderCard";
+import GenericConsumerCard from "../components/tableComponents/GenericConsumerCard";
 import {handleAccept, handleCancel, handleDecline, handleTimeChange} from "../utils/requestHandler";
 import {ServiceRequest} from "../models/ServiceRequest";
 import useAlert from "../hooks/useAlert";
