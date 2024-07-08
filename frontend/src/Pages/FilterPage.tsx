@@ -1,11 +1,11 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import NavigationBar from '../components/Navbar';
 import MediaCard from '../components/ProfileCard';
-import {DrawerFilter} from '../components/DrawFilter';
+import { DrawerFilter } from '../components/DrawFilter';
 import Sort from '../components/Sort';
-import {useLocation, useNavigate} from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from 'axios';
-import {Account} from '../models/Account';
+import { Account } from '../models/Account';
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
 
@@ -17,6 +17,8 @@ interface FilterState {
 }
 
 function FilterPage() {
+    const defaultProfileImage = '/images/default-profile.jpg'; // Use relative path for public folder
+
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [filterState, setFilterState] = useState<FilterState>({
         type: '',
@@ -30,33 +32,52 @@ function FilterPage() {
     const [search, setSearch] = useState<string>(searchTerm);
     const [sortKey, setSortKey] = useState<string | null>(null);
     const [profileImages, setProfileImages] = useState<{ [key: string]: string }>({});
+    const [loadingImages, setLoadingImages] = useState<{ [key: string]: boolean }>({});
     const [loading, setLoading] = useState<boolean>(true);
     const navigate = useNavigate();
+    console.log(defaultProfileImage);
 
+    const fetchProfileImage = async (account: Account) => {
+        try {
+            const response = await axios.get(`/api/file/profileImage/${account._id}`, {
+                responseType: 'blob'
+            });
+            if (response.status === 200) {
+                return URL.createObjectURL(response.data);
+            }
+        } catch (error) {
+            if ((error as any).response && (error as any).response.status === 404) {
+                console.log('No profile image found for account:', account._id);
+            } else {
+                console.error('Error fetching profile image:', error);
+            }
+        }
+        return defaultProfileImage; // Return default image on error or not found
+    };
 
     const fetchProfileImages = async (accounts: Account[]) => {
         const newProfileImages: { [key: string]: string } = {};
-        await Promise.all(accounts.map(async (account) => {
+        const newLoadingImages: { [key: string]: boolean } = {};
+        accounts.forEach(account => {
+            newLoadingImages[account._id] = true;
+        });
+        setLoadingImages(newLoadingImages);
 
-            await axios.get(`/api/file/profileImage/${account._id}`, {
-                responseType: 'blob'
-            }).then((response) => {
-                if (response.status === 200) {
-                    newProfileImages[account._id] = URL.createObjectURL(response.data);
-                }
-                return response;
-            }).catch((error) => {
-                if (error.response.status === 404) {
-                    console.log('No profile image found for account:', account._id);
-                } else {
-                    console.error('Error fetching profile image:', error);
-                }
-            });
-            setProfileImages(newProfileImages);
-            setLoading(false);
+        await Promise.all(accounts.map(async (account) => {
+            const imageUrl = await fetchProfileImage(account);
+            newProfileImages[account._id] = imageUrl;
+            setProfileImages(prevImages => ({
+                ...prevImages,
+                [account._id]: imageUrl,
+            }));
+            setLoadingImages(prevLoading => ({
+                ...prevLoading,
+                [account._id]: false,
+            }));
         }));
 
-    }
+        setLoading(false);
+    };
 
     useEffect(() => {
         const fetchAndSortOfferings = async () => {
@@ -70,7 +91,7 @@ function FilterPage() {
             };
 
             try {
-                const response = await axios.get<Account[]>('/api/offerings', {params});
+                const response = await axios.get<Account[]>('/api/offerings', { params });
                 let data = response.data;
 
                 const sortAccounts = (accounts: Account[]) => {
@@ -119,23 +140,21 @@ function FilterPage() {
                     data = [...topPremiumAccounts, ...remainingAccounts];
                 }
                 setOfferings(data);
-                fetchProfileImages(data).then(r => console.log('Profile images fetched'));
+                setLoading(false);
+                await fetchProfileImages(data);
 
             } catch (error) {
                 console.error('Error fetching data:', error);
-                setLoading(false);
+            } finally {
             }
         };
 
         fetchAndSortOfferings();
     }, [filterState, search, sortKey]);
 
-
-
     const toggleDrawer = () => {
         setIsDrawerOpen(!isDrawerOpen);
     };
-
 
     const handleSearch = () => {
         navigate("/filter");
@@ -167,7 +186,7 @@ function FilterPage() {
     return (
         <div>
             <NavigationBar toggleDrawer={toggleDrawer} onChange={handleInputChange} onSearch={handleSearch}
-                           search={search} setSearch={setSearch}/>
+                           search={search} setSearch={setSearch} />
             <div className='flex-col items-center'>
                 <DrawerFilter
                     openDrawer={isDrawerOpen}
@@ -176,17 +195,17 @@ function FilterPage() {
                     onApplyFilters={handleApplyFilters}
                     onClearFilters={clearFilters}
                 />
-                <Sort onSortChange={handleSortChange}/>
+                <Sort onSortChange={handleSortChange} />
                 {loading ? (
                     <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
-                        <CircularProgress/>
+                        <CircularProgress />
                     </Box>
                 ) : (
-                    <div
-                        className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mx-auto bg-slate-50 max-w-screen-2xl'>
+                    <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mx-auto bg-slate-50 max-w-screen-2xl'>
                         {offerings.map((offering) => (
                             <MediaCard key={offering._id} user={offering}
-                                       profileImageUrl={profileImages[offering._id] || null}/>
+                                       profileImageUrl={profileImages[offering._id] || defaultProfileImage}
+                                       loading={loadingImages[offering._id]} />
                         ))}
                     </div>
                 )}
