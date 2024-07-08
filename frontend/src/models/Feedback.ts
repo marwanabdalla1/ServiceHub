@@ -9,11 +9,13 @@ export enum ReviewCategory {
 }
 
 export interface Feedback {
+    _id: string;
     title: string;
     rating: number; // rating is optional
     content: string;
     category: ReviewCategory;
     givenBy: {
+        _id: string;
         firstName: string
         lastName: string
     }
