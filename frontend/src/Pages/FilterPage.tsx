@@ -59,10 +59,6 @@ function FilterPage() {
     }
 
     useEffect(() => {
-        fetchProfileImages(offerings).then(r => console.log('Profile images fetched'));
-    }, [offerings]);
-
-    useEffect(() => {
         const fetchAndSortOfferings = async () => {
             setLoading(true);
             const params = {
@@ -123,10 +119,11 @@ function FilterPage() {
                     data = [...topPremiumAccounts, ...remainingAccounts];
                 }
                 setOfferings(data);
+                fetchProfileImages(data).then(r => console.log('Profile images fetched'));
 
             } catch (error) {
                 console.error('Error fetching data:', error);
-                // setLoading(false);
+                setLoading(false);
             }
         };
 
