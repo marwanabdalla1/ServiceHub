@@ -169,7 +169,7 @@ function AddServicePage() {
                 }
                 console.log(`Status: ${response.status}`);
                 console.log(response.data);
-                navigate('/profile'); // Redirect to profile page after submission
+                navigate('/setprofile'); // Redirect to profile page after submission
             } catch
                 (error) {
                 console.error('Error submitting service:', error);
