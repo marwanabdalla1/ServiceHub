@@ -27,24 +27,26 @@ import ChangeBookingTimePage from './Pages/ChangeBookingTimePage';
 import {ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import {Slide} from "react-toastify";
-import JobDetailsPage from "./Pages/JobDetailsPage";
 import VerifyCertificatePage from "./Pages/AdminPanel/VerifyCertificatePage";
 import AdminUserDataPage from "./Pages/AdminPanel/AdminUserDataPage";
 import AdminHomePage from "./Pages/AdminPanel/AdminHomePage";
 import ErrorPage from "./Pages/ErrorPage";
-import CombinedServicePage from "./Pages/TablePages/CombinedIncomingPage";
-import Footer from './components/Footer';
-import { Divider } from '@mui/material';
 import UpdateSProfile from './components/UpdateSProfile';
 import AddServicePage from './Pages/AddServicePage';
+
 import OfferedServicesTable from "./Pages/TablePages/OfferedServicesTable";
 import IncomingRequestsTable from "./Pages/TablePages/IncomingRequestsTable";
-import RequestDetailsPage from "./Pages/RequestDetailsPage";
-import ReceivedServiceTable from "./Pages/TablePages/ReceivedServiceTable";
-import CombinedOutgoingPage from "./Pages/TablePages/CombinedOutgoingPage";
 import RequestHistoryTable from "./Pages/TablePages/RequestHistoryTable";
-import {RecoveryProvider} from "./contexts/RecoveryContext";
+import ReceivedServiceTable from "./Pages/TablePages/ReceivedServiceTable";
 
+
+import JobDetailsPage from "./Pages/JobDetailsPage";
+import RequestDetailsPage from "./Pages/RequestDetailsPage";
+import CombinedOutgoingPage from "./Pages/TablePages/CombinedOutgoingPage";
+import CombinedServicePage from "./Pages/TablePages/CombinedIncomingPage";
+import {RecoveryProvider} from "./contexts/RecoveryContext";
+import { Divider } from '@mui/material';
+import Footer from './components/Footer';
 function App() {
     const [search, setSearch] = useState('');
 
@@ -118,7 +120,7 @@ function MainRoutes({search, setSearch}: {search: any, setSearch: any}) {
                 <Route path="/forgetPassword/success" element={<ResetPasswordSuccessPage/>}/>
                 <Route path="/filter" element={<FilterPage/>}/>
 
-               
+
 
 
                 {/* Add another one for it */}

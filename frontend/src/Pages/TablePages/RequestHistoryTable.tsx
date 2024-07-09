@@ -153,6 +153,7 @@ export default function RequestHistoryTable() {
             serviceRequests,
             setServiceRequests,
             token,
+            account,
             setShowMediaCard,
         });
     };
