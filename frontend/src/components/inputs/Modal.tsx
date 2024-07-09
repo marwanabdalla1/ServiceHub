@@ -1,6 +1,6 @@
 import React from 'react';
 import { IoClose } from "react-icons/io5";
-import IncomingRequestTable  from "../IncomingRequestsTable";
+import IncomingRequestTable  from "../../Pages/TablePages/IncomingRequestsTable";
 
 interface ModalProps {
   show: boolean;

@@ -8,6 +8,7 @@ import {createNotification, createNotificationDirect} from "./NotificationContro
 import Notification from "../models/notification";
 import {NotificationType, RequestStatus} from "../models/enums";
 import {bookTimeslot, cancelTimeslotDirect, cancelTimeslotWithRequestId} from "./TimeSlotController";
+import Job from "../models/job";
 
 
 
@@ -174,8 +175,8 @@ export const getServiceRequestsByProvider: RequestHandler = async (req, res) => 
 
         const serviceRequests = await ServiceRequest.find({ provider: providerId })
             .populate([
-                { path: 'requestedBy', select: 'firstName lastName' }, // Exclude _id
-                { path: 'provider', select: 'firstName lastName' },
+                { path: 'requestedBy', select: 'firstName lastName email profileImageId' }, // todo: also include profile pic
+                { path: 'provider', select: 'firstName lastName email profileImageId' }
             ])
             .exec();
 
@@ -212,8 +213,8 @@ export const getIncomingServiceRequestsByProvider: RequestHandler = async (req, 
 
         const serviceRequests = await ServiceRequest.find({ provider: providerId, requestStatus: {$in: ["pending", RequestStatus.requestorActionNeeded]} })
             .populate([
-                { path: 'requestedBy', select: 'firstName lastName' }, // Exclude _id
-                { path: 'provider', select: 'firstName lastName' },
+                { path: 'requestedBy', select: 'firstName lastName email profileImageId' }, // todo: also include profile pic
+                { path: 'provider', select: 'firstName lastName email profileImageId' }
             ])
             .exec();
 
@@ -254,7 +255,8 @@ export const getServiceRequestsByRequester: RequestHandler = async (req, res) =>
 
         const serviceRequests = await ServiceRequest.find({ requestedBy: requesterId })
             .populate([
-                { path: 'requestedBy', select: 'firstName lastName' }
+                { path: 'requestedBy', select: 'firstName lastName email profileImageId' }, // todo: also include profile pic
+                { path: 'provider', select: 'firstName lastName email profileImageId' }
             ])
             .exec();
 
@@ -409,30 +411,6 @@ export const handleChangeTimeslot: RequestHandler = async (req, res, next) => {
     }
 };
 
-// export const handleChangeTimeslot: RequestHandler = async (req, res, next) => {
-//     const { createdById, requestId } = req.body;
-//
-//     try {
-//         const result = await bookTimeslot(req, res, next);  // Assume bookTimeslot now just handles logic and throws
-//         console.log("request controller change timeslot result:", result)
-//         res.json(result);
-//         await createNotificationDirect({
-//             content: `The timeslot of the existing request ${requestId} has been successfully changed.`,
-//             serviceRequest: requestId,
-//             notificationType: NotificationType.timeRequestChanged,
-//             recipient: createdById
-//         });
-//     } catch (error) {
-//         console.error("Error in handling timeslot change:", error);
-//         res.status(500).json({ message: "Failed to process timeslot change." });
-//         await createNotificationDirect({
-//             content: `Failed to change the timeslot of the existing request ${requestId}.`,
-//             serviceRequest: requestId,
-//             notificationType: NotificationType.timeRequestChanged,
-//             recipient: createdById
-//         });
-//     }
-// };
 
 
 export const getRequestById: RequestHandler = async (req, res) => {
@@ -448,13 +426,12 @@ export const getRequestById: RequestHandler = async (req, res) => {
         //     return res.status(403).json({ message: "Unauthorized access." });
         // }
 
-        const serviceRequest = await ServiceRequest.findOne({ _id: requestId })
-            // .populate([
-            //     { path: 'requestedBy', select: 'firstName lastName' },
-            //     {path: 'provider', select: 'firstName lastName'},
-            //     {path: 'serviceOffering', select: 'baseDuration bufferTimeDuration'}
-            // ])
-            // .exec();
+
+        const serviceRequest = await ServiceRequest.findById(requestId).populate([
+            { path: 'requestedBy', select: 'firstName lastName email profileImageId' }, // todo: also include profile pic
+            { path: 'provider', select: 'firstName lastName email profileImageId' }]).exec();
+
+
 
         console.log(serviceRequest)
 
@@ -468,11 +445,14 @@ export const getRequestById: RequestHandler = async (req, res) => {
             return res.status(403).json({ message: "Unauthorized access." });
         }
 
+        const timeslot = await Timeslot.findOne({ requestId: requestId }).exec();
+        const requestWithTimeslot = { ...serviceRequest.toObject(), timeslot: timeslot || undefined };
 
 
-        console.log("incoming requests with their timeslots", serviceRequest)
 
-        res.status(200).json(serviceRequest);
+        console.log("incoming requests with their timeslots", requestWithTimeslot)
+
+        res.status(200).json(requestWithTimeslot);
 
     } catch (error: any) {
         console.error("Failed to retrieve service requests:", error);

@@ -38,6 +38,7 @@ type AccountContextType = {
     isProvider: () => boolean;
     isAdmin: () => boolean;
     isReady: boolean;
+    isFetched: boolean;
 }
 
 type Props = { children: React.ReactNode };
@@ -50,6 +51,8 @@ export const AccountProvider = ({children}: Props) => {
 
     const [token, setToken] = useState<string | null>(null);
     const [isReady, setIsReady] = useState<boolean>(false);
+    const [isFetched, setIsFetched] = useState<boolean>(false);
+
     const [account, setAccount] = useState<Account | null>(null);
     // const [nextPath, setNextPath] = useState('/');  // Default to home
 
@@ -76,11 +79,14 @@ export const AccountProvider = ({children}: Props) => {
                     console.log("account:", response.data)
                     setAccount(response.data);
                     localStorage.setItem('account', response?.data);
+                    setIsReady(true); //todo: note this was in the other useEffect
+                    setIsFetched(true);
                 })
                 .catch(error => {
                     console.error('Error fetching user data:', error);
                 });
         }
+
     }, [token]);
 
     function handleResponse(response: AxiosResponse<any>) {
@@ -201,7 +207,7 @@ export const AccountProvider = ({children}: Props) => {
 
     return (
         <AccountContext.Provider
-            value={{token, account, isProvider, isPremium, registerUser, loginUser, logoutUser, isLoggedIn, isAdmin, isReady}}>
+            value={{token, account, isProvider, isPremium, registerUser, loginUser, logoutUser, isLoggedIn, isAdmin, isReady, isFetched}}>
             {isReady ? children : null}
         </AccountContext.Provider>
     );

@@ -5,6 +5,8 @@ import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
+import CircularProgress from '@mui/material/CircularProgress';
+import Box from '@mui/material/Box';
 import { Account } from '../models/Account';
 import { GoStarFill } from "react-icons/go";
 import { Link } from 'react-router-dom';
@@ -12,24 +14,30 @@ import { Link } from 'react-router-dom';
 interface MediaCardProps {
   user: Account;
   profileImageUrl: string | null;
+  loading: boolean;
 }
 
-export default function MediaCard({ user, profileImageUrl }: MediaCardProps) {
+export default function MediaCard({ user, profileImageUrl, loading }: MediaCardProps) {
   return (
     <div className='border margin-4'>
       <Card sx={{ borderRadius: '15px' }}>
-        <CardMedia
-          sx={{ height: 280 }}
-          image={profileImageUrl ? profileImageUrl : user.profileImageUrl}
-          title="Service Image"
-        />
+        {loading ? (
+          <Box display="flex" justifyContent="center" alignItems="center" height={280}>
+            <CircularProgress />
+          </Box>
+        ) : (
+          <CardMedia
+            sx={{ height: 280 }}
+            image={profileImageUrl ? profileImageUrl : user.profileImageUrl}
+            title="Service Image"
+          />
+        )}
         <CardContent>
           <div>
             <Typography gutterBottom variant="h5" component="div">
               {user.firstName} {user.lastName}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              {/*todo: this only has the first service offering!*/}
               {user.serviceOfferings[0]?.serviceType}
             </Typography>
 

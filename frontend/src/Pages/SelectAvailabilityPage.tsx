@@ -7,19 +7,27 @@ const SelectAvailabilityPage: React.FC = () => {
     const [serviceType, setServiceType] = useState("Babysitting"); // Placeholder for the service type [e.g. "Tutoring"]
     const [defaultSlotDuration, setDefaultSlotDuration] = useState(60); // Placeholder for the default slot duration
     // const [globalAvailabilities, setGlobalAvailabilities] = useState<Event[]>([{start: Date.now(), end: Date.now(), title: "Event"}]); // Placeholder for the global availabilities [e.g. tutor availabilities]
-    const {token, account, isProvider, isReady } = useAuth();
+    const {token, account, isReady, isFetched } = useAuth();
     const navigate = useNavigate();
+    const isProvider = account?.isProvider;
+
 
 
 
     useEffect(() => {
-        if (!isReady) return;
-        console.log("you are in the select availability page:", token, account,)
-        if (!token || !isProvider()) {
+        console.log("you are in the select availability page1:", token, account, isReady, isFetched, isProvider)
+
+        if (!isReady || (token && !isFetched)){
+            console.log("not ready!")
+            return;
+        }
+        console.log("you are in the select availability page:", token, account, isReady, isFetched, isProvider)
+
+        if (!token || (account && !isProvider)) {
             // If not a provider, redirect" to home or another appropriate page
             navigate('/unauthorized'); // Make sure you have a route for '/unauthorized' or change as needed
         }
-    }, [token, isProvider, account]);
+    }, [token, isProvider, account, isReady, isFetched]);
 
     if (!isReady) {
         return <div>Loading...</div>;  // Or any other loading indicator
