@@ -14,7 +14,7 @@ import {JobStatus, RequestStatus} from "../../models/enums";
 import OpenInFullIcon from "@mui/icons-material/OpenInFull";
 import CloseFullscreenIcon from '@mui/icons-material/CloseFullscreen';
 import CloseIcon from "@mui/icons-material/Close";
-import {useNavigate} from "react-router-dom";
+import {redirect, useNavigate} from "react-router-dom";
 import {formatDateTime} from "../../utils/dateUtils";
 
 
@@ -28,6 +28,7 @@ interface GenericConsumerCardProps {
 
     onClose: () => void;
     inDetailPage: boolean;
+    redirectPath?: string;
 
 
     // actions, depending on if it's job or request
@@ -55,6 +56,7 @@ const isJob = (item: Item): item is Job => {
 const GenericConsumerCard: React.FC<GenericConsumerCardProps> = ({
                                                                      item,
                                                                      inDetailPage,
+                                                                     redirectPath,
                                                                      provider,
                                                                      receiver,
                                                                      onClose,
@@ -80,9 +82,9 @@ const GenericConsumerCard: React.FC<GenericConsumerCardProps> = ({
                 console.log("No Actions possible for CANCELLED requests!");
             } else if (item.requestStatus === RequestStatus.declined) {
                 console.log("No Actions possible for DECLINED requests!");
-            // } else if (item.requestStatus === RequestStatus.accepted) {
-            //     buttons.push(<BlackButton text="Cancel Request" onClick={() => actions.cancelRequest?.(item)}
-            //                               sx={{marginRight: "1rem"}}/>);
+                // } else if (item.requestStatus === RequestStatus.accepted) {
+                //     buttons.push(<BlackButton text="Cancel Request" onClick={() => actions.cancelRequest?.(item)}
+                //                               sx={{marginRight: "1rem"}}/>);
             } else if (actions.cancelRequest && ["pending", "accepted", "action needed from requestor"].includes(item.requestStatus)) {
                 buttons.push(<BlackButton text="Cancel Request" onClick={() => actions.cancelRequest?.(item)}
                                           sx={{marginRight: "1rem"}}/>);
@@ -113,10 +115,14 @@ const GenericConsumerCard: React.FC<GenericConsumerCardProps> = ({
     const handleIconClick = () => {
         setIsInDetailPage(!isInDetailPage);
         if (inDetailPage) {
-            if (isJob(item)) {
-                navigate('/outgoing/jobs');
-            } else{
-                navigate('/outgoing/requests');
+            if (redirectPath) {
+                navigate(redirectPath)
+            } else {
+                if (isJob(item)) {
+                    navigate('/outgoing/jobs');
+                } else {
+                    navigate('/outgoing/requests');
+                }
             }
 
         } else {
@@ -128,7 +134,7 @@ const GenericConsumerCard: React.FC<GenericConsumerCardProps> = ({
         }
     };
 
-    const generalStatus = 'requestStatus' in item ?  item.requestStatus: JobStatus[item.status];
+    const generalStatus = 'requestStatus' in item ? item.requestStatus : JobStatus[item.status];
 
 
     return (
@@ -159,7 +165,7 @@ const GenericConsumerCard: React.FC<GenericConsumerCardProps> = ({
                             sx={{width: 100, height: 100, marginRight: '0.5rem'}}/>
                     <div style={{marginRight: '1rem', textAlign: 'left'}}>
                         <Typography variant="h6">
-                            {isJob(item) ? "Job Detail": "Request Detail"}
+                            {isJob(item) ? "Job Detail" : "Request Detail"}
                         </Typography>
                         <Typography variant="body2" color="textSecondary" style={{marginBottom: '0.5rem'}}>
                             Provider: {provider?.firstName + " " + provider?.lastName}

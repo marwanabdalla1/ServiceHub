@@ -19,19 +19,15 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
-import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
 
 
 import axios from 'axios';
 import moment from 'moment';
 import {useAuth} from '../contexts/AuthContext';
-import FormLabel from "@mui/joy/FormLabel";
-import RadioGroup from "@mui/joy/RadioGroup";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Radio from "@mui/joy/Radio";
 import {v4 as uuidv4} from 'uuid';
 import useAlert from "../hooks/useAlert";
 import AlertCustomized from "./AlertCustomized";
+import {useLocation, useNavigate} from "react-router-dom";
 
 
 const locales = {
@@ -53,9 +49,11 @@ export interface TimeSlot {
     transitStart?: Date;
     transitEnd?: Date;
     title: string;
-    isFixed?: boolean;  // Optional property to indicate if the TimeSlot is fixed
+    isFixed: boolean;
     isBooked: boolean;
     createdById: string;
+    requestId?: string | undefined | null;
+    jobId?: string | undefined | null;
     // baseEventId?: string
 }
 
@@ -84,62 +82,20 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
     const [deleteOption, setDeleteOption] = useState('single'); // 'single' or 'all'
     const [actionDialogOpen, setActionDialogOpen] = useState(false);
     const [deleteOptionDialogOpen, setDeleteOptionDialogOpen] = useState(false);
+    const [viewBookedDialogOpen, setViewBookedDialogOpen] = useState(false);
 
     const [clashDialogOpen, setClashDialogOpen] = useState(false);
     const {token, account} = useAuth();
 
     const {triggerAlert, alert, closeAlert} = useAlert(5000);
+    const navigate = useNavigate();
+    const location = useLocation();
 
     console.log(token);
     useEffect(() => {
         fetchEvents(new Date(), new Date());
-        // const events = fetched.map((event: any) => ({
-        //             ...event,
-        //             transitStart: new Date(event.transitStart),
-        //             transitEnd: new Date(event.transitEnd),
-        //             start: new Date(event.start),
-        //             end: new Date(event.end)
-        //         }));
-        // setFetchedEvents(events);
-        // axios.get('/api/timeslots', {
-        //     headers: {
-        //         'Authorization': `Bearer ${token}`
-        //     }
-        // }).then(response => {
-        //     const events = response.data.map((event: any) => ({
-        //         ...event,
-        //         transitStart: new Date(event.transitStart),
-        //         transitEnd: new Date(event.transitEnd),
-        //         start: new Date(event.start),
-        //         end: new Date(event.end)
-        //     }));
-        //     console.log("use effect:", events)
-        //     setFetchedEvents(events);
-        // }).catch(error => {
-        //     console.error("Error fetching timeslots:", error);
-        // });
     }, [token]);
-    //
-    // const saveAvailability = () => {
-    //     console.log('Submitted token' + token + availability)
-    //     axios.post('/api/timeslots', {
-    //         events: availability
-    //     }, {
-    //         headers: {
-    //             'Authorization': `Bearer ${token}`
-    //         }
-    //     }).then(response => {
-    //         const { insertedEvents } = response.data;
-    //         const savedEvents = insertedEvents.map((event: any) => ({
-    //             ...event,
-    //             start: new Date(event.start),
-    //             end: new Date(event.end)
-    //         }));
-    //         setAvailability(savedEvents);
-    //     }).catch(error => {
-    //         console.error("Error saving availability:", error);
-    //     });
-    // };
+
 
     const handleSelect = async ({start, end}: SlotInfo) => {
         const newTimeSlot: TimeSlot = {
@@ -203,47 +159,19 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
                 console.log("before", fetchedEvents)
 
                 console.log("saved time slot in handle select:", savedTimeSlot)
-                setFetchedEvents([...fetchedEvents, { ...adjustedTimeSlot, _id: savedTimeSlot._id }]);
+                setFetchedEvents([...fetchedEvents, {...adjustedTimeSlot, _id: savedTimeSlot._id}]);
                 console.log("after", fetchedEvents)
                 console.log("old selected timeslot:", selectedTimeSlot)
                 // setSelectedTimeSlot(savedTimeSlot)
                 // console.log("new selected timeslot:", selectedTimeSlot)
 
-            }catch(error) {
+            } catch (error) {
                 console.error("Error saving new timeslot:", error);
-                triggerAlert("Error Saving Timeslot", "There was an error saving the timeslot, please try again later.", "error", 3000, "dialog" )
-            };
+                triggerAlert("Error Saving Timeslot", "There was an error saving the timeslot, please try again later.", "error", 3000, "dialog")
+            }
+            ;
         }
     };
-
-
-    // const handleDelete = (deleteAllFuture = false) => {
-    //     if (selectedTimeSlot) {
-    //         const url = '/api/timeslots';
-    //         const data = {
-    //             event: selectedTimeSlot,
-    //             deleteAllFuture: deleteAllFuture
-    //         };
-    //         axios.delete(url, {
-    //             headers: {
-    //                 'Authorization': `Bearer ${token}`
-    //             },
-    //             data: data
-    //         }).then(() => {
-    //             setAvailability(availability.filter(a => {
-    //                 if (deleteAllFuture) {
-    //                     return a.start < selectedTimeSlot.start || a.title !== selectedTimeSlot.title;
-    //                 }
-    //                 return a.start !== selectedTimeSlot.start && a.end !== selectedTimeSlot.end;
-    //             }));
-    //             setDeleteDialog(false);
-    //             setDeleteOptionDialogOpen(false);
-    //
-    //         }).catch(error => {
-    //             console.error("Error deleting timeslot:", error);
-    //         });
-    //     }
-    // };
 
 
     const handleDelete = (deleteAllFuture = false) => {
@@ -259,25 +187,6 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
                 },
                 data: data
             }).then(() => {
-                // setAvailability(availability.filter(a => {
-                //     if (deleteAllFuture && selectedTimeSlot.isFixed) {
-                //         const dayOfWeek = selectedTimeSlot.start.getDay();
-                //         const startTime = selectedTimeSlot.start.getTime();
-                //         const endTime = selectedTimeSlot.end.getTime();
-                //
-                //         // return !(a.start.getDay() === dayOfWeek &&
-                //         //     a.start.getTime() === startTime &&
-                //         //     a.end.getTime() === endTime &&
-                //         //     a.start >= selectedTimeSlot.start);
-                //         return !(a.isFixed &&
-                //             a.start.getDay() === dayOfWeek &&
-                //             a.start.getTime() >= startTime &&
-                //             a.end.getTime() <= endTime);
-                //     }
-                //     return a !== selectedTimeSlot;
-                // }));
-
-
                 setFetchedEvents(fetchedEvents.filter(a =>
                     !(a.start.getTime() === selectedTimeSlot.start.getTime() && a.end.getTime() === selectedTimeSlot.end.getTime())));
                 console.log(fetchedEvents.length)
@@ -289,54 +198,6 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
         }
     };
 
-
-    // const handleDelete = () => {
-    //     if (selectedTimeSlot) {
-    //         axios.delete('/api/timeslots', {
-    //             headers: {
-    //                 'Authorization': `Bearer ${token}`
-    //             },
-    //             data: { event: selectedTimeSlot }
-    //         }).then(() => {
-    //             setAvailability(availability.filter(a => a.start !== selectedTimeSlot.start && a.end !== selectedTimeSlot.end));
-    //             setDeleteDialog(false);
-    //         }).catch(error => {
-    //             console.error("Error deleting timeslot:", error);
-    //         });
-    //     }
-    // };
-
-    // const renderDeleteDialog = () => {
-    //     return (
-    //         <Dialog open={deleteDialog} onClose={handleClose}>
-    //             <DialogTitle>Delete Slot?</DialogTitle>
-    //             <DialogContent>
-    //                 {selectedTimeSlot && <p>{selectedTimeSlot.title}</p>}
-    //                 {/* Add selection for deletion scope: this event only or all future events */}
-    //                 <FormControl component="fieldset">
-    //                     <FormLabel component="legend">Delete Options</FormLabel>
-    //                     <RadioGroup
-    //                         name="deleteOptions"
-    //                         value={deleteOption}
-    //                         onChange={(e) => setDeleteOption(e.target.value)}
-    //                     >
-    //                         <FormControlLabel value="single" control={<Radio />} label="Delete this event only" />
-    //                         <FormControlLabel value="all" control={<Radio />} label="Delete all future events" />
-    //                     </RadioGroup>
-    //                 </FormControl>
-    //             </DialogContent>
-    //             <DialogActions>
-    //                 <Button onClick={handleClose} color="primary">Cancel</Button>
-    //                 <Button onClick={handleDelete} color="secondary">Delete</Button>
-    //             </DialogActions>
-    //         </Dialog>
-    //     );
-    // };
-    //
-    // const handleSelectTimeSlot = (TimeSlot: TimeSlot) => {
-    //     setSelectedTimeSlot(TimeSlot);
-    //     setDeleteDialog(true);
-    // };
 
     const handleTimeChange = (field: any, value: any) => {
         if (selectedTimeSlot) {
@@ -351,33 +212,13 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
     const handleSelectTimeSlot = (TimeSlot: TimeSlot) => {
         setSelectedTimeSlot(TimeSlot);
         console.log("selected clicked:", TimeSlot)
-        setActionDialogOpen(true);
-        console.log(fetchedEvents)
+        if (TimeSlot.isBooked) {
+            setViewBookedDialogOpen(true)
+        } else {
+            setActionDialogOpen(true);
+        }
     };
 
-    // const handleFixWeekly = () => {
-    //     if (selectedTimeSlot) {
-    //         // const baseEventId = uuidv4();
-    //         const filteredAvailability = availability.filter(a => a.start !== selectedTimeSlot.start && a.end !== selectedTimeSlot.end);
-    //         const newTimeSlot: TimeSlot = {
-    //             start: selectedTimeSlot.start,
-    //             end: selectedTimeSlot.end,
-    //             title: selectedTimeSlot.title,
-    //             isFixed: true,
-    //             isBooked: false,
-    //             createdById: '',
-    //             // baseEventId: baseEventId
-    //         };
-    //
-    //         console.log("new time slot: ", newTimeSlot)
-    //
-    //         setAvailability([...filteredAvailability, newTimeSlot]);
-    //         console.log("availability: ", availability)
-    //         setDeleteDialog(false);
-    //         setActionDialogOpen(false);
-    //         saveAvailability();
-    //     }
-    // };
 
     // updated
     const handleFixWeekly = async () => {
@@ -400,7 +241,6 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
                 // Log the response data or handle it as needed
                 console.log("Updated and future instances added:", response.data);
 
-                // Optionally fetch all events again to refresh the data
                 // fetchEvents();
 
                 // setFetchedEvents([...fetchedEvents, response.data])
@@ -424,6 +264,9 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
         setClashDialogOpen(false);
     };
 
+    const handleViewBookedDialogClose = () => {
+        setViewBookedDialogOpen(false);
+    };
 
     const fetchEvents = async (start: Date, end: Date) => {
         try {
@@ -466,100 +309,43 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
                         'Authorization': `Bearer ${token}`
                     }
                 }).then(() => {
-                    // axios.get('/api/timeslots', {
-                    //     headers: {
-                    //         'Authorization': `Bearer ${token}`
-                    //     }
-                    // }).then(response => {
-                    //     const events = response.data.map((event: any) => ({
-                    //         ...event,
-                    //         start: new Date(event.start),
-                    //         end: new Date(event.end),
-                    //         title: event.title,
-                    //         isBooked: event.isBooked
-                    //     }));
-                    //     setAvailability(events);
-                    // }).catch(error => {
-                    //     console.error("Error fetching timeslots:", error);
-                    // });
 
                     fetchEvents(start, end)
                 }).catch(error => {
                     console.error("Error extending fixed slots:", error);
                 });
             } else {
-                // axios.get('/api/timeslots', {
-                //     headers: {
-                //         'Authorization': `Bearer ${token}`
-                //     },
-                //     params: {
-                //         start: start.toISOString(),
-                //         end: end.toISOString()
-                //     }
-                // }).then(response => {
-                //     const events = response.data.map((event: any) => ({
-                //         ...event,
-                //         start: new Date(event.start),
-                //         end: new Date(event.end),
-                //         title: event.title,
-                //         isBooked: event.isBooked
-                //     }));
-                //     setAvailability(events);
-                // }).catch(error => {
-                //     console.error("Error fetching timeslots:", error);
-                // });
                 fetchEvents(start, end)
             }
         }
     };
 
 
-    // const eventPropGetter = (event: TimeSlot) => {
-    //     if (event.isBooked) {
-    //         return { style: { backgroundColor: 'grey', pointerEvents: 'none' as 'none', opacity: 0.6, zIndex:1 } };
-    //     }
-    //     return { style: { backgroundColor: event.isFixed ? 'purple' : 'blue', zIndex: 2 } };
-    // };
-
-    // const eventPropGetter = (event: TimeSlot) => {
-    //     const style = { zIndex: 2 };
-    //
-    //     if (event.isBooked) {
-    //         if (event.transitStart && event.transitEnd) {
-    //             // Styles for transit times
-    //             if (new Date(event.start) >= new Date(event.transitStart) && new Date(event.end) <= new Date(event.transitEnd)) {
-    //                 return { style: { ...style, backgroundColor: 'lightgrey', pointerEvents: 'none' as 'none', opacity: 0.6, zIndex: 1 } };
-    //             }
-    //             // Styles for the main booked event time
-    //             return { style: { ...style, backgroundColor: 'grey', pointerEvents: 'none' as 'none', opacity: 0.6, zIndex: 1 } };
+    // const CustomEvent = (event: TimeSlot) => (
+    //     <Tooltip
+    //         title={
+    //             <React.Fragment>
+    //                 <div>{event.title}</div>
+    //                 {event.isBooked && (
+    //                     <Button
+    //                         size="small"
+    //                         onClick={(e) => {
+    //                             e.stopPropagation(); // Prevent the calendar's onSelectEvent from firing
+    //                             event.jobId ? navigate(`/jobs/${event.jobId}`) : navigate(`/requests/${event.requestId}`);
+    //                         }}
+    //                         style={{ color: 'white', backgroundColor: 'blue', fontSize: '0.7em' }}
+    //                     >
+    //                         View Details
+    //                     </Button>
+    //                 )}
+    //             </React.Fragment>
     //         }
-    //         return { style: { ...style, backgroundColor: 'grey', pointerEvents: 'none' as 'none', opacity: 0.6, zIndex: 1 } };
-    //     }
-    //     return { style: { ...style, backgroundColor: event.isFixed ? 'purple' : 'blue' } };
-    // };
-
-
-    const EventTooltip = ({event}: { event: TimeSlot }) => (
-        <Tooltip
-            title={
-                <>
-                    {/*<div>Provider: {event.providerName}</div>*/}
-                    <div>Actual Start: {new Date(event.start).toLocaleString()}</div>
-                    <div>Actual End: {new Date(event.end).toLocaleString()}</div>
-                    {event.transitStart && event.transitEnd && (
-                        <>
-                            <div>Transit Start: {new Date(event.transitStart).toLocaleString()}</div>
-                            <div>Transit End: {new Date(event.transitEnd).toLocaleString()}</div>
-                        </>
-                    )}
-                </>
-            }
-            arrow
-        >
-            <div className="booked-event-content">{event.title}</div>
-        </Tooltip>
-    );
-
+    //         placement="top"
+    //         arrow
+    //     >
+    //         <div>{event.title}</div>
+    //     </Tooltip>
+    // );
 
     const eventPropGetter = (event: TimeSlot) => {
         if (event.isBooked) {
@@ -592,7 +378,7 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
                         lightblue ${beforePercent + eventPercent}%
                     )`,
                         color: 'black',
-                        pointerEvents: 'none' as 'none',
+                        // pointerEvents: 'none' as 'none',
                         opacity: 0.6,
                         zIndex: 1,
                     }
@@ -604,7 +390,7 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
                 className: 'booked-event',
                 style: {
                     backgroundColor: 'grey',
-                    pointerEvents: 'none' as 'none',
+                    // pointerEvents: 'none' as 'none',
                     opacity: 0.6,
                     zIndex: 1,
                 }
@@ -658,6 +444,9 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
                 // components={{
                 //     event: ({ event }) => <EventTooltip event={event} />
                 // }}
+                //     components={{
+                //         event: CustomEvent
+                //     }}
             />
             {/*<Dialog open={deleteDialog} onClose={handleClose}>*/}
             {/*    <DialogTitle>Delete Slot?</DialogTitle>*/}
@@ -743,6 +532,31 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClashDialogClose}>OK</Button>
+                </DialogActions>
+            </Dialog>
+
+            <Dialog open={viewBookedDialogOpen} onClose={handleViewBookedDialogClose}>
+                <DialogTitle>Timeslot Booked</DialogTitle>
+                <DialogContent>
+                    <p>This timeslot is already booked. </p>
+
+                    {selectedTimeSlot?.jobId && <p>Job ID: {selectedTimeSlot.jobId}</p>}
+                    {selectedTimeSlot?.requestId && <p>Request ID: {selectedTimeSlot.requestId}</p>}
+                    {!selectedTimeSlot?.jobId && !selectedTimeSlot?.requestId &&
+                        <p>No specific job or request linked to this slot.</p>}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setViewBookedDialogOpen(false)}>Close</Button>
+                    {selectedTimeSlot?.jobId && (
+                        <Button onClick={() => navigate(`/incoming/jobs/${selectedTimeSlot.jobId}`, {
+                            state: { redirectPath: location }
+                        })}>View Job Details</Button>
+                    )}
+                    {selectedTimeSlot?.requestId && (
+                        <Button onClick={() => navigate(`/incoming/requests/${selectedTimeSlot.requestId}`,{
+                            state: { redirectPath: location }
+                        })}>View Request Details</Button>
+                    )}
                 </DialogActions>
             </Dialog>
             {/*<Box display="flex" justifyContent="flex-end" sx={{ mt: 4 }}>*/}

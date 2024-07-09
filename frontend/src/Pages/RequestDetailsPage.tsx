@@ -1,6 +1,6 @@
 // src/components/JobDetailsPage.tsx
 import React, { useEffect, useState } from 'react';
-import {useNavigate, useParams} from 'react-router-dom';
+import {useLocation, useNavigate, useParams} from 'react-router-dom';
 import axios from 'axios';
 import { Job } from '../models/Job';
 import {
@@ -46,6 +46,9 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps>  = ({ role }) => {
 
 
     const navigate = useNavigate();
+    const location = useLocation();
+    const redirectPath = location.state?.redirectPath || '/incoming';
+
 
 
     useEffect(() => {
@@ -155,6 +158,7 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps>  = ({ role }) => {
         receiver: request.requestedBy,
         onClose: () => {},
         inDetailPage: true,
+        redirectPath: redirectPath,
 
         actions:{
             accept: onAccept,
@@ -170,6 +174,7 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps>  = ({ role }) => {
         receiver: request.requestedBy,
         onClose: () => {},
         inDetailPage: true,
+        redirectPath: redirectPath,
         actions:{
             cancelRequest: onCancel,
         }

@@ -61,10 +61,10 @@ const ChangeBookingTimePage: React.FC = () => {
 
                 console.log("requests response", response.data)
                 // make sure only the requestor can access this and only upon request
-                // if (response.data.requestedBy !== account?._id || response.data.requestStatus.toString()!= RequestStatus.requestorActionNeeded.toString()) {
-                //     setError('Access Denied...');
-                //     return;
-                // }
+                if (response.data.requestedBy !== account?._id || response.data.requestStatus.toString()!= RequestStatus.requestorActionNeeded.toString()) {
+                    setError('Access Denied...');
+                    return;
+                }
                 setRequest(response.data);
                 setProviderId(response.data.provider._id)
                 console.log("fetched request when changing booking time:", request)
