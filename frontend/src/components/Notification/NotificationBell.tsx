@@ -36,10 +36,6 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ header }) => {
     fetchNotifications();
   }, [token]);
 
-  const markAsRead = (id: string) => {
-    console.log(`Marked notification ${id} as read`);
-    // Implement the logic to mark the notification as read
-  };
 // TODO: Implement the logic to mark the notification as read
 // Redirect logic
 //look up if you should make the fetchOperations a websocket connection
@@ -56,7 +52,6 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ header }) => {
       {isOpen && (
         <NotificationDropdown
           data={notifications}
-          markAsRead={markAsRead}
           header={header}
         />
       )}

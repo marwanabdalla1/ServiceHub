@@ -54,17 +54,17 @@ export async function createNotificationDirect({ content, notificationType, job,
 // Get all notifications
 export const getNotifications = async (req: Request, res: Response) => {
     try {
-        //from the token, retrieve all notifications where the recepient is the id from the token
-        const userId = (req as any).user.userId;// Assuming userId is available in the request (e.g., from authentication middleware)
-        console.log("userId: ", userId)
-        const notifications = await Notification.find({ recipient: userId });
-        console.log("notifications: ", notifications)
+        // From the token, retrieve all notifications where the recipient is the id from the token
+        const userId = (req as any).user.userId; // Assuming userId is available in the request (e.g., from authentication middleware)
+        console.log("userId: ", userId);
+        const notifications = await Notification.find({ recipient: userId }).sort({ createdAt: -1 }); // Sorting by createdAt in descending order
+        console.log("notifications: ", notifications);
         res.status(200).json(notifications);
-
     } catch (error) {
         res.status(500).json({ message: (error as Error).message });
     }
 };
+
 
 // Get a notification by ID
 export const getNotificationById = async (req: Request, res: Response) => {
@@ -77,20 +77,23 @@ export const getNotificationById = async (req: Request, res: Response) => {
     }
 };
 
-// Update a notification by ID
 export const updateNotification = async (req: Request, res: Response) => {
     try {
         const { isViewed, content, job, review, recipient, serviceRequest } = req.body;
+        console.log("Notification ID " + req.params.id);
+        
+        // Create an update object dynamically based on the request body
+        const updateFields: any = {};
+        if (isViewed !== undefined) updateFields.isViewed = isViewed;
+        if (content !== undefined) updateFields.content = content;
+        if (job !== undefined) updateFields.job = new Types.ObjectId(job);
+        if (serviceRequest !== undefined) updateFields.serviceRequest = new Types.ObjectId(serviceRequest);
+        if (review !== undefined) updateFields.review = new Types.ObjectId(review);
+        if (recipient !== undefined) updateFields.recipient = new Types.ObjectId(recipient);
+
         const updatedNotification = await Notification.findByIdAndUpdate(
             req.params.id,
-            {
-                isViewed,
-                content,
-                job: job ? new Types.ObjectId(job) : undefined,
-                serviceRequest: serviceRequest ? new Types.ObjectId(serviceRequest) : undefined,
-                review: review ? new Types.ObjectId(review) : undefined,
-                recipient: new Types.ObjectId(recipient)
-            },
+            updateFields,
             { new: true }
         );
         if (!updatedNotification) return res.status(404).json({ message: 'Notification not found' });
