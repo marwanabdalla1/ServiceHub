@@ -7,14 +7,14 @@ const Footer: React.FC = () => {
     <Box component="footer" sx={{ bgcolor: 'white', color: '#2B2E4A', mt: 'auto', py: 1 }}>
       <Container maxWidth="lg" sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <MuiLink component={RouterLink} to="/faq" color='#93C5FD' sx={{ mr: 2 }}>
+          <MuiLink component={RouterLink} to="/faq" color='#000000' sx={{ mr: 2 }}>
             FAQs
           </MuiLink>
-          <MuiLink href="mailto:servicehub.seba22@gmail.com" color='#93C5FD'>
+          <MuiLink href="mailto:servicehub.seba22@gmail.com" color='#000000'>
             Contact Us
           </MuiLink>
         </Box>
-        <Typography variant="body2" color='#93C5FD' sx={{ mt: 1 }}>
+        <Typography variant="body2" color='#000000' sx={{ mt: 1 }}>
           © {new Date().getFullYear()} ServiceHub
         </Typography>
       </Container>
