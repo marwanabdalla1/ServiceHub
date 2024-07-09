@@ -10,6 +10,8 @@ export class ServiceRequest {
     requestStatus: RequestStatus;
     createdAt: Date; //automatically set by MongoDB
     serviceType: ServiceType;
+
+    // todo: delete
     appointmentStartTime: Date;
     appointmentEndTime: Date | undefined;
     uploads: File[];
