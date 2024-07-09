@@ -36,15 +36,15 @@ function CombinedServicePage() {
     return (
 
         // <Container sx={{ p: 0, m: 1 }}>
-        <div>
-            <Box sx={{display: 'flex', width: '100%', height: '100vh'}}>
-                <Box sx={{width: '180px', flexShrink: 0, borderRight: 0, borderColor: 'divider', paddingTop: 3, paddingLeft: 2}}>
+        <div  style={{display: 'flex', width: '100%', height: '100vh', overflow: 'hidden'}}>
+                <Box sx={{width: '180px', overflowY: 'auto', position: 'sticky', flexShrink: 0, borderRight: 0, borderColor: 'divider', paddingTop: 3, paddingLeft: 2}}>
                     <Tabs
                         orientation="vertical"
                         variant="scrollable"
                         value={selectedTab}
                         onChange={handleChange}
-                        aria-label="Vertical tabs example"
+                        aria-label="Vertical tabs"
+
                         sx={{
                             borderRight: 1,
                             borderColor: 'divider',
@@ -55,12 +55,13 @@ function CombinedServicePage() {
                         <Tab label="Offered Services (Jobs)"/>
                     </Tabs>
                 </Box>
-                <Box sx={{flex: 1, p: 1}}>
-                    {/*    {selectedTab === 0 && <IncomingRequestsTable/>}*/}
-                    {/*    {selectedTab === 1 && <OfferedServicesTable/>}*/}
+                <Box sx={{
+                    flex: 1,
+                    p: 1,
+                    overflowY: 'auto' //for independent vertical scrolling
+                }}>
                     <Outlet/>
                 </Box>
-            </Box>
         {/*</Container>*/}
         </div>
     );
