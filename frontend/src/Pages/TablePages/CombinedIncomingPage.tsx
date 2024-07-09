@@ -1,14 +1,27 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Tabs, Tab, Box, Container} from '@mui/material';
 import IncomingRequestsTable from './IncomingRequestsTable';
 import OfferedServicesTable from './OfferedServicesTable';
-import {useNavigate, Outlet} from "react-router-dom";
+import {useNavigate, useLocation, Outlet} from "react-router-dom";
 import AlertCustomized from "../../components/AlertCustomized";
 import useAlert from "../../hooks/useAlert";
 
 function CombinedServicePage() {
     const [selectedTab, setSelectedTab] = useState(0);
     const navigate = useNavigate();
+    const location = useLocation();
+
+    // navigate according to URL path
+    useEffect(() => {
+        // Adjust the tab index based on the current path
+        const path = location.pathname.split('/').pop(); // Gets the last segment of the URL
+        if (path === 'requests') {
+            setSelectedTab(0);
+        } else if (path === 'jobs') {
+            setSelectedTab(1);
+        }
+    }, [location.pathname]);
+
 
     const handleChange = (event: any, newValue: any) => {
         setSelectedTab(newValue);

@@ -68,7 +68,12 @@ const Navbar: React.FC<NavbarProps> = ({toggleDrawer, onChange, onSearch, search
     }, [search]);
 
     const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-        setAnchorEl(event.currentTarget);
+        if (!isProvider) {
+            navigate("/outgoing");
+        } else {
+            // Otherwise, show the menu for choosing bookings
+            setAnchorEl(event.currentTarget);
+        }
     };
 
     const handleMenuClose = () => {
@@ -186,8 +191,14 @@ const Navbar: React.FC<NavbarProps> = ({toggleDrawer, onChange, onSearch, search
                     horizontal: 'right',
                 }}
             >
-                <MenuItem component={Link} to="/incoming" onClick={handleMenuClose}>Incoming Bookings</MenuItem>
-                <MenuItem component={Link} to="/outgoing" onClick={handleMenuClose}>Outgoing Bookings</MenuItem>
+                {isProvider && (
+                    <MenuItem component={Link} to="/incoming" onClick={handleMenuClose}>
+                        Incoming Bookings
+                    </MenuItem>
+                )}
+                <MenuItem component={Link} to="/outgoing" onClick={handleMenuClose}>
+                    Outgoing Bookings
+                </MenuItem>
             </Menu>
         </div>
     )

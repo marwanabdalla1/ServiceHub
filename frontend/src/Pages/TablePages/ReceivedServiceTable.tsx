@@ -19,17 +19,18 @@ import {RequestStatus, ServiceType, JobStatus} from '../../models/enums';
 
 import GenericTableRow from '../../components/tableComponents/GenericTableRow'
 import GenericConsumerCard from "../../components/tableComponents/GenericConsumerCard";
-import {handleCancel} from "../../utils/jobHandler";
+import {handleCancel, sortBookingItems} from "../../utils/jobHandler";
 
 
 import {useAuth} from "../../contexts/AuthContext";
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
 import axios from "axios";
 import {useNavigate} from 'react-router-dom';
 import {now} from 'moment';
 import {formatDateTime} from '../../utils/dateUtils';
 import {ServiceRequest} from "../../models/ServiceRequest";
 import GenericProviderCard from "../../components/tableComponents/GenericProviderCard";
+import {Button} from "@mui/material";
 
 
 type Item = ServiceRequest | Job;
@@ -41,6 +42,12 @@ export default function ReceivedServiceTable() {
     const {token, account} = useAuth();
     const navigate = useNavigate();
 
+    const statusOptions = ['ALL JOBS', 'Open', 'Completed', 'Cancelled'];
+    const [statusFilter, setStatusFilter] = useState('ALL JOBS');
+
+    const filteredJobs = jobs.filter((job) =>
+        statusFilter === 'ALL JOBS' || statusFilter === '' ? true : job.status === statusFilter.toLowerCase()
+    );
 
     // todo: this probably can be combined/reused along with the request history table
     useEffect(() => {
@@ -52,7 +59,8 @@ export default function ReceivedServiceTable() {
             })
                 .then(response => {
                     console.log("getting requests ...", response.data)
-                    setJobs(response.data);
+                    const sortedData = sortBookingItems(response.data);
+                    setJobs(sortedData as Job[]);
                     // setLoading(false);
                 })
                 .catch(error => {
@@ -131,6 +139,7 @@ export default function ReceivedServiceTable() {
     };
 
 
+
     return (
         <div style={{display: 'flex'}}>
             <div style={{flex: 1, padding: '20px'}}>
@@ -144,14 +153,31 @@ export default function ReceivedServiceTable() {
                         {/*    <Typography color="textPrimary">Received Services</Typography>*/}
                         {/*</Breadcrumbs>*/}
                         <Typography variant="h6" component="div" sx={{marginBottom: '16px'}}>
-                            Received Services
+                            Services Received
                         </Typography>
                     </Box>
+                    <Box sx={{ display: 'flex', marginBottom: 2 }}>
+                        {statusOptions.map((status) => (
+                            <Button
+                                key={status}
+                                variant={statusFilter.toLowerCase() === status.toLowerCase() ? 'contained' : 'outlined'}
+                                onClick={() => setStatusFilter(status)}
+                                sx={{ margin: 0.5, textTransform: 'none'}}
+                            >
+                                {status}
+                            </Button>
+                        ))}
+                    </Box>
+
                     <Box style={{display: 'flex'}}>
                         <Box sx={{flexGrow: 1, marginRight: 2}}>
                             <Box>
-                                {jobs.length === 0 ? (
-                                    <Typography variant="body1">You haven't booked anything yet.</Typography>
+                                {filteredJobs.length === 0 ? (
+                                    <Typography variant="body1">
+                                        You haven't booked any job {statusFilter === 'ALL JOBS' || statusFilter === ''? '' : (
+                                        <span> with status <span style={{ fontStyle: 'italic' }}>{statusFilter.toLowerCase()}</span></span>
+                                    )} yet.
+                                    </Typography>
                                 ) : (
                                     <TableContainer component={Paper} sx={{overflow: 'auto'}}>
                                         <Table sx={{minWidth: 650}} aria-label="simple table">
@@ -164,7 +190,7 @@ export default function ReceivedServiceTable() {
                                                 </TableRow>
                                             </TableHead>
                                             <TableBody>
-                                                {jobs.map((receivedService) => (
+                                                {filteredJobs.map((receivedService) => (
                                                     <GenericTableRow key={receivedService._id} item={receivedService}
                                                                      onViewDetails={handleToggleMediaCard}/>
                                                 ))}

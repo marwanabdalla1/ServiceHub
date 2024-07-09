@@ -1,4 +1,5 @@
 import {JobStatus, RequestStatus} from "../models/enums";
+
 import axios from "axios";
 import {formatDateTime} from "./dateUtils";
 import {ServiceRequest} from "../models/ServiceRequest";
@@ -316,8 +317,9 @@ export const handleTimeChange = async ({
     // Prepare notification data
     const notificationData = {
         isViewed: false,
-        content: `Please change the booking time for your service request ${selectedRequest.serviceType} on the ${formatDateTime(selectedRequest.timeslot?.start)}.
-            \n Comment from the provider: ${comment}`,
+        content: `Please change the booking time for your service request ${selectedRequest.serviceType} on the ${formatDateTime(selectedRequest.timeslot?.start)}.${
+            comment ? `\n Comment from the provider: ${comment}` : ''
+        }`,
         serviceRequest: selectedRequest._id,
         recipient: selectedRequest.requestedBy._id,
         notificationType: 'Timeslot Change Request',
@@ -370,3 +372,5 @@ export const handleTimeChange = async ({
     navigate("/select-availability")
     setTimeChangePopUp(false);
 };
+
+

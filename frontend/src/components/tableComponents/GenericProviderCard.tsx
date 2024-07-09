@@ -81,6 +81,10 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
             // } else if (item.requestStatus === RequestStatus.accepted) {
             //     buttons.push(<BlackButton text="Cancel Request" onClick={() => actions.cancelRequest?.(item)}
             //                               sx={{marginRight: "1rem"}}/>);
+            } else if (item.requestStatus === RequestStatus.accepted && item.job) {
+                console.log("request with job:", item)
+                buttons.push(<BlackButton text="View Job" onClick={() =>navigate(`/incoming/jobs/${item.job}`)}
+                                          sx={{marginRight: "1rem"}}/>);
             } else if (item.requestStatus === "pending") {
                 buttons.push(<BlackButton text="Accept" onClick={() => actions.accept?.(item)}
                                           sx={{marginRight: "1rem"}}/>);
@@ -90,7 +94,7 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
                                           sx={{marginRight: "1rem"}}/>);
 
             }
-            if (actions.cancelRequest && ["accepted", "action needed from requestor"].includes(item.requestStatus)) {
+            if (actions.cancelRequest && ["action needed from requestor"].includes(item.requestStatus)) {
                 buttons.push(<BlackButton text="Cancel Request" onClick={() => actions.cancelRequest?.(item)}
                                           sx={{marginRight: "1rem"}}/>);
 

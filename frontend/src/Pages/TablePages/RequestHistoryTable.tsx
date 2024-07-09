@@ -18,12 +18,14 @@ import GenericProviderCard from '../../components/tableComponents/GenericProvide
 import GenericTableRow from '../../components/tableComponents/GenericTableRow'
 
 import axios from "axios";
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
 import {useAuth} from "../../contexts/AuthContext";
 import {formatDateTime} from '../../utils/dateUtils';
 import {handleCancel} from "../../utils/requestHandler";
 import GenericConsumerCard from "../../components/tableComponents/GenericConsumerCard";
 import {Job} from "../../models/Job";
+import {Button} from "@mui/material";
+import {sortBookingItems} from "../../utils/jobHandler";
 
 type Item = ServiceRequest | Job;
 
@@ -33,6 +35,12 @@ export default function RequestHistoryTable() {
     const [serviceRequests, setServiceRequests] = React.useState<ServiceRequest[]>([]);
     const {token, account} = useAuth();
 
+
+    const statusOptions = ['ALL REQUESTS', 'Pending', 'Action Needed from Requester', 'Accepted', 'Cancelled', 'Declined'];
+    const [statusFilter, setStatusFilter] = useState('ALL REQUESTS');
+    const filteredRequests = serviceRequests.filter((request) =>
+        statusFilter === 'ALL REQUESTS' || statusFilter === '' ? true : request.requestStatus === statusFilter.toLowerCase()
+    );
     // const providerId = account?._id;
 
     // useEffect(() => {
@@ -57,7 +65,8 @@ export default function RequestHistoryTable() {
             })
                 .then(response => {
                     console.log("getting requests ...", response.data)
-                    setServiceRequests(response.data);
+                    const sortedData = sortBookingItems(response.data);
+                    setServiceRequests(sortedData as ServiceRequest[]);
                     // setLoading(false);
                 })
                 .catch(error => {
@@ -74,6 +83,8 @@ export default function RequestHistoryTable() {
         setSelectedRequest(req as ServiceRequest);
         setShowMediaCard(req !== null);
     };
+
+
 
 //   const handleCancel =  async() => {
 //
@@ -171,14 +182,31 @@ export default function RequestHistoryTable() {
                         {/*    <Typography color="textPrimary">Request History</Typography>*/}
                         {/*</Breadcrumbs>*/}
                         <Typography variant="h6" component="div" sx={{marginBottom: '16px'}}>
-                            Request History
+                            My Outgoing Requests
                         </Typography>
                     </Box>
+                    <Box sx={{ display: 'flex', marginBottom: 2 }}>
+                        {statusOptions.map((status) => (
+                            <Button
+                                key={status}
+                                variant={statusFilter.toLowerCase() === status.toLowerCase() ? 'contained' : 'outlined'}
+                                onClick={() => setStatusFilter(status)}
+                                sx={{ margin: 0.5, textTransform: 'none' }}
+                            >
+                                {status}
+                            </Button>
+                        ))}
+                    </Box>
+
                     <Box style={{display: 'flex'}}>
                         <Box sx={{flexGrow: 1, marginRight: 2}}>
                             <Box>
-                                {serviceRequests.length === 0 ? (
-                                    <Typography variant="body1">You haven't requested anything yet..</Typography>
+                                {filteredRequests.length === 0 ? (
+                                    <Typography variant="body1">
+                                        You don't have any requests {statusFilter === 'ALL REQUESTS' || statusFilter === ''? '' : (
+                                        <span> with status <span style={{ fontStyle: 'italic' }}>{statusFilter.toLowerCase()}</span></span>
+                                    )} yet.
+                                    </Typography>
                                 ) : (
                                     <TableContainer component={Paper} sx={{overflow: 'auto'}}>
                                         <Table sx={{minWidth: 650}} aria-label="simple table">
@@ -191,7 +219,7 @@ export default function RequestHistoryTable() {
                                                 </TableRow>
                                             </TableHead>
                                             <TableBody>
-                                                {serviceRequests.map((request) => (
+                                                {filteredRequests.map((request) => (
                                                     <GenericTableRow key={request._id} item={request}
                                                                      onViewDetails={handleToggleMediaCard}/>
                                                 ))}
