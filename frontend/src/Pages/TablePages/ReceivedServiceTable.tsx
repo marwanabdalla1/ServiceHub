@@ -31,6 +31,7 @@ import {formatDateTime} from '../../utils/dateUtils';
 import {ServiceRequest} from "../../models/ServiceRequest";
 import GenericProviderCard from "../../components/tableComponents/GenericProviderCard";
 import {Button} from "@mui/material";
+import GenericTable from "../../components/tableComponents/GenericTable";
 
 
 type Item = ServiceRequest | Job;
@@ -153,7 +154,11 @@ export default function ReceivedServiceTable() {
                         {/*    <Typography color="textPrimary">Received Services</Typography>*/}
                         {/*</Breadcrumbs>*/}
                         <Typography variant="h6" component="div" sx={{marginBottom: '16px'}}>
-                            Services Received
+                            Services (Jobs) Received
+                        </Typography>
+                        <Typography variant="body2" component="div" sx={{marginBottom: '16px'}}>
+                            Here are all the services you've received from a provider.
+                            {/*<Link to="/incoming/jobs"> jobs</Link>.*/}
                         </Typography>
                     </Box>
                     <Box sx={{ display: 'flex', marginBottom: 2 }}>
@@ -179,24 +184,9 @@ export default function ReceivedServiceTable() {
                                     )} yet.
                                     </Typography>
                                 ) : (
-                                    <TableContainer component={Paper} sx={{overflow: 'auto'}}>
-                                        <Table sx={{minWidth: 650}} aria-label="simple table">
-                                            <TableHead>
-                                                <TableRow>
-                                                    <TableCell>Type</TableCell>
-                                                    <TableCell>Status</TableCell>
-                                                    <TableCell>Appointment Date</TableCell>
-                                                    <TableCell></TableCell>
-                                                </TableRow>
-                                            </TableHead>
-                                            <TableBody>
-                                                {filteredJobs.map((receivedService) => (
-                                                    <GenericTableRow key={receivedService._id} item={receivedService}
-                                                                     onViewDetails={handleToggleMediaCard}/>
-                                                ))}
-                                            </TableBody>
-                                        </Table>
-                                    </TableContainer>)}
+                                    <GenericTable data={filteredJobs} />
+
+                                )}
                             </Box>
                         </Box>
                         {showMediaCard && selectedJob && (

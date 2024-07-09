@@ -19,13 +19,14 @@ import {ServiceRequest} from '../../models/ServiceRequest';
 import {useAuth} from "../../contexts/AuthContext";
 import {useEffect, useState} from "react";
 import axios from "axios";
-import {useNavigate} from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 import {now} from 'moment';
 import {formatDateTime} from '../../utils/dateUtils';
 import {handleComplete, handleRevoke, handleCancel, sortBookingItems} from "../../utils/jobHandler";
 import useAlert from "../../hooks/useAlert";
 import AlertCustomized from "../../components/AlertCustomized";
 import {Button} from "@mui/material";
+import GenericTable from "../../components/tableComponents/GenericTable";
 
 type Item = ServiceRequest | Job;
 
@@ -146,6 +147,9 @@ export default function OfferedServicesTable() {
                         <Typography variant="h6" component="div" sx={{marginBottom: '16px'}}>
                             Offered Services (Jobs)
                         </Typography>
+                        <Typography variant="body2" component="div" sx={{marginBottom: '16px'}}>
+                            Here are all the service bookings you have accepted as a provider.
+                        </Typography>
                     </Box>
                     <Box sx={{ display: 'flex', marginBottom: 2 }}>
                         {statusOptions.map((status) => (
@@ -170,24 +174,26 @@ export default function OfferedServicesTable() {
                                             <span> with status <span style={{ fontStyle: 'italic' }}>{statusFilter.toLowerCase()}</span></span>
                                         )}.                                    </Typography>
                                 ) : (
-                                    <TableContainer component={Paper} sx={{overflow: 'auto'}}>
-                                        <Table sx={{minWidth: 650}} aria-label="simple table">
-                                            <TableHead>
-                                                <TableRow>
-                                                    <TableCell>Type</TableCell>
-                                                    <TableCell>Status</TableCell>
-                                                    <TableCell>Appointment Date</TableCell>
-                                                    <TableCell></TableCell>
-                                                </TableRow>
-                                            </TableHead>
-                                            <TableBody>
-                                                {filteredJobs.map((job) => (
-                                                    <GenericTableRow key={job._id} item={job}
-                                                                     onViewDetails={handleToggleMediaCard}/>
-                                                ))}
-                                            </TableBody>
-                                        </Table>
-                                    </TableContainer>)}
+                                    <GenericTable data={filteredJobs} />
+                                    // <TableContainer component={Paper} sx={{overflow: 'auto'}}>
+                                    //     <Table sx={{minWidth: 650}} aria-label="simple table">
+                                    //         <TableHead>
+                                    //             <TableRow>
+                                    //                 <TableCell>Type</TableCell>
+                                    //                 <TableCell>Status</TableCell>
+                                    //                 <TableCell>Appointment Date</TableCell>
+                                    //                 <TableCell></TableCell>
+                                    //             </TableRow>
+                                    //         </TableHead>
+                                    //         <TableBody>
+                                    //             {filteredJobs.map((job) => (
+                                    //                 <GenericTableRow key={job._id} item={job}
+                                    //                                  onViewDetails={handleToggleMediaCard}/>
+                                    //             ))}
+                                    //         </TableBody>
+                                    //     </Table>
+                                    // </TableContainer>
+                                )}
                             </Box>
                         </Box>
                         {showMediaCard && selectedJob && (

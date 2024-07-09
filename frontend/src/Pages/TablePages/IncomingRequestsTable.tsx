@@ -29,6 +29,7 @@ import axios from "axios";
 import {formatDateTime} from '../../utils/dateUtils';
 import {useNavigate} from "react-router-dom";
 import {Job} from "../../models/Job";
+import {TablePagination} from '@mui/material';
 
 
 import {
@@ -37,7 +38,8 @@ import {
     handleCancel,
     handleTimeChange,
 } from '../../utils/requestHandler';
-import {sortBookingItems} from "../../utils/jobHandler";  // Adjust the path as necessary
+import {sortBookingItems} from "../../utils/jobHandler";
+import GenericTable from "../../components/tableComponents/GenericTable";  // Adjust the path as necessary
 
 
 // todo: replace ALL appointmentstarttime/endtime
@@ -53,6 +55,10 @@ export default function IncomingRequestTable() {
     const {token, account} = useAuth();
     const [timeChangePopUp, setTimeChangePopUp] = useState(false);
     const navigate = useNavigate();
+
+
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
 
 
     const statusOptions = ['ALL REQUESTS', 'Pending', 'Action Needed from Requester', 'Accepted', 'Cancelled', 'Declined'];
@@ -99,6 +105,19 @@ export default function IncomingRequestTable() {
         setShowMediaCard(req !== null);
     };
 
+    const handleChangePage = (
+        event: React.MouseEvent<HTMLButtonElement> | null,
+        newPage: number
+    ): void => {
+        setPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (
+        event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+    ): void => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0); // Reset page to zero after row change
+    };
 
     const onAccept = () => {
         if (!selectedRequest) {
@@ -161,8 +180,6 @@ export default function IncomingRequestTable() {
     };
 
 
-
-
     return (
         <div style={{display: 'flex'}}>
             <div style={{flex: 1, padding: '20px'}}>
@@ -176,17 +193,17 @@ export default function IncomingRequestTable() {
                             Incoming Requests
                         </Typography>
                         <Typography variant="body2" component="div" sx={{marginBottom: '16px'}}>
-                            Accepted requests automatically turn into
+                            Hint: Accepted requests automatically turn into
                             <Link to="/incoming/jobs"> jobs</Link>.
                         </Typography>
                     </Box>
-                    <Box sx={{ display: 'flex', marginBottom: 2 }}>
+                    <Box sx={{display: 'flex', marginBottom: 2}}>
                         {statusOptions.map((status) => (
                             <Button
                                 key={status}
                                 variant={statusFilter.toLowerCase() === status.toLowerCase() ? 'contained' : 'outlined'}
                                 onClick={() => setStatusFilter(status)}
-                                sx={{ margin: 0.5, textTransform: 'none'}}
+                                sx={{margin: 0.5, textTransform: 'none'}}
                             >
                                 {status}
                             </Button>
@@ -198,28 +215,15 @@ export default function IncomingRequestTable() {
                             <Box>
                                 {filteredRequests.length === 0 ? (
                                     <Typography variant="body1">
-                                        You don't have any incoming request {statusFilter === 'ALL REQUESTS' || statusFilter === ''? '' : (
-                                        <span> with status <span style={{ fontStyle: 'italic' }}>{statusFilter.toLowerCase()}</span></span>
+                                        You don't have any incoming
+                                        request {statusFilter === 'ALL REQUESTS' || statusFilter === '' ? '' : (
+                                        <span> with status <span
+                                            style={{fontStyle: 'italic'}}>{statusFilter.toLowerCase()}</span></span>
                                     )}.
-                                    </Typography>                                ) : (
-                                    <TableContainer component={Paper} sx={{overflow: 'auto'}}>
-                                        <Table sx={{minWidth: 650}} aria-label="simple table">
-                                            <TableHead>
-                                                <TableRow>
-                                                    <TableCell>Type</TableCell>
-                                                    <TableCell>Status</TableCell>
-                                                    <TableCell>Appointment Date</TableCell>
-                                                    <TableCell></TableCell>
-                                                </TableRow>
-                                            </TableHead>
-                                            <TableBody>
-                                                {filteredRequests.map((request) => (
-                                                    <GenericTableRow key={request._id} item={request}
-                                                                     onViewDetails={handleToggleMediaCard}/>
-                                                ))}
-                                            </TableBody>
-                                        </Table>
-                                    </TableContainer>)}
+                                    </Typography>) : (
+                                    <GenericTable data={filteredRequests} />
+
+                                )}
                             </Box>
                         </Box>
                         {/*<Dialog open={timeChangePopUp} onClose={handleTimeChange}>*/}

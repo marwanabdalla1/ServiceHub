@@ -26,6 +26,7 @@ import GenericConsumerCard from "../../components/tableComponents/GenericConsume
 import {Job} from "../../models/Job";
 import {Button} from "@mui/material";
 import {sortBookingItems} from "../../utils/jobHandler";
+import GenericTable from "../../components/tableComponents/GenericTable";
 
 type Item = ServiceRequest | Job;
 
@@ -208,24 +209,9 @@ export default function RequestHistoryTable() {
                                     )} yet.
                                     </Typography>
                                 ) : (
-                                    <TableContainer component={Paper} sx={{overflow: 'auto'}}>
-                                        <Table sx={{minWidth: 650}} aria-label="simple table">
-                                            <TableHead>
-                                                <TableRow>
-                                                    <TableCell>Type</TableCell>
-                                                    <TableCell>Status</TableCell>
-                                                    <TableCell>Appointment Date</TableCell>
-                                                    <TableCell></TableCell>
-                                                </TableRow>
-                                            </TableHead>
-                                            <TableBody>
-                                                {filteredRequests.map((request) => (
-                                                    <GenericTableRow key={request._id} item={request}
-                                                                     onViewDetails={handleToggleMediaCard}/>
-                                                ))}
-                                            </TableBody>
-                                        </Table>
-                                    </TableContainer>)}
+                                    <GenericTable data={filteredRequests} />
+
+                                )}
                             </Box>
                         </Box>
                         {showMediaCard && selectedRequest && (
