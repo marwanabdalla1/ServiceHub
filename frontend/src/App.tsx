@@ -6,7 +6,6 @@ import SignUpPage from './Pages/AuthPages/SignUpPage';
 import NavigationBar from './components/Navbar';
 import AdminNavbar from "./components/adminComponents/AdminNavbar";
 import HomePage from './Pages/HomePage';
-import AddServicePage from './Pages/AddServicePage';
 import ReviewPage from "./Pages/CustomerReviewPage";
 import ProviderProfilePage from "./Pages/ProviderProfilePage";
 import ProfileSettingPage from "./Pages/ProfileSettingPage";
@@ -18,7 +17,6 @@ import {AccountProvider} from "./contexts/AuthContext";
 import BookingPage from "./Pages/bookingSteps/BookingPage";
 import ConfirmationPage from "./Pages/bookingSteps/ConfirmationPage";
 import FAQPage from "./Pages/FAQPage";
-
 import BecomeProPage from './Pages/BecomePro';
 import ResetPasswordPage from "./Pages/AuthPages/ForgetPasswordPages/ResetPasswordPage";
 import OTPPage from "./Pages/AuthPages/ForgetPasswordPages/OTPPage";
@@ -34,7 +32,8 @@ import VerifyCertificatePage from "./Pages/AdminPanel/VerifyCertificatePage";
 import AdminUserDataPage from "./Pages/AdminPanel/AdminUserDataPage";
 import AdminHomePage from "./Pages/AdminPanel/AdminHomePage";
 import ErrorPage from "./Pages/ErrorPage";
-import CombinedServicePage from "./Pages/TablePages/CombinedIncomingPage";
+import UpdateSProfile from './components/UpdateSProfile';
+import AddServicePage from './Pages/TablePages/AddServicePage';
 
 import OfferedServicesTable from "./Pages/TablePages/OfferedServicesTable";
 import IncomingRequestsTable from "./Pages/TablePages/IncomingRequestsTable";
@@ -117,7 +116,11 @@ function MainRoutes({search, setSearch}: {search: any, setSearch: any}) {
                 <Route path="/forgetPassword/success" element={<ResetPasswordSuccessPage/>}/>
                 <Route path="/filter" element={<FilterPage/>}/>
 
+               
 
+
+                {/* Add another one for it */}
+                <Route path="/update-sprofile" element={<UpdateSProfile/>}/>
                 <Route path="/addservice" element={<AddServicePage/>}/>
                 {/*<Route path="/provider-profile/:id" element={<ProviderProfilePage/>}/>*/}
                 <Route path="/select-availability" element={<SelectAvailabilityPage/>}/>

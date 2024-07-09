@@ -32,12 +32,12 @@ const ServiceButton: React.FC<ServiceButtonProps> = ({isLoggedIn, isProvider, is
         return "Provide a Service";
     };
 
-    const getLinkDestination = () => {
-        if (isProvider && !isPremium) {
-            return "/becomepro";
-        }
-        return isLoggedIn ? "/addservice" : "/login";
-    };
+  const getLinkDestination = () => {
+    if (isProvider && !isPremium) {
+      return "/becomepro";
+    }
+    return isLoggedIn ? "/update-sprofile" : "/login"; //Redirect to updateprofie before providing service to make sure data is up to date
+  };
 
     return (
         <Link to={getLinkDestination()} className="text-current">
