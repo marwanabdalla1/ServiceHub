@@ -59,7 +59,7 @@ export default function AdminUserData(): React.ReactElement {
 
     const handleDelete = async (accountId:string) => {
         try {
-            await axios.delete(`/api/account/admin/userdata/{accountId}`, {
+            await axios.delete(`/api/account/admin/userdata/${accountId}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, {useState} from 'react';
+import {useLocation, useNavigate} from 'react-router-dom';
 import './ViewUserData.css';
 
 interface Account {
@@ -10,7 +10,6 @@ interface Account {
     phoneNumber?: string;
     address?: string;
     createdOn?: Date;
-    profileImageUrl?: string;
     description?: string;
     location?: string;
     postal?: string;
@@ -41,7 +40,7 @@ export default function ViewUserData(): React.ReactElement {
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
+        const {name, value} = e.target;
         // This should be updated to actually update the editedAccount state
         // setEditedAccount({ ...editedAccount, [name]: value });
     };
@@ -53,7 +52,7 @@ export default function ViewUserData(): React.ReactElement {
     return (
         <div className="container">
             <div className="sidebar">
-                <button onClick={() => navigate('/serviceOfferings')}>User Details</button>
+                <button onClick={() => navigate('/admin/viewUserData', {state: {editedAccount}})}>User Details</button>
                 <button onClick={() => navigate('/serviceOfferings')}>Service Offerings</button>
                 <button onClick={() => navigate('/requestHistory')}>Request History</button>
                 <button onClick={() => navigate('/jobHistory')}>Job History</button>
@@ -65,47 +64,67 @@ export default function ViewUserData(): React.ReactElement {
                     <div className="form">
                         <label>
                             First Name:
-                            <input type="text" name="firstName" value={editedAccount.firstName || ''} onChange={handleChange} />
+                            <input type="text" name="firstName" value={editedAccount.firstName || ''}
+                                   onChange={handleChange}/>
                         </label>
                         <label>
                             Last Name:
-                            <input type="text" name="lastName" value={editedAccount.lastName || ''} onChange={handleChange} />
+                            <input type="text" name="lastName" value={editedAccount.lastName || ''}
+                                   onChange={handleChange}/>
                         </label>
                         <label>
                             Email:
-                            <input type="email" name="email" value={editedAccount.email || ''} onChange={handleChange} />
+                            <input type="email" name="email" value={editedAccount.email || ''} onChange={handleChange}/>
                         </label>
                         <label>
                             Phone Number:
-                            <input type="tel" name="phoneNumber" value={editedAccount.phoneNumber || ''} onChange={handleChange} />
+                            <input type="tel" name="phoneNumber" value={editedAccount.phoneNumber || ''}
+                                   onChange={handleChange}/>
+                        </label>
+                        <label>
+                            Description:
+                            <input type="text" name="location" value={editedAccount.location || ''}
+                                   onChange={handleChange}/>
                         </label>
                         <label>
                             Address:
-                            <input type="text" name="address" value={editedAccount.address || ''} onChange={handleChange} />
+                            <input type="text" name="address" value={editedAccount.address || ''}
+                                   onChange={handleChange}/>
                         </label>
                         <label>
                             Location:
-                            <input type="text" name="location" value={editedAccount.location || ''} onChange={handleChange} />
+                            <input type="text" name="location" value={editedAccount.location || ''}
+                                   onChange={handleChange}/>
                         </label>
                         <label>
                             Postal:
-                            <input type="text" name="postal" value={editedAccount.postal || ''} onChange={handleChange} />
+                            <input type="text" name="postal" value={editedAccount.postal || ''}
+                                   onChange={handleChange}/>
                         </label>
                         <label>
                             Country:
-                            <input type="text" name="country" value={editedAccount.country || ''} onChange={handleChange} />
+                            <input type="text" name="country" value={editedAccount.country || ''}
+                                   onChange={handleChange}/>
                         </label>
                     </div>
                 ) : (
+                    // Inside the return statement of the ViewUserData component
+
                     <div className="details">
                         <p><strong>First Name:</strong> {editedAccount.firstName || 'N/A'}</p>
                         <p><strong>Last Name:</strong> {editedAccount.lastName || 'N/A'}</p>
                         <p><strong>Email:</strong> {editedAccount.email || 'N/A'}</p>
                         <p><strong>Phone Number:</strong> {editedAccount.phoneNumber || 'N/A'}</p>
+                        <p><strong>Description:</strong> {editedAccount.description || 'N/A'}</p>
                         <p><strong>Address:</strong> {editedAccount.address || 'N/A'}</p>
                         <p><strong>Location:</strong> {editedAccount.location || 'N/A'}</p>
                         <p><strong>Postal:</strong> {editedAccount.postal || 'N/A'}</p>
                         <p><strong>Country:</strong> {editedAccount.country || 'N/A'}</p>
+                        <p><strong>Created
+                            On:</strong> {editedAccount.createdOn ? new Date(editedAccount.createdOn).toLocaleDateString() : 'N/A'}
+                        </p>
+
+
                     </div>
                 )}
             </div>
