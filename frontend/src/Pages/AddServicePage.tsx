@@ -106,7 +106,13 @@ function AddServicePage() {
     };
 
     const handleChange = (key: keyof FormData, value: any) => {
-        setFormData(prev => ({ ...prev, [key]: value }));
+        if (key === 'acceptedPaymentMethods') {
+            // E.g. map [{title: 'Cash'}, {title: 'Cash'}]  to Set['Cash','Cash'] -> ['Cash']->[title: 'Cash']
+            const uniquePaymentMethods = Array.from(new Set(value.map((item: { title: string }) => item.title))).map(title => ({ title: title as string }));
+            setFormData(prev => ({ ...prev, [key]: uniquePaymentMethods }));
+        } else {
+            setFormData(prev => ({ ...prev, [key]: value }));
+        }
     };
 
     const validateForm = () => {
