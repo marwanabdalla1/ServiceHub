@@ -34,13 +34,13 @@ type FieldType = {
 function UserProfile(): React.ReactElement {
 
     const [account, setAccount] = useState<any>(null);
-    const { token, logoutUser } = useAuth();
+    const {token, logoutUser} = useAuth();
     const [services, setServices] = useState<any[]>([]);
     const [openDialog, setOpenDialog] = useState(false);
     const [serviceToDelete, setServiceToDelete] = useState<string | null>(null);
     const [profileImage, setProfileImage] = useState<File | null>(null);
     const [subscriptions, setSubscriptions] = useState<any[]>([]);
-    const { account: userAccount } = useAuth();
+    const {account: userAccount} = useAuth();
     const isProvider = userAccount?.isProvider;
     const isPremium = userAccount?.isPremium;
     const client_reference_id = userAccount?._id;
@@ -72,7 +72,7 @@ function UserProfile(): React.ReactElement {
             console.log(response.data);
 
             // Update the subscriptions state after cancellation
-            setSubscriptions(subscriptions.map(sub => sub.id === subscriptionId ? { ...sub, status: 'canceled' } : sub));
+            setSubscriptions(subscriptions.map(sub => sub.id === subscriptionId ? {...sub, status: 'canceled'} : sub));
         } catch (error) {
             console.error('Error cancelling subscription:', error);
         }
@@ -348,9 +348,9 @@ function UserProfile(): React.ReactElement {
 
     const renderField = (label: string, field: string) => {
         return (
-            <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 0 }}>
-                <Typography variant="body1" sx={{ fontWeight: 'bold' }}>{label}:</Typography>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box sx={{display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 0}}>
+                <Typography variant="body1" sx={{fontWeight: 'bold'}}>{label}:</Typography>
+                <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                     {field === 'userId' || !editMode[field] ? (
                         <Typography variant="body1">{fieldValue[field]}</Typography>
                     ) : (
@@ -373,9 +373,9 @@ function UserProfile(): React.ReactElement {
     };
 
     return (
-        <Container component="main" maxWidth="md" sx={{ mt: 4, backgroundColor: '#f5f5f5', borderRadius: '20px' }}>
-            <Paper variant="outlined" sx={{ p: 3, borderRadius: '20px' }}>
-                <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', fontSize: '24px', color: '#007BFF' }}>
+        <Container component="main" maxWidth="md" sx={{mt: 4, backgroundColor: '#f5f5f5', borderRadius: '20px'}}>
+            <Paper variant="outlined" sx={{p: 3, borderRadius: '20px'}}>
+                <Typography variant="h6" gutterBottom sx={{fontWeight: 'bold', fontSize: '24px', color: '#007BFF'}}>
                     Public Profile
                 </Typography>
                 <Box sx={{display: 'flex', flexDirection: 'column', gap: 3, p: 3}}>
@@ -398,9 +398,9 @@ function UserProfile(): React.ReactElement {
                     <Button onClick={logoutUser}>Logout</Button>
                     {isProvider && (
                         <>
-                            <Divider sx={{ my: 2 }} />
+                            <Divider sx={{my: 2}}/>
                             <Typography variant="h6" gutterBottom component="div"
-                                sx={{ fontWeight: 'bold', fontSize: '24px', color: '#007BFF' }}>
+                                        sx={{fontWeight: 'bold', fontSize: '24px', color: '#007BFF'}}>
                                 Service Provider Settings
                             </Typography>
                             <Box sx={{
@@ -431,16 +431,20 @@ function UserProfile(): React.ReactElement {
                         </>
                     )}
 
-                    <Box sx={{ mt: 3 }}>
-                        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Subscription Information:</Typography>
+                    <Box sx={{mt: 3}}>
+                        <Typography variant="h6" sx={{fontWeight: 'bold'}}>Subscription Information:</Typography>
                         {subscriptions.length > 0 ? (
                             subscriptions.map((subscription) => (
-                                <Box key={subscription.id} sx={{ display: 'flex', flexDirection: 'column', mt: 2 }}>
-                                    <Typography variant="body1"><strong>Subscription ID:</strong> {subscription.id}</Typography>
-                                    <Typography variant="body1"><strong>Status:</strong> {subscription.status}</Typography>
-                                    <Typography variant="body1"><strong>Expiration Date:</strong> {getFormattedDate(subscription.current_period_end)}</Typography>
+                                <Box key={subscription.id} sx={{display: 'flex', flexDirection: 'column', mt: 2}}>
+                                    <Typography variant="body1"><strong>Subscription ID:</strong> {subscription.id}
+                                    </Typography>
+                                    <Typography variant="body1"><strong>Status:</strong> {subscription.status}
+                                    </Typography>
+                                    <Typography variant="body1"><strong>Expiration
+                                        Date:</strong> {getFormattedDate(subscription.current_period_end)}</Typography>
                                     {subscription.status !== 'canceled' && (
-                                        <Button onClick={() => cancelSubscription(subscription.id)} sx={{ mt: 1, color: 'red' }}>Cancel Subscription</Button>
+                                        <Button onClick={() => cancelSubscription(subscription.id)}
+                                                sx={{mt: 1, color: 'red'}}>Cancel Subscription</Button>
                                     )}
                                 </Box>
                             ))
@@ -448,8 +452,21 @@ function UserProfile(): React.ReactElement {
                             <Typography variant="body1">No active subscriptions</Typography>
                         )}
                     </Box>
-                    <BlueButton text="View My Schedule" onClick={handleViewScheduleClick} sx={{ backgroundColor: '#ADD8E6', color: 'white', mt: 2 }} />
-                    <Button onClick={handleDeleteAccount} sx={{ backgroundColor: 'red', color: 'white', mt: 2 }}>Delete Account</Button>
+                    {isProvider ? (
+                        <BlueButton
+                            text="View My Schedule"
+                            onClick={handleViewScheduleClick}
+                            sx={{
+                                backgroundColor: '#ADD8E6',
+                                color: 'white',
+                                mt: 2
+                            }}
+                        />
+                    ) : (
+                        <div></div>
+                    )}
+                    <Button onClick={handleDeleteAccount} sx={{backgroundColor: 'red', color: 'white', mt: 2}}>Delete
+                        Account</Button>
                 </Box>
             </Paper>
             <Dialog open={openDialog} onClose={handleCloseDialog}>

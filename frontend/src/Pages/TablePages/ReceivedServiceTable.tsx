@@ -17,8 +17,8 @@ import {Job} from '../../models/Job';
 
 import {RequestStatus, ServiceType, JobStatus} from '../../models/enums';
 
-import GenericTableRow from '../../components/tableComponents/generic/GenericTableRow'
-import GenericConsumerCard from "../../components/tableComponents/generic/GenericConsumerCard";
+import GenericTableRow from '../../components/tableComponents/GenericTableRow'
+import GenericConsumerCard from "../../components/tableComponents/GenericConsumerCard";
 import {handleCancel} from "../../utils/jobHandler";
 
 
@@ -29,7 +29,7 @@ import {useNavigate} from 'react-router-dom';
 import {now} from 'moment';
 import {formatDateTime} from '../../utils/dateUtils';
 import {ServiceRequest} from "../../models/ServiceRequest";
-import GenericProviderCard from "../../components/tableComponents/generic/GenericProviderCard";
+import GenericProviderCard from "../../components/tableComponents/GenericProviderCard";
 
 
 type Item = ServiceRequest | Job;

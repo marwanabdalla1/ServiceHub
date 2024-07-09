@@ -4,18 +4,18 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import Avatar from '@mui/material/Avatar';
-import BlackButton from '../../inputs/blackbutton';
-import {ServiceRequest} from "../../../models/ServiceRequest";
-import {Job} from "../../../models/Job";
-import {useAuth} from "../../../contexts/AuthContext";
-import {Account} from "../../../models/Account";
+import BlackButton from '../inputs/blackbutton';
+import {ServiceRequest} from "../../models/ServiceRequest";
+import {Job} from "../../models/Job";
+import {useAuth} from "../../contexts/AuthContext";
+import {Account} from "../../models/Account";
 import {Button, Divider, IconButton} from "@mui/material";
-import {JobStatus, RequestStatus} from "../../../models/enums";
+import {JobStatus, RequestStatus} from "../../models/enums";
 import OpenInFullIcon from "@mui/icons-material/OpenInFull";
 import CloseFullscreenIcon from '@mui/icons-material/CloseFullscreen';
 import CloseIcon from "@mui/icons-material/Close";
 import {useNavigate} from "react-router-dom";
-import {formatDateTime} from "../../../utils/dateUtils";
+import {formatDateTime} from "../../utils/dateUtils";
 
 
 type Item = ServiceRequest | Job;

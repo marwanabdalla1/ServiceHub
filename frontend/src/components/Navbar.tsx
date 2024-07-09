@@ -134,12 +134,12 @@ const Navbar: React.FC<NavbarProps> = ({toggleDrawer, onChange, onSearch, search
 
                     {
                         isLoggedIn() ? (
-                            <>
+                            <div className="flex items-center">
                                 <RequestListButton className="h-6 w-6" onClick={handleMenuOpen}/>
                                 <div className="flex items-center">
                                     <NotificationBell header="Notifications"/>
                                 </div>
-                            </>
+                            </div>
                         ) : (<div></div>)}
                     <div onClick={handleProfileMenuOpen}>
                         <CgProfile className="h-6 w-6"/>
@@ -178,8 +178,8 @@ const Navbar: React.FC<NavbarProps> = ({toggleDrawer, onChange, onSearch, search
                 open={Boolean(anchorEl)}
                 onClose={handleMenuClose}
                 anchorOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right',
+                    vertical: 'bottom',
+                    horizontal: 'left',
                 }}
                 transformOrigin={{
                     vertical: 'top',

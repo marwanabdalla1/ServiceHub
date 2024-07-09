@@ -18,8 +18,8 @@ import {ServiceRequest, ServiceRequest as Request} from '../../models/ServiceReq
 import Modal from '../../components/inputs/Modal';
 // import MediaCard from './IncomingRequestCard';
 
-import GenericProviderCard from '../../components/tableComponents/generic/GenericProviderCard'
-import GenericTableRow from '../../components/tableComponents/generic/GenericTableRow'
+import GenericProviderCard from '../../components/tableComponents/GenericProviderCard'
+import GenericTableRow from '../../components/tableComponents/GenericTableRow'
 
 import {ServiceType, RequestStatus, JobStatus} from '../../models/enums'
 import {Account} from '../../models/Account';

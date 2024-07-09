@@ -1,10 +1,10 @@
 import React, {useState} from 'react';
 import {Tabs, Tab, Box, Container} from '@mui/material';
-import IncomingRequestsTable from './TablePages/IncomingRequestsTable';
-import OfferedServicesTable from './TablePages/OfferedServicesTable';
+import IncomingRequestsTable from './IncomingRequestsTable';
+import OfferedServicesTable from './OfferedServicesTable';
 import {useNavigate, Outlet} from "react-router-dom";
-import AlertCustomized from "../components/AlertCustomized";
-import useAlert from "../hooks/useAlert";
+import AlertCustomized from "../../components/AlertCustomized";
+import useAlert from "../../hooks/useAlert";
 
 function CombinedOutgoingPage() {
     const [selectedTab, setSelectedTab] = useState(0);
