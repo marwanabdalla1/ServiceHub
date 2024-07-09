@@ -35,7 +35,7 @@ const ServiceButton: React.FC<ServiceButtonProps> = ({ isLoggedIn, isProvider, i
     if (isProvider && !isPremium) {
       return "/becomepro";
     }
-    return isLoggedIn ? "/addservice" : "/login";
+    return isLoggedIn ? "/update-sprofile" : "/login"; //Redirect to updateprofie before providing service to make sure data is up to date
   };
 
   return (
