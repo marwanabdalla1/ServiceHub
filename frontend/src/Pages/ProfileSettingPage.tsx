@@ -13,7 +13,8 @@ import {
     DialogContent,
     DialogContentText,
     DialogTitle,
-    IconButton
+    IconButton,
+    Grid
 } from '@mui/material';
 import BlueButton from "../components/inputs/BlueButton";
 import LightBlueFileButton from "../components/inputs/BlueUploadButton";
@@ -409,24 +410,46 @@ function UserProfile(): React.ReactElement {
                                 justifyContent: 'space-between',
                                 gap: 0
                             }}>
-                                <Typography variant="body1" sx={{fontWeight: 'bold'}}>Provided Services:</Typography>
+                                <Typography variant="h6" sx={{fontWeight: 'bold'}}>Provided Services:</Typography>
+                                {/*<Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 3 }}>*/}
+                                {/*    <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Provided Services:</Typography>*/}
+                                {/*    <BlueButton text="Add Service" onClick={handleAddServiceClick} />*/}
+                                {/*</Box>*/}
                                 <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
                                     {services.length > 0 ? (
                                         services.map(service => (
-                                            <Box key={service._id}
-                                                 sx={{display: 'flex', alignItems: 'center', gap: 1, my: 1}}>
-                                                <Typography variant="body1">{service.serviceType}</Typography>
-                                                <Button onClick={() => handleEditServiceClick(service)}>Edit</Button>
-                                                <Button onClick={() => handleOpenDialog(service._id)}
-                                                        sx={{color: 'red'}}>Delete</Button>
-                                            </Box>
+                                            <Grid container alignItems="center" spacing={2} key={service._id}>
+                                                <Grid item xs>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                        <Typography variant="body1">{service.serviceType}</Typography>
+                                                        {service.isCertified && (
+                                                            <Typography variant="body2" sx={{
+                                                                color: '#388e3c', // Color for "Licensed"
+                                                                fontWeight: 'bold',
+                                                                marginLeft: '10px',
+                                                                fontSize: '1rem', // Adjust the font size to match the service type
+                                                            }}>
+                                                                [Licensed]
+                                                            </Typography>
+                                                        )}
+                                                    </Box>
+                                                </Grid>
+                                                <Grid item>
+                                                    <Button onClick={() => handleEditServiceClick(service)}>Edit</Button>
+                                                </Grid>
+                                                <Grid item>
+                                                    <Button onClick={() => handleOpenDialog(service._id)} sx={{ color: 'red' }}>Delete</Button>
+                                                </Grid>
+                                            </Grid>
+
                                         ))
                                     ) : (
                                         <Typography variant="body1">No services provided</Typography>
                                     )}
                                 </Box>
-                                <BlueButton text="Add Service" onClick={handleAddServiceClick}
-                                            sx={{alignSelf: 'flex-start', width: 'auto', padding: '5px 10px'}}/>
+                                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
+                                    <BlueButton text="Add Service" onClick={handleAddServiceClick} />
+                                </Box>
                             </Box>
                         </>
                     )}
