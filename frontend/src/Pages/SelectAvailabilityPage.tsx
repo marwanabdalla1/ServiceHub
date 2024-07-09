@@ -46,7 +46,7 @@ const SelectAvailabilityPage: React.FC = () => {
                 <Typography>Available Slot (repeats weekly) </Typography>
             </Box>
             <Box display="flex" alignItems="center" marginRight={2}>
-                <Box width={20} height={20} bgcolor="grey" marginRight={1} />
+                <Box width={20} height={20} bgcolor="lightgrey" marginRight={1} />
                 <Typography>Booked Service Time</Typography>
             </Box>
             <Box display="flex" alignItems="center">
