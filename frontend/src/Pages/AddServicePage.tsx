@@ -4,6 +4,7 @@ import LightBlueButton from '../components/inputs/BlueButton';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
+import {toast} from "react-toastify";
 
 interface FormData {
     selectedService: { title: string } | null;
@@ -108,10 +109,12 @@ function AddServicePage() {
     const handleChange = (key: keyof FormData, value: any) => {
         if (key === 'acceptedPaymentMethods') {
             // E.g. map [{title: 'Cash'}, {title: 'Cash'}]  to Set['Cash','Cash'] -> ['Cash']->[title: 'Cash']
-            const uniquePaymentMethods = Array.from(new Set(value.map((item: { title: string }) => item.title))).map(title => ({ title: title as string }));
-            setFormData(prev => ({ ...prev, [key]: uniquePaymentMethods }));
+            const uniquePaymentMethods = Array.from(new Set(value.map((item: {
+                title: string
+            }) => item.title))).map(title => ({title: title as string}));
+            setFormData(prev => ({...prev, [key]: uniquePaymentMethods}));
         } else {
-            setFormData(prev => ({ ...prev, [key]: value }));
+            setFormData(prev => ({...prev, [key]: value}));
         }
     };
 
