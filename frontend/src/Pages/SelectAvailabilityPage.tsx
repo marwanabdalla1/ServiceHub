@@ -33,9 +33,34 @@ const SelectAvailabilityPage: React.FC = () => {
         return <div>Loading...</div>;  // Or any other loading indicator
     }
 
+
+    // color legend to be displayed
+    const CalendarLegend = () => (
+        <Box display="flex" justifyContent="center" alignItems="center" padding={2} bgcolor="background.paper">
+            <Box display="flex" alignItems="center" marginRight={2}>
+                <Box width={20} height={20} bgcolor="blue" marginRight={1} />
+                <Typography>Available Slot (non-repeating)</Typography>
+            </Box>
+            <Box display="flex" alignItems="center" marginRight={2}>
+                <Box width={20} height={20} bgcolor="purple" marginRight={1} />
+                <Typography>Available Slot (repeats weekly) </Typography>
+            </Box>
+            <Box display="flex" alignItems="center" marginRight={2}>
+                <Box width={20} height={20} bgcolor="grey" marginRight={1} />
+                <Typography>Booked Service Time</Typography>
+            </Box>
+            <Box display="flex" alignItems="center">
+                <Box width={20} height={20} bgcolor="lightblue" marginRight={1} />
+                <Typography>Transit Time</Typography>
+            </Box>
+
+        </Box>
+    );
+
+
     return (
         <Container maxWidth="lg">
-            <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mt: 4, mb: 4 }}>
+            <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mt: 3, mb: 2 }}>
                 <Typography variant="h4">
                     Set Your Weekly Availability
                 </Typography>
@@ -45,7 +70,7 @@ const SelectAvailabilityPage: React.FC = () => {
                 defaultSlotDuration={defaultSlotDuration}
                 // globalAvailabilities={globalAvailabilities}
             />
-
+            <CalendarLegend />
         </Container>
     );
 };

@@ -320,33 +320,7 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
         }
     };
 
-
-    // const CustomEvent = (event: TimeSlot) => (
-    //     <Tooltip
-    //         title={
-    //             <React.Fragment>
-    //                 <div>{event.title}</div>
-    //                 {event.isBooked && (
-    //                     <Button
-    //                         size="small"
-    //                         onClick={(e) => {
-    //                             e.stopPropagation(); // Prevent the calendar's onSelectEvent from firing
-    //                             event.jobId ? navigate(`/jobs/${event.jobId}`) : navigate(`/requests/${event.requestId}`);
-    //                         }}
-    //                         style={{ color: 'white', backgroundColor: 'blue', fontSize: '0.7em' }}
-    //                     >
-    //                         View Details
-    //                     </Button>
-    //                 )}
-    //             </React.Fragment>
-    //         }
-    //         placement="top"
-    //         arrow
-    //     >
-    //         <div>{event.title}</div>
-    //     </Tooltip>
-    // );
-
+    // styling for the calendar
     const eventPropGetter = (event: TimeSlot) => {
         if (event.isBooked) {
             // Check for transit times
@@ -431,7 +405,7 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
                 events={fetchedEvents/*[...fetchedEvents, ...availability]*/}
                 startAccessor={getStartAccessor}
                 endAccessor={getEndAccessor}
-                style={{height: 500}}
+                style={{height: 520}}
                 // onEventDrop={handleEventDrop}
                 // onEventResize={handleEventResize}
                 selectable
