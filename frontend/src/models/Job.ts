@@ -13,19 +13,19 @@ export class Job {
   // dateOfService: Date; //not needed!
   serviceFee: string;
   status: JobStatus;
-  description: string;
+  comment: string;
   provider: Account;
   receiver: Account;
   providerImage: string; // Candidate for deletion
   rating: number;
 
   //foreign keys
-  timeOfService: Timeslot | undefined; //todo: edit this once calendar is done
+  timeslot: Timeslot | undefined; //todo: edit this once calendar is done
   request: ServiceRequest | undefined;
   serviceOffering: ServiceOffering | undefined;
 
   constructor(jobId: string, serviceType: ServiceType, appointmentStartTime: Date, appointmentEndTime: Date, serviceFee: string, status: JobStatus,
-    description: string, provider: Account, receiver:Account, providerImage: string, rating: number, timeOfService: Timeslot, request: ServiceRequest, serviceOffering: ServiceOffering | undefined) {
+    description: string, provider: Account, receiver:Account, providerImage: string, rating: number, timeslot: Timeslot, request: ServiceRequest, serviceOffering: ServiceOffering | undefined) {
     this._id = jobId;
     this.serviceType = serviceType;
     // this.appointmentStartTime = new Date(dateOfService.getFullYear() + "-" + dateOfService.getMonth() + "-" + dateOfService.getDay()
@@ -35,12 +35,12 @@ export class Job {
     // this.dateOfService = dateOfService;
     this.serviceFee = serviceFee;
     this.status = status;
-    this.description = description;
+    this.comment = description;
     this.provider = provider;
     this.receiver = receiver;
     this.providerImage = providerImage;
     this.rating = rating;
-    this.timeOfService = timeOfService;
+    this.timeslot = timeslot;
     this.request = request;
     this.serviceOffering = serviceOffering;
   }
