@@ -8,6 +8,7 @@ import useAlert from "../hooks/useAlert";
 import {useCallback} from "react";
 import {AlertColor} from "@mui/material";
 import moment from 'moment';
+import {ServiceRequest} from "../models/ServiceRequest";
 
 
 
@@ -263,16 +264,20 @@ export const handleCancel = async ({
     if (selectedJob) {
         // Send email to the provider if the user is the receiver
         if (account?._id === selectedJob.receiver._id) {
-            let providerEmail = selectedJob.provider.email;
-            let providerName = selectedJob.provider.firstName + " " + selectedJob.provider.lastName;
-            sendEmailNotification(providerEmail, providerName, selectedJob);
+            let receiverEmail = selectedJob.provider.email;
+            let receiverName = selectedJob.provider.firstName;
+            let initiatorEmail = selectedJob.receiver.email;
+            let initiatorName = selectedJob.receiver.firstName;
+            sendEmailNotification(initiatorEmail, initiatorName, receiverEmail, receiverName, selectedJob);
         }
 
         // Send email to the receiver if the user is the provider
         if (account?._id === selectedJob.provider._id) {
             let receiverEmail = selectedJob.receiver.email;
-            let receiverName = selectedJob.receiver.firstName + " " + selectedJob.receiver.lastName;
-            sendEmailNotification(receiverEmail, receiverName, selectedJob);
+            let receiverName = selectedJob.receiver.firstName;
+            let initiatorEmail = selectedJob.provider.email;
+            let initiatorName = selectedJob.provider.firstName;
+            sendEmailNotification(initiatorEmail, initiatorName, receiverEmail, receiverName, selectedJob);
         }
     }
 
@@ -297,17 +302,23 @@ export const handleCancel = async ({
 };
 
 
-const sendEmailNotification = async (email: string, addressee: string, selectedJob: Job) => {
+
+export const sendEmailNotification = async (initiatorEmail: string,
+                                     initiatorName: string,
+                                     receiverEmail: string,
+                                     receiverName: string, selectedJob: Job | ServiceRequest) => {
     try {
         await axios.post('/api/email/cancelNotification', {
-            email: email,
+            initiatorEmail: initiatorEmail,
+            initiatorName: initiatorName,
+            receiverEmail: receiverEmail,
+            receiverName: receiverName,
             serviceType: selectedJob.serviceType,
             startTime: selectedJob.timeslot?.start,
-            name: addressee
         }).then((res) => {
-            console.log(`Email sent to ${addressee}:`, res);
+            console.log(`Email sent to ${receiverEmail}:`, res);
         }).catch((err) => {
-            console.error(`Error sending email to ${addressee}:`, err);
+            console.error(`Error sending email to ${receiverEmail}:`, err);
         });
     } catch (error) {
         console.error("There was an error sending the email", error);

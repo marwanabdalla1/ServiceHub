@@ -3,13 +3,15 @@ import axios from "axios";
 import {formatDateTime} from "./dateUtils";
 import {ServiceRequest} from "../models/ServiceRequest";
 import {NavigateFunction} from "react-router-dom";
-
+import {sendEmailNotification} from './jobHandler'
+import {Account} from "../models/Account";
 
 interface RequestHandlerParams {
     selectedRequest: ServiceRequest;
     serviceRequests: ServiceRequest[];
     setServiceRequests: ((requests: ServiceRequest[]) => void) | null;
     token: string | null;
+    account?: Account | null;
     setShowMediaCard: (show: boolean) => void;
 
 }
@@ -188,6 +190,7 @@ export const handleCancel = async ({
                                 serviceRequests,
                                 setServiceRequests,
                                 token,
+                                account,
                                 setShowMediaCard
                             }:RequestHandlerParams) => {
 
@@ -264,6 +267,26 @@ export const handleCancel = async ({
 
     } catch (notificationError) {
         console.error('Error sending notification:', notificationError);
+    }
+
+    if (selectedRequest) {
+        // Send email to the provider if the user is the receiver
+        if (account?._id === selectedRequest.requestedBy._id) {
+            let receiverEmail = selectedRequest.provider.email;
+            let receiverName = selectedRequest.provider.firstName;
+            let initiatorEmail = selectedRequest.requestedBy.email;
+            let initiatorName = selectedRequest.requestedBy.firstName;
+            sendEmailNotification(initiatorEmail, initiatorName, receiverEmail, receiverName, selectedRequest);
+        }
+
+        // Send email to the receiver if the user is the provider
+        if (account?._id === selectedRequest.provider._id) {
+            let receiverEmail = selectedRequest.requestedBy.email;
+            let receiverName = selectedRequest.requestedBy.firstName;
+            let initiatorEmail = selectedRequest.provider.email;
+            let initiatorName = selectedRequest.provider.firstName;
+            sendEmailNotification(initiatorEmail, initiatorName, receiverEmail, receiverName, selectedRequest);
+        }
     }
 
 
