@@ -5,7 +5,7 @@ import mongoose, {Types} from "mongoose";
 import ServiceRequest from "../models/serviceRequest";
 import {ObjectId} from "mongodb";
 
-function generateWeeklyInstances(events: ITimeslot[], existingTimeslots: ITimeslot[], startDate: moment.Moment, endDate: moment.Moment) {
+async function generateWeeklyInstances(events: ITimeslot[], existingTimeslots: ITimeslot[], startDate: moment.Moment, endDate: moment.Moment) {
     console.log("existing ones:", existingTimeslots)
     const weekInstances: ITimeslot[] = [];
     events.forEach(event => {
@@ -255,7 +255,7 @@ export const extendFixedSlots: RequestHandler = async (req, res, next) => {
             existingTimeslots = []; // Continue with empty array if error
         }
         // Generate new instances
-        const futureInstances = generateWeeklyInstances(fixedEvents, existingTimeslots, moment(start), moment(end));
+        const futureInstances = await generateWeeklyInstances(fixedEvents, existingTimeslots, moment(start), moment(end));
 
         // Insert future instances into the database
         await Timeslot.insertMany(futureInstances.map(instance => ({
@@ -559,10 +559,12 @@ export const saveEvents: RequestHandler = async (req, res, next) => {
 
         // Generate future instances for new fixed events
         const fixedEvents = events.filter((event: ITimeslot) => event.isFixed);
+
         let futureInstances: ITimeslot[] = [];
         if (fixedEvents.length > 0) {
             let existingTimeslots: ITimeslot[] = [];
             try {
+                console.log("now getting all events")
                 // Asynchronously get existing timeslots
                 existingTimeslots = await getEventsDirect(userId);
             } catch (error) {
@@ -570,7 +572,7 @@ export const saveEvents: RequestHandler = async (req, res, next) => {
                 existingTimeslots = []; // Continue with empty array if error
             }
             const futureEndDate = moment(fixedEvents[0].end).endOf('week').add(6, 'months');
-            futureInstances = generateWeeklyInstances(fixedEvents, existingTimeslots, moment(fixedEvents[0].start).add(1, 'week'), futureEndDate);
+            futureInstances = await generateWeeklyInstances(fixedEvents, existingTimeslots, moment(fixedEvents[0].start).add(1, 'week'), futureEndDate);
         }
 
         // Insert new events
@@ -618,7 +620,8 @@ export const turnExistingEventIntoFixed: RequestHandler = async (req, res, next)
         console.log(req)
         const userId = (req as any).user.userId; // Assuming userId is available in the request (e.g., from authentication middleware)
         const event = req.body;
-        console.log('events to save:', event);
+        console.log(req.body)
+        console.log('events to save in turnExistingEventIntoFixed:', event);
 
 
         // Step 1: Find and update the specified event to mark it as fixed
@@ -629,9 +632,13 @@ export const turnExistingEventIntoFixed: RequestHandler = async (req, res, next)
             $set: {isFixed: true}
         }, {new: true}); // Return the updated document
 
+        console.log('fixed events to update:', eventToUpdate);
+
         if (!eventToUpdate) {
             return res.status(404).json({message: "Event not found or user mismatch"});
         }
+
+        console.log('fixed events to update:', eventToUpdate);
 
 
         // Step 2: Generate future instances based on the newly fixed event
@@ -647,7 +654,7 @@ export const turnExistingEventIntoFixed: RequestHandler = async (req, res, next)
                 console.error("Error fetching existing timeslots:", error);
                 existingTimeslots = []; // Continue with empty array if error
             }
-            futureInstances = generateWeeklyInstances([eventToUpdate], existingTimeslots, moment(eventToUpdate.start).add(1, 'week'), futureEndDate);
+            futureInstances = await generateWeeklyInstances([eventToUpdate], existingTimeslots, moment(eventToUpdate.start).add(1, 'week'), futureEndDate);
         }
 
         // Insert new events
