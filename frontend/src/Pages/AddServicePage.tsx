@@ -131,10 +131,27 @@ function AddServicePage() {
         return Object.values(newErrors).every(error => !error);
     };
 
+    const isNumberValid = (value: string, fieldName: string) => {
+        const number = Number(value);
+        const isValid = !isNaN(number) && isFinite(number);
+        if (!isValid) {
+            toast.error(`${fieldName} must be a valid number.`);
+        }
+        return isValid;
+    };
+
     const handleSubmit = async () => {
+
+        if (!isNumberValid(formData.hourlyRate, "Hourly Rate")
+            || !isNumberValid(formData.defaultSlotTime, "Default Slot Time")
+            || !isNumberValid(formData.travelTime, "Travel Time")) {
+            return;
+        }
+
         if (validateForm()) {
             const submissionData = {
                 ...formData,
+                hourlyRate: Number(formData.hourlyRate),
                 defaultSlotTime: Number(formData.defaultSlotTime),
                 travelTime: Number(formData.travelTime)
             };
