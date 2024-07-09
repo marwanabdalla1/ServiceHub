@@ -1,7 +1,7 @@
 import express from "express";
-import { sendCancellationNotificationEmail } from "../controller/EmailController";
+import { sendCancellationEmails } from "../controller/EmailController";
 
 const router = express.Router();
-router.post('/cancelNotification', sendCancellationNotificationEmail);
+router.post('/cancelNotification', sendCancellationEmails);
 
 export default router;

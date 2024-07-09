@@ -1,56 +1,54 @@
 import React, {useEffect, useState} from 'react';
-import {BrowserRouter, Routes, Route, useLocation} from "react-router-dom";
+import {BrowserRouter, Routes, Route, useLocation, Navigate} from "react-router-dom";
 import FilterPage from './Pages/FilterPage';
 import SignInPage from './Pages/AuthPages/LoginPage';
 import SignUpPage from './Pages/AuthPages/SignUpPage';
 import NavigationBar from './components/Navbar';
-import ReceivedServicesPage from './Pages/ReceivedServicesPage';
 import AdminNavbar from "./components/adminComponents/AdminNavbar";
-import RequestHistoryPage from './Pages/RequestHistoryPage';
-import IncomingRequestsPage from './Pages/IncomingRequestsPage';
 import HomePage from './Pages/HomePage';
-import AddServicePage from './Pages/AddServicePage';
 import ReviewPage from "./Pages/CustomerReviewPage";
 import ProviderProfilePage from "./Pages/ProviderProfilePage";
 import ProfileSettingPage from "./Pages/ProfileSettingPage";
 import SelectAvailabilityPage from './Pages/SelectAvailabilityPage';
-import SelectTimeslot from './Pages/bookingSteps/SelectTimeslotPage'
-import UpdateTimeslot from './Pages/UpdateTimeslotPage'
 import {BookingProvider} from "./contexts/BookingContext";
-import UpdateProfile from "./Pages/bookingSteps/UpdateProfile";
-import ReviewAndConfirm from "./Pages/bookingSteps/ReviewAndConfirm";
-import CreateAccountOrSignIn from "./Pages/bookingSteps/CreateAccountOrSignIn";
-import ListsLandingPage from "./Pages/listsLandingPage";
-import {RequestProvider} from './contexts/RequestContext';
+
 import axios from "axios";
-import ProposeNewtimePage from './Pages/ProposeNewTimePage';
 import {AccountProvider} from "./contexts/AuthContext";
 import BookingPage from "./Pages/bookingSteps/BookingPage";
 import ConfirmationPage from "./Pages/bookingSteps/ConfirmationPage";
 import FAQPage from "./Pages/FAQPage";
-
 import BecomeProPage from './Pages/BecomePro';
 import ResetPasswordPage from "./Pages/AuthPages/ForgetPasswordPages/ResetPasswordPage";
 import OTPPage from "./Pages/AuthPages/ForgetPasswordPages/OTPPage";
 import ForgetPasswordPage from "./Pages/AuthPages/ForgetPasswordPages/ForgetPasswordPage";
 import ResetPasswordSuccessPage from "./Pages/AuthPages/ForgetPasswordPages/ResetPasswordSuccessPage";
-import {RecoveryProvider} from './contexts/RecoveryContext';
 
-import OfferedServicesPage from './Pages/OfferedServicesPage';
 import ChangeBookingTimePage from './Pages/ChangeBookingTimePage';
-// import SelectAvailabilityBooking_temp from "./Pages/SelectAvailabilityBooking_temp";
 import {ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import {Slide} from "react-toastify";
-import JobDetailsPage from "./Pages/JobDetailsPage";
 import VerifyCertificatePage from "./Pages/AdminPanel/VerifyCertificatePage";
 import AdminUserDataPage from "./Pages/AdminPanel/AdminUserDataPage";
 import AdminHomePage from "./Pages/AdminPanel/AdminHomePage";
 import ErrorPage from "./Pages/ErrorPage";
-import CombinedServicePage from "./Pages/CombinedIncomingPage";
+import CombinedIncomingPage from "./Pages/TablePages/CombinedIncomingPage";
 import Footer from './components/Footer';
 import { Divider } from '@mui/material';
 
+import UpdateSProfile from './components/UpdateSProfile';
+import AddServicePage from './Pages/AddServicePage';
+
+import OfferedServicesTable from "./Pages/TablePages/OfferedServicesTable";
+import IncomingRequestsTable from "./Pages/TablePages/IncomingRequestsTable";
+import RequestHistoryTable from "./Pages/TablePages/RequestHistoryTable";
+import ReceivedServiceTable from "./Pages/TablePages/ReceivedServiceTable";
+
+
+import JobDetailsPage from "./Pages/JobDetailsPage";
+import RequestDetailsPage from "./Pages/RequestDetailsPage";
+import CombinedOutgoingPage from "./Pages/TablePages/CombinedOutgoingPage";
+import CombinedServicePage from "./Pages/TablePages/CombinedIncomingPage";
+import {RecoveryProvider} from "./contexts/RecoveryContext";
 function App() {
     const [search, setSearch] = useState('');
 
@@ -74,13 +72,11 @@ function App() {
             />
             <BrowserRouter>
                 <BookingProvider>
-                    <RequestProvider>
                         <AccountProvider>
                             <RecoveryProvider>
                                 <MainRoutes search={search} setSearch={setSearch}/>
                             </RecoveryProvider>
                         </AccountProvider>
-                    </RequestProvider>
                 </BookingProvider>
             </BrowserRouter>
         </div>
@@ -126,12 +122,11 @@ function MainRoutes({search, setSearch}: {search: any, setSearch: any}) {
                 <Route path="/forgetPassword/success" element={<ResetPasswordSuccessPage/>}/>
                 <Route path="/filter" element={<FilterPage/>}/>
 
-                <Route path="/jobs/receivedServices" element={<ReceivedServicesPage/>}/>
-                <Route path="/jobs/requestHistory" element={<RequestHistoryPage/>}/>
-                <Route path="/jobs/offeredServices" element={<OfferedServicesPage/>}/>
-                <Route path="/incomingRequests" element={<IncomingRequestsPage/>}/>
-                {/*<Route path="/incoming" element={<CombinedServicePage/>}/>*/}
 
+
+
+                {/* Add another one for it */}
+                <Route path="/update-sprofile" element={<UpdateSProfile/>}/>
                 <Route path="/addservice" element={<AddServicePage/>}/>
                 {/*<Route path="/provider-profile/:id" element={<ProviderProfilePage/>}/>*/}
                 <Route path="/select-availability" element={<SelectAvailabilityPage/>}/>
@@ -142,7 +137,6 @@ function MainRoutes({search, setSearch}: {search: any, setSearch: any}) {
                 <Route path="/offerings/:offeringId" element={<ProviderProfilePage/>} />
                 <Route path="/offerings/:offeringId/booking/:step" element={<BookingPage/>} />
                 <Route path="/select-availability" element={<SelectAvailabilityPage/>}/>
-                <Route path="/update-timeslot" element={<UpdateTimeslot/>}/>
                 <Route path="/becomepro" element={<BecomeProPage/>}/>
 
 
@@ -152,17 +146,27 @@ function MainRoutes({search, setSearch}: {search: any, setSearch: any}) {
                 <Route path="/offerings/:offeringId/booking/:step" element={<BookingPage/>}/> */}
                 <Route path="/confirmation/:requestId/:type" element={<ConfirmationPage/>}/>
 
+                <Route path="/incoming" element={<CombinedServicePage />} >
+                    <Route index element={<Navigate replace to="requests" />} />
+                    <Route path="requests" element={<IncomingRequestsTable />} />
+                    <Route path="jobs" element={<OfferedServicesTable />} />
+                </Route>
+
+                <Route path="/outgoing" element={<CombinedOutgoingPage />} >
+                    <Route index element={<Navigate replace to="requests" />} />
+                    <Route path="requests" element={<RequestHistoryTable />} />
+                    <Route path="jobs" element={<ReceivedServiceTable />} />
+                </Route>
                 {/*todo: get this once it's done*/}
-                <Route path="/jobs/:jobId" element={<JobDetailsPage />} />
+                {/*<Route path="incoming/jobs/:jobId" element={<JobDetailsPage />} />*/}
+                <Route path="/incoming/jobs/:jobId" element={<JobDetailsPage role="provider" />} />
+                <Route path="/outgoing/jobs/:jobId" element={<JobDetailsPage role="consumer" />} />
 
-                {/*old ones*/}
-                {/*<Route path="/create-account-or-sign-in" element={<CreateAccountOrSignIn/>}/>*/}
-                {/*<Route path="/update-profile" element={<UpdateProfile/>}/>*/}
-                {/*<Route path="/review-and-confirm" element={<ReviewAndConfirm/>}/>*/}
 
-                {/*<Route path="/listsLandingPage" element={<ListsLandingPage/>}/>*/}
-                <Route path="/update-timeslot/" element={<UpdateTimeslot/>}/>
-                <Route path="/proposeNewTime" element={<ProposeNewtimePage/>}/>
+                <Route path="/incoming/requests/:requestId" element={<RequestDetailsPage role="provider" />} />
+                <Route path="/outgoing/requests/:requestId" element={<RequestDetailsPage role="consumer" />} />
+
+
                 <Route path="/write-reviews" element={<ReviewPage/>}/>
                 <Route path="/faq" element={<FAQPage/>}/>
 

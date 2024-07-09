@@ -3,7 +3,9 @@ import nodemailer from 'nodemailer';
 import * as dotenv from "dotenv";
 import crypto from 'crypto';
 import Account from "../models/account";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
+import { format } from 'date-fns';
+import { ServiceType } from '../models/enums';
 
 dotenv.config();
 
@@ -49,14 +51,9 @@ const generatePasswordResetEmail = (firstName: any, otp: string) => {
             Please feel free to contact us in case of any issues. If you did not request this email, please reach out to our email 
             <a href="servicehub.seba22@gmail.com" style="color: #007bff;">servicehub.seba22@gmail.com</a>.
             <br /><br />
-            Cheers,
+            Kind regards,
             <br />
             <b>Your ServiceHub Team</b>
-          </td>
-        </tr>
-        <tr>
-          <td style="background-color: #007bff; padding: 10px; text-align: center; color: #fff;">
-            <a href="https://servicehub.com" style="color: #fff; text-decoration: none;">Visit Our Website</a>
           </td>
         </tr>
       </table>
@@ -124,31 +121,110 @@ export const setNewPassword: RequestHandler = async (req, res) => {
   }
 };
 
+
+const generateCancellationNotificationEmail = (firstName: string, serviceType: ServiceType, startTime: Date) => {
+
+  const formattedStartTime = format(new Date(startTime), 'PPpp');
+
+  return `
+  <div style="font-family: Arial, sans-serif; margin: 0; padding: 0;">
+    <table style="max-width: 600px; margin: auto; border-collapse: collapse; border: 1px solid #ddd;">
+      <tr>
+        <td style="background-color: #007bff; padding: 20px; text-align: center; color: #fff; font-size: 24px; font-weight: bold;">
+          ${serviceType} Cancellation
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 20px; font-size: 16px; line-height: 1.5;">
+          <b>Dear ${firstName},</b>
+          <br /><br />
+          We are sorry to inform you that your scheduled appointment for ${serviceType} on ${formattedStartTime} has been cancelled. We apologize for any inconvenience.
+          <br /><br />
+          </div>
+          Thank you for understanding!
+          <br /><br />
+          Please feel free to contact us in case of any issues. 
+            <a href="servicehub.seba22@gmail.com" style="color: #007bff;">servicehub.seba22@gmail.com</a>.
+            <br /><br />
+            Kind regards,
+          <br />
+          <b>Your ServiceHub Team</b>
+        </td>
+      </tr>
+    </table>
+  </div>
+`;
+};
+
+const generateCancellationConfirmationEmail = (firstName: string, serviceType: ServiceType, startTime: Date) => {
+
+  const formattedStartTime = format(new Date(startTime), 'PPpp');
+
+  return `
+  <div style="font-family: Arial, sans-serif; margin: 0; padding: 0;">
+    <table style="max-width: 600px; margin: auto; border-collapse: collapse; border: 1px solid #ddd;">
+      <tr>
+        <td style="background-color: #007bff; padding: 20px; text-align: center; color: #fff; font-size: 24px; font-weight: bold;">
+          Confirmation: ${serviceType} Cancellation
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 20px; font-size: 16px; line-height: 1.5;">
+          <b>Dear ${firstName},</b>
+          <br /><br />
+          We confirm that your scheduled appointment for ${serviceType} on ${formattedStartTime} has been cancelled.
+          <br /><br />
+          </div>
+          Please feel free to contact us in case of any issues. 
+            <a href="servicehub.seba22@gmail.com" style="color: #007bff;">servicehub.seba22@gmail.com</a>.
+            <br /><br />
+            Kind regards,
+          <br />
+          <b>Your ServiceHub Team</b>
+        </td>
+      </tr>
+    </table>
+  </div>
+`;
+};
+
 /**
  * Send an cancellation notification to the user's email
  * @param req
  * @param res
  */
-export const sendCancellationNotificationEmail = (req: Request, res: Response): void => {
-  const { email, serviceType, startTime, name } = req.body;
+export const sendCancellationEmails = (req: Request, res: Response): void => {
+  const { initiatorEmail, initiatorName, receiverEmail, receiverName, serviceType, startTime } = req.body;
 
-  const mailOptions = {
+  const confirmationMailOptions = {
     from: process.env.MY_EMAIL,
-    to: email,
-    subject: `${serviceType} Appointment Cancellation`,
-    text: `Dear ${name}, \n We are sorry to inform you that your scheduled service appointment for ${serviceType} at ${startTime} has been cancelled. \n Please find an alternative timeslot. \n Thank you for understanding. \n Kind regards, \n The ServiceHub Team`
+    to: initiatorEmail,
+    subject: `Confirmation: ${serviceType} Appointment Cancellation`,
+    html: generateCancellationConfirmationEmail(initiatorName, serviceType, startTime)
   };
 
-  transporter.sendMail(mailOptions, (error, info) => {
+  const notificationMailOptions = {
+    from: process.env.MY_EMAIL,
+    to: receiverEmail,
+    subject: `${serviceType} Appointment Cancellation`,
+    html: generateCancellationNotificationEmail(receiverName, serviceType, startTime)
+  };
+
+  transporter.sendMail(confirmationMailOptions, (error, info) => {
     if (error) {
       res.status(500).send(error.toString());
     } else {
-      res.status(200).send(`Cancellation notification sent to  sent to ${email}`);
+      res.status(200).send(`Cancellation confirmation sent to  sent to ${initiatorEmail}`);
+    }
+  });
+
+  transporter.sendMail(notificationMailOptions, (error, info) => {
+    if (error) {
+      res.status(500).send(error.toString());
+    } else {
+      res.status(200).send(`Cancellation notification sent to  sent to ${receiverEmail}`);
     }
   });
 };
 
-function formatDateTime(startTime: any) {
-  throw new Error('Function not implemented.');
-}
 

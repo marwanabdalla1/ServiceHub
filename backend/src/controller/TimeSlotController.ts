@@ -3,8 +3,9 @@ import moment from 'moment';
 import Timeslot, {ITimeslot} from '../models/timeslot';
 import mongoose, {Types} from "mongoose";
 import ServiceRequest from "../models/serviceRequest";
+import {ObjectId} from "mongodb";
 
-function generateWeeklyInstances(events: ITimeslot[], existingTimeslots: ITimeslot[], startDate: moment.Moment, endDate: moment.Moment) {
+async function generateWeeklyInstances(events: ITimeslot[], existingTimeslots: ITimeslot[], startDate: moment.Moment, endDate: moment.Moment) {
     console.log("existing ones:", existingTimeslots)
     const weekInstances: ITimeslot[] = [];
     events.forEach(event => {
@@ -254,7 +255,7 @@ export const extendFixedSlots: RequestHandler = async (req, res, next) => {
             existingTimeslots = []; // Continue with empty array if error
         }
         // Generate new instances
-        const futureInstances = generateWeeklyInstances(fixedEvents, existingTimeslots, moment(start), moment(end));
+        const futureInstances = await generateWeeklyInstances(fixedEvents, existingTimeslots, moment(start), moment(end));
 
         // Insert future instances into the database
         await Timeslot.insertMany(futureInstances.map(instance => ({
@@ -558,10 +559,12 @@ export const saveEvents: RequestHandler = async (req, res, next) => {
 
         // Generate future instances for new fixed events
         const fixedEvents = events.filter((event: ITimeslot) => event.isFixed);
+
         let futureInstances: ITimeslot[] = [];
         if (fixedEvents.length > 0) {
             let existingTimeslots: ITimeslot[] = [];
             try {
+                console.log("now getting all events")
                 // Asynchronously get existing timeslots
                 existingTimeslots = await getEventsDirect(userId);
             } catch (error) {
@@ -569,7 +572,7 @@ export const saveEvents: RequestHandler = async (req, res, next) => {
                 existingTimeslots = []; // Continue with empty array if error
             }
             const futureEndDate = moment(fixedEvents[0].end).endOf('week').add(6, 'months');
-            futureInstances = generateWeeklyInstances(fixedEvents, existingTimeslots, moment(fixedEvents[0].start).add(1, 'week'), futureEndDate);
+            futureInstances = await generateWeeklyInstances(fixedEvents, existingTimeslots, moment(fixedEvents[0].start).add(1, 'week'), futureEndDate);
         }
 
         // Insert new events
@@ -617,7 +620,8 @@ export const turnExistingEventIntoFixed: RequestHandler = async (req, res, next)
         console.log(req)
         const userId = (req as any).user.userId; // Assuming userId is available in the request (e.g., from authentication middleware)
         const event = req.body;
-        console.log('events to save:', event);
+        console.log(req.body)
+        console.log('events to save in turnExistingEventIntoFixed:', event);
 
 
         // Step 1: Find and update the specified event to mark it as fixed
@@ -628,9 +632,13 @@ export const turnExistingEventIntoFixed: RequestHandler = async (req, res, next)
             $set: {isFixed: true}
         }, {new: true}); // Return the updated document
 
+        console.log('fixed events to update:', eventToUpdate);
+
         if (!eventToUpdate) {
             return res.status(404).json({message: "Event not found or user mismatch"});
         }
+
+        console.log('fixed events to update:', eventToUpdate);
 
 
         // Step 2: Generate future instances based on the newly fixed event
@@ -646,7 +654,7 @@ export const turnExistingEventIntoFixed: RequestHandler = async (req, res, next)
                 console.error("Error fetching existing timeslots:", error);
                 existingTimeslots = []; // Continue with empty array if error
             }
-            futureInstances = generateWeeklyInstances([eventToUpdate], existingTimeslots, moment(eventToUpdate.start).add(1, 'week'), futureEndDate);
+            futureInstances = await generateWeeklyInstances([eventToUpdate], existingTimeslots, moment(eventToUpdate.start).add(1, 'week'), futureEndDate);
         }
 
         // Insert new events
@@ -823,10 +831,11 @@ export const bookTimeslot: RequestHandler = async (req, res, next) => {
 
         // Adjust timeslots based on the booked time
         for (const slot of overlappingSlots) {
-            if (new Date(slot.start) === new Date(transitStart) && new Date(slot.end) === new Date(transitEnd)) {
+            if (moment(new Date(slot.start)).isSame(moment(new Date(transitStart))) && moment(new Date(slot.end)).isSame(moment(new Date(transitEnd)))) {
                 // Case where the new slot exactly matches the existing one, remove the old slot
                 await Timeslot.findByIdAndDelete(slot._id, {session});
-            } else if (new Date(slot.start) < new Date(transitStart) && new Date(slot.end) > new Date(transitEnd)) {
+            } else if (moment(new Date(slot.start)).isBefore(moment(new Date(transitStart))) &&
+                moment(new Date(slot.end)).isAfter(moment(new Date(transitEnd)))) {
                 console.log("need to split!")
 
                 // Split the timeslot into two parts before and after the booked slot
@@ -850,9 +859,9 @@ export const bookTimeslot: RequestHandler = async (req, res, next) => {
 
             } else {
                 // Adjust existing slot start or end
-                if (new Date(slot.end) > new Date(transitEnd)) {
+                if (moment(new Date(slot.end)).isAfter(moment(new Date(transitEnd)))) {
                     slot.start = transitEnd;
-                } else if (new Date(slot.start) < new Date(transitStart)) {
+                } else if (moment(new Date(slot.start)).isBefore(moment(new Date(transitStart)))) {
                     slot.end = transitStart;
                 }
                 await slot.save({session});
@@ -915,6 +924,26 @@ export async function cancelTimeslotWithRequestId(requestId: string): Promise<{ 
         // @ts-ignore
         await cancelTimeslotDirect(foundTimeslot._id);
         return {success: true, message: "Timeslot cancelled successfully"};
+    } catch (error) {
+        console.error("Error cancelling timeslot:", error);
+        throw new Error("Failed to cancel timeslot");
+    }
+}
+
+// update the timeslot to add jobid
+export async function updateTimeslotWithRequestId(requestId: string, jobId: string): Promise<{ success: boolean, message: string }> {
+    try {
+        const foundTimeslot = await findTimeslotByRequestId(requestId);
+        if (!foundTimeslot) {
+            console.log(`No timeslot found with requestId: ${requestId}`);
+            return {success: false, message: "No timeslot to cancel, proceeding..."};
+        }
+
+        foundTimeslot.jobId = new Types.ObjectId(jobId)
+
+        const updatedTimeslot = await foundTimeslot.save();
+        console.log("Timeslot updated successfully with the job", foundTimeslot)
+        return {success: true, message: "Timeslot updated successfully with the job"}; // Return the updated timeslot for further processing or response
     } catch (error) {
         console.error("Error cancelling timeslot:", error);
         throw new Error("Failed to cancel timeslot");

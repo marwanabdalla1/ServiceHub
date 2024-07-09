@@ -17,7 +17,7 @@ export const addService = async (req: Request, res: Response, next: NextFunction
             description,
             defaultSlotTime,
             travelTime,
-            selectedPaymentMethods,
+            acceptedPaymentMethods,
         } = req.body;
 
         // Validate required fields (description is optional, should be validated separately)
@@ -43,7 +43,7 @@ export const addService = async (req: Request, res: Response, next: NextFunction
             lastUpdatedOn: new Date(),
             hourlyRate: Number(hourlyRate),
             description: description,
-            acceptedPaymentMethods: selectedPaymentMethods.map((method: { title: any; }) => method.title) || [],
+            acceptedPaymentMethods: acceptedPaymentMethods.map((method: { title: any; }) => method.title) || [],
             location: account.location || 'Unknown location', // Use account's location if available
             provider: new Types.ObjectId(userId),
             baseDuration: defaultSlotTime,
@@ -87,7 +87,7 @@ export const editService = async (req: Request, res: Response, next: NextFunctio
             description,
             defaultSlotTime,
             travelTime,
-            selectedPaymentMethods
+            acceptedPaymentMethods
         } = req.body;
 
         // Validate required fields
@@ -116,7 +116,7 @@ export const editService = async (req: Request, res: Response, next: NextFunctio
         // serviceOffering.serviceType = serviceType; //it shouldn't update the service type
         serviceOffering.hourlyRate = Number(hourlyRate);
         serviceOffering.description = description;
-        serviceOffering.acceptedPaymentMethods = selectedPaymentMethods.map((method: {
+        serviceOffering.acceptedPaymentMethods = acceptedPaymentMethods.map((method: {
             title: any;
         }) => method.title) || [],
 

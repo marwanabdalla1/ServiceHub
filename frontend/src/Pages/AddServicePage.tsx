@@ -8,7 +8,7 @@ import axios from 'axios';
 interface FormData {
     selectedService: { title: string } | null;
     hourlyRate: string;
-    selectedPaymentMethods: Array<{ title: string }>;
+    acceptedPaymentMethods: Array<{ title: string }>;
     description: string;
     certificateId: string | null;
     defaultSlotTime: string;
@@ -38,7 +38,7 @@ function AddServicePage() {
     const [formData, setFormData] = useState<FormData>({
         selectedService: null,
         hourlyRate: '',
-        selectedPaymentMethods: [],
+        acceptedPaymentMethods: [],
         description: '',
         certificateId: null,
         defaultSlotTime: '',
@@ -47,7 +47,7 @@ function AddServicePage() {
     const [errors, setErrors] = useState({
         selectedService: false,
         hourlyRate: false,
-        selectedPaymentMethods: false,
+        acceptedPaymentMethods: false,
         defaultSlotTime: false,
         travelTime: false
     });
@@ -59,7 +59,7 @@ function AddServicePage() {
             setFormData({
                 selectedService: {title: serviceToEdit.serviceType},
                 hourlyRate: serviceToEdit.hourlyRate.toString(),
-                selectedPaymentMethods: serviceToEdit.selectedPaymentMethods ? serviceToEdit.selectedPaymentMethods.map((method: string) => ({title: method})) : [],
+                acceptedPaymentMethods: serviceToEdit.acceptedPaymentMethods ? serviceToEdit.acceptedPaymentMethods.map((method: string) => ({title: method})) : [],
                 description: serviceToEdit.description,
                 certificateId: serviceToEdit.certificateId,
                 defaultSlotTime: serviceToEdit.baseDuration.toString(),
@@ -114,7 +114,7 @@ function AddServicePage() {
         const newErrors = {
             selectedService: !formData.selectedService,
             hourlyRate: !formData.hourlyRate,
-            selectedPaymentMethods: formData.selectedPaymentMethods.length === 0,
+            acceptedPaymentMethods: formData.acceptedPaymentMethods.length === 0,
             defaultSlotTime: !formData.defaultSlotTime,
             travelTime: !formData.travelTime
         };
@@ -169,7 +169,7 @@ function AddServicePage() {
                 }
                 console.log(`Status: ${response.status}`);
                 console.log(response.data);
-                navigate('/profile'); // Redirect to profile page after submission
+                navigate('/setprofile');
             } catch
                 (error) {
                 console.error('Error submitting service:', error);
@@ -223,16 +223,16 @@ function AddServicePage() {
                                 multiple
                                 options={paymentMethods}
                                 getOptionLabel={(option) => option.title}
-                                value={formData.selectedPaymentMethods}
-                                onChange={(event, newValue) => handleChange('selectedPaymentMethods', newValue)}
+                                value={formData.acceptedPaymentMethods}
+                                onChange={(event, newValue) => handleChange('acceptedPaymentMethods', newValue)}
                                 renderInput={(params) => (
                                     <TextField
                                         {...params}
                                         label="Payment Method"
                                         variant="outlined"
                                         fullWidth
-                                        error={errors.selectedPaymentMethods}
-                                        helperText={errors.selectedPaymentMethods ? 'At least one payment method is required' : ''}
+                                        error={errors.acceptedPaymentMethods}
+                                        helperText={errors.acceptedPaymentMethods ? 'At least one payment method is required' : ''}
                                     />
                                 )}
                             />
