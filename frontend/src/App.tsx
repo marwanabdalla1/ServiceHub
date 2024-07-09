@@ -6,7 +6,6 @@ import SignUpPage from './Pages/AuthPages/SignUpPage';
 import NavigationBar from './components/Navbar';
 import AdminNavbar from "./components/adminComponents/AdminNavbar";
 import HomePage from './Pages/HomePage';
-import AddServicePage from './Pages/AddServicePage';
 import ReviewPage from "./Pages/CustomerReviewPage";
 import ProviderProfilePage from "./Pages/ProviderProfilePage";
 import ProfileSettingPage from "./Pages/ProfileSettingPage";
@@ -28,21 +27,25 @@ import ChangeBookingTimePage from './Pages/ChangeBookingTimePage';
 import {ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import {Slide} from "react-toastify";
-import JobDetailsPage from "./Pages/JobDetailsPage";
 import VerifyCertificatePage from "./Pages/AdminPanel/VerifyCertificatePage";
 import AdminUserDataPage from "./Pages/AdminPanel/AdminUserDataPage";
 import AdminHomePage from "./Pages/AdminPanel/AdminHomePage";
 import ErrorPage from "./Pages/ErrorPage";
+
 import UpdateSProfile from './components/UpdateSProfile';
+import AddServicePage from './Pages/AddServicePage';
 
 import OfferedServicesTable from "./Pages/TablePages/OfferedServicesTable";
 import IncomingRequestsTable from "./Pages/TablePages/IncomingRequestsTable";
-import RequestDetailsPage from "./Pages/RequestDetailsPage";
-import ReceivedServiceTable from "./Pages/TablePages/ReceivedServiceTable";
-import CombinedOutgoingPage from "./Pages/TablePages/CombinedOutgoingPage";
 import RequestHistoryTable from "./Pages/TablePages/RequestHistoryTable";
-import {RecoveryProvider} from "./contexts/RecoveryContext";
+import ReceivedServiceTable from "./Pages/TablePages/ReceivedServiceTable";
 
+
+import JobDetailsPage from "./Pages/JobDetailsPage";
+import RequestDetailsPage from "./Pages/RequestDetailsPage";
+import CombinedOutgoingPage from "./Pages/TablePages/CombinedOutgoingPage";
+import CombinedServicePage from "./Pages/TablePages/CombinedIncomingPage";
+import {RecoveryProvider} from "./contexts/RecoveryContext";
 function App() {
     const [search, setSearch] = useState('');
 

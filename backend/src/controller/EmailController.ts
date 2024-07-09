@@ -138,7 +138,7 @@ const generateCancellationNotificationEmail = (firstName: string, serviceType: S
         <td style="padding: 20px; font-size: 16px; line-height: 1.5;">
           <b>Dear ${firstName},</b>
           <br /><br />
-          We are sorry to inform you that your scheduled appointment for ${serviceType} on ${formattedStartTime} has been cancelled. Please try rebooking another appointment. We apologize for any inconvenience.
+          We are sorry to inform you that your scheduled appointment for ${serviceType} on ${formattedStartTime} has been cancelled. We apologize for any inconvenience.
           <br /><br />
           </div>
           Thank you for understanding!
@@ -172,7 +172,7 @@ const generateCancellationConfirmationEmail = (firstName: string, serviceType: S
         <td style="padding: 20px; font-size: 16px; line-height: 1.5;">
           <b>Dear ${firstName},</b>
           <br /><br />
-          We confirm that your scheduled appointment for ${serviceType} on ${formattedStartTime} has been cancelled. Please update your availabilites accordingly.
+          We confirm that your scheduled appointment for ${serviceType} on ${formattedStartTime} has been cancelled.
           <br /><br />
           </div>
           Please feel free to contact us in case of any issues. 
