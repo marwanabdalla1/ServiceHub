@@ -42,7 +42,6 @@ import {sortBookingItems} from "../../utils/jobHandler";
 import GenericTable from "../../components/tableComponents/GenericTable";  // Adjust the path as necessary
 
 
-// todo: replace ALL appointmentstarttime/endtime
 
 type Item = ServiceRequest | Job;
 
@@ -52,6 +51,8 @@ export default function IncomingRequestTable() {
     const [selectedRequest, setSelectedRequest] = React.useState<ServiceRequest | null>(null);
     const [serviceRequests, setServiceRequests] = React.useState<ServiceRequest[]>([]);
     const [comment, setComment] = useState('');
+    const [total, setTotal] = useState(0);
+
     const {token, account} = useAuth();
     const [timeChangePopUp, setTimeChangePopUp] = useState(false);
     const navigate = useNavigate();
@@ -63,33 +64,65 @@ export default function IncomingRequestTable() {
 
     const statusOptions = ['ALL REQUESTS', 'Pending', 'Action Needed from Requester', 'Accepted', 'Cancelled', 'Declined'];
     const [statusFilter, setStatusFilter] = useState('ALL REQUESTS');
-    const filteredRequests = serviceRequests.filter((request) =>
-        statusFilter === 'ALL REQUESTS' || statusFilter === '' ? true : request.requestStatus === statusFilter.toLowerCase()
-    );
+    const [serviceTypeFilter, setServiceTypeFilter] = useState("ALL");
+
     useEffect(() => {
         console.log(token)
         if (token && account) {
-            console.log("this is the logged in account in request table:", account)
-            // setLoading(true);
-            // get all requests instead of only incoming ones
-            axios.get<ServiceRequest[]>(`/api/requests/provider/${account._id}`, {
-                headers: {Authorization: `Bearer ${token}`}
-            })
-                .then(response => {
 
-                    console.log("getting requests ...", response.data)
-                    const sortedData = sortBookingItems(response.data);
-                    setServiceRequests(sortedData as ServiceRequest[]);
-                    // setLoading(false);
-                })
-                .catch(error => {
+            const fetchServiceRequests = async () => {
+                try {
+                    const params = new URLSearchParams({
+                        page: (page + 1).toString(), // API is zero-indexed, React state is zero-indexed
+                        limit: rowsPerPage.toString(),
+                    });
+                    if (statusFilter !== 'ALL REQUESTS') {
+                        params.append('requestStatus', statusFilter.toLowerCase());
+                    }
+
+                    if (serviceTypeFilter !== 'ALL') {
+                        params.append('serviceType', serviceTypeFilter); // Ensure this matches the actual enum/case used in your database
+                    }
+
+                    console.log(params)
+
+                    const response = await axios.get(`/api/requests/provider/${account._id}?${params.toString()}`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+
+                    console.log("fetched service requests,", response)
+                    setServiceRequests(response.data.data);
+                    setTotal(response.data.total);
+                } catch (error) {
                     console.error('Failed to fetch service requests:', error);
                     setServiceRequests([]);
-                    // setError('Failed to load service requests');
-                    // setLoading(false);
-                });
+                }
+            };
+
+            fetchServiceRequests();
+
+
+            // console.log("this is the logged in account in request table:", account)
+            // // setLoading(true);
+            // // get all requests instead of only incoming ones
+            // axios.get<ServiceRequest[]>(`/api/requests/provider/${account._id}`, {
+            //     headers: {Authorization: `Bearer ${token}`}
+            // })
+            //     .then(response => {
+            //
+            //         console.log("getting requests ...", response.data)
+            //         const sortedData = sortBookingItems(response.data);
+            //         setServiceRequests(sortedData as ServiceRequest[]);
+            //         // setLoading(false);
+            //     })
+            //     .catch(error => {
+            //         console.error('Failed to fetch service requests:', error);
+            //         setServiceRequests([]);
+            //         // setError('Failed to load service requests');
+            //         // setLoading(false);
+            //     });
         }
-    }, [token, account]);
+    }, [token, account, page, rowsPerPage, statusFilter]);
 
     const openModal = (request: Request) => {
         setSelectedRequest(request);
@@ -213,7 +246,7 @@ export default function IncomingRequestTable() {
                     <Box style={{display: 'flex'}}>
                         <Box sx={{flexGrow: 1, marginRight: 2}}>
                             <Box>
-                                {filteredRequests.length === 0 ? (
+                                {serviceRequests.length === 0 ? (
                                     <Typography variant="body1">
                                         You don't have any incoming
                                         request {statusFilter === 'ALL REQUESTS' || statusFilter === '' ? '' : (
@@ -221,7 +254,14 @@ export default function IncomingRequestTable() {
                                             style={{fontStyle: 'italic'}}>{statusFilter.toLowerCase()}</span></span>
                                     )}.
                                     </Typography>) : (
-                                    <GenericTable data={filteredRequests} />
+                                    <GenericTable data={serviceRequests}
+                                                  count={total}
+                                                  page={page}
+                                                  setPage={setPage}
+                                                  rowsPerPage={rowsPerPage}
+                                                  setRowsPerPage={setRowsPerPage}
+                                                  setShowMediaCard={setShowMediaCard}
+                                    />
 
                                 )}
                             </Box>

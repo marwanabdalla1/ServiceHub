@@ -35,7 +35,10 @@ export default function RequestHistoryTable() {
     const [selectedRequest, setSelectedRequest] = React.useState<ServiceRequest | null>(null);
     const [serviceRequests, setServiceRequests] = React.useState<ServiceRequest[]>([]);
     const {token, account} = useAuth();
+    const [total, setTotal] = useState(0);
 
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
 
     const statusOptions = ['ALL REQUESTS', 'Pending', 'Action Needed from Requester', 'Accepted', 'Cancelled', 'Declined'];
     const [statusFilter, setStatusFilter] = useState('ALL REQUESTS');
@@ -59,23 +62,46 @@ export default function RequestHistoryTable() {
     useEffect(() => {
         console.log(token)
         if (token && account) {
-            console.log("this is the logged in account in request table:", account)
-            // setLoading(true);
-            axios.get<ServiceRequest[]>(`/api/requests/requester/${account._id}`, {
-                headers: {Authorization: `Bearer ${token}`}
-            })
-                .then(response => {
-                    console.log("getting requests ...", response.data)
-                    const sortedData = sortBookingItems(response.data);
-                    setServiceRequests(sortedData as ServiceRequest[]);
-                    // setLoading(false);
-                })
-                .catch(error => {
+            const fetchServiceRequests = async () => {
+                try {
+                    const params = new URLSearchParams({
+                        page: (page + 1).toString(), // API is zero-indexed, React state is zero-indexed
+                        limit: rowsPerPage.toString(),
+                        requestStatus: statusFilter !== 'ALL REQUESTS' ? statusFilter.toLowerCase() : ''
+                    });
+                    console.log(params)
+
+                    const response = await axios.get(`/api/requests/provider/${account._id}?${params.toString()}`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+
+                    console.log("fetched service requests,", response)
+                    setServiceRequests(response.data.data); // Assuming the backend sends data in a 'data' field
+                    setTotal(response.data.total);
+                } catch (error) {
                     console.error('Failed to fetch service requests:', error);
                     setServiceRequests([]);
-                    // setError('Failed to load service requests');
-                    // setLoading(false);
-                });
+                }
+            };
+
+            fetchServiceRequests();
+            // console.log("this is the logged in account in request table:", account)
+            // // setLoading(true);
+            // axios.get<ServiceRequest[]>(`/api/requests/requester/${account._id}`, {
+            //     headers: {Authorization: `Bearer ${token}`}
+            // })
+            //     .then(response => {
+            //         console.log("getting requests ...", response.data)
+            //         const sortedData = sortBookingItems(response.data);
+            //         setServiceRequests(sortedData as ServiceRequest[]);
+            //         // setLoading(false);
+            //     })
+            //     .catch(error => {
+            //         console.error('Failed to fetch service requests:', error);
+            //         setServiceRequests([]);
+            //         // setError('Failed to load service requests');
+            //         // setLoading(false);
+            //     });
         }
     }, [account?._id]);
 

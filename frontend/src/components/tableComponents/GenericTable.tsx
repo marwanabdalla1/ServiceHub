@@ -10,23 +10,28 @@ type Item = ServiceRequest | Job;
 
 interface GenericTableProps {
     data: Item[];
+    count: number;
+    page: number;                 // current page
+    setPage: (page: number) => void; // setter for current page
+    rowsPerPage: number;          // rows per page
+    setRowsPerPage: (rowsPerPage: number) => void; // setter for rows per page
+    setShowMediaCard: (show: boolean) => void
+
 }
 
 
 
-function GenericTable({data}:GenericTableProps) {
-    const [showMediaCard, setShowMediaCard] = React.useState(false);
+function GenericTable({data, count, page, setPage, rowsPerPage, setRowsPerPage, setShowMediaCard }:GenericTableProps) {
     const [selectedItem, setSelectedItem] = React.useState<ServiceRequest | Job | null>(null);
     const [selectedItems, setSelectedItems] = React.useState<Item[]>([]);
 
-    const [page, setPage] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(10);
 
 
     const handleChangePage = (
         event: React.MouseEvent<HTMLButtonElement> | null,
         newPage: number
     ): void => {
+        console.log("new page", newPage)
         setPage(newPage);
     };
 
@@ -42,6 +47,8 @@ function GenericTable({data}:GenericTableProps) {
         setShowMediaCard(req !== null);
     };
 
+
+
     return (
         <Paper>
             <TableContainer>
@@ -50,15 +57,12 @@ function GenericTable({data}:GenericTableProps) {
                         <TableRow>
                             <TableCell>Type</TableCell>
                             <TableCell>Status</TableCell>
-                            <TableCell>Appointment Date</TableCell>
+                            <TableCell>Appointment Time</TableCell>
                             <TableCell></TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {(rowsPerPage > 0
-                                ? data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                : data
-                        ).map((row) => (
+                        {data.map((row) => (
                             <GenericTableRow key={row._id} item={row} onViewDetails={handleToggleMediaCard} />
                         ))}
                     </TableBody>
@@ -92,7 +96,7 @@ function GenericTable({data}:GenericTableProps) {
                 }}
                 rowsPerPageOptions={[10, 20, 50, {label: 'All', value: -1}]}
                 component="div"
-                count={data.length}
+                count={count}
                 rowsPerPage={rowsPerPage}
                 page={page}
                 onPageChange={handleChangePage}
