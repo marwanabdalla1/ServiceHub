@@ -182,10 +182,10 @@ export const getJobsByProvider: RequestHandler = async (req, res) => {
         const paginatedJobssWithTimeslots = sortedJobsWithTimeslots.slice((Number(page)-1) * Number(limit), (Number(page)) * Number(limit));
 
 
-
         res.status(200).json({
             data: jobsWithTimeslots,
-        total: sortedJobsWithTimeslots.length});
+            total: sortedJobsWithTimeslots.length})
+        ;
     } catch (error: any) {
         console.error("Failed to retrieve jobs:", error);
         res.status(500).json({ message: "Internal server error", error: error.message });
@@ -245,10 +245,9 @@ export const getJobsByRequester: RequestHandler = async (req, res) => {
 
 
         res.status(200).json({
-            data: jobsWithTimeslots,
+            data: paginatedJobssWithTimeslots,
             total: sortedJobsWithTimeslots.length});
 
-        res.status(200).json(jobsWithTimeslots);
     } catch (error: any) {
         console.error("Failed to retrieve jobs:", error);
         res.status(500).json({ message: "Internal server error", error: error.message });
