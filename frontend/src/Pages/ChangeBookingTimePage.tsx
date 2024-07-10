@@ -4,7 +4,7 @@ import { Typography, Container, Button, Box } from '@mui/material';
 import {useLocation, useNavigate, useParams} from 'react-router-dom';
 import {BookingDetails} from "../contexts/BookingContext";
 import {useAuth} from "../contexts/AuthContext";
-import axios from "axios";
+import axios, {AxiosError} from "axios";
 import {RequestStatus} from "../models/enums";
 import useAlert from "../hooks/useAlert";
 import AlertCustomized from "../components/AlertCustomized";
@@ -46,7 +46,7 @@ const ChangeBookingTimePage: React.FC = () => {
 
     const [request, setRequest] = useState<ServiceRequest | null>(null);
     // const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string| null>(null);
+    const [error, setError] = useState<any>(undefined);
     const {token, account} = useAuth();
 
     const {alert, triggerAlert, closeAlert} = useAlert(30000);
@@ -67,6 +67,10 @@ const ChangeBookingTimePage: React.FC = () => {
 
                 console.log("requests response", response.data.requestedBy, "\n my account;", account?._id)
                 // make sure only the requestor can access this and only upon request
+                if (!response.data) {
+                    setError('404 Not Found: The request you\'re looking for cannot be found.');
+                    return;
+                }
                 if (account && response.data.requestedBy._id.toString() !== account?._id.toString()){
                     navigate("/unauthorized");
                     return;
@@ -79,7 +83,7 @@ const ChangeBookingTimePage: React.FC = () => {
                 setProviderId(response.data.provider._id)
                 console.log("fetched request when changing booking time:", request)
             } catch (err: any) {
-                setError(err.message);
+                setError(err);
             }
         };
 
@@ -91,21 +95,13 @@ const ChangeBookingTimePage: React.FC = () => {
     // const [globalAvailabilities, setGlobalAvailabilities] = useState<Event[]>([{start: Date.now(), end: Date.now(), title: "Event"}]); // Placeholder for the global availabilities [e.g. tutor availabilities]
 
 
-    // if (loading) {
-    //     return <div>Loading...</div>;
-    // }
-
-    if (!request) {
-        return <ErrorPage title={"404 Not Found"} message={'The request you\'re looking for cannot be found.'} redirectTitle={"My Requests"} redirectPath={"/outgoing/requests"}/>;
-    }
-
     if (requestNotEditable) {
-        return <ErrorPage title={"Request Cannot Be Edited"} message={'No action can be made to this request. \n' +
+        return <ErrorPage title={"403 Forbidden"} message={'No action can be made to this request. \n' +
             'If you have already rebooked a timeslot, you can view it in your outgoing requests.'} redirectTitle={"Outgoing Requests"} redirectPath={"/outgoing/requests"}/>;
     }
 
     if (error) {
-        return <ErrorPage title={"Error"} message={error.toString()}/>;
+        return <ErrorPage title={error.split(': ')[0]} message={error.split(': ')[1]} redirectTitle="Home" redirectPath="/" />;
     }
 
 
@@ -128,12 +124,12 @@ const ChangeBookingTimePage: React.FC = () => {
                 </Box>
             )}
             <AvailabilityCalendarBooking
-                Servicetype={request.serviceType}
+                Servicetype={request?.serviceType}
                 providerIdInput={providerId}
                 requestIdInput={requestId}
                 mode={"change"}
-                defaultSlotDuration={request.serviceOffering.baseDuration || 60}
-                defaultTransitTime={request.serviceOffering?.bufferTimeDuration || 30}
+                defaultSlotDuration={request?.serviceOffering.baseDuration || 60}
+                defaultTransitTime={request?.serviceOffering?.bufferTimeDuration || 30}
                 onNext={()=>console.log("next")}
             />
 
