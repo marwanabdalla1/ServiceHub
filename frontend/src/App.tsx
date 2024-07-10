@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {BrowserRouter, Routes, Route, useLocation, Navigate} from "react-router-dom";
 import FilterPage from './Pages/FilterPage';
 import SignInPage from './Pages/AuthPages/LoginPage';
-import SignUpPage from './Pages/AuthPages/SignUpPage';
+import SignUpPage from './Pages/AuthPages/SignUpPages/SignUpPage';
 import NavigationBar from './components/Navbar';
 import AdminNavbar from "./components/adminComponents/AdminNavbar";
 import HomePage from './Pages/HomePage';
@@ -112,9 +112,10 @@ function MainRoutes({search, setSearch}: { search: any, setSearch: any }) {
                     {/* Home */}
                     <Route path="/" element={<HomePage/>}/>
 
-                    {/* User Authentication */}
-                    <Route path="/login" element={<SignInPage/>}/>
-                    <Route path="/signup" element={<SignUpPage/>}/>
+                {/* User Authentication */}
+                <Route path="/login" element={<SignInPage/>}/>
+                <Route path="/signup" element={<SignUpPage/>}/>
+                <Route path="/signup/otp" element={<OTPSignUpPage/>}/>
 
                     {/* User Profile */}
                     <Route path="/setprofile" element={<ProfileSettingPage/>}/>

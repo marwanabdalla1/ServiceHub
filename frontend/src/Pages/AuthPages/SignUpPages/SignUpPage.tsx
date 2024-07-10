@@ -23,8 +23,10 @@ import Container from '@mui/material/Container';
 import {createTheme, ThemeProvider} from '@mui/material/styles';
 import {blue} from "@mui/material/colors";
 import axios from 'axios';
-import {useAuth} from "../../contexts/AuthContext";
+import {useAuth} from "../../../contexts/AuthContext";
 import {useLocation, useNavigate} from "react-router-dom";
+import {toast} from "react-toastify";
+import {useRecovery} from "../../../contexts/RecoveryContext";
 
 function Copyright(props: any) {
     return (
@@ -48,17 +50,79 @@ const defaultTheme = createTheme({
 });
 
 export default function SignUp() {
-    const { registerUser } = useAuth();
+    const {registerUser} = useAuth();
     const location = useLocation();
-    const { from } = location.state || { from: { pathname: "/" } };
+    const {from} = location.state || {from: {pathname: "/"}};
     const navigate = useNavigate();
+    const {createAccountEmail} = useRecovery();
+
+
+    const checkEmptyFields = (data: string, fieldName: string) => {
+        if (data === '' || data === null || data === undefined) {
+            toast.error(`${fieldName} is required.`);
+            return true;
+        }
+        return false;
+    };
+
+    // TODO: if german characters are not allowed in the name?
+    const isValidName = (name: string) => {
+        const nameRegex = /^[a-zA-Z\s]+$/;
+        return nameRegex.test(name);
+    };
+
+    const isValidEmail = (email: string) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
 
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        // await registerUser(event, from.pathname);
-        // todo: improve this to enable redirect
-        await registerUser(event);
+        const formData = new FormData(event.currentTarget);
+        const firstName = formData.get('firstName') as string;
+        const lastName = formData.get('lastName') as string;
+        const email = formData.get('email') as string;
+        const password = formData.get('password') as string;
+        const repeatPassword = formData.get('repeatPassword') as string;
+
+        try {
+            if (checkEmptyFields(firstName, 'First Name') || checkEmptyFields(lastName, 'Last Name') ||
+                checkEmptyFields(email, 'Email') || checkEmptyFields(password, 'Password') ||
+                checkEmptyFields(repeatPassword, 'Repeat Password')) {
+                return;
+            }
+
+            if (!isValidName(firstName) ) {
+                toast.error('First Name should not contain numbers or invalid characters.');
+                return;
+            }
+
+            if(!isValidName(lastName)){
+                toast.error('Last Name should not contain numbers or invalid characters.');
+                return;
+            }
+
+            if (!isValidEmail(email)) {
+                toast.error('Invalid email format.');
+                return;
+            }
+
+            if (password !== repeatPassword) {
+                toast.error('Passwords do not match.');
+                return;
+            }
+
+            await createAccountEmail(email, firstName);
+            navigate("/signup/otp", {
+                state: {
+                    firstName, lastName, email, password
+                }
+            });
+        } catch (error) {
+            toast.error('There was an error processing your request. Please try again.');
+            console.error('Error during form submission:', error);
+        }
     };
 
 
@@ -128,7 +192,18 @@ export default function SignUp() {
                                     autoComplete="new-password"
                                 />
                             </Grid>
-                          
+                            <Grid item xs={12}>
+                                <TextField
+                                    required
+                                    fullWidth
+                                    name="repeatPassword"
+                                    label="Repeat Password"
+                                    type="password"
+                                    id="repeatPassword"
+                                    autoComplete="new-password"
+                                />
+                            </Grid>
+
                         </Grid>
                         <Button
                             type="submit"
