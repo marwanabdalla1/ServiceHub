@@ -113,7 +113,6 @@ const ChangeBookingTimePage: React.FC = () => {
                 defaultSlotDuration={request.serviceOffering.baseDuration || 60}
                 defaultTransitTime={request.serviceOffering?.bufferTimeDuration || 30}
                 onNext={()=>console.log("next")}
-                onRequestChange={()=>console.log("change")}
             />
 
         </Container>

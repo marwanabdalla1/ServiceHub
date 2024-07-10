@@ -58,11 +58,11 @@ interface ServiceScheduleProps {
     providerIdInput: string| null|undefined;
     requestIdInput: string|null|undefined;
     mode:"create" | "change"; //"create" or "change"
-    onRequestChange: () => void;
+    onCancelBooking?: () => void;
     onNext: () => void;
 }
 
-function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, defaultTransitTime, providerIdInput, requestIdInput, mode, onRequestChange, onNext }: ServiceScheduleProps) {
+function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, defaultTransitTime, providerIdInput, requestIdInput, mode, onCancelBooking, onNext }: ServiceScheduleProps) {
     const {bookingDetails, setTimeAndDuration} = useBooking();
     // const providerId = bookingDetails.provider?._id;
     const providerId = mode === 'change' ? providerIdInput : bookingDetails.provider?._id;
@@ -651,9 +651,10 @@ function AvailabilityCalendarBooking({ Servicetype, defaultSlotDuration, default
                 </DialogActions>
             </Dialog>
             <Box display="flex" justifyContent="flex-end" sx={{mt: 4}}>
-                <Button variant="contained" color="primary" onClick={confirmBooking}>
+                <Button variant="contained" color="primary" onClick={confirmBooking} sx={{mr: 2}}>
                     {mode === 'create' ? 'Confirm Booking Time' : 'Update Booking Time'}
                 </Button>
+                <Button variant="outlined" onClick={onCancelBooking}>Cancel </Button>
             </Box>
         </div>
     );

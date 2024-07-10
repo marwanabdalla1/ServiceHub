@@ -1,21 +1,20 @@
-import React, { useEffect } from 'react';
+import React, {useEffect} from 'react';
 import {useLocation, useNavigate, useParams} from 'react-router-dom';
-import { Container, Box, Typography, Button, Card, CardContent } from '@mui/material';
-import {BookingDetails, useBooking } from '../../contexts/BookingContext';
+import {Container, Box, Typography, Button, Card, CardContent} from '@mui/material';
+import {BookingDetails, useBooking} from '../../contexts/BookingContext';
 import {Account} from "../../models/Account";
 import {useAuth} from "../../contexts/AuthContext";
 
 
 interface CreateAccountOrSignInProps {
     onNext: () => void;
-    onBack: () => void;
     bookingDetails: BookingDetails;
 }
 
-function CreateAccountOrSignIn({ onNext, onBack, bookingDetails }: CreateAccountOrSignInProps) {
-    const { setRequestedBy} = useBooking();
+function CreateAccountOrSignIn({onNext, bookingDetails}: CreateAccountOrSignInProps) {
+    const {setRequestedBy} = useBooking();
     const navigate = useNavigate();
-    const { offeringId } = useParams<{ offeringId: string }>(); // Get the offeringId from the route params
+    const {offeringId} = useParams<{ offeringId: string }>(); // Get the offeringId from the route params
     const {token, account} = useAuth();
 
     const location = useLocation();
@@ -64,58 +63,28 @@ function CreateAccountOrSignIn({ onNext, onBack, bookingDetails }: CreateAccount
 
     // todo: make these navigate back to the booking page!
     const handleSignUpClick = () => {
-        navigate('/signup', { state: { from: location } });
+        navigate('/signup', {state: {from: location}});
     };
 
     const handleLoginClick = () => {
-        navigate('/login', { state: { from: location } });
+        navigate('/login', {state: {from: location}});
         // loginUser()
     };
 
-    if (!account || !token){
+    if (!account || !token) {
         return (
-            <Container>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-                    <Box sx={{ width: '60%' }}>
-                        <Box sx={{width: '100%', display:"flex", flexDirection:"row", justifyContent: 'space-between'}}>
-                            <Typography variant="h6" gutterBottom>
-                                Step 1 of 4
-                            </Typography>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', ml: 5 }}>
-                                <Button variant="outlined" onClick={onBack}>Back</Button>
-                                {/*<Button variant="contained" onClick={onNext}>Next</Button>*/}
-                            </Box>
-                        </Box>
-                        <Typography variant="h4" gutterBottom>
-                            Create account or sign in
-                        </Typography>
-                        <Button variant="contained" sx={{ mb: 2, width: '100%' }} onClick={handleSignUpClick}>
-                            Sign up with email
-                        </Button>
-                        <Button variant="text" sx={{ width: '100%' }} onClick={handleLoginClick}>
-                            Log in
-                        </Button>
-                    </Box>
-                    <Box sx={{ width: '20%' }}>
-                        <Card>
-                            <CardContent sx={{ display: 'flex', alignItems: 'center' }}>
-                                <Box>
-                                    <Typography variant="h6">{`${bookingDetails.provider?.firstName} ${bookingDetails.provider?.lastName}`}</Typography>
-                                    <Typography variant="body2" color="text.secondary">
-                                        {bookingDetails.serviceOffering?.location}
-                                    </Typography>
-                                    <Typography variant="body2" color="text.secondary">
-                                        {bookingDetails.serviceType}
-                                    </Typography>
-                                    <Typography variant="body2" color="text.secondary">
-                                        {bookingDetails.price} per hour
-                                    </Typography>
-                                </Box>
-                            </CardContent>
-                        </Card>
-                    </Box>
-                </Box>
-            </Container>
+            <>
+
+                <Typography variant="h4" gutterBottom>
+                    Create account or sign in
+                </Typography>
+                <Button variant="contained" sx={{mb: 2, width: '100%'}} onClick={handleSignUpClick}>
+                    Sign up with email
+                </Button>
+                <Button variant="text" sx={{width: '100%'}} onClick={handleLoginClick}>
+                    Log in
+                </Button>
+            </>
         );
     }
     return null
