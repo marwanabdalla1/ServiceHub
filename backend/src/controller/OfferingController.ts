@@ -85,9 +85,9 @@ const filterOfferings = (offerings: any[], filters: any) => {
 
         if (searchTerm && searchTerm !== '') {
             const searchRegex = new RegExp(searchTerm, 'i');
-            matchesSearch = searchRegex.test(offering.provider.firstName) ||
-                searchRegex.test(offering.provider.lastName) ||
-                searchRegex.test(offering.provider.location) ||
+            matchesSearch = searchRegex.test(offering.provider?.firstName) ||
+                searchRegex.test(offering.provider?.lastName) ||
+                searchRegex.test(offering.provider?.location) ||
                 searchRegex.test(offering.serviceType);
         }
 
@@ -125,4 +125,3 @@ export const getServiceOfferingsByUser = async (req: Request, res: Response) => 
         res.status(500).json({ message: err.message });
     }
 }
-
