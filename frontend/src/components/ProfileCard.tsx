@@ -1,3 +1,4 @@
+// MediaCard component
 import * as React from 'react';
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
@@ -7,17 +8,18 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
-import { Account } from '../models/Account';
+import { ServiceOffering } from '../models/ServiceOffering';
 import { GoStarFill } from "react-icons/go";
 import { Link } from 'react-router-dom';
 
 interface MediaCardProps {
-  user: Account;
+  offering: ServiceOffering;
   profileImageUrl: string | null;
   loading: boolean;
 }
 
-export default function MediaCard({ user, profileImageUrl, loading }: MediaCardProps) {
+export default function MediaCard({ offering, profileImageUrl, loading }: MediaCardProps) {
+  const provider = offering.provider;
   return (
     <div className='border margin-4'>
       <Card sx={{ borderRadius: '15px' }}>
@@ -28,35 +30,35 @@ export default function MediaCard({ user, profileImageUrl, loading }: MediaCardP
         ) : (
           <CardMedia
             sx={{ height: 280 }}
-            image={profileImageUrl ? profileImageUrl : user.profileImageUrl}
+            image={profileImageUrl ? profileImageUrl : provider.profileImageUrl}
             title="Service Image"
           />
         )}
         <CardContent>
           <div>
             <Typography gutterBottom variant="h5" component="div">
-              {user.firstName} {user.lastName}
+              {provider.firstName} {provider.lastName}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              {user.serviceOfferings[0]?.serviceType}
+              {offering.serviceType}
             </Typography>
 
             <div className='flex space-x-4'>
               <Typography variant="body2" color="text.secondary">
-                €{user.serviceOfferings[0]?.hourlyRate}/hr
+                €{offering.hourlyRate}/hr
               </Typography>
               <div className='flex space-x-1 items-center'>
                 <Typography variant="body2" color="text.secondary">
-                  {user.serviceOfferings[0]?.rating}
+                  {offering.rating}
                 </Typography>
                 <GoStarFill className='text-yellow-500' />
               </div>
-              {user.serviceOfferings[0]?.isCertified && (
+              {offering.isCertified && (
                 <Typography className='text-green-500' variant="body2">
                   Licensed
                 </Typography>
               )}
-              {user.isPremium && (
+              {provider.isPremium && (
                 <Typography className='text-slate-500 font-extrabold' variant="body2">
                   Promoted
                 </Typography>
@@ -66,7 +68,7 @@ export default function MediaCard({ user, profileImageUrl, loading }: MediaCardP
         </CardContent>
         <div className='flex justify-center'>
           <CardActions>
-            <Link to={`/offerings/${user.serviceOfferings[0]._id}`}>
+            <Link to={`/offerings/${offering._id}`}>
               <Button size="small">Book Now</Button>
             </Link>
           </CardActions>

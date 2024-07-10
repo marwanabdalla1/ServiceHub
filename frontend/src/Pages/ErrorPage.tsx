@@ -5,13 +5,21 @@ import { useNavigate } from 'react-router-dom';
 interface ErrorPageProps {
     title: string;  // Title for the error page
     message: string;  // Description or error message
+    redirectPath?: string;
+    redirectTitle?: string;
 }
 
-const ErrorPage: React.FC<ErrorPageProps> = ({ title, message }) => {
+const ErrorPage: React.FC<ErrorPageProps> = ({ title, message, redirectPath= "/", redirectTitle="Home" }) => {
     const navigate = useNavigate();
+    const messageElements = message.split('\n').map((part, index) => (
+        <span key={index}>
+      {part}
+            {index < message.split('\n').length - 1 && <br />}
+    </span>
+    ));
 
     return (
-        <Container maxWidth="sm">
+        <Container maxWidth="md">
             <Box
                 display="flex"
                 flexDirection="column"
@@ -24,10 +32,10 @@ const ErrorPage: React.FC<ErrorPageProps> = ({ title, message }) => {
                     {title}
                 </Typography>
                 <Typography variant="h5" gutterBottom>
-                    {message}
+                    {messageElements}
                 </Typography>
-                <Button variant="contained" color="primary" onClick={() => navigate('/')} sx={{ mt: 4 }}>
-                    Go to Home
+                <Button variant="contained" color="primary" onClick={() => navigate(redirectPath)} sx={{ mt: 2 }}>
+                    Go to {redirectTitle}
                 </Button>
             </Box>
         </Container>

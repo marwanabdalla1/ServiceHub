@@ -174,6 +174,9 @@ const GenericConsumerCard: React.FC<GenericConsumerCardProps> = ({
                 </div>
 
                 <Divider sx={{marginBottom: '1rem'}}/>
+                <Typography variant="body2" marginBottom={2}>
+                    {isJob(item) ? "Job ID" : "Request ID"}: {item._id}
+                </Typography>
                 <Typography variant="body2">
                     Service Type: {item.serviceType}
                 </Typography>
@@ -184,7 +187,7 @@ const GenericConsumerCard: React.FC<GenericConsumerCardProps> = ({
                     Appointment End Time: {formatDateTime(item.timeslot?.end)}
                 </Typography>
                 <Typography variant="body2" sx={{marginBottom: '2rem'}}>
-                    Service Fee: {item.serviceFee}
+                    Service Fee: €{item.serviceFee} per hour
                 </Typography>
                 <Typography variant="body2" sx={{marginBottom: '1rem'}}>
                     Status: {generalStatus}

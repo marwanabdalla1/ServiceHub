@@ -75,7 +75,7 @@ export default function RequestHistoryTable() {
                     if (serviceTypeFilter !== 'ALL') {
                         params.append('serviceType', serviceTypeFilter); // Ensure this matches the actual enum/case used in your database
                     }
-                    console.log(params)
+                    console.log("params for query", params)
 
                     const response = await axios.get(`/api/requests/requester/${account._id}?${params.toString()}`, {
                         headers: { Authorization: `Bearer ${token}` }
