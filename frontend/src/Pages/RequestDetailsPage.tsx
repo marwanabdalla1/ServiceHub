@@ -25,18 +25,20 @@ import AlertCustomized from "../components/AlertCustomized";
 
 // Define the props interface
 interface RequestDetailsPageProps {
-    role: string;
+    // role: string;
 }
 
 type Item = ServiceRequest | Job;
 
 
 // tood: modify this
-const RequestDetailsPage: React.FC<RequestDetailsPageProps>  = ({ role }) => {
+const RequestDetailsPage: React.FC<RequestDetailsPageProps>  = () => {
     const { requestId } = useParams<{ requestId: string }>();
     const [request, setRequest] = useState<ServiceRequest | null>(null);
     const { token, account } = useAuth();
     const [reviews, setReviews] = useState<Review[]>([]);
+
+    const [role, setRole] = useState<string | undefined>(undefined)
 
     // for time change
     const [timeChangePopUp, setTimeChangePopUp] = useState(false);
@@ -47,12 +49,12 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps>  = ({ role }) => {
 
     const navigate = useNavigate();
     const location = useLocation();
-    const redirectPath = location.state?.redirectPath || '/incoming';
 
+    const [redirectPath, setRedirectPath] = useState(() => location.state?.redirectPath || undefined);
 
 
     useEffect(() => {
-        const fetchJob = async () => {
+        const fetchRequest = async () => {
             try {
 
                 const response = await axios.get<ServiceRequest>(`/api/requests/${requestId}`, {
@@ -60,33 +62,66 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps>  = ({ role }) => {
                 });
                 setRequest(response.data);
 
-                // todo: set
 
-                // Fetch reviews for the request
-                const reviewsResponse = await axios.get<Review[]>(`/api/reviews/job/${requestId}`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                setReviews(reviewsResponse.data);
+                // // Fetch reviews for the request
+                // const reviewsResponse = await axios.get<Review[]>(`/api/reviews/job/${requestId}`, {
+                //     headers: { Authorization: `Bearer ${token}` },
+                // });
+                // setReviews(reviewsResponse.data);
             } catch (error) {
                 console.error('Failed to fetch request details:', error);
             }
         };
 
         if (requestId) {
-            fetchJob();
+            fetchRequest();
         }
     }, [requestId, token]);
 
+    useEffect(() => {
+        // Adjust paths based on role
+        if (request) {
+            const isProvider = account?._id === request.provider._id;
+            const isConsumer = account?._id === request.requestedBy._id;
+
+            const pathIncludesIncoming = location.pathname.includes("incoming");
+            const pathIncludesOutgoing = location.pathname.includes("outgoing");
+
+            if ((pathIncludesIncoming && !isProvider) || (pathIncludesOutgoing && !isConsumer)) {
+                navigate("/unauthorized");
+            } else if (isProvider) {
+                setRole("provider");
+                if (!redirectPath) {
+                    setRedirectPath('/incoming');
+                }
+            } else if (isConsumer) {
+                setRole("consumer");
+                if (!redirectPath) {
+                    setRedirectPath('/outgoing');
+                }
+            } else {
+                // If neither, navigate to unauthorized
+                navigate("/unauthorized");
+            }
+        }
+
+    }, [request, account, token]);
+
     if (!request) {
-        return <div>Loading...</div>;
+        return <Typography align={"center"}>Loading...</Typography>;
     }
 
+    // Determine if the user is provider or consumer
+    const isProvider = account?._id === request.provider._id;
+    const isConsumer = account?._id === request.requestedBy._id;
+
+
     // Authorization check
-    if ((role === "provider" && account?._id !== request.provider._id) ||
-        (role === "consumer" && account?._id !== request.requestedBy._id)) {
-        // You could alternatively redirect to a different page or display a modal
-        navigate("/unauthorized")
-    }
+    // if ((role === "provider" && account?._id !== request.provider._id) ||
+    //     (role === "consumer" && account?._id !== request.requestedBy._id)) {
+    //     // You could alternatively redirect to a different page or display a modal
+    //     navigate("/unauthorized")
+    // }
 
     const onCancel = () => {
         if (!request) {
@@ -179,6 +214,7 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps>  = ({ role }) => {
             cancelRequest: onCancel,
         }
     };
+
 
 
     const CardComponent = role === "provider" ? GenericProviderCard : GenericConsumerCard;

@@ -89,7 +89,7 @@ export const handleAccept = async ({
                 serviceRequest: selectedRequest._id,
                 job: jobResponse.data._id,
                 recipient: selectedRequest.requestedBy._id,
-                notificationType: 'Request Status Changed"',
+                notificationType: 'Request Status Changed',
 
                 ...rest,
             };

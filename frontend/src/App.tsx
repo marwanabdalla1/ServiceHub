@@ -33,7 +33,7 @@ import AdminHomePage from "./Pages/AdminPanel/AdminHomePage";
 import ErrorPage from "./Pages/ErrorPage";
 import CombinedIncomingPage from "./Pages/TablePages/CombinedIncomingPage";
 import Footer from './components/Footer';
-import { Divider } from '@mui/material';
+import {Divider} from '@mui/material';
 
 import UpdateSProfile from './components/UpdateSProfile';
 import AddServicePage from './Pages/AddServicePage';
@@ -46,6 +46,7 @@ import RequestDetailsPage from "./Pages/RequestDetailsPage";
 import CombinedOutgoingPage from "./Pages/TablePages/CombinedOutgoingPage";
 import CombinedServicePage from "./Pages/TablePages/CombinedIncomingPage";
 import {RecoveryProvider} from "./contexts/RecoveryContext";
+
 function App() {
     const [search, setSearch] = useState('');
 
@@ -124,56 +125,55 @@ function MainRoutes({search, setSearch}: { search: any, setSearch: any }) {
                     <Route path="/filter" element={<FilterPage/>}/>
 
 
+                    {/* Add another one for it */}
+                    <Route path="/update-sprofile" element={<UpdateSProfile/>}/>
+                    <Route path="/addservice" element={<AddServicePage/>}/>
+                    {/*<Route path="/provider-profile/:id" element={<ProviderProfilePage/>}/>*/}
+                    <Route path="/select-availability" element={<SelectAvailabilityPage/>}/>
+                    <Route path="/change-booking-time/:requestId" element={<ChangeBookingTimePage/>}/>
+                    {/*<Route path="/select-availability-booking" element={<SelectAvailabilityBooking_temp/>}/>*/}
+
+                    {/* Booking */}
+                    <Route path="/offerings/:offeringId" element={<ProviderProfilePage/>}/>
+                    <Route path="/offerings/:offeringId/booking/:step" element={<BookingPage/>}/>
+                    <Route path="/select-availability" element={<SelectAvailabilityPage/>}/>
+                    <Route path="/becomepro" element={<BecomeProPage/>}/>
 
 
-                {/* Add another one for it */}
-                <Route path="/update-sprofile" element={<UpdateSProfile/>}/>
-                <Route path="/addservice" element={<AddServicePage/>}/>
-                {/*<Route path="/provider-profile/:id" element={<ProviderProfilePage/>}/>*/}
-                <Route path="/select-availability" element={<SelectAvailabilityPage/>}/>
-                <Route path="/change-booking-time/:requestId" element={<ChangeBookingTimePage/>}/>
-                {/*<Route path="/select-availability-booking" element={<SelectAvailabilityBooking_temp/>}/>*/}
-
-                {/* Booking */}
-                <Route path="/offerings/:offeringId" element={<ProviderProfilePage/>} />
-                <Route path="/offerings/:offeringId/booking/:step" element={<BookingPage/>} />
-                <Route path="/select-availability" element={<SelectAvailabilityPage/>}/>
-                <Route path="/becomepro" element={<BecomeProPage/>}/>
-
-
-
-                {/*booking*/}
-                {/* <Route path="/offerings/:offeringId" element={<ProviderProfilePage/>}/>
+                    {/*booking*/}
+                    {/* <Route path="/offerings/:offeringId" element={<ProviderProfilePage/>}/>
                 <Route path="/offerings/:offeringId/booking/:step" element={<BookingPage/>}/> */}
-                <Route path="/confirmation/:requestId/:type" element={<ConfirmationPage/>}/>
+                    <Route path="/confirmation/:requestId/:type" element={<ConfirmationPage/>}/>
 
-                <Route path="/incoming" element={<CombinedServicePage />} >
-                    <Route index element={<Navigate replace to="requests" />} />
-                    <Route path="requests" element={<IncomingRequestsTable />} />
-                    <Route path="jobs" element={<OfferedServicesTable />} />
-                </Route>
+                    <Route path="/incoming" element={<CombinedServicePage/>}>
+                        <Route index element={<Navigate replace to="requests"/>}/>
+                        <Route path="requests" element={<IncomingRequestsTable/>}/>
+                        <Route path="jobs" element={<OfferedServicesTable/>}/>
+                    </Route>
 
-                <Route path="/outgoing" element={<CombinedOutgoingPage />} >
-                    <Route index element={<Navigate replace to="requests" />} />
-                    <Route path="requests" element={<RequestHistoryTable />} />
-                    <Route path="jobs" element={<ReceivedServiceTable />} />
-                </Route>
-                {/*todo: get this once it's done*/}
-                {/*<Route path="incoming/jobs/:jobId" element={<JobDetailsPage />} />*/}
-                <Route path="/incoming/jobs/:jobId" element={<JobDetailsPage role="provider" />} />
-                <Route path="/outgoing/jobs/:jobId" element={<JobDetailsPage role="consumer" />} />
-
-
-                <Route path="/incoming/requests/:requestId" element={<RequestDetailsPage role="provider" />} />
-                <Route path="/outgoing/requests/:requestId" element={<RequestDetailsPage role="consumer" />} />
+                    <Route path="/outgoing" element={<CombinedOutgoingPage/>}>
+                        <Route index element={<Navigate replace to="requests"/>}/>
+                        <Route path="requests" element={<RequestHistoryTable/>}/>
+                        <Route path="jobs" element={<ReceivedServiceTable/>}/>
+                    </Route>
+                    {/*todo: get this once it's done*/}
+                    {/*<Route path="incoming/jobs/:jobId" element={<JobDetailsPage />} />*/}
+                    <Route path="/jobs/:jobId" element={<JobDetailsPage/>}/>
+                    <Route path="/incoming/jobs/:jobId" element={<JobDetailsPage/>}/>
+                    <Route path="/outgoing/jobs/:jobId" element={<JobDetailsPage/>}/>
 
 
-                <Route path="/write-reviews" element={<ReviewPage/>}/>
-                <Route path="/faq" element={<FAQPage/>}/>
+                    <Route path="/requests/:requestId" element={<RequestDetailsPage/>}/>
+                    <Route path="/incoming/requests/:requestId" element={<RequestDetailsPage/>}/>
+                    <Route path="/outgoing/requests/:requestId" element={<RequestDetailsPage/>}/>
 
-                <Route path="/admin" element={<AdminHomePage/>}/>
-                <Route path="/admin/verifyCertificate" element={<VerifyCertificatePage/>}/>
-                <Route path="/admin/UserData" element={<AdminUserDataPage/>}/>
+
+                    <Route path="/write-reviews" element={<ReviewPage/>}/>
+                    <Route path="/faq" element={<FAQPage/>}/>
+
+                    <Route path="/admin" element={<AdminHomePage/>}/>
+                    <Route path="/admin/verifyCertificate" element={<VerifyCertificatePage/>}/>
+                    <Route path="/admin/UserData" element={<AdminUserDataPage/>}/>
 
                     <Route path="/unauthorized" element={<ErrorPage title="Unauthorized Access"
                                                                     message="You do not have permission to view this page."/>}/>
