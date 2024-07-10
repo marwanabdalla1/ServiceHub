@@ -46,7 +46,7 @@ import CombinedOutgoingPage from "./Pages/TablePages/CombinedOutgoingPage";
 import CombinedServicePage from "./Pages/TablePages/CombinedIncomingPage";
 import {RecoveryProvider} from "./contexts/RecoveryContext";
 import { Divider } from '@mui/material';
-import Footer from './components/Footer';
+
 function App() {
     const [search, setSearch] = useState('');
 
@@ -177,7 +177,7 @@ function MainRoutes({search, setSearch}: {search: any, setSearch: any}) {
                 {/*<Route path="*" element={<h1>Not Found</h1>}/>*/}
             </Routes>
             <Divider variant="middle" style={{ backgroundColor: 'white', height: '50px' }} />
-            <Footer/>
+
         </div>
     );
 }

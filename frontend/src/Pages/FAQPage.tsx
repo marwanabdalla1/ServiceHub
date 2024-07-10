@@ -32,23 +32,27 @@ const FAQPage = () => {
                 </Grid>
                 
                 {/* Contact Us and Provide Feedback Section */}
-                <Grid item xs={12}>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', mt: 4 }}>
-                        <Typography variant="subtitle1" sx={{ mb: 2 }}>
-                            Got more questions? Feel free to contact us for more information.
-                        </Typography>
-                        <Button variant="contained" color="primary" href="mailto:servicehub.seba22@yoursite.com">
-                            Contact us
-                        </Button>
+               <Grid container spacing={2}>
+    <Grid item xs={6}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', mt: 4, ml:'0.5cm' }}>
+            <Typography variant="subtitle1" sx={{ mb: 2 }}>
+                Got more questions? Feel free to contact us for more information.
+            </Typography>
+            <Button variant="contained" color="primary" href="mailto:servicehub.seba22@yoursite.com">
+                Contact us
+            </Button>
+        </Box>
+    </Grid>
+    <Grid item xs={6}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', mt: 4 }}>
+            <Typography variant="subtitle1">
+                Enjoyed ServiceHub? Or have some suggestions to tell us? We would love to hear your feedback!
+            </Typography>
+            <FeedbackForm />
+        </Box>
+    </Grid>
+</Grid>
 
-                        <Box sx={{ mt: 5 }}>
-                            <Typography variant="subtitle1">
-                                Enjoyed ServiceHub? Or have some suggestions to tell us? We would love to hear your feedback!
-                            </Typography>
-                            <FeedbackForm />
-                        </Box>
-                    </Box>
-                </Grid>
             </Grid>
         </Container>
     );
