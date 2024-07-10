@@ -42,7 +42,8 @@ export const getOfferings = async (req: Request, res: Response, next: NextFuncti
             console.log('Filtered accounts found:', filteredAccounts.length);
 
             // Pagination logic
-            const paginatedAccounts = filteredAccounts.slice((page - 1) * limit, page * limit);
+            // const paginatedAccounts = filteredAccounts.slice((Number(page) - 1) * Number(limit), Number(page) * Number(limit));
+            const paginatedAccounts = filteredAccounts.slice((Number(page) - 1) * Number(limit), Number(page) * Number(limit));
 
             return res.json({
                 data: paginatedAccounts,
