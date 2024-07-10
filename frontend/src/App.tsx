@@ -31,15 +31,14 @@ import VerifyCertificatePage from "./Pages/AdminPanel/VerifyCertificatePage";
 import AdminUserDataPage from "./Pages/AdminPanel/AdminUserDataPage";
 import AdminHomePage from "./Pages/AdminPanel/AdminHomePage";
 import ErrorPage from "./Pages/ErrorPage";
+import CombinedIncomingPage from "./Pages/TablePages/CombinedIncomingPage";
+import Footer from './components/Footer';
 import UpdateSProfile from './components/UpdateSProfile';
 import AddServicePage from './Pages/AddServicePage';
-
 import OfferedServicesTable from "./Pages/TablePages/OfferedServicesTable";
 import IncomingRequestsTable from "./Pages/TablePages/IncomingRequestsTable";
 import RequestHistoryTable from "./Pages/TablePages/RequestHistoryTable";
 import ReceivedServiceTable from "./Pages/TablePages/ReceivedServiceTable";
-
-
 import JobDetailsPage from "./Pages/JobDetailsPage";
 import RequestDetailsPage from "./Pages/RequestDetailsPage";
 import CombinedOutgoingPage from "./Pages/TablePages/CombinedOutgoingPage";
@@ -95,7 +94,7 @@ function MainRoutes({search, setSearch}: {search: any, setSearch: any}) {
 
     const showAdminNavBar = location.pathname.includes("/admin");
     return (
-        <div className="h-screen flex flex-col">
+        <div className="h-screen flex flex-col" style={{ paddingTop: '80px' }}>
             {showNavBar && !showAdminNavBar && <NavigationBar
                 toggleDrawer={() => {}}
                 onChange={() => {}}

@@ -8,6 +8,7 @@ import axios from 'axios';
 import { Account } from '../models/Account';
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
+import { Pagination } from '../components/Pagination';
 
 interface FilterState {
     type: string;
@@ -34,6 +35,9 @@ function FilterPage() {
     const [profileImages, setProfileImages] = useState<{ [key: string]: string }>({});
     const [loadingImages, setLoadingImages] = useState<{ [key: string]: boolean }>({});
     const [loading, setLoading] = useState<boolean>(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10; // You can adjust this as needed
+    const [totalItems, setTotalItems] = useState(0); // To keep track of total items
     const navigate = useNavigate();
     console.log(defaultProfileImage);
 
@@ -88,11 +92,15 @@ function FilterPage() {
                 locations: filterState.locations.join(','),
                 isLicensed: filterState.isLicensed,
                 searchTerm: search,
+                page: currentPage,
+                limit: itemsPerPage,
             };
 
             try {
-                const response = await axios.get<Account[]>('/api/offerings', { params });
-                let data = response.data;
+                const response = await axios.get<{ data: Account[], total: number }>('/api/offerings', { params });
+                let data = response.data.data;
+                const totalItems = response.data.total;
+                setTotalItems(totalItems); // Set total items
 
                 const sortAccounts = (accounts: Account[]) => {
                     if (sortKey === "priceAsc") {
@@ -124,7 +132,7 @@ function FilterPage() {
 
                 sortAccounts(data);
                 const premiumAccounts = data.filter(account => account.isPremium);
-                const isFilterDefault =
+                const isFilterDefault = 
                     filterState.type === '' &&
                     filterState.priceRange[0] === 15 &&
                     filterState.priceRange[1] === 60 &&
@@ -145,12 +153,11 @@ function FilterPage() {
 
             } catch (error) {
                 console.error('Error fetching data:', error);
-            } finally {
             }
         };
 
         fetchAndSortOfferings();
-    }, [filterState, search, sortKey]);
+    }, [filterState, search, sortKey, currentPage]); // Add currentPage to dependency array
 
     const toggleDrawer = () => {
         setIsDrawerOpen(!isDrawerOpen);
@@ -183,6 +190,10 @@ function FilterPage() {
         setFilterState(newFilterState);
     };
 
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+    };
+
     return (
         <div>
             <NavigationBar toggleDrawer={toggleDrawer} onChange={handleInputChange} onSearch={handleSearch}
@@ -201,13 +212,21 @@ function FilterPage() {
                         <CircularProgress />
                     </Box>
                 ) : (
-                    <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mx-auto bg-slate-50 max-w-screen-2xl'>
-                        {offerings.map((offering) => (
-                            <MediaCard key={offering._id} user={offering}
-                                       profileImageUrl={profileImages[offering._id] || defaultProfileImage}
-                                       loading={loadingImages[offering._id]} />
-                        ))}
-                    </div>
+                    <>
+                        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mx-auto bg-slate-50 max-w-screen-2xl'>
+                            {offerings.map((offering) => (
+                                <MediaCard key={offering._id} user={offering}
+                                           profileImageUrl={profileImages[offering._id] || defaultProfileImage}
+                                           loading={loadingImages[offering._id]} />
+                            ))}
+                        </div>
+                        <Pagination
+                            currentPage={currentPage}
+                            totalItems={totalItems}
+                            itemsPerPage={itemsPerPage}
+                            onPageChange={handlePageChange}
+                        />
+                    </>
                 )}
             </div>
         </div>

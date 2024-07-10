@@ -6,11 +6,11 @@ import ServiceOffering from "../models/serviceOffering";
 
 export const getOfferings = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const userId = (req as any).user;// Assuming userId is available in the request (e.g., from authentication middleware)
+        const userId = (req as any).user; // Assuming userId is available in the request (e.g., from authentication middleware)
         console.log('User id ' + userId)
         console.log("Getting offerings");
 
-        const { type, priceRange, locations, isLicensed, searchTerm } = req.query;
+        const { type, priceRange, locations, isLicensed, searchTerm, page = 1, limit = 10 } = req.query;
         const filters = {
             type,
             priceRange: priceRange ? (priceRange as string).split(',').map(Number) : [],
@@ -40,7 +40,14 @@ export const getOfferings = async (req: Request, res: Response, next: NextFuncti
             const filteredAccounts = filterAccounts(accounts, filters);
 
             console.log('Filtered accounts found:', filteredAccounts.length);
-            return res.json(filteredAccounts);
+
+            // Pagination logic
+            const paginatedAccounts = filteredAccounts.slice((page - 1) * limit, page * limit);
+
+            return res.json({
+                data: paginatedAccounts,
+                total: filteredAccounts.length,
+            });
         }
     } catch (err: any) {
         console.error('Error fetching data:', err);

@@ -188,7 +188,13 @@ export const getServiceRequestsByProvider: RequestHandler = async (req, res) => 
             return res.status(404).json({ message: "No service requests found for this provider." });
         }
 
-        res.status(200).json(filteredRequests);
+
+        const requestsWithTimeslots = await Promise.all(filteredRequests.map(async (request) => {
+            const timeslot = await Timeslot.findOne({ requestId: request._id }).exec();
+            return { ...request.toObject(), timeslot: timeslot || undefined };
+        }));
+
+        res.status(200).json(requestsWithTimeslots);
     } catch (error: any) {
         console.error("Failed to retrieve service requests:", error);
         res.status(500).json({ message: "Internal server error", error: error.message });

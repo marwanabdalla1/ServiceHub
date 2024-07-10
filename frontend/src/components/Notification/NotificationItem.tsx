@@ -55,10 +55,16 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
           break;
         // Add more cases here as needed
         case 'Timeslot Change Request':
-          url = `/change-booking-time/${serviceRequest}`;
+          let commentFromProvider = '';
+          // Extract comment from content, assuming it starts with "\n Comment from the provider:"
+          const commentMatch = content.match(/Comment from the provider: (.*)$/);
+          if (commentMatch && commentMatch[1]) {
+            commentFromProvider = encodeURIComponent(commentMatch[1]);
+          }
+          url = `/change-booking-time/${serviceRequest}?comment=${commentFromProvider}`;
           break;
         case 'Time Request Changed':
-          url = `/change-booking-time/${serviceRequest}`;
+          url = `/incoming/requests/${serviceRequest}`;
           break;
         // declined/cancel requests: just go back to home page
         // case '':
