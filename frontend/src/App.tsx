@@ -31,6 +31,9 @@ import VerifyCertificatePage from "./Pages/AdminPanel/VerifyCertificatePage";
 import AdminUserDataPage from "./Pages/AdminPanel/AdminUserDataPage";
 import AdminHomePage from "./Pages/AdminPanel/AdminHomePage";
 import ErrorPage from "./Pages/ErrorPage";
+import CombinedIncomingPage from "./Pages/TablePages/CombinedIncomingPage";
+import Footer from './components/Footer';
+import { Divider } from '@mui/material';
 
 import UpdateSProfile from './components/UpdateSProfile';
 import AddServicePage from './Pages/AddServicePage';
@@ -175,6 +178,8 @@ function MainRoutes({search, setSearch}: {search: any, setSearch: any}) {
                 <Route path="*" element={<ErrorPage title="404 Not Found" message="The page you are looking for does not exist." />} />
                 {/*<Route path="*" element={<h1>Not Found</h1>}/>*/}
             </Routes>
+            <Divider variant="middle" style={{ backgroundColor: 'white', height: '50px' }} />
+            <Footer/>
         </div>
     );
 }
