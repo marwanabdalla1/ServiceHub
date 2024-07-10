@@ -16,9 +16,15 @@ export const StyledButton = styled('button')(({ sx }) => ({
 function BlackButton({ text, className = '', onClick, sx, disabled }: ButtonProps) {
     return (
         <StyledButton
-            className={`bg-customBlack text-white font-semibold text-xs px-2 py-2 rounded-full shadow hover:bg-gray-500 hover:text-customBlack! max-h-8 whitespace-nowrap ${className}`}
-            onClick={onClick}
-            sx={sx}
+        className={`bg-customBlack text-white font-semibold text-xs rounded-full shadow hover:bg-gray-500 max-h-8 whitespace-nowrap `}
+        onClick={onClick}
+        sx={{
+            ...sx,
+            display: 'flex', // Use flexbox for centering
+            alignItems: 'center',
+            justifyContent: 'center',
+            textDecoration: 'none', // Ensure no underline
+        }}
             disabled={disabled}
         >
             {text}
