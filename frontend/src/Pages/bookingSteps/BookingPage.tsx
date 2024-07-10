@@ -103,7 +103,13 @@ const BookingPage = () => {
                             {steps.map((label, index) => (
                                 <Step key={label}>
                                     <StepLabel onClick={handleStep(index)}
-                                               style={{cursor: index < step ? 'pointer' : 'default'}}>
+                                               style={{cursor: index < step ? 'pointer' : 'default'}}
+                                               sx={{
+                                                   '& .MuiStepLabel-label': {  // Targeting the label text
+                                                       fontSize: '0.875rem',
+                                                       mt: 1,
+                                                   },
+                                               }}>
                                         {label}
                                     </StepLabel>
                                 </Step>
