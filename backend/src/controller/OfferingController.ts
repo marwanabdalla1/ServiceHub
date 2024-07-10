@@ -2,8 +2,6 @@ import { Request, Response, NextFunction } from 'express';
 import Account from '../models/account';
 import ServiceOffering from "../models/serviceOffering";
 
-
-
 export const getOfferings = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userId = (req as any).user; // Assuming userId is available in the request (e.g., from authentication middleware)
@@ -24,7 +22,7 @@ export const getOfferings = async (req: Request, res: Response, next: NextFuncti
             const userId = (req as any).user.userId;
             console.log(`Fetching offerings for user ID: ${userId}`);
 
-            const userOfferings = await ServiceOffering.find({ provider: userId });
+            const userOfferings = await ServiceOffering.find({ provider: userId }).populate('provider');
             console.log('User offerings:', userOfferings);
 
             if (!userOfferings || userOfferings.length === 0) {
@@ -36,18 +34,19 @@ export const getOfferings = async (req: Request, res: Response, next: NextFuncti
             // If the request is not authenticated, fetch all offerings and apply filters
             console.log("Fetching all offerings with filters:", filters);
 
-            const accounts = await Account.find().populate('serviceOfferings').exec();
-            const filteredAccounts = filterAccounts(accounts, filters);
+            const offerings = await ServiceOffering.find().populate('provider').exec();
+            console.log('Service Offerings:', offerings);
+            console.log('Services found:', offerings.length);
+            const filteredOfferings = filterOfferings(offerings, filters);
 
-            console.log('Filtered accounts found:', filteredAccounts.length);
+            console.log('Filtered offerings found:', filteredOfferings.length);
 
             // Pagination logic
-            // const paginatedAccounts = filteredAccounts.slice((Number(page) - 1) * Number(limit), Number(page) * Number(limit));
-            const paginatedAccounts = filteredAccounts.slice((Number(page) - 1) * Number(limit), Number(page) * Number(limit));
+            const paginatedOfferings = filteredOfferings.slice((Number(page) - 1) * Number(limit), Number(page) * Number(limit));
 
             return res.json({
-                data: paginatedAccounts,
-                total: filteredAccounts.length,
+                data: paginatedOfferings,
+                total: filteredOfferings.length,
             });
         }
     } catch (err: any) {
@@ -56,11 +55,9 @@ export const getOfferings = async (req: Request, res: Response, next: NextFuncti
     }
 };
 
-
-
-// Helper function to filter accounts
-const filterAccounts = (accounts: any[], filters: any) => {
-    return accounts.filter(account => {
+// Helper function to filter offerings
+const filterOfferings = (offerings: any[], filters: any) => {
+    return offerings.filter(offering => {
         const { type, priceRange, locations, isLicensed, searchTerm } = filters;
 
         let matchesType = true;
@@ -70,35 +67,33 @@ const filterAccounts = (accounts: any[], filters: any) => {
         let matchesSearch = true;
 
         if (type && type !== '') {
-            matchesType = account.serviceOfferings.some((offering: any) => offering.serviceType === type);
+            matchesType = offering.serviceType === type;
         }
 
         if (priceRange && priceRange.length === 2) {
             const [minPrice, maxPrice] = priceRange.map(Number);
-            matchesPrice = account.serviceOfferings.some((offering: any) => offering.hourlyRate >= minPrice && offering.hourlyRate <= maxPrice);
+            matchesPrice = offering.hourlyRate >= minPrice && offering.hourlyRate <= maxPrice;
         }
 
         if (locations && locations.length > 0) {
-            matchesLocation = account.serviceOfferings.some((offering: any) => locations.includes(offering.location));
+            matchesLocation = locations.includes(offering.location);
         }
 
         if (isLicensed !== undefined) {
-            matchesLicense = account.serviceOfferings.some((offering: any) => offering.isCertified === (isLicensed === 'true'));
+            matchesLicense = offering.isCertified === (isLicensed === 'true');
         }
 
         if (searchTerm && searchTerm !== '') {
             const searchRegex = new RegExp(searchTerm, 'i');
-            matchesSearch = searchRegex.test(account.firstName) ||
-                searchRegex.test(account.lastName) ||
-                searchRegex.test(account.location) ||
-                account.serviceOfferings.some((offering: any) => searchRegex.test(offering.serviceType));
+            matchesSearch = searchRegex.test(offering.provider.firstName) ||
+                searchRegex.test(offering.provider.lastName) ||
+                searchRegex.test(offering.provider.location) ||
+                searchRegex.test(offering.serviceType);
         }
 
         return matchesType && matchesPrice && matchesLocation && matchesLicense && matchesSearch;
     });
 };
-
-
 
 export const getServiceOfferingById = async (req: Request, res: Response) => {
     console.log("Full URL:", req.protocol + '://' + req.get('host') + req.originalUrl);
@@ -119,17 +114,14 @@ export const getServiceOfferingById = async (req: Request, res: Response) => {
 export const getServiceOfferingsByUser = async (req: Request, res: Response) => { //The authenticated version of the getOfferings function (uses token)
     try {
         console.log("getting offerings")
-        // console.log(req)
         const userId = (req as any).user.userId;
-        const offerings = await ServiceOffering.find({ provider: userId });
-        // console.log(offerings)
+        const offerings = await ServiceOffering.find({ provider: userId }).populate('provider');
         if (!offerings) {
             return res.status(404).json({ message: 'No service offerings found' });
         }
         res.json(offerings);
 
-    }
-    catch (err: any) {
+    } catch (err: any) {
         res.status(500).json({ message: err.message });
     }
 }
