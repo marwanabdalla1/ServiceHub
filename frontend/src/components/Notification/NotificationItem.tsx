@@ -51,6 +51,15 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
           url = `/customer_review/${review}`;
           break;
         case 'New Job':
+          url = `/incoming/jobs/${job}`;
+          break;
+        case 'New Request':
+          url = `/incoming/requests/${serviceRequest}`;
+          break;
+        case 'Request Status Changed':
+          url = `/requests/${serviceRequest}`;
+          break;
+        case 'Job Status Changed':
           url = `/jobs/${job}`;
           break;
         // Add more cases here as needed
