@@ -33,6 +33,8 @@ import AdminHomePage from "./Pages/AdminPanel/AdminHomePage";
 import ErrorPage from "./Pages/ErrorPage";
 import CombinedIncomingPage from "./Pages/TablePages/CombinedIncomingPage";
 import Footer from './components/Footer';
+import { Divider } from '@mui/material';
+
 import UpdateSProfile from './components/UpdateSProfile';
 import AddServicePage from './Pages/AddServicePage';
 import OfferedServicesTable from "./Pages/TablePages/OfferedServicesTable";
@@ -44,8 +46,6 @@ import RequestDetailsPage from "./Pages/RequestDetailsPage";
 import CombinedOutgoingPage from "./Pages/TablePages/CombinedOutgoingPage";
 import CombinedServicePage from "./Pages/TablePages/CombinedIncomingPage";
 import {RecoveryProvider} from "./contexts/RecoveryContext";
-import { Divider } from '@mui/material';
-
 function App() {
     const [search, setSearch] = useState('');
 
@@ -69,18 +69,18 @@ function App() {
             />
             <BrowserRouter>
                 <BookingProvider>
-                        <AccountProvider>
-                            <RecoveryProvider>
-                                <MainRoutes search={search} setSearch={setSearch}/>
-                            </RecoveryProvider>
-                        </AccountProvider>
+                    <AccountProvider>
+                        <RecoveryProvider>
+                            <MainRoutes search={search} setSearch={setSearch}/>
+                        </RecoveryProvider>
+                    </AccountProvider>
                 </BookingProvider>
             </BrowserRouter>
         </div>
     );
 }
 
-function MainRoutes({search, setSearch}: {search: any, setSearch: any}) {
+function MainRoutes({search, setSearch}: { search: any, setSearch: any }) {
     const location = useLocation();
     const showNavBar = location.pathname !== "/login"
         && location.pathname !== "/signup"
@@ -94,30 +94,34 @@ function MainRoutes({search, setSearch}: {search: any, setSearch: any}) {
 
     const showAdminNavBar = location.pathname.includes("/admin");
     return (
-        <div className="h-screen flex flex-col" style={{ paddingTop: '80px' }}>
-            {showNavBar && !showAdminNavBar && <NavigationBar
-                toggleDrawer={() => {}}
-                onChange={() => {}}
-                onSearch={() => {}}
-                search={search}
-                setSearch={setSearch}/>}
-            {showAdminNavBar && <AdminNavbar/>}
-            <Routes>
-                {/* Home */}
-                <Route path="/" element={<HomePage/>}/>
+        <div className="h-screen flex flex-col" style={{paddingTop: '80px'}}>
+            <div>
+                {showNavBar && !showAdminNavBar && <NavigationBar
+                    toggleDrawer={() => {
+                    }}
+                    onChange={() => {
+                    }}
+                    onSearch={() => {
+                    }}
+                    search={search}
+                    setSearch={setSearch}/>}
+                {showAdminNavBar && <AdminNavbar/>}
+                <Routes>
+                    {/* Home */}
+                    <Route path="/" element={<HomePage/>}/>
 
-                {/* User Authentication */}
-                <Route path="/login" element={<SignInPage/>}/>
-                <Route path="/signup" element={<SignUpPage/>}/>
+                    {/* User Authentication */}
+                    <Route path="/login" element={<SignInPage/>}/>
+                    <Route path="/signup" element={<SignUpPage/>}/>
 
-                {/* User Profile */}
-                <Route path="/setprofile" element={<ProfileSettingPage/>}/>
-                <Route path="/customer_review/:jobId" element={<ReviewPage/>}/>
-                <Route path="/forgetPassword" element={<ForgetPasswordPage/>}/>
-                <Route path="/forgetPassword/emailVerification" element={<OTPPage/>}/>
-                <Route path="/forgetPassword/resetPassword" element={<ResetPasswordPage/>}/>
-                <Route path="/forgetPassword/success" element={<ResetPasswordSuccessPage/>}/>
-                <Route path="/filter" element={<FilterPage/>}/>
+                    {/* User Profile */}
+                    <Route path="/setprofile" element={<ProfileSettingPage/>}/>
+                    <Route path="/customer_review/:jobId" element={<ReviewPage/>}/>
+                    <Route path="/forgetPassword" element={<ForgetPasswordPage/>}/>
+                    <Route path="/forgetPassword/emailVerification" element={<OTPPage/>}/>
+                    <Route path="/forgetPassword/resetPassword" element={<ResetPasswordPage/>}/>
+                    <Route path="/forgetPassword/success" element={<ResetPasswordSuccessPage/>}/>
+                    <Route path="/filter" element={<FilterPage/>}/>
 
 
 
@@ -171,12 +175,17 @@ function MainRoutes({search, setSearch}: {search: any, setSearch: any}) {
                 <Route path="/admin/verifyCertificate" element={<VerifyCertificatePage/>}/>
                 <Route path="/admin/UserData" element={<AdminUserDataPage/>}/>
 
-                <Route path="/unauthorized" element={<ErrorPage title="Unauthorized Access" message="You do not have permission to view this page." />} />
-                <Route path="*" element={<ErrorPage title="404 Not Found" message="The page you are looking for does not exist." />} />
-                {/*<Route path="*" element={<h1>Not Found</h1>}/>*/}
-            </Routes>
-            <Divider variant="middle" style={{ backgroundColor: 'white', height: '50px' }} />
-
+                    <Route path="/unauthorized" element={<ErrorPage title="Unauthorized Access"
+                                                                    message="You do not have permission to view this page."/>}/>
+                    <Route path="*" element={<ErrorPage title="404 Not Found"
+                                                        message="The page you are looking for does not exist."/>}/>
+                    {/*<Route path="*" element={<h1>Not Found</h1>}/>*/}
+                </Routes>
+            </div>
+            <div>
+                <Divider variant="middle" style={{backgroundColor: 'white', height: '50px'}}/>
+                <Footer/>
+            </div>
         </div>
     );
 }

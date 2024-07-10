@@ -30,7 +30,7 @@ import {now} from 'moment';
 import {formatDateTime} from '../../utils/dateUtils';
 import {ServiceRequest} from "../../models/ServiceRequest";
 import GenericProviderCard from "../../components/tableComponents/GenericProviderCard";
-import {Button} from "@mui/material";
+import {Button, FormControl, InputLabel, MenuItem, Select} from "@mui/material";
 import GenericTable from "../../components/tableComponents/GenericTable";
 
 
@@ -43,82 +43,63 @@ export default function ReceivedServiceTable() {
     const {token, account} = useAuth();
     const navigate = useNavigate();
 
-    const statusOptions = ['ALL JOBS', 'Open', 'Completed', 'Cancelled'];
-    const [statusFilter, setStatusFilter] = useState('ALL JOBS');
+    const [total, setTotal] = useState(0);
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
 
-    const filteredJobs = jobs.filter((job) =>
-        statusFilter === 'ALL JOBS' || statusFilter === '' ? true : job.status === statusFilter.toLowerCase()
-    );
 
-    // todo: this probably can be combined/reused along with the request history table
+    const statusOptions = ['All Jobs', 'Open', 'Completed', 'Cancelled'];
+    const [statusFilter, setStatusFilter] = useState('All Jobs');
+
+    const [serviceTypeFilter, setServiceTypeFilter] = useState("ALL");
+
     useEffect(() => {
         if (token && account) {
-            // console.log("this is the logged in account in request table:", account)
-            // setLoading(true);
-            axios.get<Job[]>(`/api/jobs/requester/${account._id}`, {
-                headers: {Authorization: `Bearer ${token}`}
-            })
-                .then(response => {
-                    console.log("getting requests ...", response.data)
-                    const sortedData = sortBookingItems(response.data);
-                    setJobs(sortedData as Job[]);
-                    // setLoading(false);
-                })
-                .catch(error => {
+            const fetchJobs = async () => {
+                try {
+                    const params = new URLSearchParams({
+                        page: (page + 1).toString(), // API is zero-indexed, React state is zero-indexed
+                        limit: rowsPerPage.toString(),
+                    });
+                    if (statusFilter !== 'All Requests') {
+                        params.append('requestStatus', statusFilter.toLowerCase());
+                    }
+                    if (serviceTypeFilter !== 'ALL') {
+                        params.append('serviceType', serviceTypeFilter); // Ensure this matches the actual enum/case used in your database
+                    }
+                    console.log(params)
+
+                    const response = await axios.get(`/api/jobs/requester/${account._id}?${params.toString()}`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+
+                    console.log("fetched service requests,", response)
+                    setJobs(response.data.data); // Assuming the backend sends data in a 'data' field
+                    setTotal(response.data.total);
+                } catch (error) {
                     console.error('Failed to fetch service requests:', error);
                     setJobs([]);
-                    // setError('Failed to load service requests');
-                    // setLoading(false);
-                });
+                }
+            };
 
+            fetchJobs();
 
         }
-    }, [account?._id]);
+    }, [account, token, page, rowsPerPage, statusFilter, serviceTypeFilter]);
 
     const handleToggleMediaCard = (job: Item | null) => {
         setSelectedJob(job as Job);
         setShowMediaCard(job !== null);
     };
 
-    /*// handle completing the job
-    const handleComplete =  async() => {
-
-
-      if (!selectedJob) {
-        console.error('No job selected');
-        return;
-      }
-   //   sanity check: appointment time has to be in the past
-      if (!selectedJob.appointmentEndTime || selectedJob.appointmentEndTime > new Date()){
-          //TODO: add modal to let user know
-          console.error('The job cannot be completed, since its appointment is in the future.');
-          return;
-      }
-
-      try {
-
-        // update the job
-          const updateJobData = {
-            jobStatus: JobStatus.completed,
-          };
-          console.log("selected request id:" , selectedJob?._id, updateJobData)
-          const updateJob = await axios.put(`/api/jobs/${selectedJob?._id}`, updateJobData, {
-            headers: {Authorization: `Bearer ${token}` }
-          });
-          console.log('Request Updated:', updateJob.data);
-
-          console.log(updateJob);
-
-          setReceivedServices(updateJob.data);
-          setShowMediaCard(false);
-       } catch (error) {
-        console.error('Error completing job:', error);
-      }
-
-
-
+    const handleChangeServiceType = (event: any) => {
+        setServiceTypeFilter(event.target.value);
     };
-   */
+
+    const handleChangeStatus = (event: any) => {
+        setStatusFilter(event.target.value);
+    };
+
     // handle cancel the job
     const onCancel = () => {
         if (!selectedJob) {
@@ -162,29 +143,62 @@ export default function ReceivedServiceTable() {
                         </Typography>
                     </Box>
                     <Box sx={{ display: 'flex', marginBottom: 2 }}>
-                        {statusOptions.map((status) => (
-                            <Button
-                                key={status}
-                                variant={statusFilter.toLowerCase() === status.toLowerCase() ? 'contained' : 'outlined'}
-                                onClick={() => setStatusFilter(status)}
-                                sx={{ margin: 0.5, textTransform: 'none'}}
+                        <FormControl style={{ width: 300, marginRight:5}}>
+                            <InputLabel id="service-type-label">Filter Service Type</InputLabel>
+                            <Select
+                                labelId="service-type-label"
+                                id="service-type-select"
+                                value={serviceTypeFilter}
+                                label="Filter Service Type"
+                                onChange={handleChangeServiceType}
+                                fullWidth
                             >
-                                {status}
-                            </Button>
-                        ))}
+                                <MenuItem value="ALL">All</MenuItem>
+                                {Object.values(ServiceType).map(type => (
+                                    <MenuItem key={type} value={type}>{type}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+
+                        <FormControl style={{ width: 300 }}>
+                            <InputLabel id="service-type-label">Request Status</InputLabel>
+                            <Select
+                                labelId="request-status-label"
+                                id="request-status-select"
+                                value={statusFilter}
+                                label="Request Status"
+                                onChange={handleChangeStatus}
+                                fullWidth
+                            >
+                                {Object.values(statusOptions).map(type => (
+                                    <MenuItem key={type} value={type}>{type}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
                     </Box>
 
                     <Box style={{display: 'flex'}}>
                         <Box sx={{flexGrow: 1, marginRight: 2}}>
                             <Box>
-                                {filteredJobs.length === 0 ? (
+                                {jobs.length === 0 ? (
                                     <Typography variant="body1">
-                                        You haven't booked any job {statusFilter === 'ALL JOBS' || statusFilter === ''? '' : (
+                                        You haven't booked any job{statusFilter === 'All Jobs' || statusFilter === ''? '' : (
                                         <span> with status <span style={{ fontStyle: 'italic' }}>{statusFilter.toLowerCase()}</span></span>
-                                    )} yet.
+                                    )}
+                                        {serviceTypeFilter === 'ALL' || serviceTypeFilter === '' ? '' : (
+                                        <span> for service type <span
+                                            style={{fontStyle: 'italic'}}>{serviceTypeFilter.toLowerCase()}</span></span>
+                                        )} yet.
                                     </Typography>
                                 ) : (
-                                    <GenericTable data={filteredJobs} />
+                                    <GenericTable data={jobs}
+                                                  count={total}
+                                                  page={page}
+                                                  setPage={setPage}
+                                                  rowsPerPage={rowsPerPage}
+                                                  setRowsPerPage={setRowsPerPage}
+                                                  setShowMediaCard={setShowMediaCard}
+                                                  onViewDetails={handleToggleMediaCard}  />
 
                                 )}
                             </Box>

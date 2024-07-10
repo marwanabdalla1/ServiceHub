@@ -17,19 +17,18 @@ import axios from "axios";
 import {RequestStatus} from "../../models/enums";
 import {useAuth} from "../../contexts/AuthContext";
 import {Timeslot} from "../../models/Timeslot";
-import { bookTimeSlot, BookingError } from '../../services/timeslotService';
+import {bookTimeSlot, BookingError} from '../../services/timeslotService';
 import useAlert from "../../hooks/useAlert";
 import AlertCustomized from "../../components/AlertCustomized";
 
 
-
 interface ReviewAndConfirmProps {
-    onComplete: () => void;
-    onBack: () => void;
     bookingDetails: BookingDetails;
+    handleCancel: () => void;
+
 }
 
-function ReviewAndConfirm({onComplete, onBack, bookingDetails}: ReviewAndConfirmProps) {
+function ReviewAndConfirm({bookingDetails, handleCancel}: ReviewAndConfirmProps) {
     // const { bookingDetails } = useBooking();
     const navigate = useNavigate();
     const [comment, setComment] = useState('');
@@ -67,7 +66,6 @@ function ReviewAndConfirm({onComplete, onBack, bookingDetails}: ReviewAndConfirm
         }
         return () => clearInterval(timer);
     }, [showAlert, countdown]);
-
 
 
     const checkTimeslotAvailability = async (start: Date, end: Date, createdById: string) => {
@@ -113,7 +111,6 @@ function ReviewAndConfirm({onComplete, onBack, bookingDetails}: ReviewAndConfirm
                 });
         });
     };
-
 
 
     const handleConfirmBooking = async () => {
@@ -247,7 +244,7 @@ function ReviewAndConfirm({onComplete, onBack, bookingDetails}: ReviewAndConfirm
     };
 
     return (
-        <Container>
+        <>
             <div>
                 {/*<button onClick={handleAction}>Do Something</button>*/}
                 <AlertCustomized alert={alert} closeAlert={closeAlert}/>
@@ -273,86 +270,63 @@ function ReviewAndConfirm({onComplete, onBack, bookingDetails}: ReviewAndConfirm
                     </Alert>
                 </Box>
             )}
-            <Box sx={{display: 'flex', justifyContent: 'space-between', mt: 4}}>
-                <Box sx={{width: '60%'}}>
-                    <Typography variant="h6" gutterBottom>
-                        Step 4 of 4
-                    </Typography>
-                    <Typography variant="h4" gutterBottom>
-                        Review and confirm booking
-                    </Typography>
-                    <Box sx={{display: 'flex', justifyContent: 'space-between', mt: 2}}>
-                        <Button variant="outlined" onClick={onBack}>Back</Button>
-                    </Box>
-                    <Card sx={{mb: 2}}>
-                        <CardContent>
-                            <Typography variant="h6" gutterBottom>
-                                Booking Details
-                            </Typography>
-                            <Typography variant="body1">
-                                <strong>Name:</strong> {bookingDetails.provider?.lastName}
-                            </Typography>
-                            <Typography variant="body1">
-                                <strong>Location:</strong> {bookingDetails.serviceOffering?.location}
-                            </Typography>
-                            <Typography variant="body1">
-                                <strong>Service:</strong> {bookingDetails.serviceType}
-                            </Typography>
-                            <Typography variant="body1">
-                                <strong>Date:</strong> {bookingDetails.timeSlot?.start ? bookingDetails.timeSlot?.start.toLocaleString() : 'No date set'}
-                            </Typography>
-                            <Typography variant="body1">
-                                <strong>Price:</strong> {bookingDetails.price}
-                            </Typography>
-                        </CardContent>
-                    </Card>
-                    <Card sx={{mb: 2}}>
-                        <CardContent>
-                            <Typography variant="h6" gutterBottom>
-                                Add Booking Notes
-                            </Typography>
-                            <TextField
-                                fullWidth
-                                multiline
-                                rows={4}
-                                variant="outlined"
-                                placeholder="Include comments or requests about your booking"
-                                value={comment}
-                                onChange={handleCommentChange}
-                            />
-                        </CardContent>
-                    </Card>
-                    <Box sx={{display: 'flex', justifyContent: 'flex-end', mt: 2}}>
-                        <Button variant="contained" color="primary" onClick={handleConfirmBooking}>
-                            Confirm Booking
-                        </Button>
-                    </Box>
+            <>
+                {/*<Typography variant="h6" gutterBottom>*/}
+                {/*    Step 4 of 4*/}
+                {/*</Typography>*/}
+                <Typography variant="h4" gutterBottom>
+                    Review and confirm booking
+                </Typography>
+                {/*<Box sx={{display: 'flex', justifyContent: 'space-between', mt: 2}}>*/}
+                {/*    <Button variant="outlined" onClick={onBack}>Back</Button>*/}
+                {/*</Box>*/}
+                <Card sx={{mb: 2}}>
+                    <CardContent>
+                        <Typography variant="h6" gutterBottom>
+                            Booking Details
+                        </Typography>
+                        <Typography variant="body1">
+                            <strong>Provider:</strong> {bookingDetails.provider?.firstName} {bookingDetails.provider?.lastName}
+                        </Typography>
+                        <Typography variant="body1">
+                            <strong>Location:</strong> {bookingDetails.provider?.location}
+                        </Typography>
+                        <Typography variant="body1">
+                            <strong>Service:</strong> {bookingDetails.serviceType}
+                        </Typography>
+                        <Typography variant="body1">
+                            <strong>Date:</strong> {bookingDetails.timeSlot?.start ? bookingDetails.timeSlot?.start.toLocaleString() : 'No date set'}
+                        </Typography>
+                        <Typography variant="body1">
+                            <strong>Hourly Price:</strong> {bookingDetails.price}
+                        </Typography>
+                    </CardContent>
+                </Card>
+                <Card sx={{mb: 2}}>
+                    <CardContent>
+                        <Typography variant="h6" gutterBottom>
+                            Add Booking Notes
+                        </Typography>
+                        <TextField
+                            fullWidth
+                            multiline
+                            rows={4}
+                            variant="outlined"
+                            placeholder="Include comments or requests about your booking"
+                            value={comment}
+                            onChange={handleCommentChange}
+                        />
+                    </CardContent>
+                </Card>
+                <Box sx={{display: 'flex', justifyContent: 'flex-end', mt: 2}}>
+                    <Button variant="contained" color="primary" onClick={handleConfirmBooking} sx={{mr: 2}}>
+                        Confirm Booking
+                    </Button>
+                    <Button variant="outlined" onClick={handleCancel}>Cancel </Button>
                 </Box>
-                <Box sx={{width: 250}}>
-                    <Card>
-                        <CardContent sx={{display: 'flex', alignItems: 'center'}}>
-                            <Box>
-                                <Typography
-                                    variant="h6">{`${bookingDetails.provider?.firstName} ${bookingDetails.provider?.lastName}`}</Typography>
-                                <Typography variant="body2" color="text.secondary">
-                                    {bookingDetails.location}
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary">
-                                    {bookingDetails.timeSlot?.start ? bookingDetails.timeSlot?.start.toLocaleString() : 'No date set'}
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary">
-                                    {bookingDetails.serviceOffering?.serviceType}
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary">
-                                    {bookingDetails.price}
-                                </Typography>
-                            </Box>
-                        </CardContent>
-                    </Card>
-                </Box>
-            </Box>
-        </Container>
-    );
+            </>
+
+        </>);
 }
 
 export default ReviewAndConfirm;

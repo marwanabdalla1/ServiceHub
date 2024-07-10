@@ -36,11 +36,11 @@ function CombinedServicePage() {
     return (
 
         // <Container sx={{ p: 0, m: 1 }}>
-        <div  style={{display: 'flex', width: '100%', height: '100vh', overflow: 'hidden'}}>
-                <Box sx={{width: '180px', overflowY: 'auto', position: 'sticky', flexShrink: 0, borderRight: 0, borderColor: 'divider', paddingTop: 3, paddingLeft: 2}}>
+        <div  style={{display: 'flex', width: '100%'}}>
+                <Box sx={{width: '180px', position: 'sticky', flexShrink: 0, height:'100vh', overflowY:'hidden', borderRight: 0, borderColor: 'divider', paddingTop: 3, paddingLeft: 2}}>
                     <Tabs
                         orientation="vertical"
-                        variant="scrollable"
+                        // variant="scrollable"
                         value={selectedTab}
                         onChange={handleChange}
                         aria-label="Vertical tabs"
@@ -58,7 +58,7 @@ function CombinedServicePage() {
                 <Box sx={{
                     flex: 1,
                     p: 1,
-                    overflowY: 'auto' //for independent vertical scrolling
+                    overflowY: 'hidden', //for independent vertical scrolling
                 }}>
                     <Outlet/>
                 </Box>

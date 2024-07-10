@@ -8,8 +8,14 @@ import Job, { IJob } from "../models/job";
 import { Document } from 'mongoose';
 import {updateTimeslotWithRequestId} from "./TimeSlotController";
 import Timeslot from "../models/timeslot";
+import {sortBookingItems} from "../util/requestAndJobUtils";
 
 
+interface Query {
+    provider?: string;
+    receiver?: string;
+    [key: string]: any;  // Allows additional properties with any type
+}
 
 function errorHandler(req: Request, res: Response, requiredProperties: string[]) {
     for (let property of requiredProperties) {
@@ -128,35 +134,58 @@ export const getJobsByProvider: RequestHandler = async (req, res) => {
         const userId = (req as any).user.userId;
 
         //make sure only the provider him/herself can get this
-        // todo: uncomment this later
-        // if (userId !== providerId) {
-        //     console.log ("userId: ", userId, "\n providerId: ", providerId)
-        //     return res.status(403).json({ message: "Unauthorized access." });
-        // }
+        if (userId !== providerId) {
+            console.log ("userId: ", userId, "\n providerId: ", providerId)
+            return res.status(403).json({ message: "Unauthorized access." });
+        }
 
+
+        const { serviceType, status, page = 1, limit = 10 } = req.query;
+
+        console.log("queries", req.query)
+
+        let query:Query = { provider: providerId };
+
+        // Adding filters based on query parameters
+        if (status) {
+            query.status = status;
+        }
+        if (serviceType) {
+            query.serviceType = serviceType;
+        }
 
         // Fetch all jobs where the 'provider' field matches 'providerId'
-        const jobs = await Job.find({ provider: providerId })
+        const jobs = await Job.find(query)
             .populate([
                 { path: 'receiver', select: 'firstName lastName email profileImageId' }, // todo: also include profile pic
                 { path: 'provider', select: 'firstName lastName email profileImageId' },
             ])
             .exec();
 
-        if (!jobs.length) {
+
+
+        const validJobs = jobs.filter(job => job.receiver !== null);
+
+
+        if (!validJobs.length) {
             return res.status(404).json({ message: "No jobs found for this provider." });
         }
 
-
-        const jobsWithTimeslots = await Promise.all(jobs.map(async (job) => {
+        const jobsWithTimeslots = await Promise.all(validJobs.map(async (job) => {
             const timeslot = await Timeslot.findOne({ jobId: job._id }).exec();
             return { ...job.toObject(), timeslot: timeslot || undefined };
         }));
 
+        const sortedJobsWithTimeslots = sortBookingItems(jobsWithTimeslots);
+
         console.log("jobs with their timeslots", jobsWithTimeslots)
+        const paginatedJobssWithTimeslots = sortedJobsWithTimeslots.slice((Number(page)-1) * Number(limit), (Number(page)) * Number(limit));
 
 
-        res.status(200).json(jobsWithTimeslots);
+
+        res.status(200).json({
+            data: jobsWithTimeslots,
+        total: sortedJobsWithTimeslots.length});
     } catch (error: any) {
         console.error("Failed to retrieve jobs:", error);
         res.status(500).json({ message: "Internal server error", error: error.message });
@@ -165,26 +194,59 @@ export const getJobsByProvider: RequestHandler = async (req, res) => {
 
 export const getJobsByRequester: RequestHandler = async (req, res) => {
     const { requesterId } = req.params;  // Extract the provider ID from URL parameters
+    const userId = (req as any).user.userId;
+
+    //make sure only the provider him/herself can get this
+    if (userId !== requesterId) {
+        console.log ("userId: ", userId, "\n requesterId: ", requesterId)
+        return res.status(403).json({ message: "Unauthorized access." });
+    }
 
     try {
+
+
+        const { serviceType, status, page = 1, limit = 10 } = req.query;
+
+        console.log("queries", req.query)
+
+        let query:Query = { receiver: requesterId };
+
+        // Adding filters based on query parameters
+        if (status) {
+            query.status = status;
+        }
+        if (serviceType) {
+            query.serviceType = serviceType;
+        }
+
         // Fetch all jobs where the 'receiver' field matches 'requesterId'
         const jobs = await Job.find({ receiver: requesterId }).populate([
             { path: 'receiver', select: 'firstName lastName email profileImageId' }, // todo: also include profile pic
             { path: 'provider', select: 'firstName lastName email profileImageId' },
         ])
-            .exec();;
+            .exec();
 
-        if (!jobs.length) {
-            return res.status(404).json({ message: "No requested services found for this receiver." });
+        const validJobs = jobs.filter(job => job.provider !== null);
+
+
+        if (!validJobs.length) {
+            return res.status(404).json({ message: "No jobs found for this receiver." });
         }
 
-
-        const jobsWithTimeslots = await Promise.all(jobs.map(async (job) => {
+        const jobsWithTimeslots = await Promise.all(validJobs.map(async (job) => {
             const timeslot = await Timeslot.findOne({ jobId: job._id }).exec();
             return { ...job.toObject(), timeslot: timeslot || undefined };
         }));
 
+        const sortedJobsWithTimeslots = sortBookingItems(jobsWithTimeslots);
+
         console.log("jobs with their timeslots", jobsWithTimeslots)
+        const paginatedJobssWithTimeslots = sortedJobsWithTimeslots.slice((Number(page)-1) * Number(limit), (Number(page)) * Number(limit));
+
+
+        res.status(200).json({
+            data: jobsWithTimeslots,
+            total: sortedJobsWithTimeslots.length});
 
         res.status(200).json(jobsWithTimeslots);
     } catch (error: any) {

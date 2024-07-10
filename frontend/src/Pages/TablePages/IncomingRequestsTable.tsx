@@ -1,6 +1,16 @@
 import React, {useState} from 'react';
 import CardContent from '@mui/material/Box';
-import {Dialog, Button, DialogActions, DialogContent, DialogTitle, Box, TextField} from '@mui/material';
+import {
+    Dialog,
+    Button,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Box,
+    TextField,
+    Select,
+    FormControl, InputLabel, MenuItem, Container
+} from '@mui/material';
 
 import {Link} from 'react-router-dom'
 import Table from '@mui/material/Table';
@@ -42,7 +52,6 @@ import {sortBookingItems} from "../../utils/jobHandler";
 import GenericTable from "../../components/tableComponents/GenericTable";  // Adjust the path as necessary
 
 
-// todo: replace ALL appointmentstarttime/endtime
 
 type Item = ServiceRequest | Job;
 
@@ -52,6 +61,8 @@ export default function IncomingRequestTable() {
     const [selectedRequest, setSelectedRequest] = React.useState<ServiceRequest | null>(null);
     const [serviceRequests, setServiceRequests] = React.useState<ServiceRequest[]>([]);
     const [comment, setComment] = useState('');
+    const [total, setTotal] = useState(0);
+
     const {token, account} = useAuth();
     const [timeChangePopUp, setTimeChangePopUp] = useState(false);
     const navigate = useNavigate();
@@ -60,36 +71,76 @@ export default function IncomingRequestTable() {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
 
+    const serviceTypeOptions = Object.keys(ServiceType)
+    const statusOptions = ['All Requests', 'Pending', 'Action Needed from Requester', 'Accepted', 'Cancelled', 'Declined'];
+    const [statusFilter, setStatusFilter] = useState('All Requests');
+    const [serviceTypeFilter, setServiceTypeFilter] = useState("ALL");
 
-    const statusOptions = ['ALL REQUESTS', 'Pending', 'Action Needed from Requester', 'Accepted', 'Cancelled', 'Declined'];
-    const [statusFilter, setStatusFilter] = useState('ALL REQUESTS');
-    const filteredRequests = serviceRequests.filter((request) =>
-        statusFilter === 'ALL REQUESTS' || statusFilter === '' ? true : request.requestStatus === statusFilter.toLowerCase()
-    );
     useEffect(() => {
         console.log(token)
         if (token && account) {
-            console.log("this is the logged in account in request table:", account)
-            // setLoading(true);
-            // get all requests instead of only incoming ones
-            axios.get<ServiceRequest[]>(`/api/requests/provider/${account._id}`, {
-                headers: {Authorization: `Bearer ${token}`}
-            })
-                .then(response => {
 
-                    console.log("getting requests ...", response.data)
-                    const sortedData = sortBookingItems(response.data);
-                    setServiceRequests(sortedData as ServiceRequest[]);
-                    // setLoading(false);
-                })
-                .catch(error => {
+            const fetchServiceRequests = async () => {
+                try {
+                    const params = new URLSearchParams({
+                        page: (page + 1).toString(), // API is zero-indexed, React state is zero-indexed
+                        limit: rowsPerPage.toString(),
+                    });
+                    if (statusFilter !== 'All Requests') {
+                        params.append('requestStatus', statusFilter.toLowerCase());
+                    }
+
+                    if (serviceTypeFilter !== 'ALL') {
+                        params.append('serviceType', serviceTypeFilter); // Ensure this matches the actual enum/case used in your database
+                    }
+
+                    console.log(params)
+
+                    const response = await axios.get(`/api/requests/provider/${account._id}?${params.toString()}`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+
+                    console.log("fetched service requests,", response)
+                    setServiceRequests(response.data.data);
+                    setTotal(response.data.total);
+                } catch (error) {
                     console.error('Failed to fetch service requests:', error);
                     setServiceRequests([]);
-                    // setError('Failed to load service requests');
-                    // setLoading(false);
-                });
+                }
+            };
+
+            fetchServiceRequests();
+
+
+            // console.log("this is the logged in account in request table:", account)
+            // // setLoading(true);
+            // // get all requests instead of only incoming ones
+            // axios.get<ServiceRequest[]>(`/api/requests/provider/${account._id}`, {
+            //     headers: {Authorization: `Bearer ${token}`}
+            // })
+            //     .then(response => {
+            //
+            //         console.log("getting requests ...", response.data)
+            //         const sortedData = sortBookingItems(response.data);
+            //         setServiceRequests(sortedData as ServiceRequest[]);
+            //         // setLoading(false);
+            //     })
+            //     .catch(error => {
+            //         console.error('Failed to fetch service requests:', error);
+            //         setServiceRequests([]);
+            //         // setError('Failed to load service requests');
+            //         // setLoading(false);
+            //     });
         }
-    }, [token, account]);
+    }, [token, account, page, rowsPerPage, statusFilter, serviceTypeFilter]);
+
+    const handleChangeServiceType = (event: any) => {
+        setServiceTypeFilter(event.target.value);
+    };
+
+    const handleChangeStatus = (event: any) => {
+        setStatusFilter(event.target.value);
+    };
 
     const openModal = (request: Request) => {
         setSelectedRequest(request);
@@ -182,14 +233,14 @@ export default function IncomingRequestTable() {
 
     return (
         <div style={{display: 'flex'}}>
-            <div style={{flex: 1, padding: '20px'}}>
+            <div style={{flex: 1, padding: '10px'}}>
                 <Box sx={{minWidth: 275, margin: 2}}>
                     <Box>
                         {/*<Breadcrumbs separator={<NavigateNextIcon fontSize="small"/>} aria-label="breadcrumb"*/}
                         {/*             sx={{marginBottom: '16px'}}>*/}
                         {/*    <Typography color="textPrimary">Incoming Requests</Typography>*/}
                         {/*</Breadcrumbs>*/}
-                        <Typography variant="h6" component="div" sx={{marginBottom: '16px'}}>
+                        <Typography variant="h6" component="div" sx={{marginBottom: '10px'}}>
                             Incoming Requests
                         </Typography>
                         <Typography variant="body2" component="div" sx={{marginBottom: '16px'}}>
@@ -197,31 +248,78 @@ export default function IncomingRequestTable() {
                             <Link to="/incoming/jobs"> jobs</Link>.
                         </Typography>
                     </Box>
+
                     <Box sx={{display: 'flex', marginBottom: 2}}>
-                        {statusOptions.map((status) => (
-                            <Button
-                                key={status}
-                                variant={statusFilter.toLowerCase() === status.toLowerCase() ? 'contained' : 'outlined'}
-                                onClick={() => setStatusFilter(status)}
-                                sx={{margin: 0.5, textTransform: 'none'}}
+                        <FormControl style={{ width: 300, marginRight:5}}>
+                            <InputLabel id="service-type-label">Filter Service Type</InputLabel>
+                            <Select
+                                labelId="service-type-label"
+                                id="service-type-select"
+                                value={serviceTypeFilter}
+                                label="Filter Service Type"
+                                onChange={handleChangeServiceType}
+                                fullWidth
                             >
-                                {status}
-                            </Button>
-                        ))}
+                                <MenuItem value="ALL">All</MenuItem>
+                                {Object.values(ServiceType).map(type => (
+                                    <MenuItem key={type} value={type}>{type}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+
+                        <FormControl style={{ width: 300 }}>
+                            <InputLabel id="service-type-label">Request Status</InputLabel>
+                            <Select
+                                labelId="request-status-label"
+                                id="request-status-select"
+                                value={statusFilter}
+                                label="Request Status"
+                                onChange={handleChangeStatus}
+                                fullWidth
+                            >
+                                {Object.values(statusOptions).map(type => (
+                                    <MenuItem key={type} value={type}>{type}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+
+                        {/*{statusOptions.map((status) => (*/}
+                        {/*    <Button*/}
+                        {/*        key={status}*/}
+                        {/*        variant={statusFilter.toLowerCase() === status.toLowerCase() ? 'contained' : 'outlined'}*/}
+                        {/*        onClick={() => setStatusFilter(status)}*/}
+                        {/*        sx={{margin: 0.5, textTransform: 'none'}}*/}
+                        {/*    >*/}
+                        {/*        {status}*/}
+                        {/*    </Button>*/}
+                        {/*))}*/}
                     </Box>
 
                     <Box style={{display: 'flex'}}>
                         <Box sx={{flexGrow: 1, marginRight: 2}}>
                             <Box>
-                                {filteredRequests.length === 0 ? (
+                                {serviceRequests.length === 0 ? (
                                     <Typography variant="body1">
                                         You don't have any incoming
-                                        request {statusFilter === 'ALL REQUESTS' || statusFilter === '' ? '' : (
+                                        request
+                                        {statusFilter === 'All Requests' || statusFilter === '' ? '' : (
                                         <span> with status <span
                                             style={{fontStyle: 'italic'}}>{statusFilter.toLowerCase()}</span></span>
-                                    )}.
+                                    )}
+                                        {serviceTypeFilter === 'ALL' || serviceTypeFilter === '' ? '' : (
+                                            <span> for service type <span
+                                                style={{fontStyle: 'italic'}}>{serviceTypeFilter.toLowerCase()}</span></span>
+                                        )}.
                                     </Typography>) : (
-                                    <GenericTable data={filteredRequests} />
+                                    <GenericTable data={serviceRequests}
+                                                  count={total}
+                                                  page={page}
+                                                  setPage={setPage}
+                                                  rowsPerPage={rowsPerPage}
+                                                  setRowsPerPage={setRowsPerPage}
+                                                  setShowMediaCard={setShowMediaCard}
+                                                  onViewDetails={handleToggleMediaCard}
+                                    />
 
                                 )}
                             </Box>

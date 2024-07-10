@@ -1,5 +1,15 @@
 import React, { useState } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TablePagination } from '@mui/material';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Paper,
+    TablePagination,
+    Container
+} from '@mui/material';
 import GenericTableRow from "./GenericTableRow";
 import {Job} from "../../models/Job";
 import {ServiceRequest} from "../../models/ServiceRequest";
@@ -10,23 +20,30 @@ type Item = ServiceRequest | Job;
 
 interface GenericTableProps {
     data: Item[];
+    count: number;
+    page: number;                 // current page
+    setPage: (page: number) => void; // setter for current page
+    rowsPerPage: number;          // rows per page
+    setRowsPerPage: (rowsPerPage: number) => void; // setter for rows per page
+    setShowMediaCard: (show:boolean) => void;
+    onViewDetails: (item: Item | ServiceRequest | Job | null) => void;
+
 }
 
 
 
-function GenericTable({data}:GenericTableProps) {
-    const [showMediaCard, setShowMediaCard] = React.useState(false);
+function GenericTable({data, count, page, setPage, rowsPerPage, setRowsPerPage, setShowMediaCard, onViewDetails }:GenericTableProps) {
     const [selectedItem, setSelectedItem] = React.useState<ServiceRequest | Job | null>(null);
     const [selectedItems, setSelectedItems] = React.useState<Item[]>([]);
 
-    const [page, setPage] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(10);
 
 
     const handleChangePage = (
         event: React.MouseEvent<HTMLButtonElement> | null,
         newPage: number
     ): void => {
+        console.log("new page", newPage)
+        setShowMediaCard(false)
         setPage(newPage);
     };
 
@@ -37,29 +54,28 @@ function GenericTable({data}:GenericTableProps) {
         setPage(0); // Reset page to zero after row change
     };
 
-    const handleToggleMediaCard = (req: ServiceRequest | Job | null) => {
+    const handleToggleMediaCard = (req: Item | null) => {
         setSelectedItem(req);
         setShowMediaCard(req !== null);
     };
 
+
+
     return (
-        <Paper>
-            <TableContainer>
+        <div>
+            <TableContainer sx={{mb: 4}}>
                 <Table>
                     <TableHead>
                         <TableRow>
                             <TableCell>Type</TableCell>
                             <TableCell>Status</TableCell>
-                            <TableCell>Appointment Date</TableCell>
+                            <TableCell>Appointment Time</TableCell>
                             <TableCell></TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {(rowsPerPage > 0
-                                ? data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                : data
-                        ).map((row) => (
-                            <GenericTableRow key={row._id} item={row} onViewDetails={handleToggleMediaCard} />
+                        {data.map((row) => (
+                            <GenericTableRow key={row._id} item={row} onViewDetails={onViewDetails} />
                         ))}
                     </TableBody>
                 </Table>
@@ -92,13 +108,13 @@ function GenericTable({data}:GenericTableProps) {
                 }}
                 rowsPerPageOptions={[10, 20, 50, {label: 'All', value: -1}]}
                 component="div"
-                count={data.length}
+                count={count}
                 rowsPerPage={rowsPerPage}
                 page={page}
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
             />
-        </Paper>
+        </div>
     );
 }
 

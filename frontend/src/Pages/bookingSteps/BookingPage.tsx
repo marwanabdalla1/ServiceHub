@@ -1,26 +1,31 @@
 import React, {useEffect, useState} from 'react';
-import { useBooking } from '../../contexts/BookingContext';
+import {useBooking} from '../../contexts/BookingContext';
 import StepOne from './CreateAccountOrSignIn';
-import StepTwo from './SelectTimeslotPage'; // Component for step 2
-import StepThree from './UpdateProfile'; // Component for step 3
+import StepTwo from './SelectTimeslotPage';
+import StepThree from './UpdateProfile';
 import StepFour from './ReviewAndConfirm';
-import {useNavigate, useParams} from "react-router-dom"; // Component for step 4
+import {useNavigate, useParams} from 'react-router-dom';
+import {Stepper, Step, StepLabel, Button, Box, Container} from '@mui/material';
+import BookingSideCard from "../../components/BookingSideCard";
 
 const BookingPage = () => {
-    const { offeringId, step: stepParam } = useParams<{ offeringId: string; step?: string }>();
+    const {offeringId, step: stepParam} = useParams<{ offeringId: string; step?: string }>();
     const navigate = useNavigate();
-    const { bookingDetails , fetchAccountDetails, setProvider, fetchOfferingDetails, setSelectedServiceDetails} = useBooking(); // Accessing booking details from contexts
+    const {
+        bookingDetails,
+        fetchAccountDetails,
+        setProvider,
+        fetchOfferingDetails,
+        setSelectedServiceDetails
+    } = useBooking();
 
-    // Ensure stepParam is a string before processing, default to "step0"
     const safeStepParam = stepParam ?? 'step1';
-    const stepNumber = parseInt(safeStepParam.substring(4)) || 1;  // Extract number and default to 0 if undefined
-    const [step, setStep] = useState(stepNumber); // Controls which step to display
+    const stepNumber = parseInt(safeStepParam.substring(4), 10) || 1;
+    const [step, setStep] = useState(stepNumber);
+    const steps = ['Sign In', 'Select Timeslot', 'Check Profile', 'Confirm Booking'];
 
-    //
-    // // Fetch provider details based on the ID and set in context
     useEffect(() => {
         const fetchProviderDetails = async () => {
-            console.log("BOOKING PAGE!!!")
             if (offeringId) {
                 try {
                     const offering = await fetchOfferingDetails(offeringId);
@@ -35,64 +40,100 @@ const BookingPage = () => {
         fetchProviderDetails();
     }, [offeringId]);
 
-    // const fetchProviderDetails = async (providerId: string) => {
-    //     // Placeholder for fetchuseEffect(() => {
-    //         // Update URL if step state changes and doesn't match the URL
-    //         if (step !== stepNumber) {
-    //             navigate(`/provider/${providerId}/offering/${offeringId}/booking/step${step}`);
-    //         }
-    //     }, [step, providerId, offeringId, navigate, stepNumber]);
-    //     // Assume an API call fetches the provider details
-    //     const response = await fetch(`/api/providers/${providerId}`);
-    //     const providerData = await response.json();
-    //     setProvider(providerData);
-    // };
-
     useEffect(() => {
-        // Update URL if step state changes and doesn't match the URL
         if (step !== stepNumber) {
             navigate(`/offerings/${offeringId}/booking/step${step}`);
         }
-    }, [step, offeringId, navigate, stepNumber]);
+    }, [step, stepNumber, offeringId, navigate]);
 
-    const nextStep = () => {
-        if (step < 4) setStep(step + 1); // Increment step to move to the next
-    };
+    // unmount resetting
+    useEffect(() => {
+        return () => {
+            setStep(1);  // Reset step to the first step
+        };
+    }, []);
 
-    const previousStep = () => {
-        if (step > 1 && step!=2) setStep(step - 1); // Decrement step to go back
-        else goToServiceOfferingProfile();
-    };
 
-    const goToServiceOfferingProfile = () => {
-        navigate(`/offerings/${offeringId}`); //  the route to view a provider's profile on this offering
-    };
-
-    const handleBookingComplete = () => {
-        console.log('Booking Complete:', bookingDetails);
-
-        //todo: Maybe navigate to a confirmation page or reset the booking process (but it is implemented in the ReviewAndConfirm Page itself)
-    };
-
-    const currentStep = () => {switch (step) {
-        case 1:
-            return <StepOne onNext={nextStep} onBack={previousStep} bookingDetails={bookingDetails}/>;
-        case 2:
-            return <StepTwo onNext={nextStep} onBack={previousStep} bookingDetails={bookingDetails}/>;
-        case 3:
-            return <StepThree onNext={nextStep} onBack={previousStep} bookingDetails={bookingDetails} />;
-        case 4:
-            return <StepFour onComplete={handleBookingComplete} onBack={previousStep} bookingDetails={bookingDetails}/>;
-        default:
-            return <div>Invalid step</div>;
+    const handleStep = (index: number) => () => {
+        console.log("back step clicked!", index, step)
+        if (index < step) { // Only allow navigation to previous steps
+            setStep(index + 1);
+            // currentStep(index+1)
+            // navigate(`/offerings/${offeringId}/booking/step${index + 1}`);
         }
     };
 
-    return(
-        <div>
-            {currentStep()}
-        </div>
-    )
+    const handleCancel = () => {
+        setStep(1);
+        navigate(`/offerings/${bookingDetails.serviceOffering?._id}`);
+    };
+
+    // const nextStep = () => {
+    //     if (step < 4) setStep(step + 1);
+    // };
+    //
+    // const previousStep = () => {
+    //     if (step > 1) setStep(step - 1);
+    // };
+
+    const nextStep = () => setStep((prevStep) => prevStep < 4 ? prevStep + 1 : prevStep);
+    const previousStep = () => setStep((prevStep) => prevStep > 1 ? prevStep - 1 : prevStep);
+
+    const currentStep = () => {
+        // console.log("go to step:", gotoStep)
+        switch (step) {
+            case 1:
+                return <StepOne onNext={nextStep} bookingDetails={bookingDetails}/>;
+            case 2:
+                return <StepTwo onNext={nextStep} handleCancel={handleCancel} bookingDetails={bookingDetails}/>;
+            case 3:
+                return <StepThree onNext={nextStep} handleCancel={handleCancel} bookingDetails={bookingDetails}/>;
+            case 4:
+                return <StepFour handleCancel={handleCancel} bookingDetails={bookingDetails}/>;
+            default:
+                return <div>Invalid step</div>;
+        }
+    };
+
+    return (
+        <Box>
+            <Container sx={{display:"flex", mt: 4, justifyContent:"space-between" }}>
+                <Box display="flex" flexDirection="column" mt={2} width={"75%"} mb={4}>
+                        <Stepper activeStep={step - 1} alternativeLabel sx={{ mb: 2 }}>
+                            {steps.map((label, index) => (
+                                <Step key={label}>
+                                    <StepLabel onClick={handleStep(index)}
+                                               style={{cursor: index < step ? 'pointer' : 'default'}}
+                                               sx={{
+                                                   '& .MuiStepLabel-label': {  // Targeting the label text
+                                                       fontSize: '0.875rem',
+                                                       mt: 1,
+                                                   },
+                                               }}>
+                                        {label}
+                                    </StepLabel>
+                                </Step>
+                            ))}
+                        </Stepper>
+                    {/*<Button onClick={previousStep}>Back</Button>*/}
+                    {/*<Box sx={{mt: '5'}}>*/}
+                    {currentStep()}
+                    {/*</Box>*/}
+
+                </Box>
+
+                <Box sx={{width: 250, mt:10}}>
+                    <BookingSideCard
+                        provider={bookingDetails.provider}
+                        timeSlot={bookingDetails.timeSlot}
+                        serviceOffering={bookingDetails.serviceOffering}
+                        price={bookingDetails.price}
+                    />
+                </Box>
+            </Container>
+
+        </Box>
+    );
 };
 
 export default BookingPage;

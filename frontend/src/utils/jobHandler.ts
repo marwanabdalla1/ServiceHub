@@ -329,6 +329,7 @@ export const sendEmailNotification = async (initiatorEmail: string,
 
 
 // Function to sort requests
+// todo: delete this once it's handled in the backend
 export const sortBookingItems = (bookingItems: ServiceRequest[] | Job[]) => {
     return bookingItems.sort((a, b) => {
         const dateA = a.timeslot?.start
