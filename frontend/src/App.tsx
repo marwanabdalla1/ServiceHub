@@ -33,7 +33,7 @@ import AdminHomePage from "./Pages/AdminPanel/AdminHomePage";
 import ErrorPage from "./Pages/ErrorPage";
 import CombinedIncomingPage from "./Pages/TablePages/CombinedIncomingPage";
 import Footer from './components/Footer';
-import { Divider } from '@mui/material';
+import {Divider} from '@mui/material';
 
 import UpdateSProfile from './components/UpdateSProfile';
 import AddServicePage from './Pages/AddServicePage';
@@ -49,6 +49,7 @@ import RequestDetailsPage from "./Pages/RequestDetailsPage";
 import CombinedOutgoingPage from "./Pages/TablePages/CombinedOutgoingPage";
 import CombinedServicePage from "./Pages/TablePages/CombinedIncomingPage";
 import {RecoveryProvider} from "./contexts/RecoveryContext";
+
 function App() {
     const [search, setSearch] = useState('');
 
@@ -72,18 +73,18 @@ function App() {
             />
             <BrowserRouter>
                 <BookingProvider>
-                        <AccountProvider>
-                            <RecoveryProvider>
-                                <MainRoutes search={search} setSearch={setSearch}/>
-                            </RecoveryProvider>
-                        </AccountProvider>
+                    <AccountProvider>
+                        <RecoveryProvider>
+                            <MainRoutes search={search} setSearch={setSearch}/>
+                        </RecoveryProvider>
+                    </AccountProvider>
                 </BookingProvider>
             </BrowserRouter>
         </div>
     );
 }
 
-function MainRoutes({search, setSearch}: {search: any, setSearch: any}) {
+function MainRoutes({search, setSearch}: { search: any, setSearch: any }) {
     const location = useLocation();
     const showNavBar = location.pathname !== "/login"
         && location.pathname !== "/signup"
@@ -97,89 +98,95 @@ function MainRoutes({search, setSearch}: {search: any, setSearch: any}) {
 
     const showAdminNavBar = location.pathname.includes("/admin");
     return (
-        <div className="h-screen flex flex-col" style={{ paddingTop: '80px' }}>
-            {showNavBar && !showAdminNavBar && <NavigationBar
-                toggleDrawer={() => {}}
-                onChange={() => {}}
-                onSearch={() => {}}
-                search={search}
-                setSearch={setSearch}/>}
-            {showAdminNavBar && <AdminNavbar/>}
-            <Routes>
-                {/* Home */}
-                <Route path="/" element={<HomePage/>}/>
+        <div className="h-screen flex flex-col" style={{paddingTop: '80px'}}>
+            <div>
+                {showNavBar && !showAdminNavBar && <NavigationBar
+                    toggleDrawer={() => {
+                    }}
+                    onChange={() => {
+                    }}
+                    onSearch={() => {
+                    }}
+                    search={search}
+                    setSearch={setSearch}/>}
+                {showAdminNavBar && <AdminNavbar/>}
+                <Routes>
+                    {/* Home */}
+                    <Route path="/" element={<HomePage/>}/>
 
-                {/* User Authentication */}
-                <Route path="/login" element={<SignInPage/>}/>
-                <Route path="/signup" element={<SignUpPage/>}/>
+                    {/* User Authentication */}
+                    <Route path="/login" element={<SignInPage/>}/>
+                    <Route path="/signup" element={<SignUpPage/>}/>
 
-                {/* User Profile */}
-                <Route path="/setprofile" element={<ProfileSettingPage/>}/>
-                <Route path="/customer_review/:jobId" element={<ReviewPage/>}/>
-                <Route path="/forgetPassword" element={<ForgetPasswordPage/>}/>
-                <Route path="/forgetPassword/emailVerification" element={<OTPPage/>}/>
-                <Route path="/forgetPassword/resetPassword" element={<ResetPasswordPage/>}/>
-                <Route path="/forgetPassword/success" element={<ResetPasswordSuccessPage/>}/>
-                <Route path="/filter" element={<FilterPage/>}/>
-
-
-
-
-                {/* Add another one for it */}
-                <Route path="/update-sprofile" element={<UpdateSProfile/>}/>
-                <Route path="/addservice" element={<AddServicePage/>}/>
-                {/*<Route path="/provider-profile/:id" element={<ProviderProfilePage/>}/>*/}
-                <Route path="/select-availability" element={<SelectAvailabilityPage/>}/>
-                <Route path="/change-booking-time/:requestId" element={<ChangeBookingTimePage/>}/>
-                {/*<Route path="/select-availability-booking" element={<SelectAvailabilityBooking_temp/>}/>*/}
-
-                {/* Booking */}
-                <Route path="/offerings/:offeringId" element={<ProviderProfilePage/>} />
-                <Route path="/offerings/:offeringId/booking/:step" element={<BookingPage/>} />
-                <Route path="/select-availability" element={<SelectAvailabilityPage/>}/>
-                <Route path="/becomepro" element={<BecomeProPage/>}/>
+                    {/* User Profile */}
+                    <Route path="/setprofile" element={<ProfileSettingPage/>}/>
+                    <Route path="/customer_review/:jobId" element={<ReviewPage/>}/>
+                    <Route path="/forgetPassword" element={<ForgetPasswordPage/>}/>
+                    <Route path="/forgetPassword/emailVerification" element={<OTPPage/>}/>
+                    <Route path="/forgetPassword/resetPassword" element={<ResetPasswordPage/>}/>
+                    <Route path="/forgetPassword/success" element={<ResetPasswordSuccessPage/>}/>
+                    <Route path="/filter" element={<FilterPage/>}/>
 
 
+                    {/* Add another one for it */}
+                    <Route path="/update-sprofile" element={<UpdateSProfile/>}/>
+                    <Route path="/addservice" element={<AddServicePage/>}/>
+                    {/*<Route path="/provider-profile/:id" element={<ProviderProfilePage/>}/>*/}
+                    <Route path="/select-availability" element={<SelectAvailabilityPage/>}/>
+                    <Route path="/change-booking-time/:requestId" element={<ChangeBookingTimePage/>}/>
+                    {/*<Route path="/select-availability-booking" element={<SelectAvailabilityBooking_temp/>}/>*/}
 
-                {/*booking*/}
-                {/* <Route path="/offerings/:offeringId" element={<ProviderProfilePage/>}/>
+                    {/* Booking */}
+                    <Route path="/offerings/:offeringId" element={<ProviderProfilePage/>}/>
+                    <Route path="/offerings/:offeringId/booking/:step" element={<BookingPage/>}/>
+                    <Route path="/select-availability" element={<SelectAvailabilityPage/>}/>
+                    <Route path="/becomepro" element={<BecomeProPage/>}/>
+
+
+                    {/*booking*/}
+                    {/* <Route path="/offerings/:offeringId" element={<ProviderProfilePage/>}/>
                 <Route path="/offerings/:offeringId/booking/:step" element={<BookingPage/>}/> */}
-                <Route path="/confirmation/:requestId/:type" element={<ConfirmationPage/>}/>
+                    <Route path="/confirmation/:requestId/:type" element={<ConfirmationPage/>}/>
 
-                <Route path="/incoming" element={<CombinedServicePage />} >
-                    <Route index element={<Navigate replace to="requests" />} />
-                    <Route path="requests" element={<IncomingRequestsTable />} />
-                    <Route path="jobs" element={<OfferedServicesTable />} />
-                </Route>
+                    <Route path="/incoming" element={<CombinedServicePage/>}>
+                        <Route index element={<Navigate replace to="requests"/>}/>
+                        <Route path="requests" element={<IncomingRequestsTable/>}/>
+                        <Route path="jobs" element={<OfferedServicesTable/>}/>
+                    </Route>
 
-                <Route path="/outgoing" element={<CombinedOutgoingPage />} >
-                    <Route index element={<Navigate replace to="requests" />} />
-                    <Route path="requests" element={<RequestHistoryTable />} />
-                    <Route path="jobs" element={<ReceivedServiceTable />} />
-                </Route>
-                {/*todo: get this once it's done*/}
-                {/*<Route path="incoming/jobs/:jobId" element={<JobDetailsPage />} />*/}
-                <Route path="/incoming/jobs/:jobId" element={<JobDetailsPage role="provider" />} />
-                <Route path="/outgoing/jobs/:jobId" element={<JobDetailsPage role="consumer" />} />
-
-
-                <Route path="/incoming/requests/:requestId" element={<RequestDetailsPage role="provider" />} />
-                <Route path="/outgoing/requests/:requestId" element={<RequestDetailsPage role="consumer" />} />
+                    <Route path="/outgoing" element={<CombinedOutgoingPage/>}>
+                        <Route index element={<Navigate replace to="requests"/>}/>
+                        <Route path="requests" element={<RequestHistoryTable/>}/>
+                        <Route path="jobs" element={<ReceivedServiceTable/>}/>
+                    </Route>
+                    {/*todo: get this once it's done*/}
+                    {/*<Route path="incoming/jobs/:jobId" element={<JobDetailsPage />} />*/}
+                    <Route path="/incoming/jobs/:jobId" element={<JobDetailsPage role="provider"/>}/>
+                    <Route path="/outgoing/jobs/:jobId" element={<JobDetailsPage role="consumer"/>}/>
 
 
-                <Route path="/write-reviews" element={<ReviewPage/>}/>
-                <Route path="/faq" element={<FAQPage/>}/>
+                    <Route path="/incoming/requests/:requestId" element={<RequestDetailsPage role="provider"/>}/>
+                    <Route path="/outgoing/requests/:requestId" element={<RequestDetailsPage role="consumer"/>}/>
 
-                <Route path="/admin" element={<AdminHomePage/>}/>
-                <Route path="/admin/verifyCertificate" element={<VerifyCertificatePage/>}/>
-                <Route path="/admin/UserData" element={<AdminUserDataPage/>}/>
 
-                <Route path="/unauthorized" element={<ErrorPage title="Unauthorized Access" message="You do not have permission to view this page." />} />
-                <Route path="*" element={<ErrorPage title="404 Not Found" message="The page you are looking for does not exist." />} />
-                {/*<Route path="*" element={<h1>Not Found</h1>}/>*/}
-            </Routes>
-            <Divider variant="middle" style={{ backgroundColor: 'white', height: '50px' }} />
-            <Footer/>
+                    <Route path="/write-reviews" element={<ReviewPage/>}/>
+                    <Route path="/faq" element={<FAQPage/>}/>
+
+                    <Route path="/admin" element={<AdminHomePage/>}/>
+                    <Route path="/admin/verifyCertificate" element={<VerifyCertificatePage/>}/>
+                    <Route path="/admin/UserData" element={<AdminUserDataPage/>}/>
+
+                    <Route path="/unauthorized" element={<ErrorPage title="Unauthorized Access"
+                                                                    message="You do not have permission to view this page."/>}/>
+                    <Route path="*" element={<ErrorPage title="404 Not Found"
+                                                        message="The page you are looking for does not exist."/>}/>
+                    {/*<Route path="*" element={<h1>Not Found</h1>}/>*/}
+                </Routes>
+            </div>
+            <div>
+                <Divider variant="middle" style={{backgroundColor: 'white', height: '50px'}}/>
+                <Footer/>
+            </div>
         </div>
     );
 }

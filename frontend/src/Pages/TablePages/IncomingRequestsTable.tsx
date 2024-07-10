@@ -1,6 +1,16 @@
 import React, {useState} from 'react';
 import CardContent from '@mui/material/Box';
-import {Dialog, Button, DialogActions, DialogContent, DialogTitle, Box, TextField} from '@mui/material';
+import {
+    Dialog,
+    Button,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Box,
+    TextField,
+    Select,
+    FormControl, InputLabel, MenuItem, Container
+} from '@mui/material';
 
 import {Link} from 'react-router-dom'
 import Table from '@mui/material/Table';
@@ -61,9 +71,9 @@ export default function IncomingRequestTable() {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
 
-
-    const statusOptions = ['ALL REQUESTS', 'Pending', 'Action Needed from Requester', 'Accepted', 'Cancelled', 'Declined'];
-    const [statusFilter, setStatusFilter] = useState('ALL REQUESTS');
+    const serviceTypeOptions = Object.keys(ServiceType)
+    const statusOptions = ['All Requests', 'Pending', 'Action Needed from Requester', 'Accepted', 'Cancelled', 'Declined'];
+    const [statusFilter, setStatusFilter] = useState('All Requests');
     const [serviceTypeFilter, setServiceTypeFilter] = useState("ALL");
 
     useEffect(() => {
@@ -76,7 +86,7 @@ export default function IncomingRequestTable() {
                         page: (page + 1).toString(), // API is zero-indexed, React state is zero-indexed
                         limit: rowsPerPage.toString(),
                     });
-                    if (statusFilter !== 'ALL REQUESTS') {
+                    if (statusFilter !== 'All Requests') {
                         params.append('requestStatus', statusFilter.toLowerCase());
                     }
 
@@ -122,7 +132,15 @@ export default function IncomingRequestTable() {
             //         // setLoading(false);
             //     });
         }
-    }, [token, account, page, rowsPerPage, statusFilter]);
+    }, [token, account, page, rowsPerPage, statusFilter, serviceTypeFilter]);
+
+    const handleChangeServiceType = (event: any) => {
+        setServiceTypeFilter(event.target.value);
+    };
+
+    const handleChangeStatus = (event: any) => {
+        setStatusFilter(event.target.value);
+    };
 
     const openModal = (request: Request) => {
         setSelectedRequest(request);
@@ -215,14 +233,14 @@ export default function IncomingRequestTable() {
 
     return (
         <div style={{display: 'flex'}}>
-            <div style={{flex: 1, padding: '20px'}}>
+            <div style={{flex: 1, padding: '10px'}}>
                 <Box sx={{minWidth: 275, margin: 2}}>
                     <Box>
                         {/*<Breadcrumbs separator={<NavigateNextIcon fontSize="small"/>} aria-label="breadcrumb"*/}
                         {/*             sx={{marginBottom: '16px'}}>*/}
                         {/*    <Typography color="textPrimary">Incoming Requests</Typography>*/}
                         {/*</Breadcrumbs>*/}
-                        <Typography variant="h6" component="div" sx={{marginBottom: '16px'}}>
+                        <Typography variant="h6" component="div" sx={{marginBottom: '10px'}}>
                             Incoming Requests
                         </Typography>
                         <Typography variant="body2" component="div" sx={{marginBottom: '16px'}}>
@@ -230,17 +248,51 @@ export default function IncomingRequestTable() {
                             <Link to="/incoming/jobs"> jobs</Link>.
                         </Typography>
                     </Box>
+
                     <Box sx={{display: 'flex', marginBottom: 2}}>
-                        {statusOptions.map((status) => (
-                            <Button
-                                key={status}
-                                variant={statusFilter.toLowerCase() === status.toLowerCase() ? 'contained' : 'outlined'}
-                                onClick={() => setStatusFilter(status)}
-                                sx={{margin: 0.5, textTransform: 'none'}}
+                        <FormControl style={{ width: 300, marginRight:5}}>
+                            <InputLabel id="service-type-label">Filter Service Type</InputLabel>
+                            <Select
+                                labelId="service-type-label"
+                                id="service-type-select"
+                                value={serviceTypeFilter}
+                                label="Filter Service Type"
+                                onChange={handleChangeServiceType}
+                                fullWidth
                             >
-                                {status}
-                            </Button>
-                        ))}
+                                <MenuItem value="ALL">All</MenuItem>
+                                {Object.values(ServiceType).map(type => (
+                                    <MenuItem key={type} value={type}>{type}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+
+                        <FormControl style={{ width: 300 }}>
+                            <InputLabel id="service-type-label">Request Status</InputLabel>
+                            <Select
+                                labelId="request-status-label"
+                                id="request-status-select"
+                                value={statusFilter}
+                                label="Request Status"
+                                onChange={handleChangeStatus}
+                                fullWidth
+                            >
+                                {Object.values(statusOptions).map(type => (
+                                    <MenuItem key={type} value={type}>{type}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+
+                        {/*{statusOptions.map((status) => (*/}
+                        {/*    <Button*/}
+                        {/*        key={status}*/}
+                        {/*        variant={statusFilter.toLowerCase() === status.toLowerCase() ? 'contained' : 'outlined'}*/}
+                        {/*        onClick={() => setStatusFilter(status)}*/}
+                        {/*        sx={{margin: 0.5, textTransform: 'none'}}*/}
+                        {/*    >*/}
+                        {/*        {status}*/}
+                        {/*    </Button>*/}
+                        {/*))}*/}
                     </Box>
 
                     <Box style={{display: 'flex'}}>
@@ -249,10 +301,15 @@ export default function IncomingRequestTable() {
                                 {serviceRequests.length === 0 ? (
                                     <Typography variant="body1">
                                         You don't have any incoming
-                                        request {statusFilter === 'ALL REQUESTS' || statusFilter === '' ? '' : (
+                                        request
+                                        {statusFilter === 'All Requests' || statusFilter === '' ? '' : (
                                         <span> with status <span
                                             style={{fontStyle: 'italic'}}>{statusFilter.toLowerCase()}</span></span>
-                                    )}.
+                                    )}
+                                        {serviceTypeFilter === 'ALL' || serviceTypeFilter === '' ? '' : (
+                                            <span> for service type <span
+                                                style={{fontStyle: 'italic'}}>{serviceTypeFilter.toLowerCase()}</span></span>
+                                        )}.
                                     </Typography>) : (
                                     <GenericTable data={serviceRequests}
                                                   count={total}
@@ -261,6 +318,7 @@ export default function IncomingRequestTable() {
                                                   rowsPerPage={rowsPerPage}
                                                   setRowsPerPage={setRowsPerPage}
                                                   setShowMediaCard={setShowMediaCard}
+                                                  onViewDetails={handleToggleMediaCard}
                                     />
 
                                 )}

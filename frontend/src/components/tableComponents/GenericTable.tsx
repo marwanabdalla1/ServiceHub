@@ -1,5 +1,15 @@
 import React, { useState } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TablePagination } from '@mui/material';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Paper,
+    TablePagination,
+    Container
+} from '@mui/material';
 import GenericTableRow from "./GenericTableRow";
 import {Job} from "../../models/Job";
 import {ServiceRequest} from "../../models/ServiceRequest";
@@ -15,13 +25,14 @@ interface GenericTableProps {
     setPage: (page: number) => void; // setter for current page
     rowsPerPage: number;          // rows per page
     setRowsPerPage: (rowsPerPage: number) => void; // setter for rows per page
-    setShowMediaCard: (show: boolean) => void
+    setShowMediaCard: (show:boolean) => void;
+    onViewDetails: (item: Item | ServiceRequest | Job | null) => void;
 
 }
 
 
 
-function GenericTable({data, count, page, setPage, rowsPerPage, setRowsPerPage, setShowMediaCard }:GenericTableProps) {
+function GenericTable({data, count, page, setPage, rowsPerPage, setRowsPerPage, setShowMediaCard, onViewDetails }:GenericTableProps) {
     const [selectedItem, setSelectedItem] = React.useState<ServiceRequest | Job | null>(null);
     const [selectedItems, setSelectedItems] = React.useState<Item[]>([]);
 
@@ -32,6 +43,7 @@ function GenericTable({data, count, page, setPage, rowsPerPage, setRowsPerPage, 
         newPage: number
     ): void => {
         console.log("new page", newPage)
+        setShowMediaCard(false)
         setPage(newPage);
     };
 
@@ -42,7 +54,7 @@ function GenericTable({data, count, page, setPage, rowsPerPage, setRowsPerPage, 
         setPage(0); // Reset page to zero after row change
     };
 
-    const handleToggleMediaCard = (req: ServiceRequest | Job | null) => {
+    const handleToggleMediaCard = (req: Item | null) => {
         setSelectedItem(req);
         setShowMediaCard(req !== null);
     };
@@ -50,8 +62,8 @@ function GenericTable({data, count, page, setPage, rowsPerPage, setRowsPerPage, 
 
 
     return (
-        <Paper>
-            <TableContainer>
+        <div>
+            <TableContainer sx={{mb: 4}}>
                 <Table>
                     <TableHead>
                         <TableRow>
@@ -63,7 +75,7 @@ function GenericTable({data, count, page, setPage, rowsPerPage, setRowsPerPage, 
                     </TableHead>
                     <TableBody>
                         {data.map((row) => (
-                            <GenericTableRow key={row._id} item={row} onViewDetails={handleToggleMediaCard} />
+                            <GenericTableRow key={row._id} item={row} onViewDetails={onViewDetails} />
                         ))}
                     </TableBody>
                 </Table>
@@ -102,7 +114,7 @@ function GenericTable({data, count, page, setPage, rowsPerPage, setRowsPerPage, 
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
             />
-        </Paper>
+        </div>
     );
 }
 

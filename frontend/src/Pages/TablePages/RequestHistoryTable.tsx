@@ -24,9 +24,10 @@ import {formatDateTime} from '../../utils/dateUtils';
 import {handleCancel} from "../../utils/requestHandler";
 import GenericConsumerCard from "../../components/tableComponents/GenericConsumerCard";
 import {Job} from "../../models/Job";
-import {Button} from "@mui/material";
+import {Button, FormControl, InputLabel, MenuItem, Select} from "@mui/material";
 import {sortBookingItems} from "../../utils/jobHandler";
 import GenericTable from "../../components/tableComponents/GenericTable";
+import {ServiceType} from "../../models/enums";
 
 type Item = ServiceRequest | Job;
 
@@ -40,11 +41,11 @@ export default function RequestHistoryTable() {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
 
-    const statusOptions = ['ALL REQUESTS', 'Pending', 'Action Needed from Requester', 'Accepted', 'Cancelled', 'Declined'];
-    const [statusFilter, setStatusFilter] = useState('ALL REQUESTS');
-    const filteredRequests = serviceRequests.filter((request) =>
-        statusFilter === 'ALL REQUESTS' || statusFilter === '' ? true : request.requestStatus === statusFilter.toLowerCase()
-    );
+    const statusOptions = ['All Requests', 'Pending', 'Action Needed from Requester', 'Accepted', 'Cancelled', 'Declined'];
+    const [statusFilter, setStatusFilter] = useState('All Requests');
+
+    const [serviceTypeFilter, setServiceTypeFilter] = useState("ALL");
+
     // const providerId = account?._id;
 
     // useEffect(() => {
@@ -67,11 +68,16 @@ export default function RequestHistoryTable() {
                     const params = new URLSearchParams({
                         page: (page + 1).toString(), // API is zero-indexed, React state is zero-indexed
                         limit: rowsPerPage.toString(),
-                        requestStatus: statusFilter !== 'ALL REQUESTS' ? statusFilter.toLowerCase() : ''
                     });
+                    if (statusFilter !== 'All Requests') {
+                        params.append('requestStatus', statusFilter.toLowerCase());
+                    }
+                    if (serviceTypeFilter !== 'ALL') {
+                        params.append('serviceType', serviceTypeFilter); // Ensure this matches the actual enum/case used in your database
+                    }
                     console.log(params)
 
-                    const response = await axios.get(`/api/requests/provider/${account._id}?${params.toString()}`, {
+                    const response = await axios.get(`/api/requests/requester/${account._id}?${params.toString()}`, {
                         headers: { Authorization: `Bearer ${token}` }
                     });
 
@@ -103,7 +109,7 @@ export default function RequestHistoryTable() {
             //         // setLoading(false);
             //     });
         }
-    }, [account?._id]);
+    }, [account, token, page, rowsPerPage, statusFilter, serviceTypeFilter]);
 
 
     const handleToggleMediaCard = (req: Item | null) => {
@@ -111,74 +117,13 @@ export default function RequestHistoryTable() {
         setShowMediaCard(req !== null);
     };
 
+    const handleChangeServiceType = (event: any) => {
+        setServiceTypeFilter(event.target.value);
+    };
 
-
-//   const handleCancel =  async() => {
-//
-//     if (!selectedRequest) {
-//       console.error('No request selected');
-//       return;
-//     }
-//
-//
-//     // get data from the request (selectedRequest)
-//     const {requestStatus, job, _id, requestedBy, provider, ...rest} = selectedRequest;
-//
-//     try {
-//
-//       // update the request
-//         const updateRequestData = {
-//          requestStatus: RequestStatus.cancelled,
-//         };
-//         console.log("selected request id:" , selectedRequest._id, updateRequestData)
-//         const updateResponse = await axios.put(`/api/requests/${selectedRequest._id}`, updateRequestData, {
-//           headers: {Authorization: `Bearer ${token}` }
-//         });
-//         console.log('Request Updated:', updateResponse.data);
-//
-//
-//         // Update local state to reflect these changes
-//         const updatedServiceRequests = serviceRequests.map(req => {
-//           if (req._id === selectedRequest._id) {
-//             return { ...req, ...updateRequestData };
-//           }
-//           return req;
-//         });
-//
-//         console.log(updatedServiceRequests);
-//         setServiceRequests(updatedServiceRequests);
-//         setShowMediaCard(false);
-//      } catch (error) {
-//       console.error('Error cancelling Request:', error);
-//     }
-//
-// // Prepare notification data
-//
-// if(selectedRequest.requestStatus == RequestStatus.accepted) {
-// const notificationData = {
-//   isViewed: false,
-//   content: `Your scheduled job for ${selectedRequest.serviceType} on the ${formatDateTime(selectedRequest.appointmentStartTime)} has been cancelled`,
-//   serviceRequest: selectedRequest._id,
-//   recipient: selectedRequest.provider._id,
-//   ...rest,
-// };
-//
-// console.log("notification data at frontend:", notificationData);
-//
-// // generate new notification
-// try {
-//   const notification = await axios.post("api/notification/", notificationData, {
-//     headers: { Authorization: `Bearer ${token}` }
-//   });
-//   console.log("Notification sent!", notification);
-//
-//
-// } catch (notificationError) {
-//   console.error('Error sending notification:', notificationError);
-// }
-//
-//
-// }};
+    const handleChangeStatus = (event: any) => {
+        setStatusFilter(event.target.value);
+    };
 
 
     const onCancel = () => {
@@ -213,29 +158,64 @@ export default function RequestHistoryTable() {
                         </Typography>
                     </Box>
                     <Box sx={{ display: 'flex', marginBottom: 2 }}>
-                        {statusOptions.map((status) => (
-                            <Button
-                                key={status}
-                                variant={statusFilter.toLowerCase() === status.toLowerCase() ? 'contained' : 'outlined'}
-                                onClick={() => setStatusFilter(status)}
-                                sx={{ margin: 0.5, textTransform: 'none' }}
+                        <FormControl style={{ width: 300, marginRight:5}}>
+                            <InputLabel id="service-type-label">Filter Service Type</InputLabel>
+                            <Select
+                                labelId="service-type-label"
+                                id="service-type-select"
+                                value={serviceTypeFilter}
+                                label="Filter Service Type"
+                                onChange={handleChangeServiceType}
+                                fullWidth
                             >
-                                {status}
-                            </Button>
-                        ))}
+                                <MenuItem value="ALL">All</MenuItem>
+                                {Object.values(ServiceType).map(type => (
+                                    <MenuItem key={type} value={type}>{type}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+
+                        <FormControl style={{ width: 300 }}>
+                            <InputLabel id="service-type-label">Request Status</InputLabel>
+                            <Select
+                                labelId="request-status-label"
+                                id="request-status-select"
+                                value={statusFilter}
+                                label="Request Status"
+                                onChange={handleChangeStatus}
+                                fullWidth
+                            >
+                                {Object.values(statusOptions).map(type => (
+                                    <MenuItem key={type} value={type}>{type}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
                     </Box>
 
                     <Box style={{display: 'flex'}}>
                         <Box sx={{flexGrow: 1, marginRight: 2}}>
                             <Box>
-                                {filteredRequests.length === 0 ? (
+                                {serviceRequests.length === 0 ? (
                                     <Typography variant="body1">
-                                        You don't have any requests {statusFilter === 'ALL REQUESTS' || statusFilter === ''? '' : (
+                                        You don't have any requests{statusFilter === 'All Requests' || statusFilter === ''? '' : (
                                         <span> with status <span style={{ fontStyle: 'italic' }}>{statusFilter.toLowerCase()}</span></span>
-                                    )} yet.
+                                    )}
+                                        {serviceTypeFilter === 'ALL' || serviceTypeFilter === '' ? '' : (
+                                            <span> for service type <span
+                                                style={{fontStyle: 'italic'}}>{serviceTypeFilter.toLowerCase()}</span></span>
+                                        )}
+                                        yet.
                                     </Typography>
                                 ) : (
-                                    <GenericTable data={filteredRequests} />
+                                    <GenericTable data={serviceRequests}
+                                                  count={total}
+                                                  page={page}
+                                                  setPage={setPage}
+                                                  rowsPerPage={rowsPerPage}
+                                                  setRowsPerPage={setRowsPerPage}
+                                                  setShowMediaCard={setShowMediaCard}
+                                                  onViewDetails={handleToggleMediaCard}
+                                    />
 
                                 )}
                             </Box>

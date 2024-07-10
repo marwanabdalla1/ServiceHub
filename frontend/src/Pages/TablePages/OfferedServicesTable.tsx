@@ -25,8 +25,9 @@ import {formatDateTime} from '../../utils/dateUtils';
 import {handleComplete, handleRevoke, handleCancel, sortBookingItems} from "../../utils/jobHandler";
 import useAlert from "../../hooks/useAlert";
 import AlertCustomized from "../../components/AlertCustomized";
-import {Button} from "@mui/material";
+import {Button, FormControl, InputLabel, MenuItem, Select} from "@mui/material";
 import GenericTable from "../../components/tableComponents/GenericTable";
+import {ServiceType} from "../../models/enums";
 
 type Item = ServiceRequest | Job;
 
@@ -36,15 +37,17 @@ export default function OfferedServicesTable() {
     const [jobs, setJobs] = React.useState<Job[]>([]);
     const {token, account} = useAuth();
 
+    const [total, setTotal] = useState(0);
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+
 
     const {alert, triggerAlert, closeAlert} = useAlert(10000000);
 
-    const statusOptions = ['ALL JOBS', 'Open', 'Completed', 'Cancelled'];
-    const [statusFilter, setStatusFilter] = useState('ALL JOBS');
+    const statusOptions = ['All Jobs', 'Open', 'Completed', 'Cancelled'];
+    const [statusFilter, setStatusFilter] = useState('All Jobs');
+    const [serviceTypeFilter, setServiceTypeFilter] = useState("ALL");
 
-    const filteredJobs = jobs.filter((job) =>
-        statusFilter === 'ALL JOBS' || statusFilter === '' ? true : job.status === statusFilter.toLowerCase()
-    );
 
 
     const navigate = useNavigate();
@@ -52,31 +55,54 @@ export default function OfferedServicesTable() {
     // todo: this probably can be combined/reused along with the request history table
     useEffect(() => {
         if (token && account) {
-            // console.log("this is the logged in account in request table:", account)
-            // setLoading(true);
-            axios.get<Job[]>(`/api/jobs/provider/${account._id}`, {
-                headers: {Authorization: `Bearer ${token}`}
-            })
-                .then(response => {
-                    console.log("getting requests ...", response.data)
-                    const sortedData = sortBookingItems(response.data);
-                    setJobs(sortedData as Job[]);
-                    // setLoading(false);
-                })
-                .catch(error => {
+
+            const fetchJobs = async () => {
+                try {
+                    const params = new URLSearchParams({
+                        page: (page + 1).toString(), // API is zero-indexed, React state is zero-indexed
+                        limit: rowsPerPage.toString(),
+                    });
+                    if (statusFilter !== 'All Requests') {
+                        params.append('requestStatus', statusFilter.toLowerCase());
+                    }
+                    if (serviceTypeFilter !== 'ALL') {
+                        params.append('serviceType', serviceTypeFilter); // Ensure this matches the actual enum/case used in your database
+                    }
+                    console.log(params)
+
+                    const response = await axios.get(`/api/jobs/provider/${account._id}?${params.toString()}`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+
+                    console.log("fetched service requests,", response)
+                    setJobs(response.data.data); // Assuming the backend sends data in a 'data' field
+                    setTotal(response.data.total);
+                } catch (error) {
                     console.error('Failed to fetch service requests:', error);
                     setJobs([]);
-                    // setError('Failed to load service requests');
-                    // setLoading(false);
-                });
+                }
+            };
+
+            fetchJobs();
+            // console.log("this is the logged in account in request table:", account)
+            // setLoading(true);
 
 
         }
-    }, [account?._id]);
+    }, [account, token, page, rowsPerPage, statusFilter, serviceTypeFilter]);
 
     const handleToggleMediaCard = (job: Item | null) => {
         setSelectedJob(job as Job);
         setShowMediaCard(job !== null);
+    };
+
+
+    const handleChangeServiceType = (event: any) => {
+        setServiceTypeFilter(event.target.value);
+    };
+
+    const handleChangeStatus = (event: any) => {
+        setStatusFilter(event.target.value);
     };
 
 
@@ -130,21 +156,12 @@ export default function OfferedServicesTable() {
     return (
         <div style={{display: 'flex'}}>
             <div style={{flex: 1, padding: '20px'}}>
-                <div>
-                    {/*<button onClick={handleAction}>Do Something</button>*/}
+
                     <AlertCustomized alert={alert} closeAlert={closeAlert}/>
-                </div>
 
                 <Box sx={{minWidth: 275, margin: 2}}>
                     <Box>
-                        {/*todo: maybe breadcrumbs*/}
-                        {/*<Breadcrumbs separator={<NavigateNextIcon fontSize="small"/>} aria-label="breadcrumb"*/}
-                        {/*             sx={{marginBottom: '16px'}}>*/}
-                        {/*    /!*<Link color="inherit" href="/frontend/public" underline="hover">*!/*/}
-                        {/*    /!*    Offered Services (Jobs)*!/*/}
-                        {/*    /!*</Link>*!/*/}
-                        {/*</Breadcrumbs>*/}
-                        <Typography variant="h6" component="div" sx={{marginBottom: '16px'}}>
+                        <Typography variant="h6" component="div" sx={{marginBottom: '10px'}}>
                             Offered Services (Jobs)
                         </Typography>
                         <Typography variant="body2" component="div" sx={{marginBottom: '16px'}}>
@@ -152,47 +169,64 @@ export default function OfferedServicesTable() {
                         </Typography>
                     </Box>
                     <Box sx={{ display: 'flex', marginBottom: 2 }}>
-                        {statusOptions.map((status) => (
-                            <Button
-                                key={status}
-                                variant={statusFilter.toLowerCase() === status.toLowerCase() ? 'contained' : 'outlined'}
-                                onClick={() => setStatusFilter(status)}
-                                sx={{ margin: 0.5, textTransform: 'none' }}
+                        <FormControl style={{ width: 300, marginRight:5}}>
+                            <InputLabel id="service-type-label">Filter Service Type</InputLabel>
+                            <Select
+                                labelId="service-type-label"
+                                id="service-type-select"
+                                value={serviceTypeFilter}
+                                label="Filter Service Type"
+                                onChange={handleChangeServiceType}
+                                fullWidth
                             >
-                                {status}
-                            </Button>
-                        ))}
+                                <MenuItem value="ALL">All</MenuItem>
+                                {Object.values(ServiceType).map(type => (
+                                    <MenuItem key={type} value={type}>{type}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+
+                        <FormControl style={{ width: 300 }}>
+                            <InputLabel id="service-type-label">Request Status</InputLabel>
+                            <Select
+                                labelId="request-status-label"
+                                id="request-status-select"
+                                value={statusFilter}
+                                label="Request Status"
+                                onChange={handleChangeStatus}
+                                fullWidth
+                            >
+                                {Object.values(statusOptions).map(type => (
+                                    <MenuItem key={type} value={type}>{type}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
                     </Box>
 
                     <Box style={{display: 'flex'}}>
                         <Box sx={{flexGrow: 1, marginRight: 2}}>
                             <Box>
-                                {filteredJobs.length === 0 ? (
+                                {jobs.length === 0 ? (
                                     <Typography variant="body1">
                                         You don't have any incoming jobs
-                                        {statusFilter === 'ALL JOBS' || statusFilter === ''? '' : (
+                                        {statusFilter === 'All Jobs' || statusFilter === ''? '' : (
                                             <span> with status <span style={{ fontStyle: 'italic' }}>{statusFilter.toLowerCase()}</span></span>
-                                        )}.                                    </Typography>
+                                        )}
+                                        {serviceTypeFilter === 'ALL' || serviceTypeFilter === '' ? '' : (
+                                        <span> for service type <span
+                                            style={{fontStyle: 'italic'}}>{serviceTypeFilter.toLowerCase()}</span></span>
+                                        )}.
+                                    </Typography>
                                 ) : (
-                                    <GenericTable data={filteredJobs} />
-                                    // <TableContainer component={Paper} sx={{overflow: 'auto'}}>
-                                    //     <Table sx={{minWidth: 650}} aria-label="simple table">
-                                    //         <TableHead>
-                                    //             <TableRow>
-                                    //                 <TableCell>Type</TableCell>
-                                    //                 <TableCell>Status</TableCell>
-                                    //                 <TableCell>Appointment Date</TableCell>
-                                    //                 <TableCell></TableCell>
-                                    //             </TableRow>
-                                    //         </TableHead>
-                                    //         <TableBody>
-                                    //             {filteredJobs.map((job) => (
-                                    //                 <GenericTableRow key={job._id} item={job}
-                                    //                                  onViewDetails={handleToggleMediaCard}/>
-                                    //             ))}
-                                    //         </TableBody>
-                                    //     </Table>
-                                    // </TableContainer>
+                                    <GenericTable data={jobs}
+                                                  count={total}
+                                                  page={page}
+                                                  setPage={setPage}
+                                                  rowsPerPage={rowsPerPage}
+                                                  setRowsPerPage={setRowsPerPage}
+                                                  setShowMediaCard={setShowMediaCard}
+                                                  onViewDetails={handleToggleMediaCard} />
+
                                 )}
                             </Box>
                         </Box>

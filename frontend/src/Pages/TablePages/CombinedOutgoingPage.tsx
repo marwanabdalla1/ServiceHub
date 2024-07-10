@@ -35,11 +35,11 @@ function CombinedOutgoingPage() {
     return (
 
         // <Container sx={{ p: 0, m: 1 }}>
-        <div style={{display: 'flex', width: '100%', height: '100vh', overflow: 'hidden'}}>
+        <div style={{display: 'flex', width: '100%', overflow: 'hidden'}}>
                 <Box sx={{
                     width: '180px',
                     flexShrink: 0,
-                    overflowY: 'auto',
+                    overflowY: 'hidden',
                     position: 'sticky',
                     borderRight: 0,
                     borderColor: 'divider',
@@ -62,7 +62,7 @@ function CombinedOutgoingPage() {
                         <Tab label="Services (Jobs) Received"/>
                     </Tabs>
                 </Box>
-                <Box sx={{flex: 1, p: 1, overflowY: 'auto'}}>
+                <Box sx={{flex: 1, p: 1, overflowY: 'hidden'}}>
                     {/*    {selectedTab === 0 && <IncomingRequestsTable/>}*/}
                     {/*    {selectedTab === 1 && <OfferedServicesTable/>}*/}
                     <Outlet/>
