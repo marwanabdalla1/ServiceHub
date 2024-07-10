@@ -33,22 +33,19 @@ import AdminHomePage from "./Pages/AdminPanel/AdminHomePage";
 import ErrorPage from "./Pages/ErrorPage";
 import CombinedIncomingPage from "./Pages/TablePages/CombinedIncomingPage";
 import Footer from './components/Footer';
-import { Divider } from '@mui/material';
-
 import UpdateSProfile from './components/UpdateSProfile';
 import AddServicePage from './Pages/AddServicePage';
-
 import OfferedServicesTable from "./Pages/TablePages/OfferedServicesTable";
 import IncomingRequestsTable from "./Pages/TablePages/IncomingRequestsTable";
 import RequestHistoryTable from "./Pages/TablePages/RequestHistoryTable";
 import ReceivedServiceTable from "./Pages/TablePages/ReceivedServiceTable";
-
-
 import JobDetailsPage from "./Pages/JobDetailsPage";
 import RequestDetailsPage from "./Pages/RequestDetailsPage";
 import CombinedOutgoingPage from "./Pages/TablePages/CombinedOutgoingPage";
 import CombinedServicePage from "./Pages/TablePages/CombinedIncomingPage";
 import {RecoveryProvider} from "./contexts/RecoveryContext";
+import { Divider } from '@mui/material';
+
 function App() {
     const [search, setSearch] = useState('');
 
@@ -179,7 +176,7 @@ function MainRoutes({search, setSearch}: {search: any, setSearch: any}) {
                 {/*<Route path="*" element={<h1>Not Found</h1>}/>*/}
             </Routes>
             <Divider variant="middle" style={{ backgroundColor: 'white', height: '50px' }} />
-            <Footer/>
+
         </div>
     );
 }
