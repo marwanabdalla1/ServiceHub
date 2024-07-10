@@ -31,7 +31,7 @@ const FAQPage = () => {
                         <Typography variant="subtitle1" sx={{ mb: 2 }}>
                             Got more questions? Feel free to contact us for more information.
                         </Typography>
-                        <Button variant="contained" color="primary" href="mailto:support@yoursite.com">
+                        <Button variant="contained" color="primary" href="mailto:servicehub.seba22@yoursite.com">
                             Contact us
                         </Button>
                     <Box sx={{ mt: 5}}>
