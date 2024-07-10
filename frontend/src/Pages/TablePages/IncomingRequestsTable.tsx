@@ -29,9 +29,17 @@ import axios from "axios";
 import {formatDateTime} from '../../utils/dateUtils';
 import {useNavigate} from "react-router-dom";
 import {Job} from "../../models/Job";
+import {TablePagination} from '@mui/material';
 
 
-import {handleAccept, handleDecline, handleCancel, handleTimeChange} from '../../utils/requestHandler';  // Adjust the path as necessary
+import {
+    handleAccept,
+    handleDecline,
+    handleCancel,
+    handleTimeChange,
+} from '../../utils/requestHandler';
+import {sortBookingItems} from "../../utils/jobHandler";
+import GenericTable from "../../components/tableComponents/GenericTable";  // Adjust the path as necessary
 
 
 // todo: replace ALL appointmentstarttime/endtime
@@ -48,17 +56,30 @@ export default function IncomingRequestTable() {
     const [timeChangePopUp, setTimeChangePopUp] = useState(false);
     const navigate = useNavigate();
 
+
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+
+
+    const statusOptions = ['ALL REQUESTS', 'Pending', 'Action Needed from Requester', 'Accepted', 'Cancelled', 'Declined'];
+    const [statusFilter, setStatusFilter] = useState('ALL REQUESTS');
+    const filteredRequests = serviceRequests.filter((request) =>
+        statusFilter === 'ALL REQUESTS' || statusFilter === '' ? true : request.requestStatus === statusFilter.toLowerCase()
+    );
     useEffect(() => {
         console.log(token)
         if (token && account) {
             console.log("this is the logged in account in request table:", account)
             // setLoading(true);
-            axios.get<ServiceRequest[]>(`/api/requests/provider/incoming/${account._id}`, {
+            // get all requests instead of only incoming ones
+            axios.get<ServiceRequest[]>(`/api/requests/provider/${account._id}`, {
                 headers: {Authorization: `Bearer ${token}`}
             })
                 .then(response => {
+
                     console.log("getting requests ...", response.data)
-                    setServiceRequests(response.data);
+                    const sortedData = sortBookingItems(response.data);
+                    setServiceRequests(sortedData as ServiceRequest[]);
                     // setLoading(false);
                 })
                 .catch(error => {
@@ -84,289 +105,19 @@ export default function IncomingRequestTable() {
         setShowMediaCard(req !== null);
     };
 
-    // const handleAccept = async () => {
-    //
-    //     if (!selectedRequest) {
-    //         console.error('No request selected');
-    //         return;
-    //     }
-    //
-    //
-    //     // get data from the request (selectedRequest)
-    //     const {requestStatus, job, _id, requestedBy, provider, ...rest} = selectedRequest;
-    //
-    //     const jobData = {
-    //         status: JobStatus.open,
-    //         request: selectedRequest._id,
-    //         receiver: selectedRequest.requestedBy._id,
-    //         provider: selectedRequest.provider._id,
-    //         ...rest,
-    //     };
-    //
-    //     console.log("job data at frontend:", jobData);
-    //
-    //     // post new job
-    //     try {
-    //         const jobResponse = await axios.post("api/jobs/", jobData, {
-    //             headers: {Authorization: `Bearer ${token}`}
-    //         });
-    //         console.log("job posted!", jobResponse);
-    //
-    //         // update the request
-    //         if (jobResponse.data && jobResponse.data._id) {
-    //             const updateRequestData = {
-    //                 job: jobResponse.data._id,
-    //                 requestStatus: RequestStatus.accepted,
-    //             };
-    //             console.log("selected request id:", selectedRequest._id, updateRequestData);
-    //
-    //             const updateResponse = await axios.patch(`/api/requests/${selectedRequest._id}`, updateRequestData, {
-    //                 headers: {Authorization: `Bearer ${token}`}
-    //             });
-    //             console.log('Request Updated:', updateResponse.data);
-    //
-    //             // Update local state to reflect these changes
-    //             const updatedServiceRequests = serviceRequests.map(req => {
-    //                 if (req._id === selectedRequest._id) {
-    //                     return {...req, ...updateRequestData, job: jobResponse.data._id};
-    //                 }
-    //                 return req;
-    //             });
-    //
-    //             console.log(updatedServiceRequests);
-    //             setServiceRequests(updatedServiceRequests);
-    //             setShowMediaCard(false);
-    //
-    //             // Prepare notification data
-    //             const notificationData = {
-    //                 isViewed: false,
-    //                 content: `Your service request for ${selectedRequest.serviceType} on the ${formatDateTime(selectedRequest.timeslot?.start)} has been accepted`,
-    //                 serviceRequest: selectedRequest._id,
-    //                 job: jobResponse.data._id,
-    //                 recipient: selectedRequest.requestedBy._id,
-    //                 ...rest,
-    //             };
-    //
-    //             console.log("notification data at frontend:", notificationData);
-    //
-    //             // generate new notification
-    //             try {
-    //                 const notification = await axios.post("api/notification/", notificationData, {
-    //                     headers: {Authorization: `Bearer ${token}`}
-    //                 });
-    //                 console.log("Notification sent!", notification);
-    //
-    //
-    //             } catch (notificationError) {
-    //                 console.error('Error sending notification:', notificationError);
-    //             }
-    //         }
-    //     } catch (error) {
-    //         console.error('Error posting job:', error);
-    //     }
-    // }
+    const handleChangePage = (
+        event: React.MouseEvent<HTMLButtonElement> | null,
+        newPage: number
+    ): void => {
+        setPage(newPage);
+    };
 
-    // const handleDecline = async () => {
-    //
-    //     if (!selectedRequest) {
-    //         console.error('No request selected');
-    //         return;
-    //     }
-    //
-    //
-    //     // get data from the request (selectedRequest)
-    //     const {requestStatus, job, _id, requestedBy, provider, ...rest} = selectedRequest;
-    //
-    //     try {
-    //
-    //         // update the request
-    //         const updateRequestData = {
-    //             requestStatus: RequestStatus.declined,
-    //         };
-    //         console.log("selected request id:", selectedRequest._id, updateRequestData)
-    //         const updateResponse = await axios.patch(`/api/requests/${selectedRequest._id}`, updateRequestData, {
-    //             headers: {Authorization: `Bearer ${token}`}
-    //         });
-    //         console.log('Request Updated:', updateResponse.data);
-    //
-    //
-    //         // Update local state to reflect these changes
-    //         const updatedServiceRequests = serviceRequests.map(req => {
-    //             if (req._id === selectedRequest._id) {
-    //                 return {...req, ...updateRequestData};
-    //             }
-    //             return req;
-    //         });
-    //
-    //         console.log(updatedServiceRequests);
-    //         setServiceRequests(updatedServiceRequests);
-    //         setShowMediaCard(false);
-    //     } catch (error) {
-    //         console.error('Error declining Request:', error);
-    //     }
-    //
-    //     // Prepare notification data
-    //     const notificationData = {
-    //         isViewed: false,
-    //         content: `Your service request for ${selectedRequest.serviceType} on the ${formatDateTime(selectedRequest.timeslot?.start)} has been declined `,
-    //         serviceRequest: selectedRequest._id,
-    //         recipient: selectedRequest.requestedBy._id,
-    //         ...rest,
-    //     };
-    //
-    //     console.log("notification data at frontend:", notificationData);
-    //
-    //     // generate new notification
-    //     try {
-    //         const notification = await axios.post("api/notification/", notificationData, {
-    //             headers: {Authorization: `Bearer ${token}`}
-    //         });
-    //         console.log("Notification sent!", notification);
-    //
-    //
-    //     } catch (notificationError) {
-    //         console.error('Error sending notification:', notificationError);
-    //     }
-    //
-    //
-    // };
-
-    // const handleCancel = async () => {
-    //
-    //     if (!selectedRequest) {
-    //         console.error('No request selected');
-    //         return;
-    //     }
-    //
-    //
-    //     // get data from the request (selectedRequest)
-    //     const {requestStatus, job, _id, requestedBy, provider, ...rest} = selectedRequest;
-    //
-    //     try {
-    //
-    //         // update the request
-    //         const updateRequestData = {
-    //             requestStatus: RequestStatus.cancelled,
-    //         };
-    //         console.log("selected request id:", selectedRequest._id, updateRequestData)
-    //         const updateResponse = await axios.patch(`/api/requests/${selectedRequest._id}`, updateRequestData, {
-    //             headers: {Authorization: `Bearer ${token}`}
-    //         });
-    //         console.log('Request Updated:', updateResponse.data);
-    //
-    //
-    //         // todo: also cancel the timeslot
-    //         // Update local state to reflect these changes
-    //         const updatedServiceRequests = serviceRequests.map(req => {
-    //             if (req._id === selectedRequest._id) {
-    //                 return {...req, ...updateRequestData};
-    //             }
-    //             return req;
-    //         });
-    //
-    //         console.log(updatedServiceRequests);
-    //         setServiceRequests(updatedServiceRequests);
-    //         setShowMediaCard(false);
-    //     } catch (error) {
-    //         console.error('Error cancelling Request:', error);
-    //     }
-    //
-    //     // Prepare notification data
-    //     const notificationData = {
-    //         isViewed: false,
-    //         content: `Your service request for ${selectedRequest.serviceType} on the ${formatDateTime(selectedRequest.timeslot?.start)} has been cancelled`,
-    //         serviceRequest: selectedRequest._id,
-    //         recipient: selectedRequest.requestedBy._id,
-    //         ...rest,
-    //     };
-    //
-    //     console.log("notification data at frontend:", notificationData);
-    //
-    //     // generate new notification
-    //     try {
-    //         const notification = await axios.post("api/notification/", notificationData, {
-    //             headers: {Authorization: `Bearer ${token}`}
-    //         });
-    //         console.log("Notification sent!", notification);
-    //
-    //
-    //     } catch (notificationError) {
-    //         console.error('Error sending notification:', notificationError);
-    //     }
-    //
-    //
-    // };
-
-    // const handleTimeChange = async () => {
-    //     setTimeChangePopUp(true);
-    //     console.log("handle time change begin");
-    //
-    //     if (!selectedRequest) {
-    //         console.error('No request selected');
-    //         return;
-    //     }
-    //
-    //     console.log("request exists");
-    //
-    //     // get data from the request (selectedRequest)
-    //     const {requestStatus, job, _id, requestedBy, provider, ...rest} = selectedRequest;
-    //
-    //     console.log(selectedRequest)
-    //     // Prepare notification data
-    //     const notificationData = {
-    //         isViewed: false,
-    //         content: `Please change the booking time for your service request ${selectedRequest.serviceType} on the ${formatDateTime(selectedRequest.timeslot?.start)}.
-    //         \n Comment from the provider: ${comment}`,
-    //         serviceRequest: selectedRequest._id,
-    //         recipient: selectedRequest.requestedBy._id,
-    //         notificationType: 'Timeslot Change Request',
-    //         ...rest,
-    //     };
-    //
-    //     console.log("notification data at frontend:", notificationData);
-    //
-    //     // generate new notification
-    //     try {
-    //         const notification = await axios.post("api/notifications/", notificationData, {
-    //             headers: {Authorization: `Bearer ${token}`}
-    //         });
-    //         console.log("Notification sent!", notification);
-    //
-    //         //  update request status
-    //
-    //     } catch (notificationError) {
-    //         console.error('Error sending notification:', notificationError);
-    //     }
-    //
-    //     try {
-    //
-    //         // update the request status
-    //         const updateRequestData = {
-    //             requestStatus: RequestStatus.requestorActionNeeded,
-    //         };
-    //         console.log("selected request id:", selectedRequest._id, updateRequestData)
-    //         const updateResponse = await axios.patch(`/api/requests/${selectedRequest._id}`, updateRequestData, {
-    //             headers: {Authorization: `Bearer ${token}`}
-    //         });
-    //         console.log('Request Updated:', updateResponse.data);
-    //
-    //         // Update local state to reflect these changes
-    //         const updatedServiceRequests = serviceRequests.map(req => {
-    //             if (req._id === selectedRequest._id) {
-    //                 return {...req, ...updateRequestData, timeslot: undefined};
-    //             }
-    //             return req;
-    //         });
-    //
-    //         console.log("updates after sending timeslot change:", updatedServiceRequests);
-    //         setServiceRequests(updatedServiceRequests);
-    //         setShowMediaCard(false);
-    //     } catch (error) {
-    //         console.error('Error cancelling Request:', error);
-    //     }
-    //     navigate("/select-availability")
-    //     setTimeChangePopUp(false);
-    // };
+    const handleChangeRowsPerPage = (
+        event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+    ): void => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0); // Reset page to zero after row change
+    };
 
     const onAccept = () => {
         if (!selectedRequest) {
@@ -442,35 +193,37 @@ export default function IncomingRequestTable() {
                             Incoming Requests
                         </Typography>
                         <Typography variant="body2" component="div" sx={{marginBottom: '16px'}}>
-                            Here are the requests that are not accepted. {"\n"}
-                            Accepted requests automatically turn into
+                            Hint: Accepted requests automatically turn into
                             <Link to="/incoming/jobs"> jobs</Link>.
                         </Typography>
                     </Box>
+                    <Box sx={{display: 'flex', marginBottom: 2}}>
+                        {statusOptions.map((status) => (
+                            <Button
+                                key={status}
+                                variant={statusFilter.toLowerCase() === status.toLowerCase() ? 'contained' : 'outlined'}
+                                onClick={() => setStatusFilter(status)}
+                                sx={{margin: 0.5, textTransform: 'none'}}
+                            >
+                                {status}
+                            </Button>
+                        ))}
+                    </Box>
+
                     <Box style={{display: 'flex'}}>
                         <Box sx={{flexGrow: 1, marginRight: 2}}>
                             <Box>
-                                {serviceRequests.length === 0 ? (
-                                    <Typography variant="body1">No incoming requests.</Typography>
-                                ) : (
-                                    <TableContainer component={Paper} sx={{overflow: 'auto'}}>
-                                        <Table sx={{minWidth: 650}} aria-label="simple table">
-                                            <TableHead>
-                                                <TableRow>
-                                                    <TableCell>Type</TableCell>
-                                                    <TableCell>Status</TableCell>
-                                                    <TableCell>Appointment Date</TableCell>
-                                                    <TableCell></TableCell>
-                                                </TableRow>
-                                            </TableHead>
-                                            <TableBody>
-                                                {serviceRequests.map((request) => (
-                                                    <GenericTableRow key={request._id} item={request}
-                                                                     onViewDetails={handleToggleMediaCard}/>
-                                                ))}
-                                            </TableBody>
-                                        </Table>
-                                    </TableContainer>)}
+                                {filteredRequests.length === 0 ? (
+                                    <Typography variant="body1">
+                                        You don't have any incoming
+                                        request {statusFilter === 'ALL REQUESTS' || statusFilter === '' ? '' : (
+                                        <span> with status <span
+                                            style={{fontStyle: 'italic'}}>{statusFilter.toLowerCase()}</span></span>
+                                    )}.
+                                    </Typography>) : (
+                                    <GenericTable data={filteredRequests} />
+
+                                )}
                             </Box>
                         </Box>
                         {/*<Dialog open={timeChangePopUp} onClose={handleTimeChange}>*/}

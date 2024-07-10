@@ -1,6 +1,6 @@
 // src/components/JobDetailsPage.tsx
 import React, { useEffect, useState } from 'react';
-import {useNavigate, useParams} from 'react-router-dom';
+import {useLocation, useNavigate, useParams} from 'react-router-dom';
 import axios from 'axios';
 import { Job } from '../models/Job';
 import { Container, Typography, Box } from '@mui/material';
@@ -28,6 +28,9 @@ const JobDetailsPage: React.FC<JobDetailsPageProps>  = ({ role }) => {
     const [job, setJob] = useState<Job | null>(null);
     const { token, account } = useAuth();
     const [reviews, setReviews] = useState<Review[]>([]);
+
+    const location = useLocation();
+    const redirectPath = location.state?.redirectPath || '/incoming';
 
     const { alert, triggerAlert, closeAlert } = useAlert(100000);
 
@@ -68,7 +71,6 @@ const JobDetailsPage: React.FC<JobDetailsPageProps>  = ({ role }) => {
     // Authorization check
     if ((role === "provider" && account?._id !== job.provider._id) ||
         (role === "consumer" && account?._id !== job.receiver._id)) {
-        // You could alternatively redirect to a different page or display a modal
         navigate("/unauthorized")
     }
 
@@ -128,6 +130,8 @@ const JobDetailsPage: React.FC<JobDetailsPageProps>  = ({ role }) => {
         receiver: job.receiver,
         onClose: () => {},
         inDetailPage: true,
+        redirectPath: redirectPath,
+
 
         actions:{
             cancelJob: onCancel,      // Placeholder function
@@ -143,6 +147,7 @@ const JobDetailsPage: React.FC<JobDetailsPageProps>  = ({ role }) => {
         receiver: job.receiver,
         onClose: () => {},
         inDetailPage: true,
+        redirectPath: redirectPath,
         actions:{
             cancelJob: onCancel,      // Placeholder function
             review: () => handleReview(job)

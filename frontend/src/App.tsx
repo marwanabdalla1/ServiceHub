@@ -94,7 +94,7 @@ function MainRoutes({search, setSearch}: {search: any, setSearch: any}) {
 
     const showAdminNavBar = location.pathname.includes("/admin");
     return (
-        <div className="h-screen flex flex-col">
+        <div className="h-screen flex flex-col" style={{ paddingTop: '80px' }}>
             {showNavBar && !showAdminNavBar && <NavigationBar
                 toggleDrawer={() => {}}
                 onChange={() => {}}

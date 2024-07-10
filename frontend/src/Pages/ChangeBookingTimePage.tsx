@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import AvailabilityCalendarBooking from "../components/AvailabilityCalendarBooking";
 import { Typography, Container, Button, Box } from '@mui/material';
-import { useParams } from 'react-router-dom';
+import {useLocation, useParams} from 'react-router-dom';
 import {BookingDetails} from "../contexts/BookingContext";
 import {useAuth} from "../contexts/AuthContext";
 import axios from "axios";
@@ -44,6 +44,10 @@ const ChangeBookingTimePage: React.FC = () => {
     const [error, setError] = useState<string| null>(null);
     const {token, account} = useAuth();
 
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+    const commentFromProvider = queryParams.get('comment');
+
     // get the booking details
     useEffect(() => {
         console.log("change booking:", requestId, token, account)
@@ -55,14 +59,14 @@ const ChangeBookingTimePage: React.FC = () => {
                     },
                 });
 
-                console.log(response.data.requestedBy._id, account?._id)
+                console.log("requests response", response.data)
                 // make sure only the requestor can access this and only upon request
                 if (response.data.requestedBy !== account?._id || response.data.requestStatus.toString()!= RequestStatus.requestorActionNeeded.toString()) {
                     setError('Access Denied...');
                     return;
                 }
                 setRequest(response.data);
-                setProviderId(response.data.provider)
+                setProviderId(response.data.provider._id)
                 console.log("fetched request when changing booking time:", request)
             } catch (err: any) {
                 setError(err.message);
@@ -96,6 +100,11 @@ const ChangeBookingTimePage: React.FC = () => {
                     Choose an alternative time for your booking
                 </Typography>
             </Box>
+            {commentFromProvider && (
+                <Box mt={2} mb={2}>
+                    <Typography>Comment from the provider: {decodeURIComponent(commentFromProvider)}</Typography>
+                </Box>
+            )}
             <AvailabilityCalendarBooking
                 Servicetype={request.serviceType}
                 providerIdInput={providerId}
@@ -105,8 +114,6 @@ const ChangeBookingTimePage: React.FC = () => {
                 defaultTransitTime={request.serviceOffering?.bufferTimeDuration || 30}
                 onNext={()=>console.log("next")}
                 onRequestChange={()=>console.log("change")}
-
-
             />
 
         </Container>
