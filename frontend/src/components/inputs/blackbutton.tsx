@@ -13,10 +13,10 @@ export const StyledButton = styled('button')(({ sx }) => ({
     ...sx
 }));
 
-function BlackButton({ text, className = '', onClick, sx, disabled }: Readonly<ButtonProps>) {
+function BlackButton({ text, className = '', onClick, sx, disabled }: ButtonProps) {
     return (
         <StyledButton
-            className={`bg-customBlack text-white font-semibold text-xs px-2 py-2 rounded-full shadow hover:bg-gray-100 hover:text-black max-h-8 whitespace-nowrap ${className}`}
+            className={`bg-customBlack text-white font-semibold text-xs px-2 py-2 rounded-full shadow hover:bg-gray-500 hover:text-customBlack! max-h-8 whitespace-nowrap ${className}`}
             onClick={onClick}
             sx={sx}
             disabled={disabled}
