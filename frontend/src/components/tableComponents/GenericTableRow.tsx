@@ -37,7 +37,7 @@ const GenericRow: React.FC<GenericRowProps> = ({ item, onViewDetails }) => {
             <TableCell>{status}</TableCell>
             <TableCell>{formatDateTime(item.timeslot?.start)}</TableCell>
             <TableCell>
-                <BlackButton text="View" onClick={() => onViewDetails(item)}/>
+                <BlackButton text="View" onClick={() => onViewDetails(item)} />
             </TableCell>
         </TableRow>
     );

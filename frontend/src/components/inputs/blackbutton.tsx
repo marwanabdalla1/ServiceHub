@@ -24,6 +24,8 @@ function BlackButton({ text, className = '', onClick, sx, disabled }: ButtonProp
             alignItems: 'center',
             justifyContent: 'center',
             textDecoration: 'none', // Ensure no underline
+            minWidth: '42px',
+            minHeight: '25px',
         }}
             disabled={disabled}
         >
