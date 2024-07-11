@@ -99,6 +99,13 @@ const ChangeBookingTimePage: React.FC = () => {
         }, [requestId, token, account]
     );
 
+    // unmount
+    useEffect(() => {
+        return () => {
+            setError(null);
+        };
+    }, []);
+
     // const [serviceType, setServiceType] = useState("Babysitting"); // Placeholder for the service type [e.g. "Tutoring"]
     // const [defaultSlotDuration, setDefaultSlotDuration] = useState(60); // Placeholder for the default slot duration
     // const [globalAvailabilities, setGlobalAvailabilities] = useState<Event[]>([{start: Date.now(), end: Date.now(), title: "Event"}]); // Placeholder for the global availabilities [e.g. tutor availabilities]
