@@ -76,10 +76,10 @@ const ChangeBookingTimePage: React.FC = () => {
                         return;
                     }
                     // todo: make it non-comment
-                    // if (response.data.requestStatus.toString() != RequestStatus.requestorActionNeeded.toString()) {
-                    //     console.log("trigger alert");
-                    //     setRequestNotEditable(true);
-                    // }
+                    if (response.data.requestStatus.toString() != RequestStatus.requestorActionNeeded.toString()) {
+                        console.log("trigger alert");
+                        setRequestNotEditable(true);
+                    }
                     setRequest(response.data);
                     setProviderId(response.data.provider._id)
                     console.log("fetched request when changing booking time:", request)
