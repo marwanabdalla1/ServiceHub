@@ -93,12 +93,12 @@ export default function SignUp() {
                 return;
             }
 
-            if (!isValidName(firstName) ) {
+            if (!isValidName(firstName)) {
                 toast.error('First Name should not contain numbers or invalid characters.');
                 return;
             }
 
-            if(!isValidName(lastName)){
+            if (!isValidName(lastName)) {
                 toast.error('Last Name should not contain numbers or invalid characters.');
                 return;
             }
@@ -113,15 +113,16 @@ export default function SignUp() {
                 return;
             }
 
-            await createAccountEmail(email, firstName);
+            createAccountEmail(email, firstName);
             navigate("/signup/otp", {
                 state: {
                     firstName, lastName, email, password
                 }
             });
-        } catch (error) {
-            toast.error('There was an error processing your request. Please try again.');
-            console.error('Error during form submission:', error);
+        } catch (error: any) {
+            if(axios.isAxiosError(error)){
+                toast.error(error.response?.data.error);
+            }
         }
     };
 

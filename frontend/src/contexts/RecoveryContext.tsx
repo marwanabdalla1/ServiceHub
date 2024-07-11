@@ -7,8 +7,8 @@ interface RecoveryContextType {
     timer: number; // Add timer state
     setEmail: (email: string) => void;
     setOtp: (otp: string) => void;
-    resetPasswordEmail: (email: string) => Promise<void>;
-    createAccountEmail: (email: string, firstName: string) => Promise<void>;
+    resetPasswordEmail: (email: string) => void;
+    createAccountEmail: (email: string, firstName: string) => void;
     startTimer: () => void; // Function to start the timer
     resetTimer: () => void; // Function to reset the timer
 }
@@ -60,26 +60,18 @@ export const RecoveryProvider: React.FC<RecoveryProviderProps> = ({children}) =>
 
     const resetPasswordEmail = async (email: string) => {
         const otp = generateOtp();
-        const response = await axios.post('/api/forgetPassword/resetPassword', {email: email, otp: otp})
-            .then((res) => {
-                console.log(res);
-            });
+        await axios.post('/api/forgetPassword/resetPassword', {email: email, otp: otp});
         setEmail(email);
         setOtp(otp);
         startTimer(() => setOtp('')); // Reset the OTP when the timer ends
-        return response;
     };
 
     const createAccountEmail = async (email: string, firstName: string) => {
         const otp = generateOtp();
-        const response = await axios.post('/api/auth/signup/sendEmail', {email: email, otp: otp, firstName: firstName})
-            .then((res) => {
-                console.log(res);
-            });
+        await axios.post('/api/auth/signup/sendEmail', {email: email, otp: otp, firstName: firstName});
         setEmail(email);
         setOtp(otp);
         startTimer(() => setOtp('')); // Reset the OTP when the timer ends
-        return response;
     };
 
     return (
