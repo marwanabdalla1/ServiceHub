@@ -130,12 +130,12 @@ function AddServicePage() {
                 defaultSlotTime: Number(formData.defaultSlotTime),
                 travelTime: Number(formData.travelTime)
             };
-
+    
             const certificateForm = new FormData();
             if (certificate) {
                 certificateForm.append('file', certificate);
             }
-
+    
             try {
                 let response;
                 if (isEditMode) {
@@ -145,7 +145,7 @@ function AddServicePage() {
                             'Authorization': `Bearer ${token}`
                         }
                     });
-
+    
                     if (certificate && isCertificateUploaded) {
                         response = await axios.post(`/api/certificate/upload/${serviceToEdit._id}`, certificateForm, {
                             headers: {
@@ -169,15 +169,19 @@ function AddServicePage() {
                 }
                 console.log(`Status: ${response.status}`);
                 console.log(response.data);
-                navigate('/setprofile');
-            } catch
-                (error) {
+                if (isEditMode) {
+                    navigate('/setprofile');
+                } else {
+                    navigate('/select-availability');
+                }
+            } catch (error) {
                 console.error('Error submitting service:', error);
             }
         } else {
             console.log('Form validation failed');
         }
     };
+    
 
     return (
         <Box className="w-full h-full flex items-center justify-center bg-gray-100" p={3}>
