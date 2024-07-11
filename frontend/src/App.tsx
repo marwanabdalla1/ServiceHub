@@ -14,8 +14,8 @@ import {BookingProvider} from "./contexts/BookingContext";
 
 import axios from "axios";
 import {AccountProvider} from "./contexts/AuthContext";
-import BookingPage from "./Pages/bookingSteps/BookingPage";
-import ConfirmationPage from "./Pages/bookingSteps/ConfirmationPage";
+import BookingPage from "./Pages/BookingPage";
+import ConfirmationPage from "./components/bookingSteps/ConfirmationPage";
 import FAQPage from "./Pages/FAQPage";
 import BecomeProPage from './Pages/BecomePro';
 import ResetPasswordPage from "./Pages/AuthPages/ForgetPasswordPages/ResetPasswordPage";
