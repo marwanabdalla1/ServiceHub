@@ -69,6 +69,8 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
                 setRequest(response.data);
                 setLoading(false);
                 //
+
+                console.log(response)
                 if (!response) {
                     setError({title:'404 Not Found', message:'The request you\'re looking for cannot be found.'});
                     return;
@@ -120,6 +122,14 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
 
     }, [request, account, token]);
 
+    // unmount
+    useEffect(() => {
+        return () => {
+            setError(null);
+        };
+    }, []);
+
+
     if (!request) {
         if (loading) {
             return <Typography>Loading...</Typography>
@@ -130,7 +140,7 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
     }
 
     if (error) {
-        console.log("youre in iferror")
+        console.log("youre in iferror", error)
         return <ErrorPage title={error.title} message={error.message}/>
     }
 

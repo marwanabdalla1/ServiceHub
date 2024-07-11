@@ -1,8 +1,14 @@
 import { useState } from 'react';
 import axios from 'axios';
 
+interface errorProps {
+    title: string,
+    message: string,
+}
+
+
 function useErrorHandler(defaultMessage = 'An unexpected error occurred') {
-    const [error, setError] = useState({
+    const [error, setError] = useState<errorProps | null>({
         title: '',
         message: defaultMessage,
     });
