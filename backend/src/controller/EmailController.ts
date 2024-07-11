@@ -3,7 +3,7 @@ import nodemailer from 'nodemailer';
 import * as dotenv from "dotenv";
 import crypto from 'crypto';
 import Account from "../models/account";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { format } from 'date-fns';
 import { ServiceType } from '../models/enums';
 
@@ -223,6 +223,70 @@ export const sendCancellationEmails = (req: Request, res: Response): void => {
       res.status(500).send(error.toString());
     } else {
       res.status(200).send(`Cancellation notification sent to  sent to ${receiverEmail}`);
+    }
+  });
+};
+
+const generateRequestConfirmationEmail = (firstName: string, serviceType: ServiceType, startTime: Date) => {
+
+  const formattedStartTime = format(new Date(startTime), 'PPpp');
+
+  return `
+  <div style="font-family: Arial, sans-serif; margin: 0; padding: 0;">
+    <table style="max-width: 600px; margin: auto; border-collapse: collapse; border: 1px solid #ddd;">
+      <tr>
+        <td style="background-color: #007bff; padding: 20px; text-align: center; color: #fff; font-size: 24px; font-weight: bold;">
+          Request Confirmation: ${serviceType}
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 20px; font-size: 16px; line-height: 1.5;">
+          <b>Dear ${firstName},</b>
+          <br /><br />
+          Thank you for requesting an appointment for ${serviceType} on ${formattedStartTime}.
+          We hereby confirm your service request.
+          <br /><br />
+          </div>
+          Please feel free to contact us in case of any issues. 
+            <a href="servicehub.seba22@gmail.com" style="color: #007bff;">servicehub.seba22@gmail.com</a>.
+            <br /><br />
+            Kind regards,
+          <br />
+          <b>Your ServiceHub Team</b>
+        </td>
+      </tr>
+    </table>
+  </div>
+`;
+};
+
+/**
+* Send an cancellation notification to the user's email
+* @param req
+* @param res
+*/
+export const sendRequestConfirmationEmail = (req: Request, res: Response): void => {
+  const { email, name, serviceType, startTime } = req.body;
+
+  const confirmationMailOptions = {
+    from: process.env.MY_EMAIL,
+    to: email,
+    subject: `Request Confirmation: ${serviceType}`,
+    html: generateRequestConfirmationEmail(name, serviceType, startTime)
+  };
+
+  const notificationMailOptions = {
+    from: process.env.MY_EMAIL,
+    to: email,
+    subject: `${serviceType} Appointment Cancellation`,
+    html: generateRequestConfirmationEmail(name, serviceType, startTime)
+  };
+
+  transporter.sendMail(confirmationMailOptions, (error, info) => {
+    if (error) {
+      res.status(500).send(error.toString());
+    } else {
+      res.status(200).send(`Request confirmation sent to ${email}`);
     }
   });
 };

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import Notification, {INotification} from '../models/notification';
+import Notification, { INotification } from '../models/notification';
 import { Types } from 'mongoose';
 
 
@@ -81,7 +81,7 @@ export const updateNotification = async (req: Request, res: Response) => {
     try {
         const { isViewed, content, job, review, recipient, serviceRequest } = req.body;
         console.log("Notification ID " + req.params.id);
-        
+
         // Create an update object dynamically based on the request body
         const updateFields: any = {};
         if (isViewed !== undefined) updateFields.isViewed = isViewed;
@@ -113,3 +113,6 @@ export const deleteNotification = async (req: Request, res: Response) => {
         res.status(500).json({ message: (error as Error).message });
     }
 };
+
+
+
