@@ -117,4 +117,4 @@ export enum GERMAN_CITIES_SUPPORT {
     Würzburg = "Würzburg",
 }
 
-export const GERMAN_POSTAL_REGEX = /\d{5}/
+export const GERMAN_POSTAL_REGEX = /^[0-9]{5}$/;

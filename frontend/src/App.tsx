@@ -20,6 +20,7 @@ import FAQPage from "./Pages/FAQPage";
 import BecomeProPage from './Pages/BecomePro';
 import ResetPasswordPage from "./Pages/AuthPages/ForgetPasswordPages/ResetPasswordPage";
 import OTPPage from "./Pages/AuthPages/ForgetPasswordPages/OTPPage";
+import OTPSignUpPage from "./Pages/AuthPages/SignUpPages/OTPSignUpPage";
 import ForgetPasswordPage from "./Pages/AuthPages/ForgetPasswordPages/ForgetPasswordPage";
 import ResetPasswordSuccessPage from "./Pages/AuthPages/ForgetPasswordPages/ResetPasswordSuccessPage";
 
