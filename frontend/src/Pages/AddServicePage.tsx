@@ -51,6 +51,7 @@ function AddServicePage() {
         defaultSlotTime: false,
         travelTime: false
     });
+    const [errorMessage, setErrorMessage] = useState<string | null>(null); // New state for error message
     const isEditMode = Boolean(serviceToEdit);
 
     useEffect(() => {
@@ -157,6 +158,7 @@ function AddServicePage() {
                             'Authorization': `Bearer ${token}`
                         }
                     });
+
                     if (response.status === 201 && certificate && isCertificateUploaded) {
                         response = await axios.post(`/api/certificate/upload/${response.data._id}`, certificateForm, {
                             headers: {
@@ -172,8 +174,13 @@ function AddServicePage() {
                 } else {
                     navigate('/select-availability', { state: { inAddServiceSteps: true } });
                 }
-            } catch (error) {
+            } catch (error: any) {
                 console.error('Error submitting service:', error);
+                if (error.response && error.response.status === 400 && error.response.data === 'You already provide this service') {
+                    setErrorMessage('You already provide this service');
+                } else {
+                    setErrorMessage('An error occurred. Please try again.');
+                }
             }
         } else {
             console.log('Form validation failed');
@@ -199,6 +206,11 @@ function AddServicePage() {
                 <Box className='flex justify-center p-3 py-3 items-center mb=6'>
                     <h4 className="font-bold text-2xl">{isEditMode ? 'Edit Service' : 'Provide Service'}</h4>
                 </Box>
+                {errorMessage && (
+                    <Box className='flex justify-center p-3 py-3 items-center mb=6' color="error.main">
+                        <p>{errorMessage}</p>
+                    </Box>
+                )}
                 <Grid container spacing={7} className='p-4'>
                     <Grid item xs={12} md={6}>
                         <Box mb={4}>
