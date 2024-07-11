@@ -1,8 +1,8 @@
-import React, {useState, ChangeEvent, useEffect} from 'react';
-import {Autocomplete, TextField, InputAdornment, Box, Grid} from '@mui/material';
+import React, { useState, ChangeEvent, useEffect } from 'react';
+import { Autocomplete, TextField, InputAdornment, Box, Grid, Stepper, Step, StepLabel } from '@mui/material';
 import LightBlueButton from '../components/inputs/BlueButton';
-import {useNavigate, useLocation} from 'react-router-dom';
-import {useAuth} from '../contexts/AuthContext';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 
 interface FormData {
@@ -18,22 +18,22 @@ interface FormData {
 function AddServicePage() {
     const navigate = useNavigate();
     const location = useLocation();
-    const {token} = useAuth();
+    const { token } = useAuth();
     const serviceToEdit = location.state?.service || null;
     const [certificate, setCertificate] = useState<File | null>(null);
     const [isCertificateUploaded, setIsCertificateUploaded] = useState<boolean>(false);
     const serviceTypes = [
-        {title: 'Bike Repair'},
-        {title: 'Moving Services'},
-        {title: 'Baby Sitting'},
-        {title: 'Tutoring'},
-        {title: 'Pet Sitting'},
-        {title: 'Landscaping Services'},
-        {title: 'Home Remodeling'},
-        {title: 'House Cleaning'}
+        { title: 'Bike Repair' },
+        { title: 'Moving Services' },
+        { title: 'Baby Sitting' },
+        { title: 'Tutoring' },
+        { title: 'Pet Sitting' },
+        { title: 'Landscaping Services' },
+        { title: 'Home Remodeling' },
+        { title: 'House Cleaning' }
     ];
     const paymentMethods = [
-        {title: 'Cash'}, {title: 'Paypal'}, {title: 'Bank Transfer'}
+        { title: 'Cash' }, { title: 'Paypal' }, { title: 'Bank Transfer' }
     ];
     const [formData, setFormData] = useState<FormData>({
         selectedService: null,
@@ -57,9 +57,9 @@ function AddServicePage() {
         if (isEditMode && serviceToEdit) {
             console.log('Service to edit:', serviceToEdit);
             setFormData({
-                selectedService: {title: serviceToEdit.serviceType},
+                selectedService: { title: serviceToEdit.serviceType },
                 hourlyRate: serviceToEdit.hourlyRate.toString(),
-                acceptedPaymentMethods: serviceToEdit.acceptedPaymentMethods ? serviceToEdit.acceptedPaymentMethods.map((method: string) => ({title: method})) : [],
+                acceptedPaymentMethods: serviceToEdit.acceptedPaymentMethods ? serviceToEdit.acceptedPaymentMethods.map((method: string) => ({ title: method })) : [],
                 description: serviceToEdit.description,
                 certificateId: serviceToEdit.certificateId,
                 defaultSlotTime: serviceToEdit.baseDuration.toString(),
@@ -71,7 +71,6 @@ function AddServicePage() {
 
     const fetchCertificate = async (_id: string) => {
         try {
-            // Fetch certificate
             const certificateResponse = await axios.get(`/api/certificate/${_id}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -87,14 +86,13 @@ function AddServicePage() {
 
     const handleDeleteCertificate = async () => {
         try {
-            // Delete certificate
             const response = await axios.delete(`/api/certificate/${serviceToEdit._id}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
             console.log('Certificate deleted:', response.data);
-            setCertificate(null); // Reset the certificate state
+            setCertificate(null);
         } catch (error) {
             console.error('Error deleting certificate:', error);
         }
@@ -107,7 +105,7 @@ function AddServicePage() {
     };
 
     const handleChange = (key: keyof FormData, value: any) => {
-        setFormData(prev => ({...prev, [key]: value}));
+        setFormData(prev => ({ ...prev, [key]: value }));
     };
 
     const validateForm = () => {
@@ -130,12 +128,12 @@ function AddServicePage() {
                 defaultSlotTime: Number(formData.defaultSlotTime),
                 travelTime: Number(formData.travelTime)
             };
-    
+
             const certificateForm = new FormData();
             if (certificate) {
                 certificateForm.append('file', certificate);
             }
-    
+
             try {
                 let response;
                 if (isEditMode) {
@@ -145,7 +143,7 @@ function AddServicePage() {
                             'Authorization': `Bearer ${token}`
                         }
                     });
-    
+
                     if (certificate && isCertificateUploaded) {
                         response = await axios.post(`/api/certificate/upload/${serviceToEdit._id}`, certificateForm, {
                             headers: {
@@ -172,7 +170,7 @@ function AddServicePage() {
                 if (isEditMode) {
                     navigate('/setprofile');
                 } else {
-                    navigate('/select-availability');
+                    navigate('/select-availability', { state: { inAddServiceSteps: true } });
                 }
             } catch (error) {
                 console.error('Error submitting service:', error);
@@ -181,11 +179,23 @@ function AddServicePage() {
             console.log('Form validation failed');
         }
     };
-    
 
     return (
         <Box className="w-full h-full flex items-center justify-center bg-gray-100" p={3}>
             <Box className="w-full max-w-5xl p=6 bg-white shadow-md rounded-lg">
+                {!isEditMode && (
+                    <Stepper activeStep={1} alternativeLabel sx={{ mb: 2 }}>
+                        <Step>
+                            <StepLabel>Check Profile</StepLabel>
+                        </Step>
+                        <Step>
+                            <StepLabel>Add Service</StepLabel>
+                        </Step>
+                        <Step disabled>
+                            <StepLabel>Add Availability</StepLabel>
+                        </Step>
+                    </Stepper>
+                )}
                 <Box className='flex justify-center p-3 py-3 items-center mb=6'>
                     <h4 className="font-bold text-2xl">{isEditMode ? 'Edit Service' : 'Provide Service'}</h4>
                 </Box>
@@ -289,7 +299,7 @@ function AddServicePage() {
                                         <a
                                             href={URL.createObjectURL(certificate)}
                                             download
-                                            style={{marginRight: '10px'}}
+                                            style={{ marginRight: '10px' }}
                                         >
                                             Download
                                         </a>
@@ -318,7 +328,7 @@ function AddServicePage() {
                     </Grid>
                 </Grid>
                 <Box mt={4} className="flex justify-center p-2">
-                    <LightBlueButton className="py-2 px-2" text="Submit" onClick={handleSubmit}/>
+                    <LightBlueButton className="py-2 px-2" text="Submit" onClick={handleSubmit} />
                 </Box>
             </Box>
         </Box>
