@@ -208,7 +208,7 @@ function AddServicePage() {
                         <Box mb={4}>
                             <TextField
                                 InputProps={{
-                                    startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                                    startAdornment: <InputAdornment position="start">€</InputAdornment>,
                                 }}
                                 placeholder="Hourly Rate"
                                 fullWidth
