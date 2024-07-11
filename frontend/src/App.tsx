@@ -55,7 +55,7 @@ function App() {
     }, []);
 
     return (
-        <div>
+        <div className="h-screen flex flex-col">
             <ToastContainer
                 position="top-right"
                 autoClose={3000}
@@ -96,7 +96,7 @@ function MainRoutes({search, setSearch}: { search: any, setSearch: any }) {
     const showAdminNavBar = location.pathname.includes("/admin");
     return (
         <div className="h-screen flex flex-col" style={{paddingTop: '80px'}}>
-            <div>
+            <div className="h-screen flex flex-col">
                 {showNavBar && !showAdminNavBar && <NavigationBar
                     toggleDrawer={() => {
                     }}
@@ -107,6 +107,7 @@ function MainRoutes({search, setSearch}: { search: any, setSearch: any }) {
                     search={search}
                     setSearch={setSearch}/>}
                 {showAdminNavBar && <AdminNavbar/>}
+                <div className="flex-grow">
                 <Routes>
                     {/* Home */}
                     <Route path="/" element={<HomePage/>}/>
@@ -185,6 +186,7 @@ function MainRoutes({search, setSearch}: { search: any, setSearch: any }) {
             <div>
                 <Divider variant="middle" style={{backgroundColor: 'white', height: '50px'}}/>
                 <Footer/>
+            </div>
             </div>
         </div>
     );
