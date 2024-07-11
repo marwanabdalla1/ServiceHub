@@ -23,6 +23,7 @@ import {useAuth} from "../contexts/AuthContext";
 import axios from "axios";
 import {toast} from "react-toastify";
 import DeleteIcon from '@mui/icons-material/Delete';
+import AddressDialog from "../components/dialogs/AddressDialog";
 
 type EditModeType = {
     [key: string]: boolean;
@@ -45,6 +46,8 @@ function UserProfile(): React.ReactElement {
     const isProvider = userAccount?.isProvider;
     const isPremium = userAccount?.isPremium;
     const client_reference_id = userAccount?._id;
+    const [openAddressDialog, setOpenAddressDialog] = useState(false);
+
 
     const fetchSubscriptionData = async (clientReferenceId: string) => {
         try {
@@ -182,13 +185,18 @@ function UserProfile(): React.ReactElement {
 
     useEffect(() => {
         if (account) {
+            const { address, postal, city, country } = account;
+            const concatenatedAddress = [address, postal, city, country]
+                .filter(field => field !== null && field !== undefined && field.trim() !== "")
+                .join(", ");
             setFieldValue({
+
                 userId: account._id,
                 firstName: account.firstName,
                 lastName: account.lastName,
                 email: account.email,
                 phone: account.phone ? account.phone : "",
-                address: account.address ? account.address : "",
+                address: concatenatedAddress,
                 description: account.description ? account.description : "",
             });
         }
@@ -257,6 +265,27 @@ function UserProfile(): React.ReactElement {
 
     const handleFieldChange = (field: string, newValue: string) => {
         setFieldValue(prevState => ({...prevState, [field]: newValue}));
+    };
+
+    const handleSaveAddress = async (updatedAddress: { address: string; postal: string; city: string; country: string }) => {
+        const updatedAccount = {
+            ...account,
+            ...updatedAddress
+        };
+
+        try {
+            const response = await axios.put('/api/account', updatedAccount, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            setAccount(response.data);
+        } catch (error) {
+            console.error('Error updating account details:', error);
+        }
+
+        setOpenAddressDialog(false);
     };
 
     const handleFieldSave = async (field: string) => {
@@ -348,6 +377,17 @@ function UserProfile(): React.ReactElement {
     };
 
     const renderField = (label: string, field: string) => {
+        if (field === 'address') {
+            return (
+                <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 0 }}>
+                    <Typography variant="body1" sx={{ fontWeight: 'bold' }}>{label}:</Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Typography variant="body1">{fieldValue[field]}</Typography>
+                        <Button onClick={() => setOpenAddressDialog(true)}>Edit</Button>
+                    </Box>
+                </Box>
+            );
+        }
         return (
             <Box sx={{display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 0}}>
                 <Typography variant="body1" sx={{fontWeight: 'bold'}}>{label}:</Typography>
@@ -420,7 +460,7 @@ function UserProfile(): React.ReactElement {
                                         services.map(service => (
                                             <Grid container alignItems="center" spacing={2} key={service._id}>
                                                 <Grid item xs>
-                                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                    <Box sx={{display: 'flex', alignItems: 'center'}}>
                                                         <Typography variant="body1">{service.serviceType}</Typography>
                                                         {service.isCertified && (
                                                             <Typography variant="body2" sx={{
@@ -435,10 +475,12 @@ function UserProfile(): React.ReactElement {
                                                     </Box>
                                                 </Grid>
                                                 <Grid item>
-                                                    <Button onClick={() => handleEditServiceClick(service)}>Edit</Button>
+                                                    <Button
+                                                        onClick={() => handleEditServiceClick(service)}>Edit</Button>
                                                 </Grid>
                                                 <Grid item>
-                                                    <Button onClick={() => handleOpenDialog(service._id)} sx={{ color: 'red' }}>Delete</Button>
+                                                    <Button onClick={() => handleOpenDialog(service._id)}
+                                                            sx={{color: 'red'}}>Delete</Button>
                                                 </Grid>
                                             </Grid>
 
@@ -447,8 +489,8 @@ function UserProfile(): React.ReactElement {
                                         <Typography variant="body1">No services provided</Typography>
                                     )}
                                 </Box>
-                                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
-                                    <BlueButton text="Add Service" onClick={handleAddServiceClick} />
+                                <Box sx={{display: 'flex', justifyContent: 'flex-end', mt: 3}}>
+                                    <BlueButton text="Add Service" onClick={handleAddServiceClick}/>
                                 </Box>
                             </Box>
                         </>
@@ -492,6 +534,18 @@ function UserProfile(): React.ReactElement {
                         Account</Button>
                 </Box>
             </Paper>
+            <AddressDialog
+                open={openAddressDialog}
+                onClose={() => setOpenAddressDialog(false)}
+                onSave={handleSaveAddress}
+                initialAddress={{
+                    address: account?.address || '',
+                    postal: account?.postal || '',
+                    city: account?.city || '',
+                    country: account?.country || ''
+                }}
+            />
+
             <Dialog open={openDialog} onClose={handleCloseDialog}>
                 <DialogTitle>{"Confirm Delete"}</DialogTitle>
                 <DialogContent>
