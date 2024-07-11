@@ -457,8 +457,8 @@ function UserProfile(): React.ReactElement {
                             text="View My Schedule"
                             onClick={handleViewScheduleClick}
                             sx={{
-                                backgroundColor: '#ADD8E6',
-                                color: 'white',
+                                backgroundColor: '#93c5fd',
+                                color: 'black',
                                 mt: 2
                             }}
                         />
