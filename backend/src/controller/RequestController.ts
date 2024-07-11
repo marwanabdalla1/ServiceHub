@@ -528,6 +528,10 @@ export const getRequestById: RequestHandler = async (req, res) => {
         // }
 
 
+        if (!mongoose.Types.ObjectId.isValid(requestId)) {
+            return res.status(404).json({ message: "Service request not found." });
+        }
+
         const serviceRequest = await ServiceRequest.findById(requestId).populate([
             { path: 'requestedBy', select: 'firstName lastName email profileImageId' }, // todo: also include profile pic
             { path: 'provider', select: 'firstName lastName email profileImageId' }]).exec();
@@ -537,7 +541,7 @@ export const getRequestById: RequestHandler = async (req, res) => {
         console.log(serviceRequest)
 
         if (!serviceRequest){
-            return res.status(404).json({ message: "No service requests found." });
+            return res.status(404).json({ message: "Service request not found." });
         }
 
         //make sure only the provider/consumer him/herself can get this
