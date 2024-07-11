@@ -186,8 +186,8 @@ function UserProfile(): React.ReactElement {
 
     useEffect(() => {
         if (account) {
-            const {address, postal, city} = account;
-            const concatenatedAddress = [address, postal, city]
+            const {address, postal, location} = account;
+            const concatenatedAddress = [address, postal, location]
                 .filter(field => field !== null && field !== undefined && field.trim() !== "")
                 .join(", ");
             setFieldValue({
@@ -270,7 +270,7 @@ function UserProfile(): React.ReactElement {
     const handleSaveAddress = async (updatedAddress: {
         address: string;
         postal: string;
-        city: string;
+        location: string;
     }) => {
         const updatedAccount = {
             ...account,
@@ -554,7 +554,7 @@ function UserProfile(): React.ReactElement {
                 initialAddress={{
                     address: account?.address || '',
                     postal: account?.postal || '',
-                    city: account?.city || ''
+                    location: account?.location || ''
                 }}
             />
 

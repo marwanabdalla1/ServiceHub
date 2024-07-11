@@ -15,15 +15,15 @@ import { Autocomplete } from '@mui/material';
 interface AddressDialogProps {
     open: boolean;
     onClose: () => void;
-    onSave: (address: { address: string; postal: string; city: string }) => void;
-    initialAddress: { address: string; postal: string; city: string };
+    onSave: (address: { address: string; postal: string; location: string }) => void;
+    initialAddress: { address: string; postal: string; location: string };
 }
 
 const AddressDialog: React.FC<AddressDialogProps> = ({open, onClose, onSave, initialAddress}) => {
     const [addressFields, setAddressFields] = useState({
         address: '',
         postal: '',
-        city: '',
+        location: '',
     });
 
     useEffect(() => {
@@ -52,8 +52,8 @@ const AddressDialog: React.FC<AddressDialogProps> = ({open, onClose, onSave, ini
             toast('Invalid postal code', {type: 'error'});
             return;
         }
-        if (!addressFields.city.trim()) {
-            toast('City cannot be empty', {type: 'error'});
+        if (!addressFields.location.trim()) {
+            toast('location cannot be empty', {type: 'error'});
             return;
         }
         onSave(addressFields);
@@ -83,13 +83,13 @@ const AddressDialog: React.FC<AddressDialogProps> = ({open, onClose, onSave, ini
                 <Autocomplete
                     options={Object.values(GERMAN_CITIES_SUPPORT)}
                     getOptionLabel={(option) => option}
-                    value={addressFields.city}
-                    onChange={(event, newValue) => handleAddressFieldChange('city', newValue as GERMAN_CITIES_SUPPORT)}
+                    value={addressFields.location}
+                    onChange={(event, newValue) => handleAddressFieldChange('location', newValue as GERMAN_CITIES_SUPPORT)}
                     renderInput={(params) => (
                     <TextField
                         {...params}
                         margin="normal"
-                        label="City"
+                        label="location"
                         fullWidth
                         autoComplete="address-level2"
                     />

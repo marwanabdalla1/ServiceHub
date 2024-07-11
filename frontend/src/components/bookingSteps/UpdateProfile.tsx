@@ -1,10 +1,14 @@
 import React, {useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {Container, Box, Typography, Card, CardContent, TextField, Button, Grid} from '@mui/material';
+import {Container, Box, Typography, Card, CardContent, TextField, Button, Grid, Autocomplete} from '@mui/material';
 import {useBooking, BookingDetails} from '../../contexts/BookingContext';
 import axios from "axios";
 import {useAuth} from "../../contexts/AuthContext";
-import BookingSideCard from "../BookingSideCard";
+import BookingSideCard from "../../components/BookingSideCard";
+import {GERMAN_CITIES_SUPPORT} from "../../shared/Constants";
+import {checkEmptyFields} from "../../validators/GeneralValidator";
+import {isValidEmail, isValidName, isValidPhoneNumber, isValidPostalCode} from "../../validators/AccountDataValidator";
+import {toast} from "react-toastify";
 
 
 interface UpdateProfileProps {
@@ -21,7 +25,6 @@ interface UserDetails {
     address: string;
     postal: string;
     location: string;
-    country: string;
     // email: string; //should not be changed here
     phoneNumber: string;
 
@@ -41,7 +44,6 @@ function UpdateProfile({onNext,handleCancel, bookingDetails}: UpdateProfileProps
         address: bookingDetails.requestedBy?.address || '',
         postal: bookingDetails.requestedBy?.postal || '',
         location: bookingDetails.requestedBy?.location || '',
-        country: bookingDetails.requestedBy?.country || '',
         email: bookingDetails.requestedBy?.email || '',
         phoneNumber: bookingDetails.requestedBy?.phoneNumber || ''
     });
@@ -60,12 +62,38 @@ function UpdateProfile({onNext,handleCancel, bookingDetails}: UpdateProfileProps
 
     // Function to check for missing fields
     const isAnyFieldMissing = () => {
-        const fields = ['firstName', 'lastName', 'phoneNumber', 'address', 'postal', 'location', 'country']; // Extend based on required fields
+        const fields = ['firstName', 'lastName', 'phoneNumber', 'address', 'postal', 'location']; // Extend based on required fields
         return fields.some(field => !userDetails[field]);
     };
 
 
     const handleSaveProfile = async () => {
+        if (checkEmptyFields(userDetails.firstName, 'First Name') || checkEmptyFields(userDetails.lastName, 'Last Name') ||
+            checkEmptyFields(userDetails.address, 'Address') || checkEmptyFields(userDetails.postal, 'Postal') ||
+            checkEmptyFields(userDetails.location, 'City') || checkEmptyFields(userDetails.phoneNumber, 'Phone Number')) {
+            return;
+        }
+
+        if (!isValidName(userDetails.firstName)) {
+            toast.error('First Name should not contain numbers or invalid characters.');
+            return;
+        }
+
+        if (!isValidName(userDetails.lastName)) {
+            toast.error('Last Name should not contain numbers or invalid characters.');
+            return;
+        }
+
+        if (!isValidPostalCode(userDetails.postal)) {
+            toast.error('Invalid postal code');
+            return;
+        }
+
+        if (!isValidPhoneNumber(userDetails.phoneNumber)) {
+            toast.error('Invalid phone number');
+            return;
+        }
+
         const apiEndpoint = '/api/account/'
         console.log(userDetails)
         try {
@@ -144,37 +172,30 @@ function UpdateProfile({onNext,handleCancel, bookingDetails}: UpdateProfileProps
                                 onChange={e => {
                                     setUserDetails(prevDetails => ({...prevDetails, postal: e.target.value}));
                                     setIsModified(true);
-
                                 }}
 
-                            />
-                        </Grid>
-                        <Grid item xs={4}>
-                            <TextField
-                                label="City"
-                                fullWidth
-                                variant="outlined"
-                                value={userDetails.location}
-                                onChange={e => {
-                                    setUserDetails(prevDetails => ({...prevDetails, location: e.target.value}));
-                                    setIsModified(true);
-                                }}
-
-                            />
-                        </Grid>
-                        <Grid item xs={4}>
-                            <TextField
-                                label="Country"
-                                fullWidth
-                                variant="outlined"
-                                value={userDetails.country}
-                                onChange={e => {
-                                    setUserDetails(prevDetails => ({...prevDetails, country: e.target.value}))
-                                    setIsModified(true);
-                                }}
-
-                            />
-                        </Grid>
+                                    />
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <Autocomplete
+                                        options={Object.values(GERMAN_CITIES_SUPPORT)}
+                                        getOptionLabel={(option) => option}
+                                        value={userDetails.location}
+                                        onChange={(event, newValue) => {
+                                            setUserDetails(prevDetails => ({...prevDetails, location: newValue || ''}));
+                                            setIsModified(true);
+                                        }}
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                label="City"
+                                                fullWidth
+                                                autoComplete="address-level2"
+                                                variant="outlined"
+                                            />
+                                        )}
+                                    />
+                                </Grid>
 
                         {/*email should not be changeable!*/}
                         <Grid item xs={6}>
