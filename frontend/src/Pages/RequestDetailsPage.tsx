@@ -59,10 +59,7 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
 
 
     useEffect(() => {
-        setLoading(false);
-        setError({title:'500 Not Found', message:'The request you\'re looking for cannot be found.'});
-        return;
-
+        setLoading(true);
         const fetchRequest = async () => {
             try {
 
