@@ -24,6 +24,7 @@ import axios from "axios";
 import {toast} from "react-toastify";
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddressDialog from "../components/dialogs/AddressDialog";
+import {isValidPhoneNumber} from "../validators/AccountDataValidator";
 
 type EditModeType = {
     [key: string]: boolean;
@@ -185,12 +186,11 @@ function UserProfile(): React.ReactElement {
 
     useEffect(() => {
         if (account) {
-            const { address, postal, city, country } = account;
-            const concatenatedAddress = [address, postal, city, country]
+            const {address, postal, city} = account;
+            const concatenatedAddress = [address, postal, city]
                 .filter(field => field !== null && field !== undefined && field.trim() !== "")
                 .join(", ");
             setFieldValue({
-
                 userId: account._id,
                 firstName: account.firstName,
                 lastName: account.lastName,
@@ -267,7 +267,11 @@ function UserProfile(): React.ReactElement {
         setFieldValue(prevState => ({...prevState, [field]: newValue}));
     };
 
-    const handleSaveAddress = async (updatedAddress: { address: string; postal: string; city: string; country: string }) => {
+    const handleSaveAddress = async (updatedAddress: {
+        address: string;
+        postal: string;
+        city: string;
+    }) => {
         const updatedAccount = {
             ...account,
             ...updatedAddress
@@ -290,6 +294,13 @@ function UserProfile(): React.ReactElement {
 
     const handleFieldSave = async (field: string) => {
         const updatedAccount = {...account, [field]: fieldValue[field]};
+
+        if (field === 'phone' && !isValidPhoneNumber(fieldValue[field])) {
+            toast('Invalid phone number', {type: 'error'});
+            // set the value of phone back to the account phone number
+            setFieldValue(prevState => ({...prevState, [field]: account.phone}));
+            return;
+        }
 
         try {
             const response = await axios.put('/api/account', updatedAccount, {
@@ -376,12 +387,12 @@ function UserProfile(): React.ReactElement {
         navigate('/select-availability');
     };
 
-    const renderField = (label: string, field: string) => {
+    const renderField = (label: string, field: string, isEditable: boolean = true) => {
         if (field === 'address') {
             return (
-                <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 0 }}>
-                    <Typography variant="body1" sx={{ fontWeight: 'bold' }}>{label}:</Typography>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Box sx={{display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 0}}>
+                    <Typography variant="body1" sx={{fontWeight: 'bold'}}>{label}:</Typography>
+                    <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                         <Typography variant="body1">{fieldValue[field]}</Typography>
                         <Button onClick={() => setOpenAddressDialog(true)}>Edit</Button>
                     </Box>
@@ -403,7 +414,9 @@ function UserProfile(): React.ReactElement {
                             onKeyPress={(e) => handleKeyPress(e, field)}
                         />
                     )}
-                    {field !== 'userId' && <Button onClick={() => handleEditClick(field)}>Edit</Button>}
+                    {isEditable && (
+                        <Button onClick={() => handleEditClick(field)}>Edit</Button>
+                    )}
                 </Box>
             </Box>
         );
@@ -429,10 +442,10 @@ function UserProfile(): React.ReactElement {
                         <LightBlueFileButton text="Upload Profile Picture"
                                              onFileChange={handleProfileImageUpload(setProfileImage)}/>
                     </Box>
-                    {renderField("User ID", "userId")}
-                    {renderField("First Name", "firstName")}
-                    {renderField("Last Name", "lastName")}
-                    {renderField("Email Address", "email")}
+                    {renderField("User ID", "userId", false)}
+                    {renderField("First Name", "firstName", false)}
+                    {renderField("Last Name", "lastName", false)}
+                    {renderField("Email Address", "email", false)}
                     {renderField("Phone Number", "phone")}
                     {renderField("Address", "address")}
                     {renderField("Description", "description")}
@@ -541,8 +554,7 @@ function UserProfile(): React.ReactElement {
                 initialAddress={{
                     address: account?.address || '',
                     postal: account?.postal || '',
-                    city: account?.city || '',
-                    country: account?.country || ''
+                    city: account?.city || ''
                 }}
             />
 

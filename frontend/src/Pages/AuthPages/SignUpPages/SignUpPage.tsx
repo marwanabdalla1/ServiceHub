@@ -27,6 +27,8 @@ import {useAuth} from "../../../contexts/AuthContext";
 import {useLocation, useNavigate} from "react-router-dom";
 import {toast} from "react-toastify";
 import {useRecovery} from "../../../contexts/RecoveryContext";
+import {checkEmptyFields} from "../../../validators/GeneralValidator";
+import {isValidEmail, isValidName} from "../../../validators/AccountDataValidator";
 
 function Copyright(props: any) {
     return (
@@ -55,27 +57,6 @@ export default function SignUp() {
     const {from} = location.state || {from: {pathname: "/"}};
     const navigate = useNavigate();
     const {createAccountEmail} = useRecovery();
-
-
-    const checkEmptyFields = (data: string, fieldName: string) => {
-        if (data === '' || data === null || data === undefined) {
-            toast.error(`${fieldName} is required.`);
-            return true;
-        }
-        return false;
-    };
-
-    // TODO: if german characters are not allowed in the name?
-    const isValidName = (name: string) => {
-        const nameRegex = /^[a-zA-Z\s]+$/;
-        return nameRegex.test(name);
-    };
-
-    const isValidEmail = (email: string) => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    };
-
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -107,6 +88,8 @@ export default function SignUp() {
                 toast.error('Invalid email format.');
                 return;
             }
+
+            // TODO: Add password validation
 
             if (password !== repeatPassword) {
                 toast.error('Passwords do not match.');

@@ -7,20 +7,23 @@ import {
     TextField,
     Button
 } from '@mui/material';
+import {isValidPostalCode} from "../../validators/AccountDataValidator";
+import {toast} from "react-toastify";
+import {GERMAN_CITIES_SUPPORT} from "../../shared/Constants";
+import { Autocomplete } from '@mui/material';
 
 interface AddressDialogProps {
     open: boolean;
     onClose: () => void;
-    onSave: (address: { address: string; postal: string; city: string; country: string }) => void;
-    initialAddress: { address: string; postal: string; city: string; country: string };
+    onSave: (address: { address: string; postal: string; city: string }) => void;
+    initialAddress: { address: string; postal: string; city: string };
 }
 
-const AddressDialog: React.FC<AddressDialogProps> = ({ open, onClose, onSave, initialAddress }) => {
+const AddressDialog: React.FC<AddressDialogProps> = ({open, onClose, onSave, initialAddress}) => {
     const [addressFields, setAddressFields] = useState({
         address: '',
         postal: '',
         city: '',
-        country: ''
     });
 
     useEffect(() => {
@@ -30,10 +33,29 @@ const AddressDialog: React.FC<AddressDialogProps> = ({ open, onClose, onSave, in
     }, [open, initialAddress]);
 
     const handleAddressFieldChange = (field: string, value: string) => {
-        setAddressFields(prevState => ({ ...prevState, [field]: value }));
+        if (field === 'postal' && isValidPostalCode(field)) {
+            toast('Invalid postal code');
+            return;
+        }
+        setAddressFields(prevState => ({...prevState, [field]: value}));
     };
 
     const handleSave = () => {
+        if (!addressFields.address.trim()) {
+            toast('Address cannot be empty', {type: 'error'});
+            return;
+        }
+        if (addressFields.postal.trim() === '') {
+            toast("Postal code cannot be empty", {type: "error"})
+            return;
+        } else if (!isValidPostalCode(addressFields.postal)) {
+            toast('Invalid postal code', {type: 'error'});
+            return;
+        }
+        if (!addressFields.city.trim()) {
+            toast('City cannot be empty', {type: 'error'});
+            return;
+        }
         onSave(addressFields);
         onClose();
     };
@@ -58,22 +80,21 @@ const AddressDialog: React.FC<AddressDialogProps> = ({ open, onClose, onSave, in
                     onChange={(e) => handleAddressFieldChange('postal', e.target.value)}
                     autoComplete="postal-code"
                 />
-                <TextField
-                    margin="normal"
-                    label="City"
-                    fullWidth
+                <Autocomplete
+                    options={Object.values(GERMAN_CITIES_SUPPORT)}
+                    getOptionLabel={(option) => option}
                     value={addressFields.city}
-                    onChange={(e) => handleAddressFieldChange('city', e.target.value)}
-                    autoComplete="address-level2"
-                />
-                <TextField
-                    margin="normal"
-                    label="Country"
-                    fullWidth
-                    value={addressFields.country}
-                    onChange={(e) => handleAddressFieldChange('country', e.target.value)}
-                    autoComplete="country"
-                />
+                    onChange={(event, newValue) => handleAddressFieldChange('city', newValue as GERMAN_CITIES_SUPPORT)}
+                    renderInput={(params) => (
+                    <TextField
+                        {...params}
+                        margin="normal"
+                        label="City"
+                        fullWidth
+                        autoComplete="address-level2"
+                    />
+                )}
+                    />
             </DialogContent>
             <DialogActions>
                 <Button onClick={onClose} color="primary">
