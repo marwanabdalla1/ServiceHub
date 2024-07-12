@@ -32,7 +32,6 @@ import VerifyCertificatePage from "./Pages/AdminPanel/VerifyCertificatePage";
 import AdminUserDataPage from "./Pages/AdminPanel/AdminUserDataPage";
 import AdminHomePage from "./Pages/AdminPanel/AdminHomePage";
 import ErrorPage from "./Pages/ErrorPage";
-import CombinedIncomingPage from "./Pages/TablePages/CombinedIncomingPage";
 import Footer from './components/Footer';
 import {Divider} from '@mui/material';
 

@@ -24,17 +24,17 @@ function AddServicePage() {
     const [certificate, setCertificate] = useState<File | null>(null);
     const [isCertificateUploaded, setIsCertificateUploaded] = useState<boolean>(false);
     const serviceTypes = [
-        { title: 'Bike Repair' },
-        { title: 'Moving Services' },
-        { title: 'Baby Sitting' },
-        { title: 'Tutoring' },
-        { title: 'Pet Sitting' },
-        { title: 'Landscaping Services' },
-        { title: 'Home Remodeling' },
-        { title: 'House Cleaning' }
+        {title: 'Bike Repair'},
+        {title: 'Moving Services'},
+        {title: 'Baby Sitting'},
+        {title: 'Tutoring'},
+        {title: 'Pet Sitting'},
+        {title: 'Landscaping Services'},
+        {title: 'Home Remodeling'},
+        {title: 'House Cleaning'}
     ];
     const paymentMethods = [
-        { title: 'Cash' }, { title: 'Paypal' }, { title: 'Bank Transfer' }
+        {title: 'Cash'}, {title: 'Paypal'}, {title: 'Bank Transfer'}
     ];
     const [formData, setFormData] = useState<FormData>({
         selectedService: null,
@@ -59,9 +59,9 @@ function AddServicePage() {
         if (isEditMode && serviceToEdit) {
             console.log('Service to edit:', serviceToEdit);
             setFormData({
-                selectedService: { title: serviceToEdit.serviceType },
+                selectedService: {title: serviceToEdit.serviceType},
                 hourlyRate: serviceToEdit.hourlyRate.toString(),
-                acceptedPaymentMethods: serviceToEdit.acceptedPaymentMethods ? serviceToEdit.acceptedPaymentMethods.map((method: string) => ({ title: method })) : [],
+                acceptedPaymentMethods: serviceToEdit.acceptedPaymentMethods ? serviceToEdit.acceptedPaymentMethods.map((method: string) => ({title: method})) : [],
                 description: serviceToEdit.description,
                 certificateId: serviceToEdit.certificateId,
                 defaultSlotTime: serviceToEdit.baseDuration.toString(),
@@ -73,6 +73,7 @@ function AddServicePage() {
 
     const fetchCertificate = async (_id: string) => {
         try {
+            // Fetch certificate
             const certificateResponse = await axios.get(`/api/certificate/${_id}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -88,13 +89,14 @@ function AddServicePage() {
 
     const handleDeleteCertificate = async () => {
         try {
+            // Delete certificate
             const response = await axios.delete(`/api/certificate/${serviceToEdit._id}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
             console.log('Certificate deleted:', response.data);
-            setCertificate(null);
+            setCertificate(null); // Reset the certificate state
         } catch (error) {
             console.error('Error deleting certificate:', error);
         }
@@ -184,7 +186,6 @@ function AddServicePage() {
                             'Authorization': `Bearer ${token}`
                         }
                     });
-
                     if (response.status === 201 && certificate && isCertificateUploaded) {
                         response = await axios.post(`/api/certificate/upload/${response.data._id}`, certificateForm, {
                             headers: {

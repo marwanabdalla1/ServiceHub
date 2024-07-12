@@ -215,11 +215,13 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
                     <Typography variant="body2" sx={{marginBottom: '1rem'}}>
                         Description: {item.comment}
                     </Typography>
-                    {renderActions()}
+                    <div style={{display: 'flex', flexWrap: 'nowrap', overflowX: 'auto'}}>
+                        {renderActions()}
+                    </div>
                 </CardContent>
             </Card>
-        );
-    }
+);
+}
 ;
 
 export default GenericProviderCard;

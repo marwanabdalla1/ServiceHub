@@ -141,23 +141,6 @@ function AvailabilityCalendarBooking({
                 title: "Available",
                 isBooked: event.isBooked,
             }));
-
-            // const events = response.data
-            //     .map(event:any => ({
-            //         ...event,
-            //         start: new Date(event.start),
-            //         end: new Date(event.end),
-            //     }))
-            //     .filter(event => {
-            //         const durationInMinutes = (event.end.getTime() - event.start.getTime()) / 60000;
-            //         console.log(event.start, event.end, "duration in min:", durationInMinutes, defaultSlotDuration);
-            //         return durationInMinutes > 0 && durationInMinutes > defaultSlotDuration;
-            //     })
-            //     .map(event => ({
-            //         ...event,
-            //         title: "Available",
-            //         isBooked: event.isBooked,
-            //     }));
             setAvailability(events);
 
             const nextDate = findNextAvailableSlot(events);
@@ -504,39 +487,44 @@ function AvailabilityCalendarBooking({
                 const start = startOfDay(range[0]);
                 const end = endOfDay(range[range.length - 1]);
 
-                const lastDate = new Date(Math.max(...availability.map(slot => slot.end.getTime())));
-                if (end > lastDate) {
-                    axios.post('/api/timeslots/extend', {
-                        start: lastDate,
-                        end: moment(lastDate).add(6, 'months').toDate(),
-                    }, {
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        }
-                    }).then(() => {
-                        // axios.get(`/api/timeslots/${providerId}`, {
-                        //     headers: {
-                        //         'Authorization': `Bearer ${token}`
-                        //     },
-                        //     params: {transitTime:defaultTransitTime}
-                        // }).then(response => {
-                        //     const events = response.data.map((event: any) => ({
-                        //         ...event,
-                        //         start: new Date(event.start),
-                        //         end: new Date(event.end),
-                        //         title: "Available",
-                        //         isBooked: event.isBooked,
-                        //     }));
-                        //     setAvailability(events);
-                        fetchAndSetAvailability(undefined);
-                    }).catch(error => {
-                        console.error("Error fetching timeslots:", error);
-                    });
-                    // }).catch(error => {
-                    //     console.error("Error extending fixed slots:", error);
-                    // });
-                } else {
-                    fetchAndSetAvailability({start, end});
+                // const lastDate = new Date(Math.max(...availability.map(slot => slot.end.getTime())));
+
+                fetchAndSetAvailability({start, end});
+
+
+                axios.post('/api/timeslots/extend', {
+                    // start: lastDate,
+                    start: start,
+                    end: end,
+                    // end: moment(lastDate).add(6, 'months').toDate(),
+                }, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                }).then(() => {
+                    // fetchAndSetAvailability({start, end});
+                }).catch(error => {
+                    console.error("Error extending fixed slots:", error);
+                });
+
+                // if (end > lastDate) {
+                //     axios.post('/api/timeslots/extend', {
+                //         start: lastDate,
+                //         end: moment(lastDate).add(6, 'months').toDate(),
+                //     }, {
+                //         headers: {
+                //             'Authorization': `Bearer ${token}`
+                //         }
+                //     }).then(() => {
+                //         fetchAndSetAvailability(undefined);
+                //     }).catch(error => {
+                //         console.error("Error fetching timeslots:", error);
+                //     });
+                //     // }).catch(error => {
+                //     //     console.error("Error extending fixed slots:", error);
+                //     // });
+                // } else {
+                //     fetchAndSetAvailability({start, end});
                     // axios.get(`/api/timeslots/${providerId}`, {
                     //     headers: {
                     //         'Authorization': `Bearer ${token}`
@@ -558,7 +546,7 @@ function AvailabilityCalendarBooking({
                     // }).catch(error => {
                     //     console.error("Error fetching timeslots:", error);
                     // });
-                }
+                // }
             }
         } catch (error: any) {
             console.log(error)
@@ -636,6 +624,18 @@ function AvailabilityCalendarBooking({
     const scrollToTime = new Date();
     scrollToTime.setHours(9, 0, 0, 0);
 
+    let formats = {
+        dateFormat: 'dd',
+
+        dayRangeHeaderFormat: ({ start, end }:{start: Date, end:Date}, culture:any) =>
+            `${localizer.format(start, 'MMM dd', culture)} — ${localizer.format(end, 'MMM dd, yyyy', culture)}`, // Short format for week range "Oct 01 — Oct 07"
+
+    }
+
+    const handleDrillDown = (event: any) => {
+        // Prevent any drill down action.
+        return;
+    };
     return (
         <div>
             <Calendar
@@ -648,6 +648,8 @@ function AvailabilityCalendarBooking({
                 date={currentDate} //go to next availability
                 // onNavigate={date => setCurrentDate(date)} // Update internal state when manually navigating
                 onNavigate={handleNavigate}
+                formats = {formats}
+                onDrillDown={handleDrillDown}
 
                 backgroundEvents={availability}
                 events={validEvents}

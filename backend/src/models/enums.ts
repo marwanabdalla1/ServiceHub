@@ -58,4 +58,5 @@ export enum NotificationType {
     RequestStatusChanged = "Request Status Changed", // 3
     newReview = "New Review", // 4
     timeRequestChanged = "Time Request Changed", // 5
+    lowAvailabilityAlert = "Low Availability Alert"
 }
