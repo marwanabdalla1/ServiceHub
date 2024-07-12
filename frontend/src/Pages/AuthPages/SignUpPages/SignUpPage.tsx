@@ -30,6 +30,14 @@ import {useRecovery} from "../../../contexts/RecoveryContext";
 import {checkEmptyFields} from "../../../validators/GeneralValidator";
 import {isValidEmail, isValidName} from "../../../validators/AccountDataValidator";
 
+interface UserData {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+}
+
+
 function Copyright(props: any) {
     return (
         <Typography variant="body2" color="text.secondary" align="center" {...props}>
@@ -96,14 +104,24 @@ export default function SignUp() {
                 return;
             }
 
-            createAccountEmail(email, firstName);
-            navigate("/signup/otp", {
-                state: {
-                    firstName, lastName, email, password
-                }
-            });
+            // createAccountEmail(email, firstName);
+            // navigate("/signup/otp", {
+            //     state: {
+            //         firstName, lastName, email, password
+            //     }
+            // });
+
+            const data: UserData = {
+                firstName: firstName,
+                lastName: lastName,
+                email: email,
+                password: password
+            };
+            await registerUser(data);
+            navigate('/');
+
         } catch (error: any) {
-            if(axios.isAxiosError(error)){
+            if (axios.isAxiosError(error)) {
                 toast.error(error.response?.data.error);
             }
         }
