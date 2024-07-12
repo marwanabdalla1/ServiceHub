@@ -33,7 +33,6 @@ function UpdateSProfile() {
         address: Yup.string().required('Address is required'),
         postal: Yup.string().matches(/^\d+$/, 'Postal code must be numeric').required('Postal code is required'),
         location: Yup.string().required('Location is required'),
-        country: Yup.string().required('Country is required'),
         phoneNumber: Yup.string().matches(/^\d+$/, 'Phone number must be numeric').required('Phone number is required')
     });
 

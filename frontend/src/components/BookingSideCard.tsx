@@ -34,7 +34,7 @@ const BookingSideCard: React.FC<BookingSideCardProps> = ({
                         <Typography variant="body2" color="text.secondary">{serviceOffering.serviceType}</Typography>
                     )}
                     {price && (
-                        <Typography variant="body2" color="text.secondary">{price} per hour</Typography>
+                        <Typography variant="body2" color="text.secondary">€{price} per hour</Typography>
                     )}
                 </Box>
             </CardContent>

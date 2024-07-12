@@ -16,7 +16,7 @@
   margin: 0;   /* Removes any margins */
   border: none !important;   /* No borders */
   border-radius: 0 !important;/* No rounded corners */
-  background-color: mistyrose !important;
+  background-color: #bbf7d0 !important;
   color: black !important;
   display: flex !important;              /* Enables flexbox layout */
   align-items: center !important;        /* Centers content vertically */
