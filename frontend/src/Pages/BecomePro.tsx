@@ -104,7 +104,7 @@ const BecomeProPage: React.FC = () => {
             </div>
         </div>
         <Typography style={{ marginRight: '10px' }}>
-    Boost your business with Pro Membership! Stand out in every search as our Pro Membership places you at the top of search results, ensuring maximum visibility for your services. Attract more clients, increase your leads, and grow your revenue faster than ever before. Join now and make it easier for clients to find you first. Sign up today and watch your business soar!
+    Boost your business with Pro Membership! Stand out in every search as our Pro Membership places you at the top of search results, ensuring maximum visibility for your services. Attract more clients, increase your leads, and grow your revenue faster than ever before. Join now with a monthly subscription and make it easier for clients to find you first. Sign up today and watch your business soar!
     </Typography>
 
         <BlackButton style={{ padding: '8px 18px', fontSize: '16px', marginTop: '16px' }} text="Join Now" onClick={handleJoinNow} />
