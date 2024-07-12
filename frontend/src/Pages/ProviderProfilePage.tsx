@@ -26,7 +26,6 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
-import Breadcrumb from "../components/Breadcrumb";
 import LightBlueButton from "../components/inputs/BlueButton";
 import {ServiceOffering} from '../models/ServiceOffering';
 import {Link, useParams, useNavigate} from 'react-router-dom';
@@ -264,13 +263,6 @@ function ProviderProfilePage() {
     return (
         <Container>
             <Box sx={{mt: 4}}>
-                <Breadcrumb paths={[
-                    // todo: change breadcrumb!
-                    {label: 'Home', href: '/'},
-                    {label: 'Munich', href: '/munich'},
-                    {label: 'Bike Repair', href: '/munich/bike-repair'},
-                    {label: `${provider.firstName} ${provider.lastName}`}
-                ]}/>
                 <Grid container spacing={4} sx={{mt: 2}}>
                     <Grid item xs={3}>
                         <Avatar

@@ -15,17 +15,17 @@ import NotificationRouter from "./routes/Notifications";
 import FeedbackRouter from "./routes/Feedback";
 import ProfileImageRouter from "./routes/ProfileImage";
 import CertificateRouter from "./routes/Certificate";
-
-
-// Import the models to ensure they are registered
-import './models/serviceOffering';
 import TimeSlotRouter from "./routes/TimeSlot";
 import ServiceRouter from "./routes/Service";
-import ProfileImage from "./routes/ProfileImage";
 import PaymentRouter from "./routes/PaymentRouter";
 import WebhookRouter from "./routes/WebhookRouter";
 import RecoveryRouter from "./routes/Recovery";
 import EmailRouter from "./routes/Email";
+import { env } from "process";
+import mongoose from "mongoose";
+
+// Import the models to ensure they are registered
+import './models/serviceOffering';
 
 const app = express();
 
@@ -37,16 +37,15 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+
 // Middleware for logging
 app.use(logger);
 
-app.use("/webhook", express.raw({ type: 'application/json' }), WebhookRouter); //DON'T MOVE THIS LINE AFTER EXPRESS.JSON
+app.use("/webhook", express.raw({ type: 'application/json' }), WebhookRouter); // DON'T MOVE THIS LINE AFTER EXPRESS.JSON
 app.use(express.json());
-app.use("/api/auth", AuthRouter);
-// authenticate users
-// app.use(authenticate)
 
 // Routes
+app.use("/api/auth", AuthRouter);
 app.use("/api/file", ProfileImageRouter);
 app.use("/api/certificate", CertificateRouter);
 app.use("/api/account", AccountRouter);
@@ -55,14 +54,12 @@ app.use("/api/offerings", OfferingRouter);
 app.use("/api/timeslots", TimeSlotRouter);
 app.use("/api/services", ServiceRouter);
 app.use("/api/becomepro", PaymentRouter);
-
 app.use("/api/requests", RequestRouter);
 app.use("/api/jobs", JobRouter);
 app.use("/api/reviews", ReviewRouter);
 app.use("/api/notifications", NotificationRouter);
 app.use("/api/email", EmailRouter);
 app.use("/api/feedback", FeedbackRouter);
-
 
 app.get("/", async (req, res, next) => {
     try {
@@ -79,5 +76,18 @@ app.use(notFoundHandler);
 
 // Error handling middleware
 app.use(errorHandler);
+
+const port = env.PORT || 8080;
+
+mongoose.connect(env.MONGO_CONNECTION_STRING || "")
+    .then(() => {
+        console.log("Connected to MongoDB");
+        app.listen(port, () => {
+            console.log(`Server running on port: ${port}`);
+        });
+    })
+    .catch((error) => {
+        console.error("MongoDB connection error:", error);
+    });
 
 export default app;

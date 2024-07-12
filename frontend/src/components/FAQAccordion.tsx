@@ -4,7 +4,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 interface FAQAccordionProps {
     question: string;
-    answer: React.ReactNode;  // Update this to accept React nodes
+    answer: React.ReactNode;  
 }
 
 const FAQAccordion: React.FC<FAQAccordionProps> = ({ question, answer }) => {
@@ -15,10 +15,10 @@ const FAQAccordion: React.FC<FAQAccordionProps> = ({ question, answer }) => {
                 aria-controls="panel1a-content"
                 id="panel1a-header"
             >
-                <Typography style={{ /*fontStyle: 'italic'*/ }}>{question}</Typography>
+                <Typography style={{ fontWeight: 'bold' }}>{question}</Typography>
             </AccordionSummary>
             <AccordionDetails>
-                <Typography>
+                <Typography style={{ wordWrap: 'break-word', maxHeight: '200px', overflowY: 'auto' }}>
                     {answer}
                 </Typography>
             </AccordionDetails>

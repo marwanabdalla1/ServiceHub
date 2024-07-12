@@ -37,6 +37,16 @@ export const addService = async (req: Request, res: Response, next: NextFunction
             return res.status(400).send('Invalid service type');
         }
 
+        // Check if the user already provides this service
+        const existingService = await ServiceOffering.findOne({
+            provider: userId,
+            serviceType: serviceType
+        });
+
+        if (existingService) {
+            return res.status(400).send('You already provide this service');
+        }
+
         // Create a new ServiceOffering object
         const newServiceOffering = new ServiceOffering({
             serviceType: serviceType,

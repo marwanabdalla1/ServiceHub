@@ -3,8 +3,8 @@ import {Link, useNavigate, useParams} from 'react-router-dom';
 import {Container, Box, Typography, Card, CardContent, Grid, Button} from '@mui/material';
 import {useBooking, BookingDetails} from '../../contexts/BookingContext';
 import {Account} from "../../models/Account";
-import AvailabilityCalendarBooking from "../../components/AvailabilityCalendarBooking";
-import BookingSideCard from "../../components/BookingSideCard";
+import AvailabilityCalendarBooking from "../AvailabilityCalendarBooking";
+import BookingSideCard from "../BookingSideCard";
 
 
 interface SelectTimeslotProps {

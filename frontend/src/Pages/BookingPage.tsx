@@ -1,12 +1,12 @@
 import React, {useEffect, useState} from 'react';
-import {useBooking} from '../../contexts/BookingContext';
-import StepOne from './CreateAccountOrSignIn';
-import StepTwo from './SelectTimeslotPage';
-import StepThree from './UpdateProfile';
-import StepFour from './ReviewAndConfirm';
+import {useBooking} from '../contexts/BookingContext';
+import StepOne from '../components/bookingSteps/CreateAccountOrSignIn';
+import StepTwo from '../components/bookingSteps/SelectTimeslotPage';
+import StepThree from '../components/bookingSteps/UpdateProfile';
+import StepFour from '../components/bookingSteps/ReviewAndConfirm';
 import {useNavigate, useParams} from 'react-router-dom';
 import {Stepper, Step, StepLabel, Button, Box, Container} from '@mui/material';
-import BookingSideCard from "../../components/BookingSideCard";
+import BookingSideCard from "../components/BookingSideCard";
 
 const BookingPage = () => {
     const {offeringId, step: stepParam} = useParams<{ offeringId: string; step?: string }>();

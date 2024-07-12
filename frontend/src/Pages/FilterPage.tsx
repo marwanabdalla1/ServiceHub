@@ -5,10 +5,11 @@ import { DrawerFilter } from '../components/DrawFilter';
 import Sort from '../components/Sort';
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from 'axios';
-import { Account } from '../models/Account';
+import { ServiceOffering } from '../models/ServiceOffering';
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
 import { Pagination } from '../components/Pagination';
+import { fetchProfileImages } from '../services/filterProfileImage'; // Import from the new file
 
 interface FilterState {
     type: string;
@@ -27,9 +28,9 @@ function FilterPage() {
         locations: [],
         isLicensed: undefined,
     });
-    const [offerings, setOfferings] = useState<Account[]>([]);
+    const [offerings, setOfferings] = useState<ServiceOffering[]>([]);
     const location = useLocation();
-    const searchTerm = location.state?.searchTerm ? location.state?.searchTerm : "";
+    const searchTerm = location.state?.searchTerm || ""; // Use empty string if searchTerm is not provided
     const [search, setSearch] = useState<string>(searchTerm);
     const [sortKey, setSortKey] = useState<string | null>(null);
     const [profileImages, setProfileImages] = useState<{ [key: string]: string }>({});
@@ -40,48 +41,6 @@ function FilterPage() {
     const [totalItems, setTotalItems] = useState(0); // To keep track of total items
     const navigate = useNavigate();
     console.log(defaultProfileImage);
-
-    const fetchProfileImage = async (account: Account) => {
-        try {
-            const response = await axios.get(`/api/file/profileImage/${account._id}`, {
-                responseType: 'blob'
-            });
-            if (response.status === 200) {
-                return URL.createObjectURL(response.data);
-            }
-        } catch (error) {
-            if ((error as any).response && (error as any).response.status === 404) {
-                console.log('No profile image found for account:', account._id);
-            } else {
-                console.error('Error fetching profile image:', error);
-            }
-        }
-        return defaultProfileImage; // Return default image on error or not found
-    };
-
-    const fetchProfileImages = async (accounts: Account[]) => {
-        const newProfileImages: { [key: string]: string } = {};
-        const newLoadingImages: { [key: string]: boolean } = {};
-        accounts.forEach(account => {
-            newLoadingImages[account._id] = true;
-        });
-        setLoadingImages(newLoadingImages);
-
-        await Promise.all(accounts.map(async (account) => {
-            const imageUrl = await fetchProfileImage(account);
-            newProfileImages[account._id] = imageUrl;
-            setProfileImages(prevImages => ({
-                ...prevImages,
-                [account._id]: imageUrl,
-            }));
-            setLoadingImages(prevLoading => ({
-                ...prevLoading,
-                [account._id]: false,
-            }));
-        }));
-
-        setLoading(false);
-    };
 
     useEffect(() => {
         const fetchAndSortOfferings = async () => {
@@ -94,62 +53,18 @@ function FilterPage() {
                 searchTerm: search,
                 page: currentPage,
                 limit: itemsPerPage,
+                sortKey, 
             };
 
             try {
-                const response = await axios.get<{ data: Account[], total: number }>('/api/offerings', { params });
-                let data = response.data.data;
+                const response = await axios.get<{ data: ServiceOffering[], total: number }>('/api/offerings', { params });
+                const data = response.data.data;
                 const totalItems = response.data.total;
                 setTotalItems(totalItems); // Set total items
 
-                const sortAccounts = (accounts: Account[]) => {
-                    if (sortKey === "priceAsc") {
-                        accounts.sort((a, b) => {
-                            const aRate = a.serviceOfferings.length > 0 ? a.serviceOfferings[0].hourlyRate : 0;
-                            const bRate = b.serviceOfferings.length > 0 ? b.serviceOfferings[0].hourlyRate : 0;
-                            return aRate - bRate;
-                        });
-                    } else if (sortKey === "priceDesc") {
-                        accounts.sort((a, b) => {
-                            const aRate = a.serviceOfferings.length > 0 ? a.serviceOfferings[0].hourlyRate : 0;
-                            const bRate = b.serviceOfferings.length > 0 ? b.serviceOfferings[0].hourlyRate : 0;
-                            return bRate - aRate;
-                        });
-                    } else if (sortKey === "ratingAsc") {
-                        accounts.sort((a, b) => {
-                            const aRating = a.serviceOfferings.length > 0 ? a.serviceOfferings[0].rating : 0;
-                            const bRating = b.serviceOfferings.length > 0 ? b.serviceOfferings[0].rating : 0;
-                            return aRating - bRating;
-                        });
-                    } else if (sortKey === "ratingDesc") {
-                        accounts.sort((a, b) => {
-                            const aRating = a.serviceOfferings.length > 0 ? a.serviceOfferings[0].rating : 0;
-                            const bRating = b.serviceOfferings.length > 0 ? b.serviceOfferings[0].rating : 0;
-                            return bRating - aRating;
-                        });
-                    }
-                };
-
-                sortAccounts(data);
-                const premiumAccounts = data.filter(account => account.isPremium);
-                const isFilterDefault = 
-                    filterState.type === '' &&
-                    filterState.priceRange[0] === 15 &&
-                    filterState.priceRange[1] === 60 &&
-                    filterState.locations.length === 0 &&
-                    filterState.isLicensed === undefined &&
-                    sortKey === null;
-
-                if (isFilterDefault) {
-                    data = [...premiumAccounts, ...data.filter(account => !account.isPremium)];
-                } else {
-                    const topPremiumAccounts = premiumAccounts.slice(0, 4);
-                    const remainingAccounts = data.filter(account => !topPremiumAccounts.includes(account));
-                    data = [...topPremiumAccounts, ...remainingAccounts];
-                }
                 setOfferings(data);
                 setLoading(false);
-                await fetchProfileImages(data);
+                await fetchProfileImages(data, setProfileImages, setLoadingImages, setLoading);
 
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -164,12 +79,11 @@ function FilterPage() {
     };
 
     const handleSearch = () => {
-        navigate("/filter");
+        navigate("/filter", { state: { searchTerm: search } });
     };
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(event.target.value);
-        navigate("/filter");
     };
 
     const clearFilters = () => {
@@ -215,7 +129,7 @@ function FilterPage() {
                     <>
                         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mx-auto bg-slate-50 max-w-screen-2xl'>
                             {offerings.map((offering) => (
-                                <MediaCard key={offering._id} user={offering}
+                                <MediaCard key={offering._id} offering={offering}
                                            profileImageUrl={profileImages[offering._id] || defaultProfileImage}
                                            loading={loadingImages[offering._id]} />
                             ))}

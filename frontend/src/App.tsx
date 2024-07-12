@@ -14,8 +14,8 @@ import {BookingProvider} from "./contexts/BookingContext";
 
 import axios from "axios";
 import {AccountProvider} from "./contexts/AuthContext";
-import BookingPage from "./Pages/bookingSteps/BookingPage";
-import ConfirmationPage from "./Pages/bookingSteps/ConfirmationPage";
+import BookingPage from "./Pages/BookingPage";
+import ConfirmationPage from "./components/bookingSteps/ConfirmationPage";
 import FAQPage from "./Pages/FAQPage";
 import BecomeProPage from './Pages/BecomePro';
 import ResetPasswordPage from "./Pages/AuthPages/ForgetPasswordPages/ResetPasswordPage";
@@ -55,7 +55,7 @@ function App() {
     }, []);
 
     return (
-        <div>
+        <div className="h-screen flex flex-col">
             <ToastContainer
                 position="top-right"
                 autoClose={3000}
@@ -96,7 +96,7 @@ function MainRoutes({search, setSearch}: { search: any, setSearch: any }) {
     const showAdminNavBar = location.pathname.includes("/admin");
     return (
         <div className="h-screen flex flex-col" style={{paddingTop: '80px'}}>
-            <div>
+            <div className="h-screen flex flex-col">
                 {showNavBar && !showAdminNavBar && <NavigationBar
                     toggleDrawer={() => {
                     }}
@@ -107,6 +107,7 @@ function MainRoutes({search, setSearch}: { search: any, setSearch: any }) {
                     search={search}
                     setSearch={setSearch}/>}
                 {showAdminNavBar && <AdminNavbar/>}
+                <div className="flex-grow">
                 <Routes>
                     {/* Home */}
                     <Route path="/" element={<HomePage/>}/>
@@ -185,6 +186,7 @@ function MainRoutes({search, setSearch}: { search: any, setSearch: any }) {
             <div>
                 <Divider variant="middle" style={{backgroundColor: 'white', height: '50px'}}/>
                 <Footer/>
+            </div>
             </div>
         </div>
     );

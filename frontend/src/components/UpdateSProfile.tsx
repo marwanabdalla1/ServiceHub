@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Box, Typography, Card, CardContent, TextField, Button, Grid, CircularProgress } from '@mui/material';
+import { Container, Box, Typography, Card, CardContent, TextField, Button, Grid, CircularProgress, Stepper, Step, StepLabel } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 import { Formik, Field, Form, ErrorMessage } from 'formik';
@@ -82,6 +82,19 @@ function UpdateSProfile() {
                     <Typography variant="h4" gutterBottom>
                         Please confirm your contact data
                     </Typography>
+
+                    <Stepper activeStep={0} alternativeLabel sx={{ mb: 2 }}>
+                        <Step>
+                            <StepLabel>Check Profile</StepLabel>
+                        </Step>
+                        <Step disabled>
+                            <StepLabel>Add Service</StepLabel>
+                        </Step>
+                        <Step disabled>
+                            <StepLabel>Add Availability</StepLabel>
+                        </Step>
+                    </Stepper>
+
                     <Card>
                         <CardContent>
                             <Typography variant="h6" gutterBottom>
