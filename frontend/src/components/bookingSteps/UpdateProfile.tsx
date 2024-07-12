@@ -4,8 +4,6 @@ import {Container, Box, Typography, Card, CardContent, TextField, Button, Grid} 
 import {useBooking, BookingDetails} from '../../contexts/BookingContext';
 import axios from "axios";
 import {useAuth} from "../../contexts/AuthContext";
-import BookingSideCard from "../BookingSideCard";
-
 
 interface UpdateProfileProps {
     onNext: () => void;
