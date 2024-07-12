@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react';
 import {Calendar, dateFnsLocalizer, SlotInfo} from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './calendarStyles.css';
-import {format, startOfWeek, parseISO, getDay, startOfDay, endOfDay} from 'date-fns';
+import {format, startOfWeek,endOfWeek, parseISO, getDay, startOfDay, endOfDay} from 'date-fns';
 import {enUS} from '@mui/material/locale';
 import {
     Dialog,
@@ -93,8 +93,15 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
 
     console.log(token);
     useEffect(() => {
-        fetchEvents(new Date(), new Date());
-    }, [token]);
+        const now = new Date();
+        const start = startOfWeek(now, { weekStartsOn: 1 }); // Assumes week starts on Monday
+        const end = endOfWeek(now, { weekStartsOn: 1 }); // Adjust according to the end of the week
+        fetchEvents(start, end)
+    }, [token]); // Dependency array ensures this runs only when fetchedEvents changes
+
+    useEffect(() => {
+        console.log("Updated fetched events:", fetchedEvents);
+    }, [fetchedEvents]);
 
 
     const handleSelect = async ({start, end}: SlotInfo) => {
@@ -226,10 +233,13 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
             try {
                 // Construct the URL for the PATCH request
                 // const url = `/api/events/${selectedTimeSlot.id}/fixed`; // Assuming `id` is how you reference events
+                console.log("selected Timeslot:", selectedTimeSlot)
 
                 const updatedTimeSlot = {
                     ...selectedTimeSlot,
-                    isFixed: true
+                    isFixed: true,
+
+                    createdById: account?._id
                 };
 
 
@@ -270,10 +280,12 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
 
     const fetchEvents = async (start: Date, end: Date) => {
         try {
+            console.log("start and end in fetchEvents frontend:",start.toISOString(), end.toISOString())
             const response = await axios.get('/api/timeslots', {
                 headers: {'Authorization': `Bearer ${token}`},
                 params: {start: start.toISOString(), end: end.toISOString()}
             });
+            console.log("fetchEvents frontend start and end:", start, end)
             const allEvents = response.data.map((event: any) => ({
                 ...event,
                 start: new Date(event.start),
@@ -286,8 +298,12 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
             const editableEvents = allEvents.filter((event: TimeSlot) => !event.isBooked);
             // setBookedEvents(bookedEvents);
             // setAvailability(editableEvents);
+            console.log("fetched before", fetchedEvents)
+
             setFetchedEvents(allEvents)
-            console.log("fetched", fetchedEvents)
+            console.log("all events", allEvents)
+            console.log("fetched after", fetchedEvents)
+
         } catch (error) {
             console.error("Error fetching timeslots:", error);
         }
@@ -298,25 +314,32 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
         if (Array.isArray(range)) {
             const start = startOfDay(range[0]);
             const end = endOfDay(range[range.length - 1]);
+            console.log("end", end)
 
             const lastDate = new Date(Math.max(.../*availability*/fetchedEvents.map(slot => slot.end.getTime())));
-            if (end > lastDate) {
-                axios.post('/api/timeslots/extend', {
-                    start: lastDate,
-                    end: moment(lastDate).add(6, 'months').toDate(),
-                }, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                }).then(() => {
+            fetchEvents(start, end)
 
-                    fetchEvents(start, end)
-                }).catch(error => {
-                    console.error("Error extending fixed slots:", error);
-                });
-            } else {
+            console.log("fetched events after range change,", fetchedEvents)
+
+            // if (end > lastDate) {
+            //     console.log("need to extend calendar, here is frontend")
+            axios.post('/api/timeslots/extend', {
+                // start: lastDate,
+                start: start,
+                end: end,
+                // end: moment(lastDate).add(6, 'months').toDate(),
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            }).then(() => {
                 fetchEvents(start, end)
-            }
+            }).catch(error => {
+                console.error("Error extending fixed slots:", error);
+            });
+            // } else {
+            //     fetchEvents(start, end)
+            // }
         }
     };
 
