@@ -317,8 +317,8 @@ export const handleTimeChange = async ({
     // Prepare notification data
     const notificationData = {
         isViewed: false,
-        content: `Please change the booking time for your service request ${selectedRequest.serviceType} on the ${formatDateTime(selectedRequest.timeslot?.start)}.${
-            comment ? `\n Comment from the provider: ${comment}` : ''
+        content: `Please change the booking time for your service request ${selectedRequest.serviceType} originally scheduled on the ${formatDateTime(selectedRequest.timeslot?.start)}.${
+            (comment && comment!="") ? `\n Comment from the provider: ${comment}` : ''
         }`,
         serviceRequest: selectedRequest._id,
         recipient: selectedRequest.requestedBy._id,

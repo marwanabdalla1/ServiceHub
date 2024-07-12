@@ -44,7 +44,7 @@ const BookingPage = () => {
         if (step !== stepNumber) {
             navigate(`/offerings/${offeringId}/booking/step${step}`);
         }
-    }, [step, stepNumber, offeringId, navigate]);
+    }, [step, stepNumber, offeringId]);
 
     // unmount resetting
     useEffect(() => {
@@ -68,16 +68,13 @@ const BookingPage = () => {
         navigate(`/offerings/${bookingDetails.serviceOffering?._id}`);
     };
 
-    // const nextStep = () => {
-    //     if (step < 4) setStep(step + 1);
-    // };
-    //
-    // const previousStep = () => {
-    //     if (step > 1) setStep(step - 1);
-    // };
+    const nextStep = () => {
+        if (step < 4) setStep(step + 1);
+    };
 
-    const nextStep = () => setStep((prevStep) => prevStep < 4 ? prevStep + 1 : prevStep);
-    const previousStep = () => setStep((prevStep) => prevStep > 1 ? prevStep - 1 : prevStep);
+    const previousStep = () => {
+        if (step > 1) setStep(step - 1);
+    };
 
     const currentStep = () => {
         // console.log("go to step:", gotoStep)
