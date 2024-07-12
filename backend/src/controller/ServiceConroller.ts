@@ -1,8 +1,11 @@
 import {Request, Response, NextFunction} from 'express';
 import ServiceOffering from "../models/serviceOffering";
 import Account from '../models/account';
-import {Types} from 'mongoose';
-import {ServiceType} from '../models/enums'; // Assuming this is where your enum is defined
+import mongoose, {Types} from 'mongoose';
+import {JobStatus, RequestStatus, ServiceType} from '../models/enums'; // Assuming this is where your enum is defined
+import serviceRequest from '../models/serviceRequest';
+import review from '../models/review';
+import job from '../models/job';
 
 
 export const addService = async (req: Request, res: Response, next: NextFunction) => {
@@ -162,6 +165,17 @@ export const deleteService = async (req: Request, res: Response, next: NextFunct
             return res.status(403).send('Unauthorized to delete this service offering');
         }
 
+        await review.deleteMany({ serviceOffering: new mongoose.Types.ObjectId(serviceId) });
+
+        await serviceRequest.updateMany(
+            { provider: new mongoose.Types.ObjectId(userId) },
+            { $set: { serviceOffering: null }, requestStatus: RequestStatus.cancelled }
+        );
+
+        await job.updateMany(
+            { provider: new mongoose.Types.ObjectId(userId) },
+            { $set: { serviceOffering: null }, status: JobStatus.cancelled }
+        );
         // Delete the service offering from the database
         await serviceOffering.deleteOne();
 
