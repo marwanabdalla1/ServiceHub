@@ -88,16 +88,33 @@ const BecomeProPage: React.FC = () => {
 
     return (
         <div className='flex flex-col items-center justify-center mt-4'>
-            <div className="w-3/4 flex flex-col rounded md:flex-row items-center bg-customGreen pl-8">
-                <div className="text-left">
-                    <h1 className="text-4xl font-bold mb-4">ServiceHub: Connecting You to the Best, for All Your
-                        Needs!</h1>
-                    <BlackButton className="py-2" text="Join Now" onClick={handleJoinNow}/>
-                </div>
-                <div className="md:mt-0 mr-0">
-                    <img src="/images/handshake.png" alt="Handshake" className="w-full"/>
-                </div>
+        <div className="w-3/4 flex flex-col rounded md:flex-row items-center bg-customGreen pl-8">
+        <div className="text-left w-2/3">
+        <h1 className="text-5xl font-bold mb-4">Take your craft to</h1>
+        <h1 className="text-5xl font-bold mb-4">the next level</h1>
+        <div className="flex items-center mb-4">
+            <div className="flex flex-col items-center mr-4">
+                <h3 className="text-2xl font-bold">5+</h3>
+                <h3>Testimonials</h3>
             </div>
+            <div className="border-l-2 border-gray-900 h-12 mx-4"></div>
+            <div className="flex flex-col items-center">
+                <h3 className="text-2xl font-bold">10+</h3>
+                <h3>Pro Customers</h3>
+            </div>
+        </div>
+        <Typography style={{ marginRight: '10px' }}>
+    Boost your business with Pro Membership! Stand out in every search as our Pro Membership places you at the top of search results, ensuring maximum visibility for your services. Attract more clients, increase your leads, and grow your revenue faster than ever before. Join now and make it easier for clients to find you first. Sign up today and watch your business soar!
+    </Typography>
+
+        <BlackButton style={{ padding: '8px 18px', fontSize: '16px', marginTop: '16px' }} text="Join Now" onClick={handleJoinNow} />
+    </div>
+    <div className="md:mt-0 mr-0 w-1/3">
+        <img src="/images/handshake.png" alt="Handshake" className="w-full"/>
+    </div>
+</div>
+
+
             {/* Review Section */}
             <div className="w-3/4 mt-8">
                 <h2 className="text-3xl font-bold mb-4">What Our Pro Members Say</h2>
