@@ -37,7 +37,7 @@ import {useAuth} from "../contexts/AuthContext";
 import {response} from "express";
 import * as url from "node:url";
 import StarIcon from '@mui/icons-material/Star';
-import {fetchProfileImageById, fetchReviewerProfileImages} from "../services/filterProfileImage";
+import {defaultProfileImage, fetchProfileImageById, fetchReviewerProfileImages} from "../services/filterProfileImage";
 
 // !todo s
 // 1. link reviews
@@ -78,7 +78,6 @@ export interface Review {
 }
 
 function ProviderProfilePage() {
-    const defaultProfileImage = '/images/default-profile.png'; // Use relative path for public folder
     const {fetchAccountDetails, fetchOfferingDetails} = useBooking();
     const [provider, setProvider] = useState<ServiceProvider | null>(null);
     const [offering, setOffering] = useState<ServiceOffering | null>(null);
@@ -241,7 +240,7 @@ function ProviderProfilePage() {
                         <Avatar
                             variant="square"
                             sx={{width: '100%', height: 200}}
-                            src={profileImage ? profileImage : undefined}
+                            src={profileImage ? profileImage : defaultProfileImage}
                         />
                     </Grid>
                     <Grid item xs={9}>
@@ -469,7 +468,7 @@ function ProviderProfilePage() {
                                         <CardContent>
                                             <Box sx={{display: 'flex', alignItems: 'center', mb: 2}}>
                                                 <Avatar
-                                                    src={reviewerProfileImages[review.reviewer._id] || "../../public/images/profiles/default-profile-image.png"}
+                                                    src={reviewerProfileImages[review.reviewer._id] || defaultProfileImage}
                                                     sx={{mr: 2}}
                                                     alt={`${review.reviewer.firstName} ${review.reviewer.lastName}`}
                                                 />

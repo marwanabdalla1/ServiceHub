@@ -3,7 +3,7 @@ import { ServiceOffering } from '../models/ServiceOffering';
 import React from "react";
 import { Review } from '../Pages/ProviderProfilePage';
 
-const defaultProfileImage = '/images/default-profile.png'; // Use relative path for public folder
+export const defaultProfileImage = '/images/default-profile.png'; // Use relative path for public folder
 
 export const fetchProfileImageByToken = async (token: string): Promise<string> => {
     try {
