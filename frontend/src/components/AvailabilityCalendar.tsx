@@ -2,7 +2,8 @@ import React, {useState, useEffect} from 'react';
 import {Calendar, dateFnsLocalizer, SlotInfo} from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './calendarStyles.css';
-import {format, startOfWeek,endOfWeek, parseISO, getDay, startOfDay, endOfDay} from 'date-fns';
+import { NavigateAction, ToolbarProps } from 'react-big-calendar';
+import {format, startOfWeek,endOfWeek, parseISO, getDay, getYear, startOfDay, endOfDay} from 'date-fns';
 import {enUS} from '@mui/material/locale';
 import {
     Dialog,
@@ -39,6 +40,7 @@ const localizer = dateFnsLocalizer({
     parse: parseISO,
     startOfWeek: () => startOfWeek(new Date(), {weekStartsOn: 1}),
     getDay,
+    getYear,
     locales,
 });
 
@@ -333,7 +335,8 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
                     'Authorization': `Bearer ${token}`
                 }
             }).then(() => {
-                fetchEvents(start, end)
+                // no need to fetch again i guess
+                // fetchEvents(start, end)
             }).catch(error => {
                 console.error("Error extending fixed slots:", error);
             });
@@ -417,6 +420,61 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
     const scrollToTime = new Date();
     scrollToTime.setHours(9, 0, 0, 0);
 
+
+    // const CustomToolbar = ({ label, onNavigate, onView }: ToolbarProps<TimeSlot>) => {
+    //     const currentYear = new Date().getFullYear();
+    //
+    //     return (
+    //         <div className="rbc-toolbar">
+    //   <span className="rbc-btn-group">
+    //     <button type="button" onClick={() => onNavigate(NavigateAction.PREVIOUS)}>Back</button>
+    //     <button type="button" onClick={() => onNavigate(NavigateAction.TODAY)}>Today</button>
+    //     <button type="button" onClick={() => onNavigate(NavigateAction.NEXT)}>Next</button>
+    //   </span>
+    //             <span className="rbc-toolbar-label">{label} - {currentYear}</span>
+    //             <span className="rbc-btn-group">
+    //     <button type="button" onClick={() => onView('week')}>Week</button>
+    //     <button type="button" onClick={() => onView('month')}>Month</button>
+    //   </span>
+    //         </div>
+    //     );
+    // };
+
+
+    let formats = {
+        dateFormat: 'dd',
+
+        // dayFormat: (date: Date, culture: any, localizer: any) =>
+        //     localizer.format(date, 'DDD', culture),
+
+        // dayFormat: (date: Date, culture: string,) =>
+        //     localizer.format(date, 'DDD', culture),
+        //
+        // dayRangeHeaderFormat: ({ start, end }:{start: Date, end:Date}, culture:any) =>
+        //     `${localizer.format(start, 'MMM dd', culture)} — ${localizer.format(end, 'MMM dd, yyyy', culture)}`, // Format range as "Oct 01 — Oct 07, 2022".
+
+        // weekRangeHeaderFormat: (date:Date, culture: any) =>
+        //     localizer.format(date, 'MMMM yyyy', culture), // Full month and year, e.g., "October 2022".
+        //
+        // monthHeaderFormat: (date:Date, culture:any) =>
+        //     localizer.format(date, 'MMMM yyyy', culture), // Full month and year, e.g., "October 2022".
+        //
+        // yearHeaderFormat: (date:Date, culture:any) =>
+        //     localizer.format(date, 'yyyy', culture) // Year only, e.g., "2022".
+
+        dayRangeHeaderFormat: ({ start, end }:{start: Date, end:Date}, culture:any) =>
+            `${localizer.format(start, 'MMM dd', culture)} — ${localizer.format(end, 'MMM dd, yyyy', culture)}`, // Short format for week range "Oct 01 — Oct 07"
+
+    }
+
+
+
+    const handleDrillDown = (event: any) => {
+        // Prevent any drill down action.
+        return;
+    };
+
+
     return (
         <div>
             <Calendar
@@ -429,8 +487,10 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
                 startAccessor={getStartAccessor}
                 endAccessor={getEndAccessor}
                 style={{height: 520}}
+                formats = {formats}
                 // onEventDrop={handleEventDrop}
                 // onEventResize={handleEventResize}
+                onDrillDown={handleDrillDown}
                 selectable
                 onSelectSlot={handleSelect}
                 onSelectEvent={handleSelectTimeSlot}
@@ -438,6 +498,11 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
                 eventPropGetter={eventPropGetter}
                 // backgroundEvents={bookedEvents}
                 className="bg-black-300" // Apply Tailwind class here
+                // components={{
+                //     week: {
+                //         header: MyCustomWeekDateHandler,
+                //     },
+                // }}
                 // components={{
                 //     event: ({ event }) => <EventTooltip event={event} />
                 // }}
@@ -483,6 +548,7 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
                     <Button onClick={() => setActionDialogOpen(false)}>Close</Button>
                     {/* Include Edit button logic here if needed */}
 
+                    {/*todo: make */}
                     <Button onClick={handleFixWeekly}>Repeat Weekly</Button>
                     <Button onClick={() => {
                         if (selectedTimeSlot?.isFixed) {

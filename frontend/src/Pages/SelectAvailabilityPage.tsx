@@ -60,9 +60,9 @@ const SelectAvailabilityPage: React.FC = () => {
 
     return (
         <Container maxWidth="lg">
-            <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mt: 3, mb:0 }}>
-                <Typography variant="h5">
-                    Set Your Schedule
+            <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mt: 3, mb:2 }}>
+                <Typography variant="h4">
+                    My Schedule
                 </Typography>
             </Box>
             <AvailabilityCalendar

@@ -52,7 +52,7 @@ async function generateWeeklyInstances(events: ITimeslot[], existingTimeslots: I
                     title: event.title,
                     start: start,
                     end: end,
-                    isFixed: event.isFixed,
+                    isFixed: true,
                     isBooked: event.isBooked,
                     createdById: event.createdById
                 } as ITimeslot;
@@ -796,8 +796,8 @@ export const turnExistingEventIntoFixed: RequestHandler = async (req, res, next)
             const futureEndDate = moment(eventToUpdate.end).endOf('week').add(6, 'months');
             let existingTimeslots: ITimeslot[] = [];
             try {
-                // Asynchronously get existing timeslots
-                existingTimeslots = await getEventsDirect(userId);
+                // Asynchronously get existing timeslots in the future
+                existingTimeslots = await getEventsDirect(userId, eventToUpdate.start.toISOString(), futureEndDate.toISOString());
                 console.log("existing timeslots for turning into fixed:", existingTimeslots.length)
             } catch (error) {
                 console.error("Error fetching existing timeslots:", error);
