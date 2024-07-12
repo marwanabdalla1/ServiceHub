@@ -19,7 +19,7 @@ import {useAuth} from "../../contexts/AuthContext";
 import {Timeslot} from "../../models/Timeslot";
 import {bookTimeSlot, BookingError} from '../../services/timeslotService';
 import useAlert from "../../hooks/useAlert";
-import AlertCustomized from "../../components/AlertCustomized";
+import AlertCustomized from "../AlertCustomized";
 
 
 interface ReviewAndConfirmProps {

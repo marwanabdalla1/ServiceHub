@@ -5,10 +5,10 @@ import ServiceOffering from "../models/serviceOffering";
 export const getOfferings = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userId = (req as any).user; // Assuming userId is available in the request (e.g., from authentication middleware)
-        console.log('User id ' + userId)
+        console.log('User id ' + userId);
         console.log("Getting offerings");
 
-        const { type, priceRange, locations, isLicensed, searchTerm, page = 1, limit = 10 } = req.query;
+        const { type, priceRange, locations, isLicensed, searchTerm, page = 1, limit = 10, sortKey } = req.query;
         const filters = {
             type,
             priceRange: priceRange ? (priceRange as string).split(',').map(Number) : [],
@@ -23,7 +23,7 @@ export const getOfferings = async (req: Request, res: Response, next: NextFuncti
             console.log(`Fetching offerings for user ID: ${userId}`);
 
             const userOfferings = await ServiceOffering.find({ provider: userId }).populate('provider');
-            console.log('User offerings:', userOfferings);
+            // console.log('User offerings:', userOfferings);
 
             if (!userOfferings || userOfferings.length === 0) {
                 return res.status(404).json({ message: 'No service offerings found for the authenticated user' });
@@ -41,8 +41,29 @@ export const getOfferings = async (req: Request, res: Response, next: NextFuncti
 
             console.log('Filtered offerings found:', filteredOfferings.length);
 
+            // Separate premium and non-premium offerings
+            const premiumOfferings = filteredOfferings.filter(offering => offering.provider.isPremium);
+            const nonPremiumOfferings = filteredOfferings.filter(offering => !offering.provider.isPremium);
+
+            // Sort the premium offerings
+            if (sortKey) {
+                sortOfferings(premiumOfferings, sortKey as string);
+            }
+
+            // Take the top 4 premium offerings
+            const topPremiumOfferings = premiumOfferings.slice(0, 4);
+
+            // Sort the remaining offerings (including any additional premium offerings not in the top 4)
+            const remainingOfferings = [...premiumOfferings.slice(4), ...nonPremiumOfferings];
+            if (sortKey) {
+                sortOfferings(remainingOfferings, sortKey as string);
+            }
+
+            // Combine the sorted top premium offerings with the rest of the sorted offerings
+            const sortedOfferings = [...topPremiumOfferings, ...remainingOfferings];
+
             // Pagination logic
-            const paginatedOfferings = filteredOfferings.slice((Number(page) - 1) * Number(limit), Number(page) * Number(limit));
+            const paginatedOfferings = sortedOfferings.slice((Number(page) - 1) * Number(limit), Number(page) * Number(limit));
 
             return res.json({
                 data: paginatedOfferings,
@@ -95,13 +116,26 @@ const filterOfferings = (offerings: any[], filters: any) => {
     });
 };
 
+// Helper function to sort offerings
+const sortOfferings = (offerings: any[], sortKey: string) => {
+    if (sortKey === "priceAsc") {
+        offerings.sort((a, b) => a.hourlyRate - b.hourlyRate);
+    } else if (sortKey === "priceDesc") {
+        offerings.sort((a, b) => b.hourlyRate - a.hourlyRate);
+    } else if (sortKey === "ratingAsc") {
+        offerings.sort((a, b) => a.rating - b.rating);
+    } else if (sortKey === "ratingDesc") {
+        offerings.sort((a, b) => b.rating - a.rating);
+    }
+};
+
 export const getServiceOfferingById = async (req: Request, res: Response) => {
     console.log("Full URL:", req.protocol + '://' + req.get('host') + req.originalUrl);
-    const {offeringId} = req.params;
+    const { offeringId } = req.params;
     console.log("params:", req.params);
     try {
         const offering = await ServiceOffering.findById(offeringId)//.populate('provider');
-        console.log("finding service...")
+        console.log("finding service...");
         if (!offering) {
             return res.status(404).json({ message: 'Service offering not found' });
         }
@@ -113,7 +147,7 @@ export const getServiceOfferingById = async (req: Request, res: Response) => {
 
 export const getServiceOfferingsByUser = async (req: Request, res: Response) => { //The authenticated version of the getOfferings function (uses token)
     try {
-        console.log("getting offerings")
+        console.log("getting offerings");
         const userId = (req as any).user.userId;
         const offerings = await ServiceOffering.find({ provider: userId }).populate('provider');
         if (!offerings) {
@@ -124,4 +158,4 @@ export const getServiceOfferingsByUser = async (req: Request, res: Response) => 
     } catch (err: any) {
         res.status(500).json({ message: err.message });
     }
-}
+};

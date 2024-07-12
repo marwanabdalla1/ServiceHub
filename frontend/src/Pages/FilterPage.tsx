@@ -9,6 +9,7 @@ import { ServiceOffering } from '../models/ServiceOffering';
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
 import { Pagination } from '../components/Pagination';
+import { fetchProfileImages } from '../services/filterProfileImage'; // Import from the new file
 
 interface FilterState {
     type: string;
@@ -29,7 +30,7 @@ function FilterPage() {
     });
     const [offerings, setOfferings] = useState<ServiceOffering[]>([]);
     const location = useLocation();
-    const searchTerm = location.state?.searchTerm ? location.state?.searchTerm : "";
+    const searchTerm = location.state?.searchTerm || ""; // Use empty string if searchTerm is not provided
     const [search, setSearch] = useState<string>(searchTerm);
     const [sortKey, setSortKey] = useState<string | null>(null);
     const [profileImages, setProfileImages] = useState<{ [key: string]: string }>({});
@@ -40,48 +41,6 @@ function FilterPage() {
     const [totalItems, setTotalItems] = useState(0); // To keep track of total items
     const navigate = useNavigate();
     console.log(defaultProfileImage);
-
-    const fetchProfileImage = async (providerId: string) => {
-        try {
-            const response = await axios.get(`/api/file/profileImage/${providerId}`, {
-                responseType: 'blob'
-            });
-            if (response.status === 200) {
-                return URL.createObjectURL(response.data);
-            }
-        } catch (error) {
-            if ((error as any).response && (error as any).response.status === 404) {
-                console.log('No profile image found for provider:', providerId);
-            } else {
-                console.error('Error fetching profile image:', error);
-            }
-        }
-        return defaultProfileImage; // Return default image on error or not found
-    };
-
-    const fetchProfileImages = async (offerings: ServiceOffering[]) => {
-        const newProfileImages: { [key: string]: string } = {};
-        const newLoadingImages: { [key: string]: boolean } = {};
-        offerings.forEach(offering => {
-            newLoadingImages[offering._id] = true;
-        });
-        setLoadingImages(newLoadingImages);
-
-        await Promise.all(offerings.map(async (offering) => {
-            const imageUrl = await fetchProfileImage(offering.provider._id);
-            newProfileImages[offering._id] = imageUrl;
-            setProfileImages(prevImages => ({
-                ...prevImages,
-                [offering._id]: imageUrl,
-            }));
-            setLoadingImages(prevLoading => ({
-                ...prevLoading,
-                [offering._id]: false,
-            }));
-        }));
-
-        setLoading(false);
-    };
 
     useEffect(() => {
         const fetchAndSortOfferings = async () => {
@@ -94,46 +53,18 @@ function FilterPage() {
                 searchTerm: search,
                 page: currentPage,
                 limit: itemsPerPage,
+                sortKey, 
             };
 
             try {
                 const response = await axios.get<{ data: ServiceOffering[], total: number }>('/api/offerings', { params });
-                let data = response.data.data;
+                const data = response.data.data;
                 const totalItems = response.data.total;
                 setTotalItems(totalItems); // Set total items
 
-                const sortOfferings = (offerings: ServiceOffering[]) => {
-                    if (sortKey === "priceAsc") {
-                        offerings.sort((a, b) => a.hourlyRate - b.hourlyRate);
-                    } else if (sortKey === "priceDesc") {
-                        offerings.sort((a, b) => b.hourlyRate - a.hourlyRate);
-                    } else if (sortKey === "ratingAsc") {
-                        offerings.sort((a, b) => a.rating - b.rating);
-                    } else if (sortKey === "ratingDesc") {
-                        offerings.sort((a, b) => b.rating - a.rating);
-                    }
-                };
-
-                sortOfferings(data);
-                const premiumOfferings = data.filter(offering => offering.provider.isPremium);
-                const isFilterDefault = 
-                    filterState.type === '' &&
-                    filterState.priceRange[0] === 15 &&
-                    filterState.priceRange[1] === 60 &&
-                    filterState.locations.length === 0 &&
-                    filterState.isLicensed === undefined &&
-                    sortKey === null;
-
-                if (isFilterDefault) {
-                    data = [...premiumOfferings, ...data.filter(offering => !offering.provider.isPremium)];
-                } else {
-                    const topPremiumOfferings = premiumOfferings.slice(0, 4);
-                    const remainingOfferings = data.filter(offering => !topPremiumOfferings.includes(offering));
-                    data = [...topPremiumOfferings, ...remainingOfferings];
-                }
                 setOfferings(data);
                 setLoading(false);
-                await fetchProfileImages(data);
+                await fetchProfileImages(data, setProfileImages, setLoadingImages, setLoading);
 
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -148,12 +79,11 @@ function FilterPage() {
     };
 
     const handleSearch = () => {
-        navigate("/filter");
+        navigate("/filter", { state: { searchTerm: search } });
     };
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(event.target.value);
-        navigate("/filter");
     };
 
     const clearFilters = () => {

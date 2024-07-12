@@ -67,7 +67,7 @@ export const uploadProfileImage: RequestHandler = async (req, res) => {
 
             // Delete the previous profile image if it exists
             if (user.get('profileImageId') != ""&& user.get('profileImageId') != null && user.get('profileImageId') != undefined) {
-                console.log("Profile Image exists with ID: ", user.get('profileImageId'));
+                // console.log("Profile Image exists with ID: ", user.get('profileImageId'));
                 const _id = new ObjectId(user.get('profileImageId'));
                 bucket.delete(_id).then(() => {
                     console.log("Profile Image deleted successfully");
@@ -85,7 +85,7 @@ export const uploadProfileImage: RequestHandler = async (req, res) => {
             if (!updatedUser) {
                 return res.status(404).send({message: 'User not found'});
             }
-            console.log("user: ", updatedUser);
+            // console.log("user: ", updatedUser);
             return res.status(200).json(req.file);
         });
     } catch (err: any) {
@@ -112,11 +112,11 @@ async function getProfileImage(userId: string, res: express.Response) {
     }
     try {
         if (user.get('profileImageId') === ""|| user.get('profileImageId') === null || user.get('profileImageId') === undefined){
-            console.log("No profile image found for user: ", user.get('firstName'));
+            // console.log("No profile image found for user: ", user.get('firstName'));
             return res.status(404).json({error: 'No profile image found for user'});
         }
         const _id = new ObjectId(user.get('profileImageId'));
-        console.log("Profile Image ID: ", _id);
+        // console.log("Profile Image ID: ", _id);
 
         const downloadStream = bucket.openDownloadStream(_id);
 
@@ -156,7 +156,7 @@ export const getProfileImageByAuth: RequestHandler = async (req, res) => {
 export const getProfileImageByUserId: RequestHandler = async (req, res) => {
     try {
         const userId = req.params.userId
-        console.log("User ID: ", userId);
+        // console.log("User ID: ", userId);
         await getProfileImage(userId, res);
 
     } catch (error) {

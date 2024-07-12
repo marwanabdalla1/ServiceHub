@@ -63,7 +63,6 @@ const Navbar: React.FC<NavbarProps> = ({ toggleDrawer, onChange, onSearch, searc
     const navigate = useNavigate();
     const location = useLocation();
 
-
     const isPremium = account?.isPremium || false;
     const isProvider = account?.isProvider || false;
     //console.log("token: " + token + '\n' + "isProvider: " + isProvider + '\n' + "isPremium: " + isPremium );
@@ -95,7 +94,6 @@ const Navbar: React.FC<NavbarProps> = ({ toggleDrawer, onChange, onSearch, searc
         setProfileAnchorEl(null);
     };
 
-
     const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(event.target.value);
     };
@@ -106,9 +104,9 @@ const Navbar: React.FC<NavbarProps> = ({ toggleDrawer, onChange, onSearch, searc
 
     return (
         <div style={{
-            position: 'fixed', // fixed on top
+            position: 'fixed', 
             top: 0,
-            width: '100%',     // takes the full width
+            width: '100%',     
             zIndex: 1100,
         }}>
             <div className="bg-blue-300 shadow-md h-20">
@@ -213,8 +211,7 @@ const Navbar: React.FC<NavbarProps> = ({ toggleDrawer, onChange, onSearch, searc
                 </Menu>
             </div>
         </div>
-    )
-        ;
+    );
 };
 
 export default Navbar;
