@@ -31,6 +31,7 @@ export class Account {
     lastName: string;
     email: string;
     phoneNumber?: string;
+    profileImageId?: string;
     address?: string;
     createdOn?: Date;
     profileImageUrl?: string;
@@ -56,6 +57,7 @@ export class Account {
         lastName: string,
         email: string,
         profileImageUrl?: string,
+        profileImageId?: string,
         rating?: number,
         serviceOfferings?: ServiceOffering[],
         phoneNumber?: string,
@@ -82,6 +84,7 @@ export class Account {
         this.address = address;
         this.createdOn = createdOn;
         this.profileImageUrl = profileImageUrl;
+        this.profileImageId = profileImageId;
         this.description = description;
         this.location = location;
         this.country = country;

@@ -37,6 +37,7 @@ import {useAuth} from "../contexts/AuthContext";
 import {response} from "express";
 import * as url from "node:url";
 import StarIcon from '@mui/icons-material/Star';
+import {fetchProfileImageById, fetchReviewerProfileImages} from "../services/filterProfileImage";
 
 // !todo s
 // 1. link reviews
@@ -58,7 +59,8 @@ const formatDate = (date: Date) => {
     return format(date, 'dd MMM yyyy, HH:mm');
 };
 
-interface Review {
+// TODO: should we use the review model instead of creating a new one?
+export interface Review {
     _id: string;
     reviewer: {
         _id: string;
@@ -76,6 +78,7 @@ interface Review {
 }
 
 function ProviderProfilePage() {
+    const defaultProfileImage = '/images/default-profile.png'; // Use relative path for public folder
     const {fetchAccountDetails, fetchOfferingDetails} = useBooking();
     const [provider, setProvider] = useState<ServiceProvider | null>(null);
     const [offering, setOffering] = useState<ServiceOffering | null>(null);
@@ -86,25 +89,13 @@ function ProviderProfilePage() {
     const [filterStars, setFilterStars] = useState<number | null>(null);
 
     const [nextAvailability, setNextAvailability] = useState<any>(null);
-    const [profileImage, setProfileImage] = useState<File | null>(null);
+    const [profileImage, setProfileImage] = useState<string | null>(null);
     const [reviewerProfileImages, setReviewerProfileImages] = useState<{ [key: string]: string }>({});
 
     // const provider = mockProvider;
     const {offeringId} = useParams<{ offeringId: string }>(); //use this to then make a request to the user with the id to get the user data
 
     const navigate = useNavigate();
-
-    const fetchProfileImage = async (_id: string) => {
-        try {
-            // Fetch profile image
-            const profileImageResponse = await axios.get(`/api/file/profileImage/${_id}`, {
-                responseType: 'blob'
-            });
-            setProfileImage(profileImageResponse.data);
-        } catch (error) {
-            console.error('Error fetching profile data:', error);
-        }
-    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -130,7 +121,8 @@ function ProviderProfilePage() {
                 try {
                     const fetchedProvider = await fetchAccountDetails(offeringId);
                     setProvider(fetchedProvider);
-                    fetchProfileImage(fetchedProvider._id).then(() => {
+                    fetchProfileImageById(fetchedProvider._id).then(image => {
+                        setProfileImage(image);
                         console.log("profile image fetched");
                     });
 
@@ -152,31 +144,12 @@ function ProviderProfilePage() {
     }, [offeringId]);
 
 
-    // Define the new function to fetch reviewer profile images
-    const fetchReviewerProfileImages = async (reviews: Review[]) => {
-        const newProfileImages: { [key: string]: string } = {};
-
-        await Promise.all(reviews.map(async (review) => {
-            console.log("current review: ", review);
-            try {
-                const profileImageResponse = await axios.get(`/api/file/profileImage/${review.reviewer._id}`, {
-                    responseType: 'blob'
-                });
-                if (profileImageResponse.status === 200) {
-                    newProfileImages[review.reviewer._id] = URL.createObjectURL(profileImageResponse.data);
-                }
-            } catch (error) {
-                console.error('Error fetching profile image:', error);
-            }
-        }));
-
-        setReviewerProfileImages(newProfileImages);
-    };
-
 // Use the useEffect hook to call the new function when reviews change
     useEffect(() => {
         if (reviews.length > 0) {
-            fetchReviewerProfileImages(reviews).then(r => { console.log("reviewer profile images fetched") });
+            fetchReviewerProfileImages(reviews).then(images => {
+                setReviewerProfileImages(images);
+            });
         }
     }, [reviews]);
 
@@ -268,20 +241,20 @@ function ProviderProfilePage() {
                         <Avatar
                             variant="square"
                             sx={{width: '100%', height: 200}}
-                            src={profileImage ? URL.createObjectURL(profileImage) : undefined}
+                            src={profileImage ? profileImage : undefined}
                         />
                     </Grid>
                     <Grid item xs={9}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                <Box sx={{ position: 'relative' }}>
+                        <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+                            <Box sx={{display: 'flex', alignItems: 'center'}}>
+                                <Box sx={{position: 'relative'}}>
                                     <Typography variant="h4" gutterBottom>
                                         {provider.firstName} {provider.lastName}
                                     </Typography>
                                     {provider.isPremium && (
                                         <Box sx={styles.premiumContainer}>
                                             <Typography variant="body2" sx={styles.premiumText}>Premium</Typography>
-                                            <StarIcon sx={styles.starIcon} />
+                                            <StarIcon sx={styles.starIcon}/>
                                         </Box>
                                     )}
                                 </Box>
@@ -308,7 +281,7 @@ function ProviderProfilePage() {
                                     </Typography>
                                 )}
                             </Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Box sx={{display: 'flex', alignItems: 'center'}}>
                                 <Typography variant="body2" color="text.secondary">
                                     {offering.serviceType}
                                 </Typography>
