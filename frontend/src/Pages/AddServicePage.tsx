@@ -4,6 +4,7 @@ import LightBlueButton from '../components/inputs/BlueButton';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
+import {toast} from "react-toastify";
 
 interface FormData {
     selectedService: { title: string } | null;
@@ -23,17 +24,17 @@ function AddServicePage() {
     const [certificate, setCertificate] = useState<File | null>(null);
     const [isCertificateUploaded, setIsCertificateUploaded] = useState<boolean>(false);
     const serviceTypes = [
-        { title: 'Bike Repair' },
-        { title: 'Moving Services' },
-        { title: 'Baby Sitting' },
-        { title: 'Tutoring' },
-        { title: 'Pet Sitting' },
-        { title: 'Landscaping Services' },
-        { title: 'Home Remodeling' },
-        { title: 'House Cleaning' }
+        {title: 'Bike Repair'},
+        {title: 'Moving Services'},
+        {title: 'Baby Sitting'},
+        {title: 'Tutoring'},
+        {title: 'Pet Sitting'},
+        {title: 'Landscaping Services'},
+        {title: 'Home Remodeling'},
+        {title: 'House Cleaning'}
     ];
     const paymentMethods = [
-        { title: 'Cash' }, { title: 'Paypal' }, { title: 'Bank Transfer' }
+        {title: 'Cash'}, {title: 'Paypal'}, {title: 'Bank Transfer'}
     ];
     const [formData, setFormData] = useState<FormData>({
         selectedService: null,
@@ -59,9 +60,9 @@ function AddServicePage() {
         if (isEditMode && serviceToEdit) {
             console.log('Service to edit:', serviceToEdit);
             setFormData({
-                selectedService: { title: serviceToEdit.serviceType },
+                selectedService: {title: serviceToEdit.serviceType},
                 hourlyRate: serviceToEdit.hourlyRate.toString(),
-                acceptedPaymentMethods: serviceToEdit.acceptedPaymentMethods ? serviceToEdit.acceptedPaymentMethods.map((method: string) => ({ title: method })) : [],
+                acceptedPaymentMethods: serviceToEdit.acceptedPaymentMethods ? serviceToEdit.acceptedPaymentMethods.map((method: string) => ({title: method})) : [],
                 description: serviceToEdit.description,
                 certificateId: serviceToEdit.certificateId,
                 defaultSlotTime: serviceToEdit.baseDuration.toString(),
@@ -73,6 +74,7 @@ function AddServicePage() {
 
     const fetchCertificate = async (_id: string) => {
         try {
+            // Fetch certificate
             const certificateResponse = await axios.get(`/api/certificate/${_id}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -88,13 +90,14 @@ function AddServicePage() {
 
     const handleDeleteCertificate = async () => {
         try {
+            // Delete certificate
             const response = await axios.delete(`/api/certificate/${serviceToEdit._id}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
             console.log('Certificate deleted:', response.data);
-            setCertificate(null);
+            setCertificate(null); // Reset the certificate state
         } catch (error) {
             console.error('Error deleting certificate:', error);
         }
@@ -107,7 +110,15 @@ function AddServicePage() {
     };
 
     const handleChange = (key: keyof FormData, value: any) => {
-        setFormData(prev => ({ ...prev, [key]: value }));
+        if (key === 'acceptedPaymentMethods') {
+            // E.g. map [{title: 'Cash'}, {title: 'Cash'}]  to Set['Cash','Cash'] -> ['Cash']->[title: 'Cash']
+            const uniquePaymentMethods = Array.from(new Set(value.map((item: {
+                title: string
+            }) => item.title))).map(title => ({title: title as string}));
+            setFormData(prev => ({...prev, [key]: uniquePaymentMethods}));
+        } else {
+            setFormData(prev => ({...prev, [key]: value}));
+        }
     };
 
     const validateForm = () => {
@@ -123,11 +134,28 @@ function AddServicePage() {
         return Object.values(newErrors).every(error => !error);
     };
 
+    const isNumberValid = (value: string, fieldName: string) => {
+        const number = Number(value);
+        const isValid = !isNaN(number) && isFinite(number);
+        if (!isValid) {
+            toast.error(`${fieldName} must be a valid number.`);
+        }
+        return isValid;
+    };
+
     const handleSubmit = async () => {
+
+        if (!isNumberValid(formData.hourlyRate, "Hourly Rate")
+            || !isNumberValid(formData.defaultSlotTime, "Default Slot Time")
+            || !isNumberValid(formData.travelTime, "Travel Time")) {
+            return;
+        }
+
         if (validateForm()) {
             setIsLoading(true);
             const submissionData = {
                 ...formData,
+                hourlyRate: Number(formData.hourlyRate),
                 defaultSlotTime: Number(formData.defaultSlotTime),
                 travelTime: Number(formData.travelTime)
             };
@@ -160,7 +188,6 @@ function AddServicePage() {
                             'Authorization': `Bearer ${token}`
                         }
                     });
-
                     if (response.status === 201 && certificate && isCertificateUploaded) {
                         response = await axios.post(`/api/certificate/upload/${response.data._id}`, certificateForm, {
                             headers: {
@@ -238,7 +265,7 @@ function AddServicePage() {
                         <Box mb={4}>
                             <TextField
                                 InputProps={{
-                                    startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                                    startAdornment: <InputAdornment position="start">€</InputAdornment>,
                                 }}
                                 placeholder="Hourly Rate"
                                 fullWidth

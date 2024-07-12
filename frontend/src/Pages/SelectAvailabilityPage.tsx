@@ -8,7 +8,7 @@ const SelectAvailabilityPage: React.FC = () => {
     const [serviceType, setServiceType] = useState("Babysitting"); // Placeholder for the service type [e.g. "Tutoring"]
     const [defaultSlotDuration, setDefaultSlotDuration] = useState(60); // Placeholder for the default slot duration
     // const [globalAvailabilities, setGlobalAvailabilities] = useState<Event[]>([{start: Date.now(), end: Date.now(), title: "Event"}]); // Placeholder for the global availabilities [e.g. tutor availabilities]
-    const { token, account, isReady, isFetched } = useAuth();
+    const {token, account, isReady, isFetched } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
     const isProvider = account?.isProvider;
@@ -16,20 +16,21 @@ const SelectAvailabilityPage: React.FC = () => {
 
     useEffect(() => {
 
-        if (!isReady || (token && !isFetched)) {
+        if (!isReady || (token && !isFetched)){
             console.log("not ready!")
             return;
         }
 
         if (!token || (account && !isProvider)) {
-            // If not a provider, redirect to home or another appropriate page
+            // If not a provider, redirect" to home or another appropriate page
             navigate('/unauthorized'); // Make sure you have a route for '/unauthorized' or change as needed
         }
-    }, [token, isProvider, account, isReady, isFetched, navigate]);
+    }, [token, isProvider, account, isReady, isFetched]);
 
     if (!isReady) {
         return <div>Loading...</div>;  // Or any other loading indicator
     }
+
 
     // color legend to be displayed
     const CalendarLegend = () => (
@@ -50,13 +51,15 @@ const SelectAvailabilityPage: React.FC = () => {
                 <Box width={20} height={20} bgcolor="lightblue" marginRight={1} />
                 <Typography>Transit Time</Typography>
             </Box>
+
         </Box>
     );
+
 
     return (
         <Container maxWidth="lg">
             {inAddServiceSteps && (
-                <Stepper activeStep={2} alternativeLabel sx={{ mb: 2 }}>
+                <Stepper activeStep={2} alternativeLabel sx={{ mb: 2, mt:2 }}>
                     <Step>
                         <StepLabel>Check Profile</StepLabel>
                     </Step>
