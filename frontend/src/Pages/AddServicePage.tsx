@@ -4,6 +4,7 @@ import LightBlueButton from '../components/inputs/BlueButton';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
+import {toast} from "react-toastify";
 
 interface FormData {
     selectedService: { title: string } | null;
@@ -108,7 +109,15 @@ function AddServicePage() {
     };
 
     const handleChange = (key: keyof FormData, value: any) => {
-        setFormData(prev => ({...prev, [key]: value}));
+        if (key === 'acceptedPaymentMethods') {
+            // E.g. map [{title: 'Cash'}, {title: 'Cash'}]  to Set['Cash','Cash'] -> ['Cash']->[title: 'Cash']
+            const uniquePaymentMethods = Array.from(new Set(value.map((item: {
+                title: string
+            }) => item.title))).map(title => ({title: title as string}));
+            setFormData(prev => ({...prev, [key]: uniquePaymentMethods}));
+        } else {
+            setFormData(prev => ({...prev, [key]: value}));
+        }
     };
 
     const validateForm = () => {
@@ -124,10 +133,27 @@ function AddServicePage() {
         return Object.values(newErrors).every(error => !error);
     };
 
+    const isNumberValid = (value: string, fieldName: string) => {
+        const number = Number(value);
+        const isValid = !isNaN(number) && isFinite(number);
+        if (!isValid) {
+            toast.error(`${fieldName} must be a valid number.`);
+        }
+        return isValid;
+    };
+
     const handleSubmit = async () => {
+
+        if (!isNumberValid(formData.hourlyRate, "Hourly Rate")
+            || !isNumberValid(formData.defaultSlotTime, "Default Slot Time")
+            || !isNumberValid(formData.travelTime, "Travel Time")) {
+            return;
+        }
+
         if (validateForm()) {
             const submissionData = {
                 ...formData,
+                hourlyRate: Number(formData.hourlyRate),
                 defaultSlotTime: Number(formData.defaultSlotTime),
                 travelTime: Number(formData.travelTime)
             };
@@ -177,10 +203,11 @@ function AddServicePage() {
                 }
             } catch (error: any) {
                 console.error('Error submitting service:', error);
-                if (error.response && error.response.status === 400 && error.response.data === 'You already provide this service') {
-                    setErrorMessage('You already provide this service');
-                } else {
-                    setErrorMessage('An error occurred. Please try again.');
+                if (error.response && error.response.status === 409) {
+                    toast.error(error.response.data);
+                }
+                else {
+                    toast.error('An error occurred. Please try again.');
                 }
             }
         } else {

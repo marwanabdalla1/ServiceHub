@@ -60,21 +60,23 @@ function SelectTimeslot({onNext, handleCancel, bookingDetails}: SelectTimeslotPr
             {/*</Box>*/}
 
             {/*</Box>*/}
-            <Typography variant="h4" gutterBottom marginBottom={1}>
+            <Typography variant="h4" gutterBottom>
                 Select time
             </Typography>
+
             <Box display="flex" alignItems="center" justifyContent="space-between" sx={{mt: 3, mb: 2}}>
-                <Typography variant="body2" gutterBottom marginBottom={2} style={{whiteSpace: 'pre-line'}} sx={{ flex: 6 }}>
+                <Typography variant="body2" gutterBottom marginBottom={2} style={{whiteSpace: 'pre-line'}}
+                            sx={{flex: 6}}>
                     The default duration for this service
                     is {bookingDetails.serviceOffering?.baseDuration || 60} minutes. If you select a slot shorter than
                     this, it will be automatically extended to the default duration.
                     {"\n"}
-                    You can only book a slot up to three months in advance. For reservations beyond this period, please
-                    check back at a later date when those slots become available.
+                    Note that you can only book a slot up to three months in advance.
                 </Typography>
-                <CalendarLegend />
+                <CalendarLegend/>
 
             </Box>
+
             <AvailabilityCalendarBooking
                 Servicetype={bookingDetails?.serviceType}
                 providerIdInput={null}
@@ -85,7 +87,6 @@ function SelectTimeslot({onNext, handleCancel, bookingDetails}: SelectTimeslotPr
                 onNext={onNext}
                 onCancelBooking={handleCancel}
             />
-
         </>
 
     );

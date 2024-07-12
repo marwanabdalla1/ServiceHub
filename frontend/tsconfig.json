@@ -1,6 +1,6 @@
   {
     "compilerOptions": {
-      "target": "es5", // Specify ECMAScript target version (ES5, ES6/ES2015, etc.)
+      "target": "ES6", // Specify ECMAScript target version (ES5, ES6/ES2015, etc.)
       "lib": ["dom", "dom.iterable", "esnext"], // Specify library files to include in the compilation
       "allowJs": true, // Allow JavaScript files to be compiled
       "skipLibCheck": true, // Skip type checking of all declaration files (*.d.ts)
