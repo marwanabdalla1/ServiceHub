@@ -202,10 +202,11 @@ function AddServicePage() {
                 }
             } catch (error: any) {
                 console.error('Error submitting service:', error);
-                if (error.response && error.response.status === 400 && error.response.data === 'You already provide this service') {
-                    setErrorMessage('You already provide this service');
-                } else {
-                    setErrorMessage('An error occurred. Please try again.');
+                if (error.response && error.response.status === 409) {
+                    toast.error(error.response.data);
+                }
+                else {
+                    toast.error('An error occurred. Please try again.');
                 }
             }
         } else {
