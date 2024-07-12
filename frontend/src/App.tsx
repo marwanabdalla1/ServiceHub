@@ -37,7 +37,7 @@ import {Divider} from '@mui/material';
 
 import UpdateSProfile from './components/UpdateSProfile';
 import AddServicePage from './Pages/AddServicePage';
-import OfferedServicesTable from "./Pages/TablePages/OfferedServicesTable";
+import OfferedServicesTable from "./Pages/TablePages/OfferedServicesPage";
 import IncomingRequestsTable from "./Pages/TablePages/IncomingRequestsTable";
 import RequestHistoryTable from "./Pages/TablePages/RequestHistoryTable";
 import ReceivedServiceTable from "./Pages/TablePages/ReceivedServiceTable";

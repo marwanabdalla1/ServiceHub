@@ -62,13 +62,13 @@ export default function OfferedServicesTable() {
                         page: (page + 1).toString(), // API is zero-indexed, React state is zero-indexed
                         limit: rowsPerPage.toString(),
                     });
-                    if (statusFilter !== 'All Requests') {
+                    if (statusFilter !== 'All Jobs') {
                         params.append('requestStatus', statusFilter.toLowerCase());
                     }
                     if (serviceTypeFilter !== 'ALL') {
                         params.append('serviceType', serviceTypeFilter); // Ensure this matches the actual enum/case used in your database
                     }
-                    console.log(params)
+                    console.log("params" + params)
 
                     const response = await axios.get(`/api/jobs/provider/${account._id}?${params.toString()}`, {
                         headers: { Authorization: `Bearer ${token}` }

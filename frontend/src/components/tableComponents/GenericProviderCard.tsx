@@ -85,20 +85,21 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
                     //                               sx={{marginRight: "1rem"}}/>);
                 } else if (item.requestStatus === RequestStatus.accepted && item.job) {
                     console.log("request with job:", item)
-                    buttons.push(<BlackButton text="View Job" onClick={() => navigate(`/incoming/jobs/${item.job}`)}
-                                              sx={{marginRight: "1rem"}}/>);
+                    buttons.push(<BlackButton
+                    text="View Job" onClick={() => navigate(`/incoming/jobs/${item.job}`)}
+                                              sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
                 } else if (item.requestStatus === "pending") {
                     buttons.push(<BlackButton text="Accept" onClick={() => actions.accept?.(item)}
-                                              sx={{marginRight: "1rem"}}/>);
+                                              sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
                     buttons.push(<BlackButton text="Decline" onClick={() => actions.decline?.(item)}
-                                              sx={{marginRight: "1rem"}}/>);
+                                              sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
                     buttons.push(<BlackButton text="Request Time Change" onClick={() => actions.changeTime?.(true)}
-                                              sx={{marginRight: "1rem"}}/>);
+                                              sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
 
                 }
                 if (actions.cancelRequest && ["action needed from requestor"].includes(item.requestStatus)) {
                     buttons.push(<BlackButton text="Cancel Request" onClick={() => actions.cancelRequest?.(item)}
-                                              sx={{marginRight: "1rem"}}/>);
+                                              sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
 
                 }
 
@@ -106,25 +107,25 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
                 // Job actions
                 if (actions.complete && item.status === "open") {
                     buttons.push(
-                        <BlackButton text="Mark ad Completed" onClick={() => actions.complete?.(item)}
-                                     sx={{marginRight: "1rem"}}/>);
+                        <BlackButton text="Mark as Completed" onClick={() => actions.complete?.(item)}
+                                     sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
                 }
 
                 if (actions.cancelJob && item.status === "open") {
                     buttons.push(
                         <BlackButton text="Cancel Job" onClick={() => actions.cancelJob?.(item)}
-                                     sx={{marginRight: "1rem"}}/>);
+                                     sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
 
                 }
                 if (actions.review && item.status === "completed") {
                     buttons.push(
                         <BlackButton text="Write a Review" onClick={() => actions.review?.(item)}
-                                     sx={{marginRight: "1rem"}}/>);
+                                     sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
                 }
                 if (actions.revoke && item.status === "completed") {
                     buttons.push(
                         <BlackButton text="Revoke Completion" onClick={() => actions.revoke?.(item)}
-                                     sx={{marginRight: "1rem"}}/>);
+                                     sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
 
                 }
             }

@@ -9,6 +9,7 @@ import { Document } from 'mongoose';
 import {updateTimeslotWithRequestId} from "./TimeSlotController";
 import Timeslot from "../models/timeslot";
 import {sortBookingItems} from "../util/requestAndJobUtils";
+import { request } from 'http';
 
 
 interface Query {
@@ -140,20 +141,23 @@ export const getJobsByProvider: RequestHandler = async (req, res) => {
         }
 
 
-        const { serviceType, status, page = 1, limit = 10 } = req.query;
+        const { serviceType, requestStatus, page = 1, limit = 10 } = req.query;
 
         console.log("queries", req.query)
 
         let query:Query = { provider: providerId };
 
         // Adding filters based on query parameters
-        if (status) {
-            query.status = status;
+        if (requestStatus) {
+            if (requestStatus === "all jobs") {
+                query.status = undefined
+            }
+            query.status = requestStatus;
         }
         if (serviceType) {
             query.serviceType = serviceType;
         }
-
+        console.log("statusss" + requestStatus)
         // Fetch all jobs where the 'provider' field matches 'providerId'
         const jobs = await Job.find(query)
             .populate([
