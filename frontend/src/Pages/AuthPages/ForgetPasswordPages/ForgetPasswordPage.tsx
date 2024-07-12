@@ -40,7 +40,7 @@ export default function ForgetPassword() {
         }
 
         try {
-            await resetPasswordEmail(email);
+            resetPasswordEmail(email);
             // Only navigate if resetPasswordEmail does not throw an error
             navigate('/forgetPassword/emailVerification', {state: {email}});
         } catch (error: any) {
