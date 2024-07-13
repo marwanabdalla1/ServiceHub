@@ -1,5 +1,5 @@
 // GenericServiceCard.js
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
@@ -16,6 +16,7 @@ import CloseFullscreenIcon from '@mui/icons-material/CloseFullscreen';
 import CloseIcon from "@mui/icons-material/Close";
 import {useNavigate} from "react-router-dom";
 import {formatDateTime} from "../../utils/dateUtils";
+import {defaultProfileImage, fetchProfileImageById} from "../../services/filterProfileImage";
 
 
 type Item = ServiceRequest | Job;
@@ -69,8 +70,17 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
 
         const {account, token, isProvider} = useAuth();
         const navigate = useNavigate();
+        const [profileImage, setProfileImage] = useState<string | null>(null);
 
         // todo: check account is provider otherwise not authorized?
+
+        useEffect(() => {
+            if (receiver) {
+                fetchProfileImageById(receiver._id).then((image) => {
+                    setProfileImage(image);
+                });
+            }
+        }, [receiver]);
 
         const renderActions = () => {
             const buttons = [];
@@ -181,8 +191,7 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
 
                 <CardContent>
                     <div style={{display: 'flex', alignItems: 'center', marginBottom: '1rem'}}>
-                        {/*todo: profile image!*/}
-                        <Avatar alt={receiver?.firstName + " " + receiver?.lastName} src={receiver?.profileImageUrl}
+                        <Avatar alt={receiver?.firstName + " " + receiver?.lastName} src={receiver ? profileImage || undefined : defaultProfileImage}
                                 sx={{width: 100, height: 100, marginRight: '0.5rem'}}/>
                         <div style={{marginRight: '1rem', textAlign: 'left'}}>
                             <Typography variant="h6">

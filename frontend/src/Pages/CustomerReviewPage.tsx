@@ -8,6 +8,7 @@ import {useLocation, useNavigate} from "react-router-dom";
 import axios from "axios";
 import {Review} from "../models/Review";
 import { Account } from '../models/Account';
+import {defaultProfileImage, fetchProfileImageById} from "../services/filterProfileImage";
 
 import useAlert from "../hooks/useAlert";
 import AlertCustomized from "../components/AlertCustomized";
@@ -24,11 +25,18 @@ const ReviewPage: React.FC = () => {
 
     const {alert, triggerAlert, closeAlert} = useAlert(5000);
 
+    const [profileImage, setProfileImage] = useState<string | null>(null);
     const {token, account} = useAuth();
 
     const { jobId } = useParams();
 
-    
+    useEffect(() => {
+        if (job?.provider) {
+            fetchProfileImageById(job.provider._id).then((image) => {
+                setProfileImage(image);
+            });
+        }
+    }, [job?.provider]);
 
     useEffect(() => {
         // This useEffect will always run, but the internal logic runs only under certain conditions.
@@ -43,8 +51,6 @@ const ReviewPage: React.FC = () => {
                 const jobData = jobResponse.data;
                 setJob(jobData);
 
-                console.log("jobdata:", jobData)
-
                 // Determine reviewee based on job data and current account
                 let revieweeId;
                 if (account?._id === jobData.provider._id) {
@@ -58,14 +64,10 @@ const ReviewPage: React.FC = () => {
                     throw new Error("Current user should not have access to this review!");
                 }
 
-                console.log(revieweeId)
-
                 // Fetch reviewee data
                 const revieweeResponse = await axios.get(`/api/account/${revieweeId}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-
-                console.log("reviewee:", revieweeResponse)
                 setReviewee(revieweeResponse.data);
 
                 // Fetch review data
@@ -177,7 +179,7 @@ const ReviewPage: React.FC = () => {
                             }}
 
                             /*todo: also need to include their profile when GET (in controller)*/
-                            // src={job?.provider.profileImageUrl}
+                            src={job?.provider ? profileImage || undefined : defaultProfileImage}
                         />
                         <Box>
                             <Typography
