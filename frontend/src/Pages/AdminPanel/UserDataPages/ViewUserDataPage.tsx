@@ -1,133 +1,290 @@
-import React, {useState} from 'react';
-import {useLocation, useNavigate} from 'react-router-dom';
-import './ViewUserData.css';
+import React, { useEffect, useState } from 'react';
+import {
+    Container,
+    Typography,
+    TextField,
+    Button,
+    Box,
+    Paper,
+    Divider,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    Grid
+} from '@mui/material';
+import { useLocation, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import { isValidPhoneNumber } from '../../../validators/AccountDataValidator';
+import AddressDialog from '../../../components/dialogs/AddressDialog';
+import { useAuth } from '../../../contexts/AuthContext';
+import { loadAccount, saveAddress, updateAccountFields } from '../../../services/accountService';
+import { deleteService } from '../../../services/serviceOfferingService';
+import BlueButton from "../../../components/inputs/BlueButton";
 
-interface Account {
-    _id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    phoneNumber?: string;
-    address?: string;
-    createdOn?: Date;
-    description?: string;
-    location?: string;
-    postal?: string;
-    country?: string;
-    isProvider?: boolean;
-    isPremium?: boolean;
-    isAdmin?: boolean;
-    rating?: number;
-    reviewCount?: number;
-}
+type EditModeType = {
+    [key: string]: boolean;
+};
 
-interface Props {
-    user: Account;
-}
+type FieldType = {
+    [key: string]: string;
+};
 
 export default function ViewUserData(): React.ReactElement {
-    const [editMode, setEditMode] = useState(false);
     const location = useLocation();
-    const editedAccount: Account = location.state?.account || {} as Account;
+    const accountId = location.state?.accountId;
+    const [account, setAccount] = useState<any>(null);
+    const { token } = useAuth();
+    const [services, setServices] = useState<any[]>([]);
+    const [openDialog, setOpenDialog] = useState(false);
+    const [openAddressDialog, setOpenAddressDialog] = useState(false);
+    const [serviceToDelete, setServiceToDelete] = useState<string | null>(null);
+    const [editMode, setEditMode] = useState<EditModeType>({
+        firstName: false,
+        lastName: false,
+        email: false,
+        phone: false,
+        address: false,
+        description: false,
+        service: false
+    });
+    const [fieldValue, setFieldValue] = useState<FieldType>({
+        userId: "",
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        address: "",
+        description: "",
+    });
+
+    useEffect(() => {
+        const fetchData = async () => {
+            if (token && accountId) {
+                try {
+                    const data = await loadAccount(token, accountId);
+                    if (JSON.stringify(data) !== JSON.stringify(account)) {
+                        setAccount(data);
+                    }
+                } catch (error) {
+                    console.error('Error fetching account details:', error);
+                }
+            }
+        };
+        fetchData();
+    }, [token, accountId, account]);
+
+    useEffect(() => {
+        const fetchServices = async () => {
+            try {
+                const response = await axios.get(`/api/offerings/admin/userServiceOfferings/${accountId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                setServices(response.data || []);
+            } catch (error) {
+                console.error('Error fetching services:', error);
+            }
+        };
+        fetchServices();
+    }, [token, accountId]);
+
+    useEffect(() => {
+        if (account) {
+            const { address, postal, location } = account;
+            const concatenatedAddress = [address, postal, location]
+                .filter(field => field !== null && field !== undefined && field.trim() !== "")
+                .join(", ");
+            setFieldValue({
+                userId: account._id,
+                firstName: account.firstName,
+                lastName: account.lastName,
+                email: account.email,
+                phone: account.phone ? account.phone : "",
+                address: concatenatedAddress,
+                description: account.description ? account.description : "",
+            });
+        }
+    }, [account]);
+
+    const handleEditClick = (field: string) => {
+        setEditMode(prevState => ({ ...prevState, [field]: !prevState[field] }));
+    };
+
+    const handleFieldChange = (field: string, newValue: string) => {
+        setFieldValue(prevState => ({ ...prevState, [field]: newValue }));
+    };
+
+    const handleSaveAddress = async (updatedAddress: {
+        address: string;
+        postal: string;
+        location: string;
+    }) => {
+        await saveAddress(updatedAddress, account, token, accountId, setAccount);
+        setOpenAddressDialog(false);
+    };
+
+    const handleKeyPress = (event: React.KeyboardEvent, field: string) => {
+        if (event.key === 'Enter') {
+            updateAccountFields(account, field, token, accountId, fieldValue, setFieldValue).then(() => console.log('Field saved'));
+            handleEditClick(field);
+        }
+    };
+
     const navigate = useNavigate();
 
-    const handleEdit = () => {
-        if (editMode) {
-            // Handle saving the edited user data
-            console.log('Save user data:', editedAccount);
+    const handleAddServiceClick = () => {
+        navigate('/addservice');
+    };
+
+    const handleEditServiceClick = (service: any) => {
+        navigate('/addservice', { state: { service } });
+    };
+
+    const handleDeleteServiceClick = async () => {
+        if (serviceToDelete && token) {
+            try {
+                await deleteService(serviceToDelete, token)
+                setServices(services.filter(service => service._id !== serviceToDelete));
+            } catch (error) {
+                console.error('Error deleting service:', error);
+            } finally {
+                setOpenDialog(false);
+                setServiceToDelete(null);
+            }
         }
-        setEditMode(!editMode);
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const {name, value} = e.target;
-        // This should be updated to actually update the editedAccount state
-        // setEditedAccount({ ...editedAccount, [name]: value });
+    const handleOpenDialog = (serviceId: string) => {
+        setServiceToDelete(serviceId);
+        setOpenDialog(true);
     };
 
-    if (!editedAccount._id) {
-        return <div>No user data available</div>;
-    }
+    const handleCloseDialog = () => {
+        setOpenDialog(false);
+        setServiceToDelete(null);
+    };
+
+    const renderField = (label: string, field: string, isEditable: boolean = true) => {
+        if (field === 'address') {
+            return (
+                <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 0 }}>
+                    <Typography variant="body1" sx={{ fontWeight: 'bold' }}>{label}:</Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Typography variant="body1">{fieldValue[field]}</Typography>
+                        <Button onClick={() => setOpenAddressDialog(true)}>Edit</Button>
+                    </Box>
+                </Box>
+            );
+        }
+        return (
+            <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 0 }}>
+                <Typography variant="body1" sx={{ fontWeight: 'bold' }}>{label}:</Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    {field === 'userId' || !editMode[field] ? (
+                        <Typography variant="body1">{fieldValue[field]}</Typography>
+                    ) : (
+                        <TextField
+                            fullWidth
+                            value={fieldValue[field]}
+                            variant="outlined"
+                            onChange={(e) => handleFieldChange(field, e.target.value)}
+                            onKeyPress={(e) => handleKeyPress(e, field)}
+                        />
+                    )}
+                    {isEditable && (
+                        <Button onClick={() => handleEditClick(field)}>Edit</Button>
+                    )}
+                </Box>
+            </Box>
+        );
+    };
 
     return (
-        <div className="container">
-            <div className="sidebar">
-                <button onClick={() => navigate('/admin/viewUserData', {state: {editedAccount}})}>User Details</button>
-                <button onClick={() => navigate('/serviceOfferings')}>Service Offerings</button>
-                <button onClick={() => navigate('/requestHistory')}>Request History</button>
-                <button onClick={() => navigate('/jobHistory')}>Job History</button>
-            </div>
-            <div className="content">
-                <h2>User Details</h2>
-                <button onClick={handleEdit} className="edit-button">{editMode ? 'Save' : 'Edit'}</button>
-                {editMode ? (
-                    <div className="form">
-                        <label>
-                            First Name:
-                            <input type="text" name="firstName" value={editedAccount.firstName || ''}
-                                   onChange={handleChange}/>
-                        </label>
-                        <label>
-                            Last Name:
-                            <input type="text" name="lastName" value={editedAccount.lastName || ''}
-                                   onChange={handleChange}/>
-                        </label>
-                        <label>
-                            Email:
-                            <input type="email" name="email" value={editedAccount.email || ''} onChange={handleChange}/>
-                        </label>
-                        <label>
-                            Phone Number:
-                            <input type="tel" name="phoneNumber" value={editedAccount.phoneNumber || ''}
-                                   onChange={handleChange}/>
-                        </label>
-                        <label>
-                            Description:
-                            <input type="text" name="location" value={editedAccount.location || ''}
-                                   onChange={handleChange}/>
-                        </label>
-                        <label>
-                            Address:
-                            <input type="text" name="address" value={editedAccount.address || ''}
-                                   onChange={handleChange}/>
-                        </label>
-                        <label>
-                            Location:
-                            <input type="text" name="location" value={editedAccount.location || ''}
-                                   onChange={handleChange}/>
-                        </label>
-                        <label>
-                            Postal:
-                            <input type="text" name="postal" value={editedAccount.postal || ''}
-                                   onChange={handleChange}/>
-                        </label>
-                        <label>
-                            Country:
-                            <input type="text" name="country" value={editedAccount.country || ''}
-                                   onChange={handleChange}/>
-                        </label>
-                    </div>
-                ) : (
-                    // Inside the return statement of the ViewUserData component
+        <Container component="main" maxWidth="md" sx={{ mt: 4, backgroundColor: '#f5f5f5', borderRadius: '20px' }}>
+            <Paper variant="outlined" sx={{ p: 3, borderRadius: '20px' }}>
+                <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', fontSize: '24px', color: '#007BFF' }}>
+                    Public Profile
+                </Typography>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: 3 }}>
+                    {renderField("User ID", "userId")}
+                    {renderField("First Name", "firstName")}
+                    {renderField("Last Name", "lastName")}
+                    {renderField("Email Address", "email")}
+                    {renderField("Phone Number", "phone")}
+                    {renderField("Address", "address")}
+                    {renderField("Description", "description")}
+                    {account?.isProvider && (
+                        <>
+                            <Divider sx={{ my: 2 }} />
+                            <Typography variant="h6" gutterBottom component="div" sx={{ fontWeight: 'bold', fontSize: '24px', color: '#007BFF' }}>
+                                Service Provider Settings
+                            </Typography>
+                            <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 0 }}>
+                                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Provided Services:</Typography>
+                                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                                    {services.length > 0 ? (
+                                        services.map(service => (
+                                            <Grid container alignItems="center" spacing={2} key={service._id}>
+                                                <Grid item xs>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                        <Typography variant="body1">{service.serviceType}</Typography>
+                                                        {service.isCertified && (
+                                                            <Typography variant="body2" sx={{
+                                                                color: '#388e3c', // Color for "Licensed"
+                                                                fontWeight: 'bold',
+                                                                marginLeft: '10px',
+                                                                fontSize: '1rem', // Adjust the font size to match the service type
+                                                            }}>
+                                                                [Licensed]
+                                                            </Typography>
+                                                        )}
+                                                    </Box>
+                                                </Grid>
+                                                <Grid item>
+                                                    <Button onClick={() => handleOpenDialog(service._id)} sx={{ color: 'red' }}>Delete</Button>
+                                                </Grid>
+                                            </Grid>
+                                        ))
+                                    ) : (
+                                        <Typography variant="body1">No services provided</Typography>
+                                    )}
+                                </Box>
+                            </Box>
+                        </>
+                    )}
+                </Box>
+            </Paper>
+            <AddressDialog
+                open={openAddressDialog}
+                onClose={() => setOpenAddressDialog(false)}
+                onSave={handleSaveAddress}
+                initialAddress={{
+                    address: account?.address || '',
+                    postal: account?.postal || '',
+                    location: account?.location || ''
+                }}
+            />
 
-                    <div className="details">
-                        <p><strong>First Name:</strong> {editedAccount.firstName || 'N/A'}</p>
-                        <p><strong>Last Name:</strong> {editedAccount.lastName || 'N/A'}</p>
-                        <p><strong>Email:</strong> {editedAccount.email || 'N/A'}</p>
-                        <p><strong>Phone Number:</strong> {editedAccount.phoneNumber || 'N/A'}</p>
-                        <p><strong>Description:</strong> {editedAccount.description || 'N/A'}</p>
-                        <p><strong>Address:</strong> {editedAccount.address || 'N/A'}</p>
-                        <p><strong>Location:</strong> {editedAccount.location || 'N/A'}</p>
-                        <p><strong>Postal:</strong> {editedAccount.postal || 'N/A'}</p>
-                        <p><strong>Country:</strong> {editedAccount.country || 'N/A'}</p>
-                        <p><strong>Created
-                            On:</strong> {editedAccount.createdOn ? new Date(editedAccount.createdOn).toLocaleDateString() : 'N/A'}
-                        </p>
-
-
-                    </div>
-                )}
-            </div>
-        </div>
+            <Dialog open={openDialog} onClose={handleCloseDialog}>
+                <DialogTitle>{"Confirm Delete"}</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Are you sure you want to delete this service?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseDialog} color="primary">
+                        Cancel
+                    </Button>
+                    <Button onClick={handleDeleteServiceClick} color="primary" autoFocus>
+                        Delete
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        </Container>
     );
 }

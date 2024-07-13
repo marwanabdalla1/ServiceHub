@@ -159,3 +159,17 @@ export const getServiceOfferingsByUser = async (req: Request, res: Response) => 
         res.status(500).json({ message: err.message });
     }
 };
+
+export const getServiceOfferingsByUserId = async (req: Request, res: Response) => { //The authenticated version of the getOfferings function (uses token)
+    try {
+        const userId = req.params.userId;
+        const offerings = await ServiceOffering.find({ provider: userId }).populate('provider');
+        if (!offerings) {
+            return res.status(404).json({ message: 'No service offerings found' });
+        }
+        res.json(offerings);
+
+    } catch (err: any) {
+        res.status(500).json({ message: err.message });
+    }
+};

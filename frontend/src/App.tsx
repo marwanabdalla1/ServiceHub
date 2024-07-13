@@ -32,7 +32,6 @@ import VerifyCertificatePage from "./Pages/AdminPanel/VerifyCertificatePage";
 import AdminUserDataPage from "./Pages/AdminPanel/UserDataPages/AdminUserDataPage";
 import AdminHomePage from "./Pages/AdminPanel/AdminHomePage";
 import ErrorPage from "./Pages/ErrorPage";
-import CombinedServicePage from "./Pages/CombinedIncomingPage";
 import ViewUserDataPage from "./Pages/AdminPanel/UserDataPages/ViewUserDataPage";
 import Footer from './components/Footer';
 import {Divider} from '@mui/material';
@@ -92,32 +91,29 @@ function MainRoutes({search, setSearch}: { search: any, setSearch: any }) {
         && location.pathname !== "/forgetPassword/resetPassword"
         && location.pathname !== "/forgetPassword"
         && location.pathname !== "/forgetPassword/success"
-        && location.pathname !== "/admin/verifyCertificate"
-        && location.pathname !== "/admin/UserData";
 
     const showAdminNavBar = location.pathname.includes("/admin");
     return (
-        <div className="h-screen flex flex-col" style={{paddingTop: '80px'}}>
-            <div className="h-screen flex flex-col">
-                {showNavBar && !showAdminNavBar && <NavigationBar
-                    toggleDrawer={() => {
-                    }}
-                    onChange={() => {
-                    }}
-                    onSearch={() => {
-                    }}
-                    search={search}
-                    setSearch={setSearch}/>}
-                {showAdminNavBar && <AdminNavbar/>}
-                <div className="flex-grow">
+        <div className="h-screen flex flex-col">
+            {showNavBar && !showAdminNavBar && <NavigationBar
+                toggleDrawer={() => {
+                }}
+                onChange={() => {
+                }}
+                onSearch={() => {
+                }}
+                search={search}
+                setSearch={setSearch}/>}
+            {showAdminNavBar && <AdminNavbar/>}
+            <div className="flex-grow">
                 <Routes>
                     {/* Home */}
                     <Route path="/" element={<HomePage/>}/>
 
-                {/* User Authentication */}
-                <Route path="/login" element={<SignInPage/>}/>
-                <Route path="/signup" element={<SignUpPage/>}/>
-                <Route path="/signup/otp" element={<OTPSignUpPage/>}/>
+                    {/* User Authentication */}
+                    <Route path="/login" element={<SignInPage/>}/>
+                    <Route path="/signup" element={<SignUpPage/>}/>
+                    <Route path="/signup/otp" element={<OTPSignUpPage/>}/>
 
                     {/* User Profile */}
                     <Route path="/setprofile" element={<ProfileSettingPage/>}/>
@@ -175,10 +171,10 @@ function MainRoutes({search, setSearch}: { search: any, setSearch: any }) {
                     <Route path="/write-reviews" element={<ReviewPage/>}/>
                     <Route path="/faq" element={<FAQPage/>}/>
 
-                <Route path="/admin" element={<AdminHomePage/>}/>
-                <Route path="/admin/verifyCertificate" element={<VerifyCertificatePage/>}/>
-                <Route path="/admin/UserData" element={<AdminUserDataPage/>}/>
-                <Route path="/admin/viewUserData" element={<ViewUserDataPage/>}/>
+                    <Route path="/admin" element={<AdminHomePage/>}/>
+                    <Route path="/admin/verifyCertificate" element={<VerifyCertificatePage/>}/>
+                    <Route path="/admin/UserData" element={<AdminUserDataPage/>}/>
+                    <Route path="/admin/viewUserData" element={<ViewUserDataPage/>}/>
 
                     <Route path="/unauthorized" element={<ErrorPage title="Unauthorized Access"
                                                                     message="You do not have permission to view this page."/>}/>
@@ -190,7 +186,6 @@ function MainRoutes({search, setSearch}: { search: any, setSearch: any }) {
             <div>
                 <Divider variant="middle" style={{backgroundColor: 'white', height: '50px'}}/>
                 <Footer/>
-            </div>
             </div>
         </div>
     );

@@ -6,7 +6,7 @@ import {
     getAccountDetails,
     adminUserData,
     getAccountById,
-    getRequesterById, deleteAccountById
+    getRequesterById
 } from "../controller/AccountController";
 import {authenticate, isAdmin} from "../middleware/authenticate";
 
@@ -18,6 +18,6 @@ router.delete("/", authenticate, deleteAccount);
 router.put('/', authenticate, updateAccountDetails);
 router.get('/', authenticate, getAccountDetails);
 router.get('/admin/userdata', authenticate, isAdmin, adminUserData);
-router.delete('/admin/userdata/:id', authenticate, isAdmin, deleteAccountById);
+router.delete('/admin/userdata/:id', authenticate, isAdmin, deleteAccount);
 
 export default router;

@@ -71,9 +71,9 @@ export default function AdminUserData(): React.ReactElement {
         }
     };
 
-    const handleView = (account:Account) => {
-        console.log('View user data:', account);
-        navigate('/admin/viewUserData', {state: {account}});
+    const handleView = (accountId: string) => {
+        console.log('View user data:', accountId);
+        navigate('/admin/viewUserData', {state: {accountId}});
     };
 
     return (
@@ -150,7 +150,7 @@ export default function AdminUserData(): React.ReactElement {
                                 <TableCell align="center">{user._id}</TableCell>
                                 <TableCell align="center">
                                     <Box textAlign="center">
-                                        <Button onClick={() => handleView(user)} variant="contained" color="primary" style={{marginRight: '20px'}}>
+                                        <Button onClick={() => handleView(user._id)} variant="contained" color="primary" style={{marginRight: '20px'}}>
                                             View
                                         </Button>
                                         <Button onClick={() => handleDelete(user._id)} variant="contained" color="error">
