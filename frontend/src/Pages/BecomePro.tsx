@@ -89,7 +89,7 @@ const BecomeProPage: React.FC = () => {
     top of search results. Join now with a monthly subscription and make it easier for clients to find you first!
     </Typography>
 
-        <BlackButton style={{ padding: '8px 18px', fontSize: '16px', marginTop: '16px', marginBottom: '16px' }} text="Join Now" onClick={handleJoinNow} />
+        <BlackButton style={{ padding: '18px 18px', fontSize: '16px', marginTop: '16px', marginBottom: '16px' }} text="Join Now" onClick={handleJoinNow} />
     </div>
     <div className="md:mt-0 mr-0" >
         <img src="/images/handshake.png" alt="Handshake" className="w-full h-full object-cover"/>

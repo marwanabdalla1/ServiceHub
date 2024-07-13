@@ -33,7 +33,7 @@ const HomePage = () => {
                             text="Get Started"
                             onClick={() => console.log('Black button pressed')}
                             sx={{
-                                padding: '24px 24px', // Increase padding
+                                padding: '18px 18px', // Increase padding
                                 fontSize: '16px', // Override font size
                             }}
                         />
