@@ -97,12 +97,12 @@ const GenericConsumerCard: React.FC<GenericConsumerCardProps> = ({
                 //                               sx={{marginRight: "1rem"}}/>);
             } else if (actions.cancelRequest && ["pending", "accepted", "action needed from requestor"].includes(item.requestStatus)) {
                 buttons.push(<BlackButton text="Cancel Request" onClick={() => actions.cancelRequest?.(item)}
-                                          sx={{marginRight: "1rem"}}/>);
+                                          sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
 
             }
             if (item.requestStatus === "action needed from requestor") {
                 buttons.push(<BlackButton text="Action Needed: Change Time" onClick={() => handleProposeNewTime(item)}
-                                          sx={{marginRight: "1rem"}}/>);
+                                          sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
             }
 
         } else {
@@ -110,13 +110,13 @@ const GenericConsumerCard: React.FC<GenericConsumerCardProps> = ({
             if (actions.cancelJob && item.status === "open") {
                 buttons.push(
                     <BlackButton text="Cancel Job" onClick={() => actions.cancelJob?.(item)}
-                                 sx={{marginRight: "1rem"}}/>);
+                                 sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
 
             }
             if (actions.review && item.status === "completed") {
                 buttons.push(
                     <BlackButton text="Review" onClick={() => actions.review?.(item)}
-                                 sx={{marginRight: "1rem"}}/>);
+                                 sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
             }
         }
         return buttons;
