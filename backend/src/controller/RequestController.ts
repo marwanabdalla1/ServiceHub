@@ -124,7 +124,7 @@ export const createServiceRequest: RequestHandler = async (req: Request, res: Re
     }
 };
 
-
+// old one
 // export const createServiceRequest: RequestHandler = async (req: Request, res: Response, next) => {
 //     const user = (req as any).user;
 //
@@ -256,8 +256,7 @@ export const updateServiceRequest: RequestHandler = async (req: Request, res: Re
         // res.send(updatedRequest);
 
 
-        // todo: modify Create and send notification (now this is in frontend)
-        // Assuming recipient is determined by logic - can be provider or requester based on context
+        // maybe todo: move notification to here but actually it needs the info from frontend
         // const notificationContent = `Service request ${requestId} has been updated.`;
 
         // Notify the provider
@@ -351,7 +350,7 @@ export const getServiceRequestsByProvider: RequestHandler = async (req, res) => 
 
         const serviceRequests = await ServiceRequest.find(query)
             .populate([
-                { path: 'requestedBy', select: 'firstName lastName email profileImageId' }, // todo: also include profile pic
+                { path: 'requestedBy', select: 'firstName lastName email profileImageId' },
                 { path: 'provider', select: 'firstName lastName email profileImageId' }
             ])
             .exec();
@@ -414,7 +413,7 @@ export const getServiceRequestsByRequester: RequestHandler = async (req, res) =>
 
         const serviceRequests = await ServiceRequest.find(query)
             .populate([
-                { path: 'requestedBy', select: 'firstName lastName email profileImageId' }, // todo: also include profile pic
+                { path: 'requestedBy', select: 'firstName lastName email profileImageId' },
                 { path: 'provider', select: 'firstName lastName email profileImageId' }
             ])
             .exec();
@@ -444,56 +443,6 @@ export const getServiceRequestsByRequester: RequestHandler = async (req, res) =>
     } catch (error: any) {
         console.error("Failed to retrieve service requests:", error);
         res.status(500).json({ message: "Internal server error", error: error.message });
-    }
-};
-
-
-// when provider requests the consumer to select a new timeslot
-export const requestChangeTimeslot: RequestHandler = async (req, res, next) => {
-    const { createdById, requestId } = req.body;
-    let success = true;  // Flag to track success of booking
-
-    // todo: first cancel the existing timeslot if not yet done
-    try {
-
-        const timeslotFound = await Timeslot.findOne({request: requestId})
-        if (timeslotFound){
-            // const hi = await cancelTimeslotDirect(timeslotFound._id.toString());
-        }
-
-        // // Check if the response has been sent by bookTimeslot
-        // if (res.headersSent) {
-        //     return; // If the response is sent, bookTimeslot was successful
-        // }
-
-    } catch (error) {
-        console.error("Error in handling timeslot change:", error);
-        success = false;  // Update success flag to false on error
-        // Only send this error response if headers have not been sent
-        if (!res.headersSent) {
-            res.status(500).json({ message: "Failed to process timeslot change." });
-        }
-    } finally {
-        // Notification should happen regardless of the booking outcome
-        const notificationContent = success
-            ? `The timeslot of the existing request ${requestId} has been successfully changed.`
-            : `Failed to change the timeslot of the existing request ${requestId}.`;
-        const notificationType = NotificationType.timeRequestChanged; // Adjust if you have specific types for success/failure
-
-        // Perform notification creation
-        try {
-            await createNotificationDirect({
-                content: notificationContent,
-                serviceRequest: requestId,
-                notificationType,
-                recipient: createdById,
-                job: undefined,
-                review: undefined
-            });
-        } catch (notificationError) {
-            console.error("Failed to create notification:", notificationError);
-            // Optionally handle the failure of notification creation
-        }
     }
 };
 
@@ -560,7 +509,7 @@ export const getRequestById: RequestHandler = async (req, res) => {
         }
 
         const serviceRequest = await ServiceRequest.findById(requestId).populate([
-            { path: 'requestedBy', select: 'firstName lastName email profileImageId' }, // todo: also include profile pic
+            { path: 'requestedBy', select: 'firstName lastName email profileImageId' },
             { path: 'provider', select: 'firstName lastName email profileImageId' }]).exec();
 
 
