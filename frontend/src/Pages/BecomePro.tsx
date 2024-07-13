@@ -6,6 +6,7 @@ import {loadStripe} from '@stripe/stripe-js';
 import axios from 'axios';
 import {useAuth} from '../contexts/AuthContext';
 import {Feedback} from '../models/Feedback';
+import {defaultProfileImage, fetchFeedbackProfileImages} from "../services/filterProfileImage";
 
 const stripePromise = loadStripe('pk_test_51NEdzDChuUsrK8kGX1Wcu8TazsmDPprhV212alFOg78GS9W3FW8JLv1S6FyJnirCaj4f5UevhfUetfDSxIvATSHp003QYXNJYT');
 
@@ -30,32 +31,12 @@ const BecomeProPage: React.FC = () => {
         fetchReviews();
     }, [token]);
 
-    // Define the new function to fetch reviewer profile images
-    const fetchFeedbackProfileImages = async (feedbacks: Feedback[]) => {
-        const newProfileImages: { [key: string]: string } = {};
-
-        await Promise.all(feedbacks.map(async (feedback) => {
-            console.log("current feedback: ", feedback);
-            try {
-                const profileImageResponse = await axios.get(`/api/file/profileImage/${feedback.givenBy._id}`, {
-                    responseType: 'blob'
-                });
-                if (profileImageResponse.status === 200) {
-                    newProfileImages[feedback.givenBy._id] = URL.createObjectURL(profileImageResponse.data);
-                }
-            } catch (error) {
-                console.error('Error fetching profile image:', error);
-            }
-        }));
-
-        setFeedbackProfileImages(newProfileImages);
-    };
 
 // Use the useEffect hook to call the new function when reviews change
     useEffect(() => {
         if (feedbacks.length > 0) {
-            fetchFeedbackProfileImages(feedbacks).then(r => {
-                console.log("reviewer profile images fetched")
+            fetchFeedbackProfileImages(feedbacks).then(images => {
+                setFeedbackProfileImages(images);
             });
         }
     }, [feedbacks]);
@@ -113,7 +94,7 @@ const BecomeProPage: React.FC = () => {
                             <CardContent>
                                 <Box sx={{display: 'flex', alignItems: 'center', mb: 2}}>
                                     <Avatar
-                                        src={feedbackProfileImages[feedback.givenBy._id] || "../../../public/images/profiles/default-profile-image.png"}
+                                        src={feedbackProfileImages[feedback.givenBy._id] || defaultProfileImage}
                                         sx={{mr: 2}}
                                         alt={feedback.title}
                                     />
