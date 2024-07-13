@@ -10,6 +10,8 @@ import {NotificationType, RequestStatus} from "../models/enums";
 import {bookTimeslot, cancelTimeslotDirect, cancelTimeslotWithRequestId} from "./TimeSlotController";
 import { PipelineStage } from 'mongoose';
 import {sortBookingItems} from "../util/requestAndJobUtils";  // Import PipelineStage for correct typing
+import {formatDateTime} from "../../../frontend/src/utils/dateUtils";
+
 
 
 
@@ -33,15 +35,15 @@ interface Query {
     [key: string]: any;  // Allows additional properties with any type
 }
 
-export const createServiceRequest: RequestHandler = async (req: Request, res: Response) => {
+export const createServiceRequest: RequestHandler = async (req: Request, res: Response, next) => {
     const user = (req as any).user;
 
     console.log("request body:" + JSON.stringify(req.body), "userID: ", user.userId)
     const error = errorHandler(req, res, [
         "requestStatus",
         "serviceType",
-        "appointmentStartTime",
-        "appointmentEndTime",
+        // "appointmentStartTime",
+        // "appointmentEndTime",
         // "uploads",
         // "comment",
         "serviceFee",
@@ -49,7 +51,6 @@ export const createServiceRequest: RequestHandler = async (req: Request, res: Re
         // "job",
         "provider",
         "requestedBy",
-        "profileImageUrl",
     ]);
     if (error) {
         return error;
@@ -64,8 +65,11 @@ export const createServiceRequest: RequestHandler = async (req: Request, res: Re
         });
     }
 
+    const session = await mongoose.startSession();
 
     try {
+        session.startTransaction();
+
         // Extract fields from req.body and possibly validate or transform them
         const { timeSlot, ...requestBody } = req.body;
         // const requestBody = req.body; // Simplified, assuming body has all required fields
@@ -82,7 +86,29 @@ export const createServiceRequest: RequestHandler = async (req: Request, res: Re
 
         // await newServiceRequest.save();
         res.status(201).send(newServiceRequest);
+
+        await session.commitTransaction();
+        session.endSession();
+        //
+        // // Attempt to create a notification
+        // now its at frontend
+        // try {
+        //     const notificationContent = `You have a new service request for ${requestBody.serviceType} at ${formatDateTime(timeSlot.start)}.`;
+        //
+        //     await createNotificationDirect({
+        //         content: "A new service request has been created.",
+        //         notificationType: "New Request",
+        //         serviceRequest: newServiceRequest._id.toString(),
+        //         recipient: req.body.provider // Assuming the provider should be notified
+        //     });
+        // } catch (notificationError: any) {
+        //     console.error("Failed to create notification:", notificationError.message);
+        //     // Optionally handle the error further, e.g., logging to an error monitoring service
+        // }
+
     } catch (error: any) {
+        await session.abortTransaction();
+        session.endSession();
         res.status(400).send({ message: error.message });
     }
 };
@@ -195,44 +221,6 @@ export const getServiceRequestsByProvider: RequestHandler = async (req, res) => 
             query.serviceType = serviceType;
         }
 
-        // Building the MongoDB aggregate pipeline
-        // const pipeline = [
-        //     { $match: query },
-        //     {
-        //         $lookup: {
-        //             from: 'timeslots',
-        //             localField: '_id',
-        //             foreignField: 'requestId',
-        //             as: 'timeslot'
-        //         }
-        //     },
-        //
-        //     // keeps empty timeslots as null
-        //     { $unwind: { path: "$timeslot", preserveNullAndEmptyArrays: true } },
-        //     {
-        //         $addFields: {
-        //             "timeslot.isFuture": { $gt: ["$timeslot.start", new Date()] },
-        //             "timeslot.isPast": { $lt: ["$timeslot.end", new Date()] }
-        //         }
-        //     },
-        //     {
-        //         $sort: {
-        //             "timeslot.isFuture": -1, // Future requests first
-        //             "timeslot.start": 1 // Then sort by date ascending
-        //         }
-        //     },
-        //     { $skip: (Number(page) - 1) * Number(limit) },
-        //     { $limit: limit }
-        // ];
-
-        // const serviceRequests = await ServiceRequest.aggregate(pipeline);
-        //
-        // if (serviceRequests.length === 0) {
-        //     return res.status(404).json({ message: "No service requests found for this provider." });
-        // }
-        //
-        // res.status(200).json(serviceRequests);
-
         const serviceRequests = await ServiceRequest.find(query)
             .populate([
                 { path: 'requestedBy', select: 'firstName lastName email profileImageId' }, // todo: also include profile pic
@@ -272,50 +260,6 @@ export const getServiceRequestsByProvider: RequestHandler = async (req, res) => 
         res.status(500).json({ message: "Internal server error", error: error.message });
     }
 };
-
-//get all incoming requests of a provider, not use?
-// In serviceRequestController.js
-// export const getIncomingServiceRequestsByProvider: RequestHandler = async (req, res) => {
-//     try {
-//
-//
-//         const { providerId } = req.params; // Extract the provider ID from the URL parameter
-//         const userId = (req as any).user.userId;
-//
-//         //make sure only the provider him/herself can get this
-//         if (userId !== providerId) {
-//             console.log("userId: ", userId, "\n providerId: ", providerId)
-//             return res.status(403).json({ message: "Unauthorized access." });
-//         }
-//
-//         const serviceRequests = await ServiceRequest.find({ provider: providerId, requestStatus: {$in: ["pending", RequestStatus.requestorActionNeeded]} })
-//             .populate([
-//                 { path: 'requestedBy', select: 'firstName lastName email profileImageId' }, // todo: also include profile pic
-//                 { path: 'provider', select: 'firstName lastName email profileImageId' }
-//             ])
-//             .exec();
-//
-//         // remove everything where the requestor account is deleted
-//         const filteredRequests = serviceRequests.filter(request => request.requestedBy !== null);
-//         // get the requests that need to have consumer actions
-//
-//         if (filteredRequests.length === 0) {
-//             return res.status(404).json({ message: "No service requests found for this provider." });
-//         }
-//
-//         const requestsWithTimeslots = await Promise.all(filteredRequests.map(async (request) => {
-//             const timeslot = await Timeslot.findOne({ requestId: request._id }).exec();
-//             return { ...request.toObject(), timeslot: timeslot || undefined };
-//         }));
-//
-//         console.log("incoming requests with their timeslots", requestsWithTimeslots)
-//
-//         res.status(200).json(requestsWithTimeslots);
-//     } catch (error: any) {
-//         console.error("Failed to retrieve service requests:", error);
-//         res.status(500).json({ message: "Internal server error", error: error.message });
-//     }
-// };
 
 export const getServiceRequestsByRequester: RequestHandler = async (req, res) => {
     try {
@@ -567,3 +511,27 @@ export const getRequestById: RequestHandler = async (req, res) => {
 
 
 
+
+export const deleteRequest: RequestHandler = async (req, res) => {
+    const { requestId } = req.params;
+    console.log(req)
+    const userId = (req as any).user._id; // Assuming your auth middleware sets req.user
+
+    try {
+        const serviceRequest = await ServiceRequest.findById(requestId);
+
+        if (!serviceRequest) {
+            return res.status(200).json({ message: "No need to delete. Service request not found." });
+        }
+
+        // Check if the user is authorized to delete this request
+        if (serviceRequest.requestedBy.toString() !== userId.toString()) {
+            return res.status(403).json({ message: "You do not have permission to delete this request." });
+        }
+
+        await ServiceRequest.findByIdAndDelete(requestId);
+        res.status(200).json({ message: "Service request deleted successfully." });
+    } catch (error: any) {
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};

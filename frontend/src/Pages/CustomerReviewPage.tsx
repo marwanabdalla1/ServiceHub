@@ -4,7 +4,6 @@ import Rating from '@mui/material/Rating';
 import { useParams } from 'react-router-dom';
 import {Job} from "../models/Job";
 import {useAuth} from "../contexts/AuthContext";
-import {useLocation, useNavigate} from "react-router-dom";
 import axios from "axios";
 import {Review} from "../models/Review";
 import { Account } from '../models/Account';
@@ -21,22 +20,15 @@ const ReviewPage: React.FC = () => {
     const [rating, setRating] = React.useState<number | null>(0);
     const [reviewText, setReviewText] = React.useState(''); // State to hold the review text
     const [isEditing, setIsEditing] = React.useState(false);  // Tracks if we are editing an existing review
-    const navigate = useNavigate();
 
     const {alert, triggerAlert, closeAlert} = useAlert(5000);
 
-    const [profileImage, setProfileImage] = useState<string | null>(null);
+    const [profileImage, setProfileImage] = React.useState<string | null>(null);
     const {token, account} = useAuth();
 
     const { jobId } = useParams();
 
-    useEffect(() => {
-        if (job?.provider) {
-            fetchProfileImageById(job.provider._id).then((image) => {
-                setProfileImage(image);
-            });
-        }
-    }, [job?.provider]);
+
 
     useEffect(() => {
         // This useEffect will always run, but the internal logic runs only under certain conditions.
@@ -90,17 +82,18 @@ const ReviewPage: React.FC = () => {
     }, [jobId, token, account]); // Ensure dependencies are correctly listed for reactivity
 
 
+    // fetch profile image
+    useEffect(() => {
+        if (reviewee) {
+            fetchProfileImageById(reviewee._id).then((image) => {
+                setProfileImage(image);
+            });
+        }
+    }, [reviewee]);
+
     if (!jobId) {
         return <Typography variant="h6">No job selected for review.</Typography>;
     }
-
-    const handleRatingChange = (event: React.SyntheticEvent, newValue: number | null) => {
-        setRating(newValue);
-    };
-
-    const handleReviewTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setReviewText(event.target.value);
-    };
 
     const handleSubmit = async () => {
 
@@ -160,6 +153,7 @@ const ReviewPage: React.FC = () => {
         }
     };
 
+    // @ts-ignore
     return (
 
         <Container>
@@ -185,7 +179,7 @@ const ReviewPage: React.FC = () => {
                             <Typography
                                 variant="h6">{reviewee?.firstName} {reviewee?.lastName}</Typography>
                             <Typography variant="body2" color="text.secondary">
-                                {job?.serviceType}, {new Date(job ? job.appointmentStartTime : new Date()).toLocaleString()}
+                                {job?.serviceType}, {new Date(job?.timeslot?.start || new Date()).toLocaleString()}
                             </Typography>
                         </Box>
                     </CardContent>

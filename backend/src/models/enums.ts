@@ -56,8 +56,9 @@ export enum NotificationType {
     newJob = "New Job", // 1
     JobStatusChanged = "Job Status Changed", // 2
     RequestStatusChanged = "Request Status Changed", // 3
-    newReview = "New Review", // 4
-    timeRequestChanged = "Time Request Changed", // 5
+    newReview = "New Review", //
+    timeRequestChanged = "Request Time Has Changed", // 5
+    timeslotChangeRequest = "Timeslot Change Request", // 5
     updatedReview = "Updated Review", // 4
 
 }

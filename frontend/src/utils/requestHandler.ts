@@ -94,7 +94,6 @@ export const handleAccept = async ({
                 ...rest,
             };
 
-            // todo: potentially also send notification to provider?
 
             console.log("notification data at frontend:", notificationData);
 
@@ -109,6 +108,8 @@ export const handleAccept = async ({
             } catch (notificationError) {
                 console.error('Error sending notification:', notificationError);
             }
+
+
         }
     } catch (error) {
         console.error('Error posting job:', error);
@@ -126,7 +127,7 @@ export const handleDecline = async ({
 
 
     // get data from the request (selectedRequest)
-    const {requestStatus, job, _id, requestedBy, provider, ...rest} = selectedRequest;
+    const {requestStatus, job, _id, requestedBy, provider, timeslot,  ...rest} = selectedRequest;
 
     try {
 
@@ -161,7 +162,7 @@ export const handleDecline = async ({
     // Prepare notification data
     const notificationData = {
         isViewed: false,
-        content: `Your service request for ${selectedRequest.serviceType} on the ${formatDateTime(selectedRequest.timeslot?.start)} has been declined `,
+        content: `Your service request for ${selectedRequest.serviceType} originally scheduled for ${formatDateTime(timeslot?.start)} has been declined `,
         serviceRequest: selectedRequest._id,
         recipient: selectedRequest.requestedBy._id,
         notificationType: "Request Status Changed",
@@ -197,7 +198,7 @@ export const handleCancel = async ({
 
 
     // get data from the request (selectedRequest)
-    const {requestStatus, job, _id, requestedBy, provider, ...rest} = selectedRequest;
+    const {requestStatus, job, _id, requestedBy, provider, timeslot, ...rest} = selectedRequest;
 
     try {
 
@@ -233,7 +234,7 @@ export const handleCancel = async ({
     // Prepare notification data
     const notificationDataToProvider = {
         isViewed: false,
-        content: `The service request for ${selectedRequest.serviceType} from ${selectedRequest.requestedBy.firstName} ${selectedRequest.requestedBy.lastName} on the ${formatDateTime(selectedRequest.timeslot?.start)} has been cancelled.`,
+        content: `The service request for ${selectedRequest.serviceType} from ${selectedRequest.requestedBy.firstName} ${selectedRequest.requestedBy.lastName} originally scheduled for ${formatDateTime(timeslot?.start)} has been cancelled.`,
         serviceRequest: selectedRequest._id,
         recipient: selectedRequest.requestedBy._id,
         notificationType: "Request Status Changed",
@@ -242,7 +243,7 @@ export const handleCancel = async ({
 
     const notificationDataToConsumer = {
         isViewed: false,
-        content: `Your service request for ${selectedRequest.serviceType} to ${selectedRequest.provider.firstName} ${selectedRequest.provider.lastName} on the ${formatDateTime(selectedRequest.timeslot?.start)} has been cancelled`,
+        content: `Your service request for ${selectedRequest.serviceType} to ${selectedRequest.provider.firstName} ${selectedRequest.provider.lastName} originally scheduled for ${formatDateTime(timeslot?.start)} has been cancelled`,
         serviceRequest: selectedRequest._id,
         recipient: selectedRequest.requestedBy._id,
         notificationType: "Request Status Changed",

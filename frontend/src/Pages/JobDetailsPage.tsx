@@ -165,6 +165,8 @@ const JobDetailsPage: React.FC<JobDetailsPageProps> = () => {
             setShowMediaCard: () => {
             },
         });
+
+        window.location.reload();
     };
 
     const onComplete = () => {
@@ -181,6 +183,8 @@ const JobDetailsPage: React.FC<JobDetailsPageProps> = () => {
             },
             triggerAlert,
         });
+
+        window.location.reload();
     };
 
     // handle revoking completed job
@@ -197,6 +201,8 @@ const JobDetailsPage: React.FC<JobDetailsPageProps> = () => {
             setShowMediaCard: () => {
             },
         });
+
+        window.location.reload();
     };
 
     const handleReview = (job: Item) => {

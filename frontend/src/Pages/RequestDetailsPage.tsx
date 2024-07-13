@@ -49,7 +49,7 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
 
     const [loading, setLoading] = useState(true);
 
-    const {alert, triggerAlert, closeAlert} = useAlert(100000);
+    const {alert, triggerAlert, closeAlert} = useAlert(3000);
 
 
     const navigate = useNavigate();
@@ -167,6 +167,9 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
             setShowMediaCard: () => {
             },
         });
+
+        window.location.reload();
+
     };
 
     const onDecline = () => {
@@ -182,6 +185,9 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
             setShowMediaCard: () => {
             },
         });
+
+        window.location.reload();
+
     };
 
     const onAccept = () => {
@@ -197,6 +203,9 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
             setShowMediaCard: () => {
             },
         });
+        window.location.reload();
+
+
     };
 
     const onTimeChange = () => {
@@ -215,6 +224,8 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
             setTimeChangePopUp,
             navigate
         });
+
+        window.location.reload();
     };
 
 
