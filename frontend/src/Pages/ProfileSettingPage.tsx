@@ -130,22 +130,7 @@ function UserProfile(): React.ReactElement {
         })();
     }, [account]);
 
-    const fetchProfileData = async () => {
-        try {
-            // Fetch profile image
-            const profileImageResponse = await axios.get(`/api/file/profileImage`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                responseType: 'blob'
-            });
 
-            setProfileImage(profileImageResponse.data);
-
-        } catch (error) {
-            console.error('Error fetching profile data:', error);
-        }
-    };
 
 
     useEffect(() => {
@@ -199,7 +184,7 @@ function UserProfile(): React.ReactElement {
                 firstName: account.firstName,
                 lastName: account.lastName,
                 email: account.email,
-                phone: account.phone ? account.phone : "",
+                phone: account.phoneNumber ? account.phoneNumber : "",
                 address: concatenatedAddress,
                 description: account.description ? account.description : "",
             });
@@ -296,7 +281,7 @@ function UserProfile(): React.ReactElement {
         if (field === 'phone' && !isValidPhoneNumber(fieldValue[field])) {
             toast('Invalid phone number', {type: 'error'});
             // set the value of phone back to the account phone number
-            setFieldValue(prevState => ({...prevState, [field]: account.phone}));
+            setFieldValue(prevState => ({...prevState, [field]: account.phoneNumber}));
             return;
         }
 

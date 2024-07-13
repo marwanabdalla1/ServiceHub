@@ -38,6 +38,7 @@ function UpdateSProfile() {
 
     const handleSaveProfile = async (values: UserDetails) => {
         const apiEndpoint = '/api/account';
+        console.log('values:', values);
         try {
             const response = await axios.put(apiEndpoint, values, {
                 headers: { 'Authorization': `Bearer ${token}` },
