@@ -118,7 +118,7 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
                 }
                 if (actions.review && item.status === "completed") {
                     buttons.push(
-                        <BlackButton text="Write a Review" onClick={() => actions.review?.(item)}
+                        <BlackButton text="Review" onClick={() => actions.review?.(item)}
                                      sx={{marginRight: "1rem"}}/>);
                 }
                 if (actions.revoke && item.status === "completed") {
@@ -132,11 +132,13 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
         };
 
         const handleIconClick = () => {
-            if (inDetailPage)
+            if (inDetailPage) {
+                console.log("in detail page");
                 if (redirectPath) {
+                    console.log("redirectPath", redirectPath)
                     navigate(redirectPath)
                 } else {
-
+                    console.log("icon clicked!")
                     if (isJob(item)) {
                         navigate('/incoming/jobs');
                     } else {
@@ -144,7 +146,7 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
                     }
 
                 }
-            else {
+            } else {
                 if (isJob(item)) {
                     navigate(`/incoming/jobs/${item._id}`);
                 } else {
@@ -220,8 +222,8 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
                     </div>
                 </CardContent>
             </Card>
-);
-}
+        );
+    }
 ;
 
 export default GenericProviderCard;

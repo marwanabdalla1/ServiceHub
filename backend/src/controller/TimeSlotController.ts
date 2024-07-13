@@ -234,14 +234,11 @@ function adjustForOverlaps(newInstance: ITimeslot, existingTimeslots: ITimeslot[
 
 // New Endpoint to Extend Fixed Slots (updated code)
 export const extendFixedSlots: RequestHandler = async (req, res, next) => {
-    console.log("trying to extend fixed timeslots!")
     try {
-
         const userId = (req as any).user.userId;// Assuming userId is available in the request (e.g., from authentication middleware)
         const {start, end} = req.body;
         const startDate = moment(start).subtract(1, 'week');
         const endDate = moment(end).subtract(1, 'week');
-
 
         // Fetch existing fixed events within the one-week range before the start and end dates
         const fixedEvents = await Timeslot.find({
@@ -532,7 +529,7 @@ export const getEvents: RequestHandler = async (req, res, next) => {
 
     try {
         //
-        const timeslots = await getEventsDirect(userId, start as string, end as string)
+        const timeslots = await getEventsDirect(userId)
         res.json(timeslots);
     } catch (error: unknown) {
         const err = error as Error;
@@ -676,7 +673,7 @@ export const getAvailabilityByProviderId: RequestHandler = async (req, res, next
 
         // Fetch all future timeslots for the provider
         const timeslots: ITimeslot[] = await Timeslot.find({
-            start: {$gte: new Date()},
+            end: {$gte: new Date()},
             // createdById: providerId,
             $or: providerIdConditions,
             isBooked: false,
@@ -804,7 +801,6 @@ export const turnExistingEventIntoFixed: RequestHandler = async (req, res, next)
                 existingTimeslots = []; // Continue with empty array if error
             }
             futureInstances = await generateWeeklyInstances([eventToUpdate], existingTimeslots, moment(eventToUpdate.start).add(1, 'week'), futureEndDate);
-            console.log("turn into fixed: future instances", futureInstances.length)
         }
 
         // Insert new events

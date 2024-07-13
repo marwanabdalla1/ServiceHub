@@ -55,9 +55,9 @@ export const submitReview: RequestHandler = async (req, res) => {
         // Additional checks can be made here,
 
         const reviewData = {
-            reviewer: user.userId,  // or any other user identifier included in the token
+            reviewer: user.userId,
             // reviewer : req.body.reviewer,
-            content: req.body.content || "",
+            content: req.body.content || '',
             rating: req.body.rating,
             recipient: req.body.recipient,
             serviceOffering: req.body.serviceOffering,
@@ -87,6 +87,7 @@ export const submitReview: RequestHandler = async (req, res) => {
         const newNotification = new Notification({
             isViewed: false,
             content: notificationContent,
+            notificationType: "New Review",
             review: savedReview._id,
             job: savedReview.job,
             recipient: savedReview.recipient,  // Assuming 'recipient' should be notified
@@ -118,9 +119,13 @@ export const findExistingReview: RequestHandler = async (req, res) => {
         if (review) {
             return res.json({ success: true, review: review });
         } else {
-            return res.json({ success: false });
+            // return res.json({ success: false, review: []});
+            return res.status(404).json({ message: 'No reviews found for this job ID' });
+
         }
     } catch (error) {
+        console.error('Server error while fetching review:', error);
+
         res.status(500).json({ success: false, message: "Server error", error });
     }
 }
@@ -135,7 +140,7 @@ export const updateReview: RequestHandler = async (req, res) => {
         // Update the review
         const updates = {
             rating: rating,
-            content: content,
+            content: content || '',
         }
         const updatedReview = await Review.findByIdAndUpdate(reviewId, { $set: updates }, { new: true });
         console.log("updated Review", updatedReview)
@@ -153,6 +158,7 @@ export const updateReview: RequestHandler = async (req, res) => {
             isViewed: false,
             content: notificationContent,
             review: updatedReview._id,
+            notificationType: "Updated Review",
             job: updatedReview.job,
             recipient: updatedReview.recipient,  // Assuming 'recipient' should be notified
         });

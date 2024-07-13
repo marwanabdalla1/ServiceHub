@@ -129,6 +129,10 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
         };
     }, []);
 
+    if (error) {
+        console.log("youre in iferror", error)
+        return <ErrorPage title={error.title} message={error.message}/>
+    }
 
     if (!request) {
         if (loading) {
@@ -139,10 +143,7 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
         }
     }
 
-    if (error) {
-        console.log("youre in iferror", error)
-        return <ErrorPage title={error.title} message={error.message}/>
-    }
+
 
     // Authorization check
     // if ((role === "provider" && account?._id !== request.provider._id) ||
