@@ -66,6 +66,9 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
                 const response = await axios.get<ServiceRequest>(`/api/requests/${requestId}`, {
                     headers: {Authorization: `Bearer ${token}`},
                 });
+
+                console.log("request data,", response.data)
+
                 setRequest(response.data);
                 setLoading(false);
                 //
