@@ -2,6 +2,7 @@ import axios from 'axios';
 import { ServiceOffering } from '../models/ServiceOffering';
 import React from "react";
 import { Review } from '../Pages/ProviderProfilePage';
+import {Feedback} from "../models/Feedback";
 
 export const defaultProfileImage = '/images/default-profile.png'; // Use relative path for public folder
 
@@ -85,6 +86,25 @@ export const fetchReviewerProfileImages = async (reviews: Review[]) => {
         }
     }));
 
+    return newProfileImages;
+};
+
+export const fetchFeedbackProfileImages = async (feedbacks: Feedback[]) => {
+    const newProfileImages: { [key: string]: string } = {};
+
+    await Promise.all(feedbacks.map(async (feedback) => {
+        console.log("current feedback: ", feedback);
+        try {
+            const profileImageResponse = await axios.get(`/api/file/profileImage/${feedback.givenBy._id}`, {
+                responseType: 'blob'
+            });
+            if (profileImageResponse.status === 200) {
+                newProfileImages[feedback.givenBy._id] = URL.createObjectURL(profileImageResponse.data);
+            }
+        } catch (error) {
+            console.error('Error fetching profile image:', error);
+        }
+    }));
     return newProfileImages;
 };
 
