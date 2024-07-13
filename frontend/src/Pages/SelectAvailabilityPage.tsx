@@ -11,7 +11,7 @@ const SelectAvailabilityPage: React.FC = () => {
     const {token, account, isReady, isFetched } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
-    const isProvider = account?.isProvider;
+    const isProvider = account!.isProvider || false;
     const inAddServiceSteps = location.state?.inAddServiceSteps || false;
 
     useEffect(() => {
@@ -21,17 +21,17 @@ const SelectAvailabilityPage: React.FC = () => {
             return;
         }
 
-        if (!token || (account && !isProvider)) {
-            // If not a provider, redirect" to home or another appropriate page
-            navigate('/unauthorized'); // Make sure you have a route for '/unauthorized' or change as needed
-        }
+       
     }, [token, isProvider, account, isReady, isFetched]);
 
     if (!isReady) {
         return <div>Loading...</div>;  // Or any other loading indicator
     }
 
-
+    if (!token || (account && !isProvider)) {
+        // If not a provider, redirect" to home or another appropriate page
+        navigate('/unauthorized'); // Make sure you have a route for '/unauthorized' or change as needed
+    }
     // color legend to be displayed
     const CalendarLegend = () => (
         <Box display="flex" justifyContent="center" alignItems="center" padding={2} bgcolor="background.paper">
