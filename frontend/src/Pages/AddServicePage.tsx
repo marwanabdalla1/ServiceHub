@@ -40,7 +40,7 @@ function AddServicePage() {
         selectedService: null,
         hourlyRate: '',
         acceptedPaymentMethods: [],
-        description: '',
+        description: 'Welcome to my service page.',
         certificateId: null,
         defaultSlotTime: '',
         travelTime: ''

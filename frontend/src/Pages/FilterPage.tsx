@@ -37,7 +37,7 @@ function FilterPage() {
     const [loadingImages, setLoadingImages] = useState<{ [key: string]: boolean }>({});
     const [loading, setLoading] = useState<boolean>(true);
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10; // You can adjust this as needed
+    const itemsPerPage = 12; // You can adjust this as needed
     const [totalItems, setTotalItems] = useState(0); // To keep track of total items
     const navigate = useNavigate();
     console.log(defaultProfileImage);
