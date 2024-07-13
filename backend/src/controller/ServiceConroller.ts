@@ -7,36 +7,6 @@ import serviceRequest from '../models/serviceRequest';
 import review from '../models/review';
 import job from '../models/job';
 
-async function checkServiceExistence(userId: string, selectedServiceTitle: string, serviceId: string): Promise<{
-    serviceType: string | undefined,
-    exists: boolean,
-    status: number,
-    message: string
-}> {
-    // Map the selected service title to the enum value
-    const serviceType = Object.values(ServiceType).find(type => type === selectedServiceTitle);
-    if (!serviceType) {
-        return {serviceType: undefined, exists: false, status: 400, message: 'Invalid service type'};
-    }
-    // Check if a service of the same type already exists for the current user
-    const existingService = await ServiceOffering.findOne({
-        provider: new Types.ObjectId(userId),
-        serviceType: serviceType,
-    });
-
-    // If the service type already exist and not the edited service itself
-    if (existingService && (existingService._id as Types.ObjectId).toString() !== serviceId) {
-        return {
-            serviceType: serviceType,
-            exists: true,
-            status: 409,
-            message: 'Service of this type already exists for the current user'
-        };
-    }
-
-    return {serviceType: serviceType, exists: false, status: 200, message: ''};
-}
-
 
 export const addService = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -64,11 +34,21 @@ export const addService = async (req: Request, res: Response, next: NextFunction
             return res.status(404).send('Provider account not found');
         }
 
-        const {serviceType, exists, status, message} = await checkServiceExistence(userId, selectedService.title, '');
-        if (exists) {
-            return res.status(status).send(message);
+        // Map the selected service title to the enum value
+        const serviceType = Object.values(ServiceType).find(type => type === selectedService.title);
+        if (!serviceType) {
+            return res.status(400).send('Invalid service type');
         }
 
+        // Check if the user already provides this service
+        const existingService = await ServiceOffering.findOne({
+            provider: userId,
+            serviceType: serviceType
+        });
+
+        if (existingService) {
+            return res.status(400).send('You already provide this service');
+        }
 
         // Create a new ServiceOffering object
         const newServiceOffering = new ServiceOffering({
@@ -93,7 +73,6 @@ export const addService = async (req: Request, res: Response, next: NextFunction
         if (!account.isProvider) {
             account.isProvider = true;
         }
-
         // Add the new service offering to the account's serviceOfferings array
         account.serviceOfferings.push(savedServiceOffering._id as Types.ObjectId);
         await account.save();
@@ -105,6 +84,7 @@ export const addService = async (req: Request, res: Response, next: NextFunction
         res.status(500).send('Internal Server Error');
     }
 }
+
 
 export const editService = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -138,17 +118,6 @@ export const editService = async (req: Request, res: Response, next: NextFunctio
         if (!serviceOffering.provider.equals(userId)) {
             return res.status(403).send('Unauthorized to edit this service offering');
         }
-
-        const {
-            serviceType,
-            exists,
-            status,
-            message
-        } = await checkServiceExistence(userId, selectedService.title, serviceId);
-        if (exists) {
-            return res.status(status).send(message);
-        }
-
 
         // Update the ServiceOffering object
         // serviceOffering.serviceType = serviceType; //it shouldn't update the service type
