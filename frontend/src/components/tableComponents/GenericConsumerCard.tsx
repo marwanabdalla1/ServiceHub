@@ -208,6 +208,10 @@ const GenericConsumerCard: React.FC<GenericConsumerCardProps> = ({
 
                     {renderActions()}
                 </div>
+
+                <Typography variant="body2" color="textSecondary" sx={{marginTop: 2, fontSize: '0.7rem'}}>
+                    Last Updated: {formatDateTime(item.updatedAt)}
+                </Typography>
             </CardContent>
         </Card>
 );

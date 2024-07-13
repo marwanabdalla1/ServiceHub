@@ -8,11 +8,13 @@ import {
     TableRow,
     Paper,
     TablePagination,
-    Container
+    Container,
+    Tooltip, IconButton
 } from '@mui/material';
 import GenericTableRow from "./GenericTableRow";
 import {Job} from "../../models/Job";
 import {ServiceRequest} from "../../models/ServiceRequest";
+import InfoIcon from '@mui/icons-material/Info';
 
 
 
@@ -70,7 +72,13 @@ function GenericTable({data, count, page, setPage, rowsPerPage, setRowsPerPage, 
                             <TableCell>Type</TableCell>
                             <TableCell>Status</TableCell>
                             <TableCell>Appointment Time</TableCell>
-                            <TableCell></TableCell>
+                            <TableCell>
+                                <Tooltip title="Tables are sorted by upcoming appointments nearest to today, followed by recent past appointments." placement="top">
+                                <IconButton>
+                                    <InfoIcon />
+                                </IconButton>
+                                </Tooltip>
+                            </TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>

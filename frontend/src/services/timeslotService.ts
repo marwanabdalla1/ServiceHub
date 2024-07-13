@@ -10,17 +10,43 @@ export class BookingError extends Error {
     }
 }
 
-export const bookTimeSlot = (timeSlot: any, token: string|null) => {
+// export const bookTimeSlot = (timeSlot: any, token: string|null) => {
+//     return new Promise((resolve, reject) => {
+//         axios.post('/api/timeslots/book', timeSlot, {
+//             headers: {'Authorization': `Bearer ${token}`}
+//         })
+//             .then(response => {
+//                 resolve(response.data);
+//             })
+//             .catch(error => {
+//                 if (error.response) {
+//                     if (error.response.status === 409) {
+//                         reject(new BookingError("Timeslot is no longer available", 409));
+//                     } else {
+//                         reject(new BookingError("An error occurred while booking the timeslot", error.response.status));
+//                     }
+//                 } else {
+//                     reject(new Error("Network or other error"));
+//                 }
+//             });
+//     });
+// };
+
+export const bookTimeSlot = (timeSlot: any, token: string|null): Promise<any> => {
     return new Promise((resolve, reject) => {
+        console.log("bookTimeSlot:", timeSlot)
         axios.post('/api/timeslots/book', timeSlot, {
             headers: {'Authorization': `Bearer ${token}`}
         })
             .then(response => {
-                resolve(response.data);
+                console.log("timeslot booked successfully", response.data);
+                resolve(response.data);  // Resolve the promise with the response data
             })
             .catch(error => {
+                console.error("Error booking timeslot:", error);
                 if (error.response) {
-                    if (error.response.status === 409) {
+                    // Check specific status codes or error messages
+                    if (error.response.status === 409) { // Assuming 409 means conflict, e.g., timeslot not available
                         reject(new BookingError("Timeslot is no longer available", 409));
                     } else {
                         reject(new BookingError("An error occurred while booking the timeslot", error.response.status));

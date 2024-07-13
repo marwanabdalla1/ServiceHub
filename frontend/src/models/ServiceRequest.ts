@@ -8,12 +8,11 @@ import {Timeslot} from "./Timeslot";
 export class ServiceRequest {
     _id: string;
     requestStatus: RequestStatus;
-    createdAt: Date; //automatically set by MongoDB
     serviceType: ServiceType;
 
     // todo: delete
-    appointmentStartTime: Date;
-    appointmentEndTime: Date | undefined;
+    appointmentStartTime?: Date;
+    appointmentEndTime?: Date | undefined;
     uploads: File[];
     comment: string;
     serviceFee: number;
@@ -26,16 +25,17 @@ export class ServiceRequest {
     requestedBy: Account;
     timeslot: Timeslot | undefined;
     rating: number;
-    profileImageUrl: string;
+
+    updatedAt?: Date;
+    createdAt?: Date;
 
 
 
-    constructor(serviceRequestId: string, requestStatus: RequestStatus, createdOn: Date, serviceType: ServiceType, serviceOffering: ServiceOffering | undefined | null,
-        appointmentStartTime: Date,  appointmentEndTime: undefined, uploads: File[], comment: string, serviceFee: number, duration: number, job: Job | null, provider: Account, timeslot: Timeslot|undefined, requestedBy: Account, rating: number,
-        profileImageUrl: string) {
+
+    constructor(serviceRequestId: string, requestStatus: RequestStatus,serviceType: ServiceType, serviceOffering: ServiceOffering | undefined | null,
+        appointmentStartTime: Date,  appointmentEndTime: undefined, uploads: File[], comment: string, serviceFee: number, duration: number, job: Job | null, provider: Account, timeslot: Timeslot|undefined, requestedBy: Account, rating: number, updatedAt: Date|undefined, createdAt: Date|undefined) {
         this._id = serviceRequestId;
         this.requestStatus = requestStatus;
-        this.createdAt = createdOn;
         this.serviceType = serviceType;
         this.serviceOffering = serviceOffering
         this.appointmentStartTime = appointmentStartTime;
@@ -49,6 +49,8 @@ export class ServiceRequest {
         this.timeslot = timeslot;
         this.requestedBy = requestedBy;
         this.rating = rating;
-        this.profileImageUrl = profileImageUrl;
+        this.updatedAt=updatedAt;
+        this.createdAt=createdAt;
+
     }
 }

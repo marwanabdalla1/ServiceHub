@@ -29,6 +29,9 @@ import './models/serviceOffering';
 
 const app = express();
 
+// Override the default required string check to allow empty strings
+mongoose.Schema.Types.String.checkRequired(v => v != null);
+
 // Configure CORS for connecting backend and frontend
 const corsOptions = {
     origin: 'http://localhost:3000',

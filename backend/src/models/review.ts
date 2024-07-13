@@ -12,7 +12,7 @@ export interface IReview extends Document {
 
 const ReviewSchema: Schema = new Schema({
     rating: {type: Number, required: true},
-    content: {type: String, required: true},
+    content: {type: String, required: true, default: ''},
     recipient: {type: Schema.Types.ObjectId, ref: 'Account', required: true},
     reviewer: {type: Schema.Types.ObjectId, ref: 'Account', required: true},
     serviceOffering: {type: Schema.Types.ObjectId, ref: 'ServiceOffering', required: true},

@@ -95,21 +95,20 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
                     //                               sx={{marginRight: "1rem"}}/>);
                 } else if (item.requestStatus === RequestStatus.accepted && item.job) {
                     console.log("request with job:", item)
-                    buttons.push(<BlackButton
-                    text="View Job" onClick={() => navigate(`/incoming/jobs/${item.job}`)}
-                                              sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
+                    buttons.push(<BlackButton text="View Job" onClick={() => navigate(`/incoming/jobs/${item.job}`)}
+                                              sx={{marginRight: "1rem"}}/>);
                 } else if (item.requestStatus === "pending") {
                     buttons.push(<BlackButton text="Accept" onClick={() => actions.accept?.(item)}
-                                              sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
+                                              sx={{marginRight: "1rem"}}/>);
                     buttons.push(<BlackButton text="Decline" onClick={() => actions.decline?.(item)}
-                                              sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
+                                              sx={{marginRight: "1rem"}}/>);
                     buttons.push(<BlackButton text="Request Time Change" onClick={() => actions.changeTime?.(true)}
-                                              sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
+                                              sx={{marginRight: "1rem"}}/>);
 
                 }
                 if (actions.cancelRequest && ["action needed from requestor"].includes(item.requestStatus)) {
                     buttons.push(<BlackButton text="Cancel Request" onClick={() => actions.cancelRequest?.(item)}
-                                              sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
+                                              sx={{marginRight: "1rem"}}/>);
 
                 }
 
@@ -129,7 +128,7 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
                 }
                 if (actions.review && item.status === "completed") {
                     buttons.push(
-                        <BlackButton text="Write a Review" onClick={() => actions.review?.(item)}
+                        <BlackButton text="Review" onClick={() => actions.review?.(item)}
                                      sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
                 }
                 if (actions.revoke && item.status === "completed") {
@@ -228,6 +227,10 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
                     <div style={{display: 'flex', flexWrap: 'nowrap', overflowX: 'auto'}}>
                         {renderActions()}
                     </div>
+
+                    <Typography variant="body2" color="textSecondary" sx={{marginTop: 2, fontSize: '0.7rem'}}>
+                        Last Updated: {formatDateTime(item.updatedAt)}
+                    </Typography>
                 </CardContent>
             </Card>
 );
