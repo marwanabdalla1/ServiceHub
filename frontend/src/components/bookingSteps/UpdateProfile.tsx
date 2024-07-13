@@ -32,7 +32,7 @@ interface UserDetails {
 }
 
 
-function UpdateProfile({onNext,handleCancel, bookingDetails}: UpdateProfileProps) {
+function UpdateProfile({onNext, handleCancel, bookingDetails}: UpdateProfileProps) {
     // const { bookingDetails } = useBooking();
     const navigate = useNavigate();
     const {token} = useAuth();
@@ -163,7 +163,7 @@ function UpdateProfile({onNext,handleCancel, bookingDetails}: UpdateProfileProps
 
                             />
                         </Grid>
-                        <Grid item xs={3}>
+                        <Grid item xs={5}>
                             <TextField
                                 label="Postal"
                                 fullWidth
@@ -174,28 +174,28 @@ function UpdateProfile({onNext,handleCancel, bookingDetails}: UpdateProfileProps
                                     setIsModified(true);
                                 }}
 
+                            />
+                        </Grid>
+                        <Grid item xs={7}>
+                            <Autocomplete
+                                options={Object.values(GERMAN_CITIES_SUPPORT)}
+                                getOptionLabel={(option) => option}
+                                value={userDetails.location}
+                                onChange={(event, newValue) => {
+                                    setUserDetails(prevDetails => ({...prevDetails, location: newValue || ''}));
+                                    setIsModified(true);
+                                }}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        label="City"
+                                        fullWidth
+                                        autoComplete="address-level2"
+                                        variant="outlined"
                                     />
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <Autocomplete
-                                        options={Object.values(GERMAN_CITIES_SUPPORT)}
-                                        getOptionLabel={(option) => option}
-                                        value={userDetails.location}
-                                        onChange={(event, newValue) => {
-                                            setUserDetails(prevDetails => ({...prevDetails, location: newValue || ''}));
-                                            setIsModified(true);
-                                        }}
-                                        renderInput={(params) => (
-                                            <TextField
-                                                {...params}
-                                                label="City"
-                                                fullWidth
-                                                autoComplete="address-level2"
-                                                variant="outlined"
-                                            />
-                                        )}
-                                    />
-                                </Grid>
+                                )}
+                            />
+                        </Grid>
 
                         {/*email should not be changeable!*/}
                         <Grid item xs={6}>

@@ -98,6 +98,7 @@ function ProviderProfilePage() {
     // const provider = mockProvider;
     const {offeringId} = useParams<{ offeringId: string }>(); //use this to then make a request to the user with the id to get the user data
 
+
     const navigate = useNavigate();
 
     const [loading, setLoading] = useState<boolean>(true);
@@ -257,7 +258,6 @@ function ProviderProfilePage() {
         return [country, location, postal].filter(Boolean).join(', ');
     }
 
-    // handle "book now" button
     return (
         <Container>
             <Box sx={{mt: 4}}>

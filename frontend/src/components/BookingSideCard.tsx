@@ -5,6 +5,7 @@ import {Account} from "../models/Account";
 import {ServiceOffering} from "../models/ServiceOffering";
 import Avatar from "@mui/material/Avatar";
 import {defaultProfileImage, fetchProfileImageById} from "../services/fetchProfileImage";
+import {formatDateTime} from "../utils/dateUtils";
 
 interface BookingSideCardProps {
     provider?: Account;
@@ -47,7 +48,8 @@ const BookingSideCard: React.FC<BookingSideCardProps> = ({
 
                     {timeSlot && timeSlot.start && (
                         <Typography variant="body2" color="text.secondary">
-                           {timeSlot.start.toLocaleString()}
+                            Time:
+                           {formatDateTime(timeSlot.start)}
                         </Typography>
                     )}
                     {serviceOffering && (
