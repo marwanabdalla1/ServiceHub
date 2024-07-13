@@ -16,7 +16,7 @@ import CloseFullscreenIcon from '@mui/icons-material/CloseFullscreen';
 import CloseIcon from "@mui/icons-material/Close";
 import {useNavigate} from "react-router-dom";
 import {formatDateTime} from "../../utils/dateUtils";
-import {defaultProfileImage, fetchProfileImageById} from "../../services/filterProfileImage";
+import {defaultProfileImage, fetchProfileImageById} from "../../services/fetchProfileImage";
 
 
 type Item = ServiceRequest | Job;
@@ -116,25 +116,25 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
                 // Job actions
                 if (actions.complete && item.status === "open") {
                     buttons.push(
-                        <BlackButton text="Mark ad Completed" onClick={() => actions.complete?.(item)}
-                                     sx={{marginRight: "1rem"}}/>);
+                        <BlackButton text="Mark as Completed" onClick={() => actions.complete?.(item)}
+                                     sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
                 }
 
                 if (actions.cancelJob && item.status === "open") {
                     buttons.push(
                         <BlackButton text="Cancel Job" onClick={() => actions.cancelJob?.(item)}
-                                     sx={{marginRight: "1rem"}}/>);
+                                     sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
 
                 }
                 if (actions.review && item.status === "completed") {
                     buttons.push(
                         <BlackButton text="Review" onClick={() => actions.review?.(item)}
-                                     sx={{marginRight: "1rem"}}/>);
+                                     sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
                 }
                 if (actions.revoke && item.status === "completed") {
                     buttons.push(
                         <BlackButton text="Revoke Completion" onClick={() => actions.revoke?.(item)}
-                                     sx={{marginRight: "1rem"}}/>);
+                                     sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
 
                 }
             }
@@ -142,13 +142,11 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
         };
 
         const handleIconClick = () => {
-            if (inDetailPage) {
-                console.log("in detail page");
+            if (inDetailPage)
                 if (redirectPath) {
-                    console.log("redirectPath", redirectPath)
                     navigate(redirectPath)
                 } else {
-                    console.log("icon clicked!")
+
                     if (isJob(item)) {
                         navigate('/incoming/jobs');
                     } else {
@@ -156,7 +154,7 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
                     }
 
                 }
-            } else {
+            else {
                 if (isJob(item)) {
                     navigate(`/incoming/jobs/${item._id}`);
                 } else {
@@ -235,8 +233,8 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
                     </Typography>
                 </CardContent>
             </Card>
-        );
-    }
+);
+}
 ;
 
 export default GenericProviderCard;

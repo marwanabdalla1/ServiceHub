@@ -7,7 +7,7 @@ import {useAuth} from "../contexts/AuthContext";
 import axios from "axios";
 import {Review} from "../models/Review";
 import { Account } from '../models/Account';
-import {defaultProfileImage, fetchProfileImageById} from "../services/filterProfileImage";
+import {defaultProfileImage, fetchProfileImageById} from "../services/fetchProfileImage";
 
 import useAlert from "../hooks/useAlert";
 import AlertCustomized from "../components/AlertCustomized";

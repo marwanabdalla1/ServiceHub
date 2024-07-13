@@ -9,7 +9,7 @@ import { ServiceOffering } from '../models/ServiceOffering';
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
 import { Pagination } from '../components/Pagination';
-import { fetchProfileImagesForServiceOffering } from '../services/filterProfileImage'; // Import from the new file
+import { fetchProfileImagesForServiceOffering } from "../services/fetchProfileImage"; // Import from the new file
 
 interface FilterState {
     type: string;

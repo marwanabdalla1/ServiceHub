@@ -3,7 +3,7 @@ import express from "express";
 import cors from "cors";
 import account from "./models/account";
 import errorHandler from "./middleware/errorHandler";
-import logger from "./middleware/logger";
+import logger from "./middleware/reqlogger";
 import notFoundHandler from "./middleware/notFoundHandler";
 import AccountRouter from "./routes/Account";
 import AuthRouter from "./routes/Auth";

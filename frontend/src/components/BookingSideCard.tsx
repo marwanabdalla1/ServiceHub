@@ -4,7 +4,7 @@ import {Timeslot} from "../models/Timeslot";
 import {Account} from "../models/Account";
 import {ServiceOffering} from "../models/ServiceOffering";
 import Avatar from "@mui/material/Avatar";
-import {defaultProfileImage, fetchProfileImageById} from "../services/filterProfileImage";
+import {defaultProfileImage, fetchProfileImageById} from "../services/fetchProfileImage";
 
 interface BookingSideCardProps {
     provider?: Account;

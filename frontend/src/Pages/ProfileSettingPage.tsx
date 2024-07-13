@@ -25,7 +25,7 @@ import {toast} from "react-toastify";
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddressDialog from "../components/dialogs/AddressDialog";
 import {isValidPhoneNumber} from "../validators/AccountDataValidator";
-import {deleteProfileImage, fetchProfileImageByToken} from "../services/filterProfileImage";
+import {deleteProfileImage, fetchProfileImageByToken} from "../services/fetchProfileImage";
 
 type EditModeType = {
     [key: string]: boolean;

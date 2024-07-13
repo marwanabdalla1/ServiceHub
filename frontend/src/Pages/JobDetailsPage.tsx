@@ -6,7 +6,7 @@ import {Job} from '../models/Job';
 import {Container, Typography, Box} from '@mui/material';
 import {useAuth} from '../contexts/AuthContext';
 import {Review} from "../models/Review"; // Assuming you have a component to list reviews
-import handleAccept from "./TablePages/IncomingRequestsTable"
+import handleAccept from "./TablePages/IncomingRequestsPage"
 import GenericProviderCard from "../components/tableComponents/GenericProviderCard";
 import GenericConsumerCard from "../components/tableComponents/GenericConsumerCard";
 import {handleCancel, handleComplete, handleRevoke} from "../utils/jobHandler";

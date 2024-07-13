@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {Tabs, Tab, Box, Container} from '@mui/material';
-import IncomingRequestsTable from './IncomingRequestsTable';
-import OfferedServicesTable from './OfferedServicesTable';
+import IncomingRequestsTable from './IncomingRequestsPage';
+import OfferedServicesTable from './OfferedServicesPage';
 import {useNavigate, useLocation, Outlet} from "react-router-dom";
 import AlertCustomized from "../../components/AlertCustomized";
 import useAlert from "../../hooks/useAlert";

@@ -1,56 +1,37 @@
 import React, {useState} from 'react';
-import CardContent from '@mui/material/Box';
 import {
     Dialog,
     Button,
     DialogActions,
     DialogContent,
     DialogTitle,
+    DialogContentText,
     Box,
     TextField,
     Select,
-    FormControl, InputLabel, MenuItem, Container
+    FormControl, InputLabel, MenuItem
 } from '@mui/material';
 
 import {Link} from 'react-router-dom'
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
-import Breadcrumbs from '@mui/material/Breadcrumbs';
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import {ServiceRequest, ServiceRequest as Request} from '../../models/ServiceRequest';
-// import IncomingRequestRow from './IncomingRequestRow';
-import Modal from '../../components/inputs/Modal';
-// import MediaCard from './IncomingRequestCard';
-
 import GenericProviderCard from '../../components/tableComponents/GenericProviderCard'
-import GenericTableRow from '../../components/tableComponents/GenericTableRow'
-
-import {ServiceType, RequestStatus, JobStatus} from '../../models/enums'
-import {Account} from '../../models/Account';
+import {ServiceType} from '../../models/enums'
 import {useEffect} from "react";
 import {useAuth} from "../../contexts/AuthContext";
 import axios from "axios";
-import {formatDateTime} from '../../utils/dateUtils';
 import {useNavigate} from "react-router-dom";
 import {Job} from "../../models/Job";
-import {TablePagination} from '@mui/material';
-
-
 import {
     handleAccept,
     handleDecline,
     handleCancel,
     handleTimeChange,
 } from '../../utils/requestHandler';
-import {sortBookingItems} from "../../utils/jobHandler";
 import GenericTable from "../../components/tableComponents/GenericTable";  // Adjust the path as necessary
 
+import AlertCustomized from "../../components/AlertCustomized";
+import useAlert from '../../hooks/useAlert';
 
 
 type Item = ServiceRequest | Job;
@@ -66,7 +47,8 @@ export default function IncomingRequestTable() {
     const {token, account} = useAuth();
     const [timeChangePopUp, setTimeChangePopUp] = useState(false);
     const navigate = useNavigate();
-
+    const [dialogOpen, setDialogOpen] = React.useState(false);
+    const { alert, triggerAlert, closeAlert } = useAlert(10000000);
 
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -110,27 +92,6 @@ export default function IncomingRequestTable() {
             };
 
             fetchServiceRequests();
-
-
-            // console.log("this is the logged in account in request table:", account)
-            // // setLoading(true);
-            // // get all requests instead of only incoming ones
-            // axios.get<ServiceRequest[]>(`/api/requests/provider/${account._id}`, {
-            //     headers: {Authorization: `Bearer ${token}`}
-            // })
-            //     .then(response => {
-            //
-            //         console.log("getting requests ...", response.data)
-            //         const sortedData = sortBookingItems(response.data);
-            //         setServiceRequests(sortedData as ServiceRequest[]);
-            //         // setLoading(false);
-            //     })
-            //     .catch(error => {
-            //         console.error('Failed to fetch service requests:', error);
-            //         setServiceRequests([]);
-            //         // setError('Failed to load service requests');
-            //         // setLoading(false);
-            //     });
         }
     }, [token, account, page, rowsPerPage, statusFilter, serviceTypeFilter]);
 
@@ -152,6 +113,10 @@ export default function IncomingRequestTable() {
     };
 
     const handleToggleMediaCard = (req: ServiceRequest | Item | null) => {
+        if (req && (req as ServiceRequest).requestedBy === null) {
+            setDialogOpen(true);
+            return;
+        }
         setSelectedRequest(req as ServiceRequest);
         setShowMediaCard(req !== null);
     };
@@ -230,17 +195,18 @@ export default function IncomingRequestTable() {
             navigate
         });
     };
-
+    const handleDialogClose = () => {
+        setDialogOpen(false);
+    };
 
     return (
         <div style={{display: 'flex'}}>
             <div style={{flex: 1, padding: '10px'}}>
+            <AlertCustomized alert={alert} closeAlert={closeAlert} />
+
                 <Box sx={{minWidth: 275, margin: 2}}>
                     <Box>
-                        {/*<Breadcrumbs separator={<NavigateNextIcon fontSize="small"/>} aria-label="breadcrumb"*/}
-                        {/*             sx={{marginBottom: '16px'}}>*/}
-                        {/*    <Typography color="textPrimary">Incoming Requests</Typography>*/}
-                        {/*</Breadcrumbs>*/}
+
                         <Typography variant="h6" component="div" sx={{marginBottom: '10px'}}>
                             Incoming Requests
                         </Typography>
@@ -284,16 +250,6 @@ export default function IncomingRequestTable() {
                             </Select>
                         </FormControl>
 
-                        {/*{statusOptions.map((status) => (*/}
-                        {/*    <Button*/}
-                        {/*        key={status}*/}
-                        {/*        variant={statusFilter.toLowerCase() === status.toLowerCase() ? 'contained' : 'outlined'}*/}
-                        {/*        onClick={() => setStatusFilter(status)}*/}
-                        {/*        sx={{margin: 0.5, textTransform: 'none'}}*/}
-                        {/*    >*/}
-                        {/*        {status}*/}
-                        {/*    </Button>*/}
-                        {/*))}*/}
                     </Box>
 
                     <Box style={{display: 'flex'}}>
@@ -376,6 +332,19 @@ export default function IncomingRequestTable() {
                     </Box>
                 </Box>
             </div>
+            <Dialog open={dialogOpen} onClose={handleDialogClose}>
+                <DialogTitle>Service Receiver Not Available</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        The service receiver is not available at the moment.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleDialogClose} color="primary">
+                        OK
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </div>
     );
 }

@@ -15,13 +15,11 @@ const SelectAvailabilityPage: React.FC = () => {
     const inAddServiceSteps = location.state?.inAddServiceSteps || false;
 
     useEffect(() => {
-        console.log("you are in the select availability page1:", token, account, isReady, isFetched, isProvider)
 
         if (!isReady || (token && !isFetched)){
             console.log("not ready!")
             return;
         }
-        console.log("you are in the select availability page:", token, account, isReady, isFetched, isProvider)
 
         if (!token || (account && !isProvider)) {
             // If not a provider, redirect" to home or another appropriate page
