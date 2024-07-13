@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Container, Box, Typography, Card, CardContent, Avatar, Button, TextField, Link as MuiLink} from '@mui/material';
 import Rating from '@mui/material/Rating';
 import { useParams } from 'react-router-dom';
@@ -8,6 +8,7 @@ import {useLocation, useNavigate} from "react-router-dom";
 import axios from "axios";
 import {Review} from "../models/Review";
 import { Account } from '../models/Account';
+import {defaultProfileImage, fetchProfileImageById} from "../services/filterProfileImage";
 
 const ReviewPage: React.FC = () => {
     const [review, setReview] = React.useState<Review|null>(null); // Holds the existing review data
@@ -17,12 +18,18 @@ const ReviewPage: React.FC = () => {
     const [reviewText, setReviewText] = React.useState(''); // State to hold the review text
     const [isEditing, setIsEditing] = React.useState(false);  // Tracks if we are editing an existing review
     const navigate = useNavigate();
-
+    const [profileImage, setProfileImage] = useState<string | null>(null);
     const {token, account} = useAuth();
 
     const { jobId } = useParams();
 
-    
+    useEffect(() => {
+        if (job?.provider) {
+            fetchProfileImageById(job.provider._id).then((image) => {
+                setProfileImage(image);
+            });
+        }
+    }, [job?.provider]);
 
     useEffect(() => {
         // This useEffect will always run, but the internal logic runs only under certain conditions.
@@ -153,7 +160,7 @@ const ReviewPage: React.FC = () => {
                             }}
 
                             /*todo: also need to include their profile when GET (in controller)*/
-                            // src={job?.provider.profileImageUrl}
+                            src={job?.provider ? profileImage || undefined : defaultProfileImage}
                         />
                         <Box>
                             <Typography
