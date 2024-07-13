@@ -17,6 +17,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import {useNavigate} from "react-router-dom";
 import {formatDateTime} from "../../utils/dateUtils";
 import {defaultProfileImage, fetchProfileImageById} from "../../services/fetchProfileImage";
+import Link from "@mui/material/Link";
+import { Link as RouterLink } from 'react-router-dom';
 
 
 type Item = ServiceRequest | Job;
@@ -206,7 +208,19 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
                         {isJob(item) ? "Job ID" : "Request ID"}: {item._id}
                     </Typography>
                     <Typography variant="body2">
-                        Service Type: {item.serviceType}
+                        Service Type: {"\t"}
+                        {item.serviceOffering ? (
+                            <Link
+                                component={RouterLink}
+                                to={`/offerings/${item.serviceOffering}`}
+                                underline="hover"
+                                sx={{ color: 'inherit', textDecoration: 'none' }}
+                            >
+                                {item.serviceType}
+                            </Link>
+                        ) : (
+                            item.serviceType
+                        )}
                     </Typography>
                     <Typography variant="body2">
                         Appointment Start Time: {formatDateTime(item.timeslot?.start)}
