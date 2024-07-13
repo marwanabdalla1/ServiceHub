@@ -16,7 +16,7 @@ import CloseFullscreenIcon from '@mui/icons-material/CloseFullscreen';
 import CloseIcon from "@mui/icons-material/Close";
 import {useNavigate} from "react-router-dom";
 import {formatDateTime} from "../../utils/dateUtils";
-import {defaultProfileImage, fetchProfileImageById} from "../../services/filterProfileImage";
+import {defaultProfileImage, fetchProfileImageById} from "../../services/fetchProfileImage";
 
 
 type Item = ServiceRequest | Job;

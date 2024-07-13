@@ -8,7 +8,7 @@ import {useLocation, useNavigate} from "react-router-dom";
 import axios from "axios";
 import {Review} from "../models/Review";
 import { Account } from '../models/Account';
-import {defaultProfileImage, fetchProfileImageById} from "../services/filterProfileImage";
+import {defaultProfileImage, fetchProfileImageById} from "../services/fetchProfileImage";
 
 const ReviewPage: React.FC = () => {
     const [review, setReview] = React.useState<Review|null>(null); // Holds the existing review data

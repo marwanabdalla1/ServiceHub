@@ -37,7 +37,7 @@ import {useAuth} from "../contexts/AuthContext";
 import {response} from "express";
 import * as url from "node:url";
 import StarIcon from '@mui/icons-material/Star';
-import {defaultProfileImage, fetchProfileImageById, fetchReviewerProfileImages} from "../services/filterProfileImage";
+import {defaultProfileImage, fetchProfileImageById, fetchReviewerProfileImages} from "../services/fetchProfileImage";
 
 // !todo s
 // 1. link reviews

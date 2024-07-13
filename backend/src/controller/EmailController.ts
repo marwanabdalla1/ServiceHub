@@ -24,7 +24,7 @@ const transporter = nodemailer.createTransport({
 });
 
 const generateEmailTemplate = (firstName: string, otp: string, subject: string, bodyText: string) => {
-    return `
+  return `
     <div style="font-family: Arial, sans-serif; margin: 0; padding: 0;">
       <table style="max-width: 600px; margin: auto; border-collapse: collapse; border: 1px solid #ddd;">
         <tr>
@@ -80,20 +80,20 @@ export const sendResetPasswordEmail = async (req: Request, res: Response): Promi
 
     otpStore[email] = otp;
 
-        const mailOptions = {
-            from: process.env.MY_EMAIL,
-            to: email,
-            subject: 'Reset Password OTP',
-            text: `Your OTP for password reset is: ${otp}`,
-            html: generateEmailTemplate(account?.get("firstName"), otp, 'Reset Password OTP',
-                'To proceed further with your password reset process, please enter the OTP below.')
-        };
+    const mailOptions = {
+      from: process.env.MY_EMAIL,
+      to: email,
+      subject: 'Reset Password OTP',
+      text: `Your OTP for password reset is: ${otp}`,
+      html: generateEmailTemplate(account?.get("firstName"), otp, 'Reset Password OTP',
+        'To proceed further with your password reset process, please enter the OTP below.')
+    };
 
-        await transporter.sendMail(mailOptions);
-        res.status(200).send('OTP sent to email');
-    } catch (error:any) {
-        res.status(500).send(error.toString());
-    }
+    await transporter.sendMail(mailOptions);
+    res.status(200).send('OTP sent to email');
+  } catch (error: any) {
+    res.status(500).send(error.toString());
+  }
 };
 
 /**
@@ -102,33 +102,33 @@ export const sendResetPasswordEmail = async (req: Request, res: Response): Promi
  * @param res
  */
 export const sendCreateAccountEmail = async (req: Request, res: Response): Promise<void> => {
-    const { otp, email, firstName } = req.body;
+  const { otp, email, firstName } = req.body;
 
-    try {
-        const account = await Account.findOne({ email: email });
-        if (account) {
-            res.status(400).json({
-                error: "User with this email already exists"
-            });
-            return;
-        }
-
-        otpStore[email] = otp;
-
-        const mailOptions = {
-            from: process.env.MY_EMAIL,
-            to: email,
-            subject: 'Account Creation OTP',
-            text: `Your OTP for account creation is: ${otp}`,
-            html: generateEmailTemplate(firstName, otp, 'Account Creation OTP',
-                'To proceed further with your account creation process, please enter the OTP below.')
-        };
-
-        await transporter.sendMail(mailOptions);
-        res.status(200).send('OTP sent to email');
-    } catch (error:any) {
-        res.status(500).send(error.toString());
+  try {
+    const account = await Account.findOne({ email: email });
+    if (account) {
+      res.status(400).json({
+        error: "User with this email already exists"
+      });
+      return;
     }
+
+    otpStore[email] = otp;
+
+    const mailOptions = {
+      from: process.env.MY_EMAIL,
+      to: email,
+      subject: 'Account Creation OTP',
+      text: `Your OTP for account creation is: ${otp}`,
+      html: generateEmailTemplate(firstName, otp, 'Account Creation OTP',
+        'To proceed further with your account creation process, please enter the OTP below.')
+    };
+
+    await transporter.sendMail(mailOptions);
+    res.status(200).send('OTP sent to email');
+  } catch (error: any) {
+    res.status(500).send(error.toString());
+  }
 };
 
 
