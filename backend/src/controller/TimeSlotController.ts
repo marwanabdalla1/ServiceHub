@@ -4,9 +4,10 @@ import Timeslot, {ITimeslot} from '../models/timeslot';
 import mongoose, {Types} from "mongoose";
 import ServiceRequest from "../models/serviceRequest";
 import {ObjectId} from "mongodb";
+import {createNotificationDirect} from "./NotificationController";
 
 async function generateWeeklyInstances(events: ITimeslot[], existingTimeslots: ITimeslot[], startDate: moment.Moment, endDate: moment.Moment) {
-    console.log("existing ones:", existingTimeslots)
+    // console.log("existing ones:", existingTimeslots)
     const weekInstances: ITimeslot[] = [];
     events.forEach(event => {
         const dayOfWeek = moment(event.start).day();
@@ -51,10 +52,12 @@ async function generateWeeklyInstances(events: ITimeslot[], existingTimeslots: I
                     title: event.title,
                     start: start,
                     end: end,
-                    isFixed: event.isFixed,
+                    isFixed: true,
                     isBooked: event.isBooked,
                     createdById: event.createdById
                 } as ITimeslot;
+
+                console.log("tempInstance", tempInstance)
 
                 // Filter out existing overlaps and adjust the times
                 const adjustedInstances = adjustForOverlaps(tempInstance, existingTimeslots);
@@ -231,41 +234,131 @@ function adjustForOverlaps(newInstance: ITimeslot, existingTimeslots: ITimeslot[
 
 // New Endpoint to Extend Fixed Slots (updated code)
 export const extendFixedSlots: RequestHandler = async (req, res, next) => {
+    console.log("trying to extend fixed timeslots!")
     try {
+
         const userId = (req as any).user.userId;// Assuming userId is available in the request (e.g., from authentication middleware)
         const {start, end} = req.body;
         const startDate = moment(start).subtract(1, 'week');
         const endDate = moment(end).subtract(1, 'week');
 
+
         // Fetch existing fixed events within the one-week range before the start and end dates
         const fixedEvents = await Timeslot.find({
             createdById: userId,
             isFixed: true,
-            start: {$gte: startDate.toDate()},
-            end: {$lte: endDate.toDate()},
+            start: {$gte: new Date(start)},
+            end: {$lte: new Date(end)},
         });
 
-        // first get existing timeslots
-        let existingTimeslots: ITimeslot[] = [];
-        try {
-            // Asynchronously get existing timeslots
-            existingTimeslots = await getEventsDirect(userId);
-        } catch (error) {
-            console.error("Error fetching existing timeslots:", error);
-            existingTimeslots = []; // Continue with empty array if error
-        }
-        // Generate new instances
-        const futureInstances = await generateWeeklyInstances(fixedEvents, existingTimeslots, moment(start), moment(end));
+        // check if this is actually the last event
+        const eventsToExtend = [];
 
-        // Insert future instances into the database
-        await Timeslot.insertMany(futureInstances.map(instance => ({
-            title: instance.title,
-            start: instance.start,
-            end: instance.end,
-            isFixed: instance.isFixed,
-            isBooked: instance.isBooked,
-            createdById: userId
-        })));
+        // Fetch potential future events, including non-active ones!
+        const potentialFutureEvents = await Timeslot.find({
+            createdById: userId,
+            isFixed: true,
+            start: { $gte: endDate.toDate() }
+        });
+
+        console.log("potential future events:", potentialFutureEvents.length)
+
+        // Filter future events to check exact timing match
+        for (const event of fixedEvents) {
+            const eventDayOfWeek = moment(event.start).day();
+            console.log("EventDayOfWeek", eventDayOfWeek)
+            const startTime = moment(event.start).format('HH:mm');
+            console.log("futre startTime", startTime)
+
+            const endTime = moment(event.end).format('HH:mm');
+            console.log("futre endTime", endTime)
+
+
+            const futureExists = potentialFutureEvents.some(
+                futureEvent => {
+                    const isAfter = moment(futureEvent.start).isAfter(event.end);
+                    const sameDayOfWeek = moment(futureEvent.start).day() === eventDayOfWeek;
+                    const sameStartTime = moment(futureEvent.start).format('HH:mm') === startTime;
+                    const sameEndTime = moment(futureEvent.end).format('HH:mm') === endTime;
+
+                    console.log(`Checking Future Event: ${futureEvent._id}`);
+                    console.log(`  Is After: ${isAfter}`);
+                    console.log(`  Same Day of Week: ${sameDayOfWeek} (${moment(futureEvent.start).day()} vs ${eventDayOfWeek})`);
+                    console.log(`  Same Start Time: ${sameStartTime} (${moment(futureEvent.start).format('HH:mm')} vs ${startTime})`);
+                    console.log(`  Same End Time: ${sameEndTime} (${moment(futureEvent.end).format('HH:mm')} vs ${endTime})`);
+
+                    return isAfter && sameDayOfWeek && sameStartTime && sameEndTime;
+            });
+
+            console.log("future exists:", futureExists)
+
+            // if there is nothing in the future and this event is still supposed to be fixed, extend it
+            if (!futureExists) {
+                eventsToExtend.push(event);
+            }
+        }
+        // for (const event of fixedEvents) {
+        //     const eventDayOfWeek = moment(event.start).day(); // Get day of week
+        //     const startTime = moment(event.start).format('HH:mm');
+        //     const endTime = moment(event.end).format('HH:mm');
+        //
+        //     // Check if there are future instances for this event
+        //     const futureExists = await Timeslot.exists({
+        //         createdById: userId,
+        //         isFixed: true,
+        //         start: {
+        //             $gte: end.toDate(),
+        //             $expr: {
+        //                 $and: [
+        //                     { $eq: [{ $dayOfWeek: "$start" }, eventDayOfWeek] },
+        //                     { $eq: [{ $hour: "$start" }, parseInt(startTime.split(':')[0])] },
+        //                     { $eq: [{ $minute: "$start" }, parseInt(startTime.split(':')[1])] },
+        //                     { $eq: [{ $hour: "$end" }, parseInt(endTime.split(':')[0])] },
+        //                     { $eq: [{ $minute: "$end" }, parseInt(endTime.split(':')[1])] }
+        //                 ]
+        //             }
+        //         }
+        //     });
+        //
+        //     if (!futureExists) {
+        //         eventsToExtend.push(event);
+        //     }
+        // }
+
+        console.log("eventstoextend:", eventsToExtend.length)
+
+        console.log("existed fixed event:", fixedEvents.length)
+
+
+        // Generate future instances for all events that need extending
+        if (eventsToExtend.length > 0) {
+            // first get existing timeslots
+            let existingTimeslots: ITimeslot[] = [];
+            try {
+                // Asynchronously get existing timeslots
+                existingTimeslots = await getEventsDirect(userId);
+                console.log("existing timeslots:", existingTimeslots.length)
+
+            } catch (error) {
+                console.error("Error fetching existing timeslots:", error);
+                existingTimeslots = []; // Continue with empty array if error
+            }
+
+            const futureInstances = await generateWeeklyInstances(eventsToExtend, existingTimeslots, moment(start), moment(end).add(6, 'months'));
+
+            console.log("generated fixed event:", futureInstances.length)
+
+            // Insert future instances into the database
+            await Timeslot.insertMany(futureInstances.map(instance => ({
+                title: instance.title,
+                start: instance.start,
+                end: instance.end,
+                isFixed: true,
+                isBooked: instance.isBooked,
+                createdById: userId
+            })));
+        }
+
 
         res.status(201).json({message: "Extended fixed slots successfully"});
     } catch (err) {
@@ -321,7 +414,33 @@ export const deleteTimeslot: RequestHandler = async (req, res, next) => {
                 $expr: {
                     $eq: [{$dayOfWeek: "$start"}, weekday] // Ensure it's the same day of the week
                 }
-            });
+            })
+
+
+            // update all previous ones to make them not fixed
+            await Timeslot.updateMany({
+                createdById: userId,
+                title,
+                isFixed: true,
+                start: {$lt: startTime},
+                $and: [
+                    {
+                        $or: [ // Start time is within the base event duration
+                            {start: {$gte: startTime}},
+                            {start: {$lt: endTime}}
+                        ]
+                    },
+                    {
+                        $or: [ // End time is within the base event duration
+                            {end: {$gt: startTime}},
+                            {end: {$lte: endTime}}
+                        ]
+                    }
+                ],
+                $expr: {
+                    $eq: [{$dayOfWeek: "$start"}, weekday] // Ensure it's the same day of the week
+                }
+            }, { $set: { isFixed: false } });
         }
 
         res.status(200).json({message: 'Timeslot deleted successfully'});
@@ -407,9 +526,13 @@ export const updateTimeslot: RequestHandler = async (req, res, next) => {
 // Existing Get Events Controller (updated code)
 export const getEvents: RequestHandler = async (req, res, next) => {
     const userId = (req as any).user.userId; // Assuming userId is available in the request (e.g., from authentication middleware)
+    const { start, end } = req.query; // Extracting start and end dates from the query parameters
+
+    console.log("getEvents backend query:", start, end)
+
     try {
         //
-        const timeslots = await getEventsDirect(userId)
+        const timeslots = await getEventsDirect(userId, start as string, end as string)
         res.json(timeslots);
     } catch (error: unknown) {
         const err = error as Error;
@@ -418,9 +541,33 @@ export const getEvents: RequestHandler = async (req, res, next) => {
 };
 
 // Define a function to fetch timeslots
-async function getEventsDirect(userId: any) {
+async function getEventsDirect(userId: any, start?: string, end?: string) {
     try {
-        const timeslots = Timeslot.find({createdById: userId});
+        const query: any = { createdById: userId};
+
+        if (start && end) {
+            query.$and = [
+                { createdById: userId }, // reiterate for clarity in combined query structure
+                {
+                    $or: [
+                        {
+                            $and: [
+                                { start: { $gte: new Date(start) } },
+                                { end: { $lte: new Date(end) } }
+                            ]
+                        },
+                        {
+                            $and: [
+                                { transitStart: { $gte: new Date(start) } },
+                                { transitEnd: { $lte: new Date(end) } }
+                            ]
+                        }
+                    ]
+                }
+            ];
+        }
+
+        const timeslots = Timeslot.find(query);
         return timeslots;
     } catch (error) {
         console.error("Error fetching timeslots for user:", error);
@@ -527,8 +674,9 @@ export const getAvailabilityByProviderId: RequestHandler = async (req, res, next
             {createdById: new Types.ObjectId(providerId)} // Explicitly cast to ObjectId
         ];
 
-        // Fetch all timeslots for the provider
+        // Fetch all future timeslots for the provider
         const timeslots: ITimeslot[] = await Timeslot.find({
+            start: {$gte: new Date()},
             // createdById: providerId,
             $or: providerIdConditions,
             isBooked: false,
@@ -627,7 +775,7 @@ export const turnExistingEventIntoFixed: RequestHandler = async (req, res, next)
         // Step 1: Find and update the specified event to mark it as fixed
         const eventToUpdate = await Timeslot.findOneAndUpdate({
             _id: event._id,
-            createdById: event.createdById
+            createdById: userId,
         }, {
             $set: {isFixed: true}
         }, {new: true}); // Return the updated document
@@ -648,13 +796,15 @@ export const turnExistingEventIntoFixed: RequestHandler = async (req, res, next)
             const futureEndDate = moment(eventToUpdate.end).endOf('week').add(6, 'months');
             let existingTimeslots: ITimeslot[] = [];
             try {
-                // Asynchronously get existing timeslots
-                existingTimeslots = await getEventsDirect(userId);
+                // Asynchronously get existing timeslots in the future
+                existingTimeslots = await getEventsDirect(userId, eventToUpdate.start.toISOString(), futureEndDate.toISOString());
+                console.log("existing timeslots for turning into fixed:", existingTimeslots.length)
             } catch (error) {
                 console.error("Error fetching existing timeslots:", error);
                 existingTimeslots = []; // Continue with empty array if error
             }
             futureInstances = await generateWeeklyInstances([eventToUpdate], existingTimeslots, moment(eventToUpdate.start).add(1, 'week'), futureEndDate);
+            console.log("turn into fixed: future instances", futureInstances.length)
         }
 
         // Insert new events

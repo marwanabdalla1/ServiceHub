@@ -1,5 +1,5 @@
 // GenericServiceCard.js
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
@@ -16,6 +16,7 @@ import CloseFullscreenIcon from '@mui/icons-material/CloseFullscreen';
 import CloseIcon from "@mui/icons-material/Close";
 import {useNavigate} from "react-router-dom";
 import {formatDateTime} from "../../utils/dateUtils";
+import {defaultProfileImage, fetchProfileImageById} from "../../services/fetchProfileImage";
 
 
 type Item = ServiceRequest | Job;
@@ -69,8 +70,17 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
 
         const {account, token, isProvider} = useAuth();
         const navigate = useNavigate();
+        const [profileImage, setProfileImage] = useState<string | null>(null);
 
         // todo: check account is provider otherwise not authorized?
+
+        useEffect(() => {
+            if (receiver) {
+                fetchProfileImageById(receiver._id).then((image) => {
+                    setProfileImage(image);
+                });
+            }
+        }, [receiver]);
 
         const renderActions = () => {
             const buttons = [];
@@ -85,20 +95,21 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
                     //                               sx={{marginRight: "1rem"}}/>);
                 } else if (item.requestStatus === RequestStatus.accepted && item.job) {
                     console.log("request with job:", item)
-                    buttons.push(<BlackButton text="View Job" onClick={() => navigate(`/incoming/jobs/${item.job}`)}
-                                              sx={{marginRight: "1rem"}}/>);
+                    buttons.push(<BlackButton
+                    text="View Job" onClick={() => navigate(`/incoming/jobs/${item.job}`)}
+                                              sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
                 } else if (item.requestStatus === "pending") {
                     buttons.push(<BlackButton text="Accept" onClick={() => actions.accept?.(item)}
-                                              sx={{marginRight: "1rem"}}/>);
+                                              sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
                     buttons.push(<BlackButton text="Decline" onClick={() => actions.decline?.(item)}
-                                              sx={{marginRight: "1rem"}}/>);
+                                              sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
                     buttons.push(<BlackButton text="Request Time Change" onClick={() => actions.changeTime?.(true)}
-                                              sx={{marginRight: "1rem"}}/>);
+                                              sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
 
                 }
                 if (actions.cancelRequest && ["action needed from requestor"].includes(item.requestStatus)) {
                     buttons.push(<BlackButton text="Cancel Request" onClick={() => actions.cancelRequest?.(item)}
-                                              sx={{marginRight: "1rem"}}/>);
+                                              sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
 
                 }
 
@@ -106,25 +117,25 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
                 // Job actions
                 if (actions.complete && item.status === "open") {
                     buttons.push(
-                        <BlackButton text="Mark ad Completed" onClick={() => actions.complete?.(item)}
-                                     sx={{marginRight: "1rem"}}/>);
+                        <BlackButton text="Mark as Completed" onClick={() => actions.complete?.(item)}
+                                     sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
                 }
 
                 if (actions.cancelJob && item.status === "open") {
                     buttons.push(
                         <BlackButton text="Cancel Job" onClick={() => actions.cancelJob?.(item)}
-                                     sx={{marginRight: "1rem"}}/>);
+                                     sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
 
                 }
                 if (actions.review && item.status === "completed") {
                     buttons.push(
                         <BlackButton text="Write a Review" onClick={() => actions.review?.(item)}
-                                     sx={{marginRight: "1rem"}}/>);
+                                     sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
                 }
                 if (actions.revoke && item.status === "completed") {
                     buttons.push(
                         <BlackButton text="Revoke Completion" onClick={() => actions.revoke?.(item)}
-                                     sx={{marginRight: "1rem"}}/>);
+                                     sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
 
                 }
             }
@@ -179,8 +190,7 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
 
                 <CardContent>
                     <div style={{display: 'flex', alignItems: 'center', marginBottom: '1rem'}}>
-                        {/*todo: profile image!*/}
-                        <Avatar alt={receiver?.firstName + " " + receiver?.lastName} src={receiver?.profileImageUrl}
+                        <Avatar alt={receiver?.firstName + " " + receiver?.lastName} src={receiver ? profileImage || undefined : defaultProfileImage}
                                 sx={{width: 100, height: 100, marginRight: '0.5rem'}}/>
                         <div style={{marginRight: '1rem', textAlign: 'left'}}>
                             <Typography variant="h6">
@@ -215,11 +225,13 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
                     <Typography variant="body2" sx={{marginBottom: '1rem'}}>
                         Description: {item.comment}
                     </Typography>
-                    {renderActions()}
+                    <div style={{display: 'flex', flexWrap: 'nowrap', overflowX: 'auto'}}>
+                        {renderActions()}
+                    </div>
                 </CardContent>
             </Card>
-        );
-    }
+);
+}
 ;
 
 export default GenericProviderCard;

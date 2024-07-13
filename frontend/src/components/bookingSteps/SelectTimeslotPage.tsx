@@ -2,9 +2,7 @@ import React from 'react';
 import {Link, useNavigate, useParams} from 'react-router-dom';
 import {Container, Box, Typography, Card, CardContent, Grid, Button} from '@mui/material';
 import {useBooking, BookingDetails} from '../../contexts/BookingContext';
-import {Account} from "../../models/Account";
 import AvailabilityCalendarBooking from "../AvailabilityCalendarBooking";
-import BookingSideCard from "../BookingSideCard";
 
 
 interface SelectTimeslotProps {
@@ -42,11 +40,16 @@ function SelectTimeslot({onNext, handleCancel, bookingDetails}: SelectTimeslotPr
     // };
     //
 
+    // color legend to be displayed
     const CalendarLegend = () => (
-        <Box display="flex" alignItems="center" marginRight={2}>
-            <Box width={20} height={20} bgcolor=" #bbf7d0" marginRight={1}/>
-            <Typography>Available Time</Typography>
-        </Box>);
+        <Box display="flex" justifyContent="center" alignItems="center" padding={2} bgcolor="background.paper">
+            <Box display="flex" alignItems="center">
+                <Box width={20} height={20} bgcolor="#bbf7d0" marginRight={1}/>
+                <Typography>Available Time</Typography>
+            </Box>
+
+        </Box>
+    );
 
     return (
         <>

@@ -1,5 +1,5 @@
 // GenericServiceCard.js
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
@@ -16,6 +16,7 @@ import CloseFullscreenIcon from '@mui/icons-material/CloseFullscreen';
 import CloseIcon from "@mui/icons-material/Close";
 import {redirect, useNavigate} from "react-router-dom";
 import {formatDateTime} from "../../utils/dateUtils";
+import { defaultProfileImage, fetchProfileImageById } from '../../services/fetchProfileImage';
 
 
 type Item = ServiceRequest | Job;
@@ -65,14 +66,22 @@ const GenericConsumerCard: React.FC<GenericConsumerCardProps> = ({
 
     const {account, token, isProvider} = useAuth();
     const [isInDetailPage, setIsInDetailPage] = useState(inDetailPage); // Example initial state
-
     const navigate = useNavigate();
+    const [profileImage, setProfileImage] = useState<string | null>(null);
 
     const handleProposeNewTime = (request: ServiceRequest) => {
         navigate(`/change-booking-time/${request._id}`); // Navigate to the calendar to select a new Timeslot
     }
 
     // todo: check account is correct consumer otherwise not authorized?
+
+    useEffect(() => {
+        if (provider) {
+            fetchProfileImageById(provider._id).then((image) => {
+                setProfileImage(image);
+            });
+        }
+    }, [provider]);
 
     const renderActions = () => {
         const buttons = [];
@@ -160,8 +169,7 @@ const GenericConsumerCard: React.FC<GenericConsumerCardProps> = ({
 
             <CardContent>
                 <div style={{display: 'flex', alignItems: 'center', marginBottom: '1rem'}}>
-                    {/*todo: profile image!*/}
-                    <Avatar alt={provider?.firstName + " " + receiver?.lastName} src={provider?.profileImageUrl}
+                    <Avatar alt={provider?.firstName + " " + provider?.lastName} src={provider ? profileImage || undefined : defaultProfileImage}
                             sx={{width: 100, height: 100, marginRight: '0.5rem'}}/>
                     <div style={{marginRight: '1rem', textAlign: 'left'}}>
                         <Typography variant="h6">
@@ -196,10 +204,13 @@ const GenericConsumerCard: React.FC<GenericConsumerCardProps> = ({
                 <Typography variant="body2" sx={{marginBottom: '1rem'}}>
                     Description: {item.comment}
                 </Typography>
-                {renderActions()}
+                <div style={{display: 'flex', flexWrap: 'nowrap', overflowX: 'auto'}}>
+
+                    {renderActions()}
+                </div>
             </CardContent>
         </Card>
-    );
+);
 };
 
 export default GenericConsumerCard;

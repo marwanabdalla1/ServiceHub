@@ -9,7 +9,7 @@ import { ServiceOffering } from '../models/ServiceOffering';
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
 import { Pagination } from '../components/Pagination';
-import { fetchProfileImages } from '../services/filterProfileImage'; // Import from the new file
+import { fetchProfileImagesForServiceOffering } from "../services/fetchProfileImage"; // Import from the new file
 
 interface FilterState {
     type: string;
@@ -64,7 +64,7 @@ function FilterPage() {
 
                 setOfferings(data);
                 setLoading(false);
-                await fetchProfileImages(data, setProfileImages, setLoadingImages, setLoading);
+                await fetchProfileImagesForServiceOffering(data, setProfileImages, setLoadingImages, setLoading);
 
             } catch (error) {
                 console.error('Error fetching data:', error);

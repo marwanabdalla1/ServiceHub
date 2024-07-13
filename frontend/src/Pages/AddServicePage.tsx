@@ -1,5 +1,5 @@
 import React, { useState, ChangeEvent, useEffect } from 'react';
-import { Autocomplete, TextField, InputAdornment, Box, Grid, Stepper, Step, StepLabel } from '@mui/material';
+import { Autocomplete, TextField, InputAdornment, Box, Grid, Stepper, Step, StepLabel, CircularProgress } from '@mui/material';
 import LightBlueButton from '../components/inputs/BlueButton';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -24,17 +24,17 @@ function AddServicePage() {
     const [certificate, setCertificate] = useState<File | null>(null);
     const [isCertificateUploaded, setIsCertificateUploaded] = useState<boolean>(false);
     const serviceTypes = [
-        { title: 'Bike Repair' },
-        { title: 'Moving Services' },
-        { title: 'Baby Sitting' },
-        { title: 'Tutoring' },
-        { title: 'Pet Sitting' },
-        { title: 'Landscaping Services' },
-        { title: 'Home Remodeling' },
-        { title: 'House Cleaning' }
+        {title: 'Bike Repair'},
+        {title: 'Moving Services'},
+        {title: 'Baby Sitting'},
+        {title: 'Tutoring'},
+        {title: 'Pet Sitting'},
+        {title: 'Landscaping Services'},
+        {title: 'Home Remodeling'},
+        {title: 'House Cleaning'}
     ];
     const paymentMethods = [
-        { title: 'Cash' }, { title: 'Paypal' }, { title: 'Bank Transfer' }
+        {title: 'Cash'}, {title: 'Paypal'}, {title: 'Bank Transfer'}
     ];
     const [formData, setFormData] = useState<FormData>({
         selectedService: null,
@@ -53,15 +53,16 @@ function AddServicePage() {
         travelTime: false
     });
     const [errorMessage, setErrorMessage] = useState<string | null>(null); // New state for error message
+    const [isLoading, setIsLoading] = useState<boolean>(false); // New state for loading
     const isEditMode = Boolean(serviceToEdit);
 
     useEffect(() => {
         if (isEditMode && serviceToEdit) {
             console.log('Service to edit:', serviceToEdit);
             setFormData({
-                selectedService: { title: serviceToEdit.serviceType },
+                selectedService: {title: serviceToEdit.serviceType},
                 hourlyRate: serviceToEdit.hourlyRate.toString(),
-                acceptedPaymentMethods: serviceToEdit.acceptedPaymentMethods ? serviceToEdit.acceptedPaymentMethods.map((method: string) => ({ title: method })) : [],
+                acceptedPaymentMethods: serviceToEdit.acceptedPaymentMethods ? serviceToEdit.acceptedPaymentMethods.map((method: string) => ({title: method})) : [],
                 description: serviceToEdit.description,
                 certificateId: serviceToEdit.certificateId,
                 defaultSlotTime: serviceToEdit.baseDuration.toString(),
@@ -73,6 +74,7 @@ function AddServicePage() {
 
     const fetchCertificate = async (_id: string) => {
         try {
+            // Fetch certificate
             const certificateResponse = await axios.get(`/api/certificate/${_id}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -88,13 +90,14 @@ function AddServicePage() {
 
     const handleDeleteCertificate = async () => {
         try {
+            // Delete certificate
             const response = await axios.delete(`/api/certificate/${serviceToEdit._id}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
             console.log('Certificate deleted:', response.data);
-            setCertificate(null);
+            setCertificate(null); // Reset the certificate state
         } catch (error) {
             console.error('Error deleting certificate:', error);
         }
@@ -149,6 +152,7 @@ function AddServicePage() {
         }
 
         if (validateForm()) {
+            setIsLoading(true);
             const submissionData = {
                 ...formData,
                 hourlyRate: Number(formData.hourlyRate),
@@ -184,7 +188,6 @@ function AddServicePage() {
                             'Authorization': `Bearer ${token}`
                         }
                     });
-
                     if (response.status === 201 && certificate && isCertificateUploaded) {
                         response = await axios.post(`/api/certificate/upload/${response.data._id}`, certificateForm, {
                             headers: {
@@ -195,6 +198,7 @@ function AddServicePage() {
                 }
                 console.log(`Status: ${response.status}`);
                 console.log(response.data);
+                setIsLoading(false);
                 if (isEditMode) {
                     navigate('/setprofile');
                 } else {
@@ -202,11 +206,11 @@ function AddServicePage() {
                 }
             } catch (error: any) {
                 console.error('Error submitting service:', error);
-                if (error.response && error.response.status === 409) {
-                    toast.error(error.response.data);
-                }
-                else {
-                    toast.error('An error occurred. Please try again.');
+                setIsLoading(false);
+                if (error.response && error.response.status === 400 && error.response.data === 'You already provide this service') {
+                    setErrorMessage('You already provide this service');
+                } else {
+                    setErrorMessage('An error occurred. Please try again.');
                 }
             }
         } else {
@@ -369,6 +373,11 @@ function AddServicePage() {
                 <Box mt={4} className="flex justify-center p-2">
                     <LightBlueButton className="py-2 px-2" text="Submit" onClick={handleSubmit} />
                 </Box>
+                {isLoading && (
+                    <Box mt={2} className="flex justify-center">
+                        <CircularProgress />
+                    </Box>
+                )}
             </Box>
         </Box>
     );

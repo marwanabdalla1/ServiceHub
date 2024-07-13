@@ -9,6 +9,7 @@ import { Document } from 'mongoose';
 import {updateTimeslotWithRequestId} from "./TimeSlotController";
 import Timeslot from "../models/timeslot";
 import {sortBookingItems} from "../util/requestAndJobUtils";
+import { request } from 'http';
 
 
 interface Query {
@@ -140,20 +141,17 @@ export const getJobsByProvider: RequestHandler = async (req, res) => {
         }
 
 
-        const { serviceType, status, page = 1, limit = 10 } = req.query;
-
-        console.log("queries", req.query)
+        const { serviceType, requestStatus, page = 1, limit = 10 } = req.query;
 
         let query:Query = { provider: providerId };
 
         // Adding filters based on query parameters
-        if (status) {
-            query.status = status;
+        if (requestStatus) {
+            query.status = requestStatus;
         }
         if (serviceType) {
             query.serviceType = serviceType;
         }
-
         // Fetch all jobs where the 'provider' field matches 'providerId'
         const jobs = await Job.find(query)
             .populate([
@@ -162,16 +160,7 @@ export const getJobsByProvider: RequestHandler = async (req, res) => {
             ])
             .exec();
 
-
-
-        const validJobs = jobs.filter(job => job.receiver !== null);
-
-
-        if (!validJobs.length) {
-            return res.status(404).json({ message: "No jobs found for this provider." });
-        }
-
-        const jobsWithTimeslots = await Promise.all(validJobs.map(async (job) => {
+        const jobsWithTimeslots = await Promise.all(jobs.map(async (job) => {
             const timeslot = await Timeslot.findOne({ jobId: job._id }).exec();
             return { ...job.toObject(), timeslot: timeslot || undefined };
         }));
@@ -226,14 +215,13 @@ export const getJobsByRequester: RequestHandler = async (req, res) => {
         ])
             .exec();
 
-        const validJobs = jobs.filter(job => job.provider !== null);
 
 
-        if (!validJobs.length) {
+        if (!jobs.length) {
             return res.status(404).json({ message: "No jobs found for this receiver." });
         }
 
-        const jobsWithTimeslots = await Promise.all(validJobs.map(async (job) => {
+        const jobsWithTimeslots = await Promise.all(jobs.map(async (job) => {
             const timeslot = await Timeslot.findOne({ jobId: job._id }).exec();
             return { ...job.toObject(), timeslot: timeslot || undefined };
         }));
