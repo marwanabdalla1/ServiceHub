@@ -25,6 +25,7 @@ import {toast} from "react-toastify";
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddressDialog from "../components/dialogs/AddressDialog";
 import {isValidPhoneNumber} from "../validators/AccountDataValidator";
+import {deleteProfileImage, fetchProfileImageByToken} from "../services/filterProfileImage";
 
 type EditModeType = {
     [key: string]: boolean;
@@ -41,7 +42,7 @@ function UserProfile(): React.ReactElement {
     const [services, setServices] = useState<any[]>([]);
     const [openDialog, setOpenDialog] = useState(false);
     const [serviceToDelete, setServiceToDelete] = useState<string | null>(null);
-    const [profileImage, setProfileImage] = useState<File | null>(null);
+    const [profileImage, setProfileImage] = useState<string | null>(null);
     const [subscriptions, setSubscriptions] = useState<any[]>([]);
     const {account: userAccount} = useAuth();
     const isProvider = userAccount?.isProvider;
@@ -146,9 +147,12 @@ function UserProfile(): React.ReactElement {
         }
     };
 
+
     useEffect(() => {
-        fetchProfileData().then(r => console.log('Profile data fetched'));
-    }, []);
+        if (token) {
+            fetchProfileImageByToken(token).then(image => setProfileImage(image));
+        }
+    }, [token]);
 
     useEffect(() => {
         axios.get('/api/offerings/myoffering', {
@@ -202,9 +206,13 @@ function UserProfile(): React.ReactElement {
         }
     }, [account]);
 
-    const handleProfileImageUpload = (setFile: React.Dispatch<React.SetStateAction<File | null>>) => (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleProfileImageUpload = (setFile: React.Dispatch<React.SetStateAction<string | null>>) => (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files ? event.target.files[0] : null;
-        setFile(file);
+        if (!file) {
+            console.error('No file selected');
+            return;
+        }
+        setFile( URL.createObjectURL(file));
         console.log("set file finished: ", file);
         handleFileUpload(file, "profileImage").then(response => {
             // Perform some action after the file upload is complete
@@ -214,16 +222,6 @@ function UserProfile(): React.ReactElement {
             toast('Error uploading profile image', {type: 'error'});
             console.error('Error uploading profile image:', error);
         });
-    };
-
-    const handleProfileImageDelete = async () => {
-        await axios.delete(`/api/file/profileImage/`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-        // set the image to the default profile image
-        setProfileImage(null);
     };
 
     const handleFileUpload = async (file: File | null, fileType: string) => {
@@ -434,10 +432,10 @@ function UserProfile(): React.ReactElement {
                 </Typography>
                 <Box sx={{display: 'flex', flexDirection: 'column', gap: 3, p: 3}}>
                     <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5}}>
-                        <IconButton onClick={handleProfileImageDelete} size="small" sx={{alignSelf: 'flex-end'}}>
+                        <IconButton onClick={() => deleteProfileImage(token, setProfileImage)} size="small" sx={{alignSelf: 'flex-end'}}>
                             <DeleteIcon/>
                         </IconButton>
-                        <Avatar src={profileImage ? URL.createObjectURL(profileImage) : undefined}
+                        <Avatar src={profileImage ? profileImage : undefined}
                                 sx={{width: 80, height: 80}}/>
                         <LightBlueFileButton text="Upload Profile Picture"
                                              onFileChange={handleProfileImageUpload(setProfileImage)}/>
