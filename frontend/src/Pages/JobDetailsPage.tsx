@@ -132,7 +132,11 @@ const JobDetailsPage: React.FC<JobDetailsPageProps> = () => {
 
     if (!job) {
         if (loading) {
-            return <CircularProgress />
+            return (
+                <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+                    <CircularProgress />
+                </Box>
+            )
         } else {
             console.log("error")
             return <ErrorPage title={"404 Not Found"} message={'The job you\'re looking for cannot be found.'}/>
