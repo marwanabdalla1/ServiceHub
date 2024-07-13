@@ -54,7 +54,6 @@ export const deleteAccount: RequestHandler = async (req, res, next) => {
         logger.info(`Deleted reviews for userId: ${userId}`);
 
         await payment.deleteMany({ userId: new mongoose.Types.ObjectId(userId) });
-        await payment.deleteMany({ provider: new mongoose.Types.ObjectId(userId) });
         logger.info(`Deleted payments for userId: ${userId}`);
 
         await Timeslot.deleteMany({ createdById: new mongoose.Types.ObjectId(userId) });
