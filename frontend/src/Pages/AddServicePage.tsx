@@ -27,9 +27,9 @@ function AddServicePage() {
     const serviceTypes = [
         { title: 'Bike Repair' },
         { title: 'Moving Services' },
-        { title: 'Baby Sitting' },
+        { title: 'Babysitting' },
         { title: 'Tutoring' },
-        { title: 'Pet Sitting' },
+        { title: 'Petsitting' },
         { title: 'Landscaping Services' },
         { title: 'Home Remodeling' },
         { title: 'House Cleaning' }
