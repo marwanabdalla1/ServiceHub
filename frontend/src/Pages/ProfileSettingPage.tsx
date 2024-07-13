@@ -519,8 +519,6 @@ function UserProfile(): React.ReactElement {
                         {subscriptions.length > 0 ? (
                             subscriptions.map((subscription) => (
                                 <Box key={subscription.id} sx={{display: 'flex', flexDirection: 'column', mt: 2}}>
-                                    <Typography variant="body1"><strong>Subscription ID:</strong> {subscription.id}
-                                    </Typography>
                                     <Typography variant="body1"><strong>Status:</strong> {subscription.status}
                                     </Typography>
                                     <Typography variant="body1"><strong>Expiration
