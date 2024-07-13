@@ -50,6 +50,9 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
         case 'New Review':
           url = `/customer_review/${review}`;
           break;
+        case 'Updated Review':
+          url = `/customer_review/${review}`;
+          break;
         case 'New Job':
           url = `/incoming/jobs/${job}`;
           break;
@@ -75,7 +78,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
           // url = `/change-booking-time/${serviceRequest}?comment=${commentFromProvider}`;
           url = `/change-booking-time/${serviceRequest}?comment=${encodeURIComponent(content)}`;
           break;
-        case 'Time Request Changed':
+        case 'Request Time Has Changed':
           url = `/incoming/requests/${serviceRequest}`;
           break;
         // declined/cancel requests: just go back to home page

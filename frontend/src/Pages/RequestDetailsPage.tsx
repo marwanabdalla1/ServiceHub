@@ -49,7 +49,7 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
 
     const [loading, setLoading] = useState(true);
 
-    const {alert, triggerAlert, closeAlert} = useAlert(100000);
+    const {alert, triggerAlert, closeAlert} = useAlert(3000);
 
 
     const navigate = useNavigate();
@@ -129,6 +129,10 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
         };
     }, []);
 
+    if (error) {
+        console.log("youre in iferror", error)
+        return <ErrorPage title={error.title} message={error.message}/>
+    }
 
     if (!request) {
         if (loading) {
@@ -139,10 +143,7 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
         }
     }
 
-    if (error) {
-        console.log("youre in iferror", error)
-        return <ErrorPage title={error.title} message={error.message}/>
-    }
+
 
     // Authorization check
     // if ((role === "provider" && account?._id !== request.provider._id) ||
@@ -166,6 +167,9 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
             setShowMediaCard: () => {
             },
         });
+
+        window.location.reload();
+
     };
 
     const onDecline = () => {
@@ -181,6 +185,9 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
             setShowMediaCard: () => {
             },
         });
+
+        window.location.reload();
+
     };
 
     const onAccept = () => {
@@ -196,6 +203,9 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
             setShowMediaCard: () => {
             },
         });
+        window.location.reload();
+
+
     };
 
     const onTimeChange = () => {
@@ -214,6 +224,8 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
             setTimeChangePopUp,
             navigate
         });
+
+        window.location.reload();
     };
 
 

@@ -147,6 +147,7 @@ export default function IncomingRequestTable() {
             token,
             setShowMediaCard,
         });
+
     };
 
     const onDecline = () => {
