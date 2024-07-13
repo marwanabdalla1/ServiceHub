@@ -11,23 +11,22 @@ import Typography from '@mui/material/Typography';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
 import Link from '@mui/material/Link';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
-import {ServiceRequest} from '../../models/ServiceRequest';
+import { ServiceRequest } from '../../models/ServiceRequest';
 
-
-import GenericProviderCard from '../../components/tableComponents/GenericProviderCard'
-import GenericTableRow from '../../components/tableComponents/GenericTableRow'
+import GenericProviderCard from '../../components/tableComponents/GenericProviderCard';
+import GenericTableRow from '../../components/tableComponents/GenericTableRow';
 
 import axios from "axios";
-import {useEffect, useState} from "react";
-import {useAuth} from "../../contexts/AuthContext";
-import {formatDateTime} from '../../utils/dateUtils';
-import {handleCancel} from "../../utils/requestHandler";
+import { useEffect, useState } from "react";
+import { useAuth } from "../../contexts/AuthContext";
+import { formatDateTime } from '../../utils/dateUtils';
+import { handleCancel } from "../../utils/requestHandler";
 import GenericConsumerCard from "../../components/tableComponents/GenericConsumerCard";
-import {Job} from "../../models/Job";
-import {Button, FormControl, InputLabel, MenuItem, Select} from "@mui/material";
-import {sortBookingItems} from "../../utils/jobHandler";
+import { Job } from "../../models/Job";
+import { Button, FormControl, InputLabel, MenuItem, Select, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from "@mui/material";
+import { sortBookingItems } from "../../utils/jobHandler";
 import GenericTable from "../../components/tableComponents/GenericTable";
-import {ServiceType} from "../../models/enums";
+import { ServiceType } from "../../models/enums";
 
 type Item = ServiceRequest | Job;
 
@@ -35,7 +34,8 @@ export default function RequestHistoryTable() {
     const [showMediaCard, setShowMediaCard] = React.useState(false);
     const [selectedRequest, setSelectedRequest] = React.useState<ServiceRequest | null>(null);
     const [serviceRequests, setServiceRequests] = React.useState<ServiceRequest[]>([]);
-    const {token, account} = useAuth();
+    const [dialogOpen, setDialogOpen] = React.useState(false);
+    const { token, account } = useAuth();
     const [total, setTotal] = useState(0);
 
     const [page, setPage] = useState(0);
@@ -46,43 +46,27 @@ export default function RequestHistoryTable() {
 
     const [serviceTypeFilter, setServiceTypeFilter] = useState("ALL");
 
-    // const providerId = account?._id;
-
-    // useEffect(() => {
-    //   // get all the requests of this provider
-    //   axios.get(`/api/requests/provider/${providerId}`)
-    //       .then(response => {
-    //         setServiceRequests(response.data);
-    //       })
-    //       .catch(error => {
-    //         console.error('Failed to fetch service requests:', error);
-    //         setServiceRequests([]); // Consider how to handle errors, possibly setting an error state
-    //       });
-    // }, [providerId]); // This effect depends on `providerId`
-
     useEffect(() => {
         console.log(token)
         if (token && account) {
             const fetchServiceRequests = async () => {
                 try {
                     const params = new URLSearchParams({
-                        page: (page + 1).toString(), // API is zero-indexed, React state is zero-indexed
+                        page: (page + 1).toString(),
                         limit: rowsPerPage.toString(),
                     });
                     if (statusFilter !== 'All Requests') {
                         params.append('requestStatus', statusFilter.toLowerCase());
                     }
                     if (serviceTypeFilter !== 'ALL') {
-                        params.append('serviceType', serviceTypeFilter); // Ensure this matches the actual enum/case used in your database
+                        params.append('serviceType', serviceTypeFilter);
                     }
-                    console.log("params for query", params)
 
                     const response = await axios.get(`/api/requests/requester/${account._id}?${params.toString()}`, {
                         headers: { Authorization: `Bearer ${token}` }
                     });
 
-                    console.log("fetched service requests,", response)
-                    setServiceRequests(response.data.data); // Assuming the backend sends data in a 'data' field
+                    setServiceRequests(response.data.data);
                     setTotal(response.data.total);
                 } catch (error) {
                     console.error('Failed to fetch service requests:', error);
@@ -91,28 +75,14 @@ export default function RequestHistoryTable() {
             };
 
             fetchServiceRequests();
-            // console.log("this is the logged in account in request table:", account)
-            // // setLoading(true);
-            // axios.get<ServiceRequest[]>(`/api/requests/requester/${account._id}`, {
-            //     headers: {Authorization: `Bearer ${token}`}
-            // })
-            //     .then(response => {
-            //         console.log("getting requests ...", response.data)
-            //         const sortedData = sortBookingItems(response.data);
-            //         setServiceRequests(sortedData as ServiceRequest[]);
-            //         // setLoading(false);
-            //     })
-            //     .catch(error => {
-            //         console.error('Failed to fetch service requests:', error);
-            //         setServiceRequests([]);
-            //         // setError('Failed to load service requests');
-            //         // setLoading(false);
-            //     });
         }
     }, [account, token, page, rowsPerPage, statusFilter, serviceTypeFilter]);
 
-
     const handleToggleMediaCard = (req: Item | null) => {
+        if (req && ((req as ServiceRequest).provider === null || (req as ServiceRequest).serviceOffering === null)) {
+            setDialogOpen(true);
+            return;
+        }
         setSelectedRequest(req as ServiceRequest);
         setShowMediaCard(req !== null);
     };
@@ -124,7 +94,6 @@ export default function RequestHistoryTable() {
     const handleChangeStatus = (event: any) => {
         setStatusFilter(event.target.value);
     };
-
 
     const onCancel = () => {
         if (!selectedRequest) {
@@ -141,24 +110,21 @@ export default function RequestHistoryTable() {
         });
     };
 
+    const handleDialogClose = () => {
+        setDialogOpen(false);
+    };
+
     return (
-        <div style={{display: 'flex'}}>
-            <div style={{flex: 1, padding: '20px'}}>
-                <Box sx={{minWidth: 275, margin: 2}}>
+        <div style={{ display: 'flex' }}>
+            <div style={{ flex: 1, padding: '20px' }}>
+                <Box sx={{ minWidth: 275, margin: 2 }}>
                     <Box>
-                        {/*<Breadcrumbs separator={<NavigateNextIcon fontSize="small"/>} aria-label="breadcrumb"*/}
-                        {/*             sx={{marginBottom: '16px'}}>*/}
-                        {/*    <Link color="inherit" href="/frontend/public" underline="hover">*/}
-                        {/*        History*/}
-                        {/*    </Link>*/}
-                        {/*    <Typography color="textPrimary">Request History</Typography>*/}
-                        {/*</Breadcrumbs>*/}
-                        <Typography variant="h6" component="div" sx={{marginBottom: '16px'}}>
+                        <Typography variant="h6" component="div" sx={{ marginBottom: '16px' }}>
                             My Outgoing Requests
                         </Typography>
                     </Box>
                     <Box sx={{ display: 'flex', marginBottom: 2 }}>
-                        <FormControl style={{ width: 300, marginRight:5}}>
+                        <FormControl style={{ width: 300, marginRight: 5 }}>
                             <InputLabel id="service-type-label">Filter Service Type</InputLabel>
                             <Select
                                 labelId="service-type-label"
@@ -192,56 +158,64 @@ export default function RequestHistoryTable() {
                         </FormControl>
                     </Box>
 
-                    <Box style={{display: 'flex'}}>
-                        <Box sx={{flexGrow: 1, marginRight: 2}}>
+                    <Box style={{ display: 'flex' }}>
+                        <Box sx={{ flexGrow: 1, marginRight: 2 }}>
                             <Box>
                                 {serviceRequests.length === 0 ? (
                                     <Typography variant="body1">
-                                        You don't have any requests{statusFilter === 'All Requests' || statusFilter === ''? '' : (
-                                        <span> with status <span style={{ fontStyle: 'italic' }}>{statusFilter.toLowerCase()}</span></span>
-                                    )}
+                                        You don't have any requests{statusFilter === 'All Requests' || statusFilter === '' ? '' : (
+                                            <span> with status <span style={{ fontStyle: 'italic' }}>{statusFilter.toLowerCase()}</span></span>
+                                        )}
                                         {serviceTypeFilter === 'ALL' || serviceTypeFilter === '' ? '' : (
                                             <span> for service type <span
-                                                style={{fontStyle: 'italic'}}>{serviceTypeFilter.toLowerCase()}</span></span>
+                                                style={{ fontStyle: 'italic' }}>{serviceTypeFilter.toLowerCase()}</span></span>
                                         )}
                                         yet.
                                     </Typography>
                                 ) : (
                                     <GenericTable data={serviceRequests}
-                                                  count={total}
-                                                  page={page}
-                                                  setPage={setPage}
-                                                  rowsPerPage={rowsPerPage}
-                                                  setRowsPerPage={setRowsPerPage}
-                                                  setShowMediaCard={setShowMediaCard}
-                                                  onViewDetails={handleToggleMediaCard}
+                                        count={total}
+                                        page={page}
+                                        setPage={setPage}
+                                        rowsPerPage={rowsPerPage}
+                                        setRowsPerPage={setRowsPerPage}
+                                        setShowMediaCard={setShowMediaCard}
+                                        onViewDetails={handleToggleMediaCard}
                                     />
 
                                 )}
                             </Box>
                         </Box>
                         {showMediaCard && selectedRequest && (
-                            <div style={{position: 'relative', flexShrink: 0, width: 400, marginLeft: 2}}>
-                                {/*<MediaCard request={selectedRequest}*/}
-                                {/*           onClose={() => setShowMediaCard(false)}*/}
-                                {/*           onDecline={() => console.log('declined.')}*/}
-                                {/*           onProposeNewTime={() => console.log('New Time: ')}*/}
-                                {/*           onCancel={onCancel}/>*/}
-
+                            <div style={{ position: 'relative', flexShrink: 0, width: 400, marginLeft: 2 }}>
                                 <GenericConsumerCard item={selectedRequest}
-                                                     provider={selectedRequest.provider}
-                                                     receiver={selectedRequest.requestedBy}
-                                                     onClose={() => setShowMediaCard(false)}
-                                                     inDetailPage={false}
-                                                     actions={{
-                                                         cancelRequest: onCancel,
-                                                     }}
+                                    provider={selectedRequest.provider}
+                                    receiver={selectedRequest.requestedBy}
+                                    onClose={() => setShowMediaCard(false)}
+                                    inDetailPage={false}
+                                    actions={{
+                                        cancelRequest: onCancel,
+                                    }}
                                 />
                             </div>
                         )}
                     </Box>
                 </Box>
             </div>
+
+            <Dialog open={dialogOpen} onClose={handleDialogClose}>
+                <DialogTitle>Service Provider Not Available</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        The service provider is not available at the moment.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleDialogClose} color="primary">
+                        OK
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </div>
     );
 }

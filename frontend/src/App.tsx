@@ -37,10 +37,10 @@ import {Divider} from '@mui/material';
 
 import UpdateSProfile from './components/UpdateSProfile';
 import AddServicePage from './Pages/AddServicePage';
-import OfferedServicesTable from "./Pages/TablePages/OfferedServicesTable";
-import IncomingRequestsTable from "./Pages/TablePages/IncomingRequestsTable";
-import RequestHistoryTable from "./Pages/TablePages/RequestHistoryTable";
-import ReceivedServiceTable from "./Pages/TablePages/ReceivedServiceTable";
+import OfferedServicesTable from "./Pages/TablePages/OfferedServicesPage";
+import IncomingRequestsTable from "./Pages/TablePages/IncomingRequestsPage";
+import RequestHistoryTable from "./Pages/TablePages/OutgoingRequestsPage";
+import ReceivedServiceTable from "./Pages/TablePages/ReceivedServicePage";
 import JobDetailsPage from "./Pages/JobDetailsPage";
 import RequestDetailsPage from "./Pages/RequestDetailsPage";
 import CombinedOutgoingPage from "./Pages/TablePages/CombinedOutgoingPage";

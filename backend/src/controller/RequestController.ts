@@ -195,67 +195,25 @@ export const getServiceRequestsByProvider: RequestHandler = async (req, res) => 
             query.serviceType = serviceType;
         }
 
-        // Building the MongoDB aggregate pipeline
-        // const pipeline = [
-        //     { $match: query },
-        //     {
-        //         $lookup: {
-        //             from: 'timeslots',
-        //             localField: '_id',
-        //             foreignField: 'requestId',
-        //             as: 'timeslot'
-        //         }
-        //     },
-        //
-        //     // keeps empty timeslots as null
-        //     { $unwind: { path: "$timeslot", preserveNullAndEmptyArrays: true } },
-        //     {
-        //         $addFields: {
-        //             "timeslot.isFuture": { $gt: ["$timeslot.start", new Date()] },
-        //             "timeslot.isPast": { $lt: ["$timeslot.end", new Date()] }
-        //         }
-        //     },
-        //     {
-        //         $sort: {
-        //             "timeslot.isFuture": -1, // Future requests first
-        //             "timeslot.start": 1 // Then sort by date ascending
-        //         }
-        //     },
-        //     { $skip: (Number(page) - 1) * Number(limit) },
-        //     { $limit: limit }
-        // ];
-
-        // const serviceRequests = await ServiceRequest.aggregate(pipeline);
-        //
-        // if (serviceRequests.length === 0) {
-        //     return res.status(404).json({ message: "No service requests found for this provider." });
-        // }
-        //
-        // res.status(200).json(serviceRequests);
-
         const serviceRequests = await ServiceRequest.find(query)
             .populate([
                 { path: 'requestedBy', select: 'firstName lastName email profileImageId' }, // todo: also include profile pic
                 { path: 'provider', select: 'firstName lastName email profileImageId' }
             ])
             .exec();
-        //
-        //
-        // // remove everything where the requestor account is deleted
-        const validRequests = serviceRequests.filter(request => request.requestedBy !== null);
-        //
-        if (validRequests.length === 0) {
+      
+
+        if (serviceRequests.length === 0) {
             return res.status(404).json({ message: "No service requests found for this provider." });
         }
-        //
-        //
-        const requestsWithTimeslots = await Promise.all(validRequests.map(async (request) => {
+ 
+        const requestsWithTimeslots = await Promise.all(serviceRequests.map(async (request) => {
             const timeslot = await Timeslot.findOne({ requestId: request._id }).exec();
             return { ...request.toObject(), timeslot: timeslot || undefined };
         }));
 
         const sortedRequestsWithTimeslots = sortBookingItems(requestsWithTimeslots);
-        //
+    
 
         console.log("sorted requests", requestsWithTimeslots)
         const paginatedRequestsWithTimeslots = sortedRequestsWithTimeslots.slice((Number(page)-1) * Number(limit), (Number(page)) * Number(limit));
@@ -266,56 +224,12 @@ export const getServiceRequestsByProvider: RequestHandler = async (req, res) => 
             total:sortedRequestsWithTimeslots.length});
 
 
-    //      handle pagination
     } catch (error: any) {
         console.error("Failed to retrieve service requests:", error);
         res.status(500).json({ message: "Internal server error", error: error.message });
     }
 };
 
-//get all incoming requests of a provider, not use?
-// In serviceRequestController.js
-// export const getIncomingServiceRequestsByProvider: RequestHandler = async (req, res) => {
-//     try {
-//
-//
-//         const { providerId } = req.params; // Extract the provider ID from the URL parameter
-//         const userId = (req as any).user.userId;
-//
-//         //make sure only the provider him/herself can get this
-//         if (userId !== providerId) {
-//             console.log("userId: ", userId, "\n providerId: ", providerId)
-//             return res.status(403).json({ message: "Unauthorized access." });
-//         }
-//
-//         const serviceRequests = await ServiceRequest.find({ provider: providerId, requestStatus: {$in: ["pending", RequestStatus.requestorActionNeeded]} })
-//             .populate([
-//                 { path: 'requestedBy', select: 'firstName lastName email profileImageId' }, // todo: also include profile pic
-//                 { path: 'provider', select: 'firstName lastName email profileImageId' }
-//             ])
-//             .exec();
-//
-//         // remove everything where the requestor account is deleted
-//         const filteredRequests = serviceRequests.filter(request => request.requestedBy !== null);
-//         // get the requests that need to have consumer actions
-//
-//         if (filteredRequests.length === 0) {
-//             return res.status(404).json({ message: "No service requests found for this provider." });
-//         }
-//
-//         const requestsWithTimeslots = await Promise.all(filteredRequests.map(async (request) => {
-//             const timeslot = await Timeslot.findOne({ requestId: request._id }).exec();
-//             return { ...request.toObject(), timeslot: timeslot || undefined };
-//         }));
-//
-//         console.log("incoming requests with their timeslots", requestsWithTimeslots)
-//
-//         res.status(200).json(requestsWithTimeslots);
-//     } catch (error: any) {
-//         console.error("Failed to retrieve service requests:", error);
-//         res.status(500).json({ message: "Internal server error", error: error.message });
-//     }
-// };
 
 export const getServiceRequestsByRequester: RequestHandler = async (req, res) => {
     try {
@@ -351,14 +265,13 @@ export const getServiceRequestsByRequester: RequestHandler = async (req, res) =>
             ])
             .exec();
 
-        const validRequests = serviceRequests.filter(request => request.provider !== null);
         //
-        if (validRequests.length === 0) {
+        if (serviceRequests.length === 0) {
             return res.status(404).json({ message: "No service requests found for this requester." });
         }
 
 
-        const requestsWithTimeslots = await Promise.all(validRequests.map(async (request) => {
+        const requestsWithTimeslots = await Promise.all(serviceRequests.map(async (request) => {
             const timeslot = await Timeslot.findOne({ requestId: request._id }).exec();
             return { ...request.toObject(), timeslot };
         }));
@@ -379,39 +292,6 @@ export const getServiceRequestsByRequester: RequestHandler = async (req, res) =>
         res.status(500).json({ message: "Internal server error", error: error.message });
     }
 };
-
-
-
-// only one-time method to clean up the DB
-// export const cleanUpServiceRequests: RequestHandler = async (req, res) => {
-//     try {
-//         // Find all service requests
-//         const serviceRequests = await ServiceRequest.find().exec();
-//
-//         // Find and delete service requests without a corresponding timeslot
-//         const deletedRequests = await Promise.all(serviceRequests.map(async (request) => {
-//             const timeslot = await Timeslot.findOne({ requestId: request._id }).exec();
-//             if (!timeslot) {
-//                 await ServiceRequest.findByIdAndDelete(request._id);
-//                 return request._id;
-//             }
-//             return null;
-//         }));
-//
-//         // Filter out null values from the deletedRequests array
-//         const deletedRequestIds = deletedRequests.filter(id => id !== null);
-//
-//         if (deletedRequestIds.length === 0) {
-//             return res.status(200).json({ message: "No service requests without timeslots were found." });
-//         }
-//
-//         res.status(200).json({ message: "Deleted service requests without timeslots", deletedRequestIds });
-//     } catch (error: any) {
-//         console.error("Failed to clean up service requests:", error);
-//         res.status(500).json({ message: "Internal server error", error: error.message });
-//     }
-// };
-
 
 
 // when provider requests the consumer to select a new timeslot
@@ -521,12 +401,6 @@ export const getRequestById: RequestHandler = async (req, res) => {
 
 
         const userId = (req as any).user.userId;
-
-        // if (userId !== requestId) {
-        //     console.log("userId: ", userId, "\n requesterId: ", requestId)
-        //     return res.status(403).json({ message: "Unauthorized access." });
-        // }
-
 
         if (!mongoose.Types.ObjectId.isValid(requestId)) {
             return res.status(404).json({ message: "Service request not found." });

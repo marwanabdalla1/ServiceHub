@@ -73,8 +73,14 @@ const BecomeProPage: React.FC = () => {
                 <div className="text-left">
                     <h1 className="text-4xl font-bold mb-4">ServiceHub: Connecting You to the Best, for All Your
                         Needs!</h1>
-                    <BlackButton className="py-2" text="Join Now" onClick={handleJoinNow}/>
-                </div>
+                        <BlackButton
+                            text="Join Now"
+                            onClick={() => console.log('Black button pressed')}
+                            sx={{
+                                padding: '24px 24px', // Increase padding
+                                fontSize: '16px', // Override font size
+                            }}
+                        />                </div>
                 <div className="md:mt-0 mr-0">
                     <img src="/images/handshake.png" alt="Handshake" className="w-full"/>
                 </div>

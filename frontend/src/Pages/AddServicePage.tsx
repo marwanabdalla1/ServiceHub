@@ -1,5 +1,5 @@
 import React, { useState, ChangeEvent, useEffect } from 'react';
-import { Autocomplete, TextField, InputAdornment, Box, Grid, Stepper, Step, StepLabel } from '@mui/material';
+import { Autocomplete, TextField, InputAdornment, Box, Grid, Stepper, Step, StepLabel, CircularProgress } from '@mui/material';
 import LightBlueButton from '../components/inputs/BlueButton';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -53,6 +53,7 @@ function AddServicePage() {
         travelTime: false
     });
     const [errorMessage, setErrorMessage] = useState<string | null>(null); // New state for error message
+    const [isLoading, setIsLoading] = useState<boolean>(false); // New state for loading
     const isEditMode = Boolean(serviceToEdit);
 
     useEffect(() => {
@@ -151,6 +152,7 @@ function AddServicePage() {
         }
 
         if (validateForm()) {
+            setIsLoading(true);
             const submissionData = {
                 ...formData,
                 hourlyRate: Number(formData.hourlyRate),
@@ -196,6 +198,7 @@ function AddServicePage() {
                 }
                 console.log(`Status: ${response.status}`);
                 console.log(response.data);
+                setIsLoading(false);
                 if (isEditMode) {
                     navigate('/setprofile');
                 } else {
@@ -203,11 +206,11 @@ function AddServicePage() {
                 }
             } catch (error: any) {
                 console.error('Error submitting service:', error);
-                if (error.response && error.response.status === 409) {
-                    toast.error(error.response.data);
-                }
-                else {
-                    toast.error('An error occurred. Please try again.');
+                setIsLoading(false);
+                if (error.response && error.response.status === 400 && error.response.data === 'You already provide this service') {
+                    setErrorMessage('You already provide this service');
+                } else {
+                    setErrorMessage('An error occurred. Please try again.');
                 }
             }
         } else {
@@ -370,6 +373,11 @@ function AddServicePage() {
                 <Box mt={4} className="flex justify-center p-2">
                     <LightBlueButton className="py-2 px-2" text="Submit" onClick={handleSubmit} />
                 </Box>
+                {isLoading && (
+                    <Box mt={2} className="flex justify-center">
+                        <CircularProgress />
+                    </Box>
+                )}
             </Box>
         </Box>
     );

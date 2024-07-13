@@ -1,8 +1,17 @@
 // Purpose: Contains the functions for handling requests to the /account endpoint.
 import Account from "../models/account";
+import serviceOffering from "../models/serviceOffering";
+import notification from "../models/notification";
+import review from "../models/review";
+import payment from "../models/payment";
+import Timeslot from "../models/timeslot";
+import serviceRequest from "../models/serviceRequest";
+import job from "../models/job";
 import { RequestHandler } from "express";
 import * as dotenv from 'dotenv'
-
+import mongoose from "mongoose";
+import { JobStatus, RequestStatus } from "../models/enums";
+import logger from "../../logger";
 dotenv.config();
 
 /**
@@ -13,28 +22,80 @@ dotenv.config();
  */
 export const deleteAccount: RequestHandler = async (req, res, next) => {
     try {
-        // Get the userId from the JWT token
-        const userId = (req as any).user.userId;
-        const user = await Account.findByIdAndDelete(userId);
+        let userId: string; // To support use by normal users and admins
+
+        if (req.body.adminInitiated) {
+            userId = req.body.userId;
+        } else {
+            userId = (req as any).user.userId;
+        }
+
+        logger.info(`Initiating delete process for userId: ${userId}`);
+
+        // Check if the user exists
+        const user = await Account.findById(userId);
+
         if (!user) {
+            logger.warn(`User not found: ${userId}`);
             return res.status(404).json({
                 error: "Not Found",
                 message: "User not found."
             });
         }
+
+        // Delete connected tables
+        await serviceOffering.deleteMany({ provider: new mongoose.Types.ObjectId(userId) });
+        logger.info(`Deleted service offerings for userId: ${userId}`);
+
+        await notification.deleteMany({ recipient: new mongoose.Types.ObjectId(userId) });
+        logger.info(`Deleted notifications for userId: ${userId}`);
+
+        await review.deleteMany({ reviewer: new mongoose.Types.ObjectId(userId) });
+        logger.info(`Deleted reviews for userId: ${userId}`);
+
+        await payment.deleteMany({ userId: new mongoose.Types.ObjectId(userId) });
+        logger.info(`Deleted payments for userId: ${userId}`);
+
+        await Timeslot.deleteMany({ createdById: new mongoose.Types.ObjectId(userId) });
+        logger.info(`Deleted timeslots for userId: ${userId}`);
+
+        await serviceRequest.updateMany(
+            { provider: new mongoose.Types.ObjectId(userId) },
+            { $set: { provider: null }, requestStatus: RequestStatus.cancelled }
+        );
+        await serviceRequest.updateMany(
+            { requestedBy: new mongoose.Types.ObjectId(userId) },
+            { $set: { requestedBy: null }, requestStatus: RequestStatus.cancelled }
+        );
+        logger.info(`Updated service requests for userId: ${userId}`);
+
+        await job.updateMany(
+            { provider: new mongoose.Types.ObjectId(userId) },
+            { $set: { provider: null }, status: JobStatus.cancelled }
+        );
+        await job.updateMany(
+            { receiver: new mongoose.Types.ObjectId(userId) },
+            { $set: { receiver: null }, status: JobStatus.cancelled }
+        );
+        logger.info(`Updated jobs for userId: ${userId}`);
+
+        // Delete the user account
+        await Account.findByIdAndDelete(userId);
+        logger.info(`Deleted user account for userId: ${userId}`);
+
         return res.status(200).json(user);
     } catch (err: any) {
         let message = '';
         if (err instanceof Error) {
             message = err.message;
         }
+        logger.error(`Error deleting user account: ${message}`);
         return res.status(500).json({
             error: "Internal server error",
             message: message,
         });
     }
-}
-// TODO Cascade delete service offerings when an account is deleted
+};
 
 
 /**
