@@ -329,25 +329,31 @@ function UserProfile(): React.ReactElement {
     const handleEditServiceClick = (service: any) => {
         navigate('/addservice', {state: {service}});
     };
-
     const handleDeleteServiceClick = async () => {
         if (serviceToDelete) {
             try {
-                // delete the corresponding certificate
-                await axios.delete(`/api/certificate/${serviceToDelete}`, {
+                // delete the service first
+                const serviceResponse = await axios.delete(`/api/services/delete-service/${serviceToDelete}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
                 });
-
-                // delete the service
-                const response = await axios.delete(`/api/services/delete-service/${serviceToDelete}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                setServices(services.filter(service => service._id !== serviceToDelete));
+    
+                if (serviceResponse.status === 200 || serviceResponse.status === 204) {
+                    // update the services state immediately after successful service deletion
+                    setServices(services.filter(service => service._id !== serviceToDelete));
+    
+                    // attempt to delete the corresponding certificate without waiting for the result
+                    axios.delete(`/api/certificate/${serviceToDelete}`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    }).catch(error => {
+                        console.error('Error deleting certificate:', error);
+                    });
+                } else {
+                    console.error('Error deleting service:', serviceResponse.status);
+                }
             } catch (error) {
                 console.error('Error deleting service:', error);
             } finally {
@@ -356,6 +362,7 @@ function UserProfile(): React.ReactElement {
             }
         }
     };
+    
 
     const handleOpenDialog = (serviceId: string) => {
         setServiceToDelete(serviceId);

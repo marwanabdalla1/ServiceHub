@@ -201,27 +201,34 @@ export const deleteService = async (req: Request, res: Response, next: NextFunct
             { provider: new mongoose.Types.ObjectId(userId) },
             { $set: { serviceOffering: null }, status: JobStatus.cancelled }
         );
+
         // Delete the service offering from the database
-        await serviceOffering.deleteOne();
+        const deleteResult = await serviceOffering.deleteOne();
+        if (deleteResult.deletedCount === 1) {
+            // Remove the service offering ID from the user's account
+            const account = await Account.findById(userId);
+            if (!account) {
+                return res.status(404).send('Provider account not found');
+            }
 
-        // Remove the service offering ID from the user's account
-        const account = await Account.findById(userId);
-        if (!account) {
-            return res.status(404).send('Provider account not found');
+            const serviceOfferingIdStr = serviceId.toString();
+            // Manually remove the service offering ID from the array
+            account.serviceOfferings = account.serviceOfferings.filter(
+                (id) => id.toString() !== serviceOfferingIdStr
+            );
+
+            // Check if the account has no more service offerings
+            if (account.serviceOfferings.length === 0) {
+                account.isProvider = false; // Set isProvider to false if there are no more service offerings
+            }
+
+            await account.save();
+            return res.status(200).send('Service offering deleted successfully');
+        } else {
+            return res.status(500).send('Failed to delete service offering');
         }
-
-        const serviceOfferingIdStr = serviceId.toString();
-
-        // Manually remove the service offering ID from the array
-        account.serviceOfferings = account.serviceOfferings.filter(
-            (id) => id.toString() !== serviceOfferingIdStr
-        );
-
-        await account.save();
-
-        res.status(200).send('Service offering deleted successfully');
     } catch (err) {
         console.error('Error deleting service:', err);
-        res.status(500).send('Internal Server Error');
+        return res.status(500).send('Internal Server Error');
     }
-}
+};
