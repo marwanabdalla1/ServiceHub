@@ -3,7 +3,7 @@ import React, {useEffect, useState} from 'react';
 import {useLocation, useNavigate, useParams} from 'react-router-dom';
 import axios from 'axios';
 import {Job} from '../models/Job';
-import {Container, Typography, Box} from '@mui/material';
+import {Container, Typography, Box, CircularProgress} from '@mui/material';
 import {useAuth} from '../contexts/AuthContext';
 import {Review} from "../models/Review"; // Assuming you have a component to list reviews
 import handleAccept from "./TablePages/IncomingRequestsPage"
@@ -53,6 +53,7 @@ const JobDetailsPage: React.FC<JobDetailsPageProps> = () => {
                 const response = await axios.get<Job>(`/api/jobs/${jobId}`, {
                     headers: {Authorization: `Bearer ${token}`},
                 });
+                console.log("job data,", response.data)
                 setJob(response.data);
                 setLoading(false);
 
@@ -131,7 +132,11 @@ const JobDetailsPage: React.FC<JobDetailsPageProps> = () => {
 
     if (!job) {
         if (loading) {
-            return <Typography>Loading...</Typography>
+            return (
+                <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+                    <CircularProgress />
+                </Box>
+            )
         } else {
             console.log("error")
             return <ErrorPage title={"404 Not Found"} message={'The job you\'re looking for cannot be found.'}/>

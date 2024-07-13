@@ -12,7 +12,7 @@ import {
     TextField,
     DialogActions,
     Button,
-    Dialog
+    Dialog, CircularProgress
 } from '@mui/material';
 import {useAuth} from '../contexts/AuthContext';
 import {Review} from "../models/Review"; // Assuming you have a component to list reviews
@@ -66,6 +66,9 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
                 const response = await axios.get<ServiceRequest>(`/api/requests/${requestId}`, {
                     headers: {Authorization: `Bearer ${token}`},
                 });
+
+                console.log("request data,", response.data)
+
                 setRequest(response.data);
                 setLoading(false);
                 //
@@ -136,7 +139,11 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
 
     if (!request) {
         if (loading) {
-            return <Typography>Loading...</Typography>
+            return (
+                <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+                    <CircularProgress />
+                </Box>
+            )
         } else {
             console.log("error")
             return <ErrorPage title={"404 Not Found"} message={'The request you\'re looking for cannot be found.'}/>

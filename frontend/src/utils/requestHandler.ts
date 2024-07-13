@@ -82,6 +82,7 @@ export const handleAccept = async ({
             }
             setShowMediaCard(false);
 
+
             // Prepare notification data
             const notificationData = {
                 isViewed: false,
