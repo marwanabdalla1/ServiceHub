@@ -87,10 +87,10 @@ const BecomeProPage: React.FC = () => {
     };
 
     return (
-        <div className='flex flex-col items-center justify-center mt-4 h-screen'>
-        <div className="w-3/4 flex flex-col rounded md:flex-row items-center bg-customGreen pl-8 h-full">
-        <div className="text-left w-2/3">
-        <h1 className="text-5xl font-bold mb-4" style={{ marginTop: '16px'}}>Take your craft to</h1>
+        <div className='flex flex-col items-center justify-center mt-4'>
+        <div className="flex flex-col rounded md:flex-row items-center bg-customGreen pl-8 h-full">
+        <div className="text-left w-2/3" >
+        <h1 className="text-5xl font-bold mb-4 flex-grow" style ={{ marginTop: '16px' }} >Take your craft to</h1>
         <h1 className="text-5xl font-bold mb-4">the next level</h1>
         <div className="flex items-center mb-4">
             <div className="flex flex-col items-center mr-4">
@@ -109,7 +109,7 @@ const BecomeProPage: React.FC = () => {
 
         <BlackButton style={{ padding: '8px 18px', fontSize: '16px', marginTop: '16px', marginBottom: '16px' }} text="Join Now" onClick={handleJoinNow} />
     </div>
-    <div className="md:mt-0 mr-0 w-1/3 h-full">
+    <div className="md:mt-0 mr-0 h-full flex-grow">
         <img src="/images/handshake.png" alt="Handshake" className="w-full h-full object-cover"/>
     </div>
 </div>
