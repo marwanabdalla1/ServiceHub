@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { Notification } from '../../models/Notification'; // Import Notification interface
 import { useNavigate } from 'react-router-dom';
@@ -11,13 +11,14 @@ interface NotificationItemProps extends Notification {
 const NotificationItem: React.FC<NotificationItemProps> = ({
   _id,
   content,
-  isViewed,
+  isViewed: initialIsViewed,
   updatedAt,
   notificationType,
   review,
   job,
   serviceRequest,
 }) => {
+  const [isViewed, setIsViewed] = useState(initialIsViewed); // Local state for isViewed
   const timeAgo = formatDistanceToNow(new Date(updatedAt), { addSuffix: true });
   const navigate = useNavigate(); // useNavigate hook to navigate
   const { token } = useAuth(); // useAuth hook to get the token
@@ -42,6 +43,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
   };
 
   const handleClick = async () => {
+    setIsViewed(true); // Update local state immediately
     const updatedNotification = await updateNotificationStatus();
     if (updatedNotification) {
       // Define the URL based on NotificationType
@@ -67,27 +69,19 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
           break;
         // Add more cases here as needed
         case 'Timeslot Change Request':
-          // todo? this return the full content.
           let commentFromProvider = '';
-          // Extract comment from content, assuming it starts with "\n Comment from the provider:"
           const commentMatch = content.match(/Comment from the provider: (.*)$/);
           if (commentMatch && commentMatch[1]) {
             commentFromProvider = encodeURIComponent(commentMatch[1]);
           }
-
-          // url = `/change-booking-time/${serviceRequest}?comment=${commentFromProvider}`;
           url = `/change-booking-time/${serviceRequest}?comment=${encodeURIComponent(content)}`;
           break;
         case 'Request Time Has Changed':
           url = `/incoming/requests/${serviceRequest}`;
           break;
-        // declined/cancel requests: just go back to home page
-        // case '':
         default:
           url = '/';
       }
-
-      // Redirect to the determined URL
       navigate(url);
     } else {
       console.error('Notification update failed, navigation cancelled');

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import NotificationDropdown from './NotificationDropdown';
 import { IoNotificationsOutline } from 'react-icons/io5';
 import { Notification } from '../../models/Notification'; // Import Notification interface
@@ -13,6 +13,7 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ header }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const { token } = useAuth();
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const toggleDropdown = () => setIsOpen(!isOpen);
 
@@ -36,11 +37,26 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ header }) => {
     fetchNotifications();
   }, [token]);
 
-// TODO: Implement the logic to mark the notification as read
-// Redirect logic
-//look up if you should make the fetchOperations a websocket connection
+  const handleClickOutside = (event: MouseEvent) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      setIsOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
+
   return (
-    <div className="relative">
+    <div className="relative" ref={dropdownRef}>
       <button onClick={toggleDropdown} className="relative flex items-center justify-center">
         <IoNotificationsOutline className="h-6 w-6" />
         {notifications.length > 0 && (

@@ -1,10 +1,10 @@
 import React, { useState, ChangeEvent, useEffect } from 'react';
-import { Autocomplete, TextField, InputAdornment, Box, Grid, Stepper, Step, StepLabel, CircularProgress } from '@mui/material';
+import { Autocomplete, TextField, InputAdornment, Box, Grid, Stepper, Step, StepLabel, CircularProgress, Typography } from '@mui/material';
 import LightBlueButton from '../components/inputs/BlueButton';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
-import {toast} from "react-toastify";
+import { toast } from "react-toastify";
 
 interface FormData {
     selectedService: { title: string } | null;
@@ -19,22 +19,23 @@ interface FormData {
 function AddServicePage() {
     const navigate = useNavigate();
     const location = useLocation();
-    const { token } = useAuth();
+    const { token, account } = useAuth();
+    const isProvider = account?.isProvider;
     const serviceToEdit = location.state?.service || null;
     const [certificate, setCertificate] = useState<File | null>(null);
     const [isCertificateUploaded, setIsCertificateUploaded] = useState<boolean>(false);
     const serviceTypes = [
-        {title: 'Bike Repair'},
-        {title: 'Moving Services'},
-        {title: 'Baby Sitting'},
-        {title: 'Tutoring'},
-        {title: 'Pet Sitting'},
-        {title: 'Landscaping Services'},
-        {title: 'Home Remodeling'},
-        {title: 'House Cleaning'}
+        { title: 'Bike Repair' },
+        { title: 'Moving Services' },
+        { title: 'Babysitting' },
+        { title: 'Tutoring' },
+        { title: 'Petsitting' },
+        { title: 'Landscaping Services' },
+        { title: 'Home Remodeling' },
+        { title: 'House Cleaning' }
     ];
     const paymentMethods = [
-        {title: 'Cash'}, {title: 'Paypal'}, {title: 'Bank Transfer'}
+        { title: 'Cash' }, { title: 'Paypal' }, { title: 'Bank Transfer' }
     ];
     const [formData, setFormData] = useState<FormData>({
         selectedService: null,
@@ -60,9 +61,9 @@ function AddServicePage() {
         if (isEditMode && serviceToEdit) {
             console.log('Service to edit:', serviceToEdit);
             setFormData({
-                selectedService: {title: serviceToEdit.serviceType},
+                selectedService: { title: serviceToEdit.serviceType },
                 hourlyRate: serviceToEdit.hourlyRate.toString(),
-                acceptedPaymentMethods: serviceToEdit.acceptedPaymentMethods ? serviceToEdit.acceptedPaymentMethods.map((method: string) => ({title: method})) : [],
+                acceptedPaymentMethods: serviceToEdit.acceptedPaymentMethods ? serviceToEdit.acceptedPaymentMethods.map((method: string) => ({ title: method })) : [],
                 description: serviceToEdit.description,
                 certificateId: serviceToEdit.certificateId,
                 defaultSlotTime: serviceToEdit.baseDuration.toString(),
@@ -114,17 +115,17 @@ function AddServicePage() {
             // E.g. map [{title: 'Cash'}, {title: 'Cash'}]  to Set['Cash','Cash'] -> ['Cash']->[title: 'Cash']
             const uniquePaymentMethods = Array.from(new Set(value.map((item: {
                 title: string
-            }) => item.title))).map(title => ({title: title as string}));
-            setFormData(prev => ({...prev, [key]: uniquePaymentMethods}));
+            }) => item.title))).map(title => ({ title: title as string }));
+            setFormData(prev => ({ ...prev, [key]: uniquePaymentMethods }));
         } else {
-            setFormData(prev => ({...prev, [key]: value}));
+            setFormData(prev => ({ ...prev, [key]: value }));
         }
     };
 
     const validateForm = () => {
         const newErrors = {
             selectedService: !formData.selectedService,
-            hourlyRate: !formData.hourlyRate,
+            hourlyRate: !formData.hourlyRate || !isHourlyRateValid(formData.hourlyRate),
             acceptedPaymentMethods: formData.acceptedPaymentMethods.length === 0,
             defaultSlotTime: !formData.defaultSlotTime,
             travelTime: !formData.travelTime
@@ -143,8 +144,16 @@ function AddServicePage() {
         return isValid;
     };
 
-    const handleSubmit = async () => {
+    const isHourlyRateValid = (value: string) => {
+        const rate = Number(value);
+        if (rate < 15 || rate > 80) {
+            toast.error("Hourly Rate must be between 15 and 80 euros.");
+            return false;
+        }
+        return true;
+    };
 
+    const handleSubmit = async () => {
         if (!isNumberValid(formData.hourlyRate, "Hourly Rate")
             || !isNumberValid(formData.defaultSlotTime, "Default Slot Time")
             || !isNumberValid(formData.travelTime, "Travel Time")) {
@@ -201,7 +210,7 @@ function AddServicePage() {
                 setIsLoading(false);
                 if (isEditMode) {
                     navigate('/setprofile');
-                } else {
+                } else if (response.status === 201) {
                     navigate('/select-availability', { state: { inAddServiceSteps: true } });
                 }
             } catch (error: any) {
@@ -273,7 +282,13 @@ function AddServicePage() {
                                 onChange={(e) => handleChange('hourlyRate', e.target.value)}
                                 error={errors.hourlyRate}
                                 helperText={errors.hourlyRate ? 'Hourly rate is required' : ''}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
                             />
+                            <Typography variant="caption" color="textSecondary" style={{ marginLeft: '10px' }}>
+                                (Range: 15 to 80 euros)
+                            </Typography>
                         </Box>
                         <Box mb={4}>
                             <Autocomplete

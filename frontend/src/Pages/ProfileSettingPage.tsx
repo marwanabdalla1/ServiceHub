@@ -130,22 +130,7 @@ function UserProfile(): React.ReactElement {
         })();
     }, [account]);
 
-    const fetchProfileData = async () => {
-        try {
-            // Fetch profile image
-            const profileImageResponse = await axios.get(`/api/file/profileImage`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                responseType: 'blob'
-            });
 
-            setProfileImage(profileImageResponse.data);
-
-        } catch (error) {
-            console.error('Error fetching profile data:', error);
-        }
-    };
 
 
     useEffect(() => {
@@ -199,7 +184,7 @@ function UserProfile(): React.ReactElement {
                 firstName: account.firstName,
                 lastName: account.lastName,
                 email: account.email,
-                phone: account.phone ? account.phone : "",
+                phone: account.phoneNumber ? account.phoneNumber : "",
                 address: concatenatedAddress,
                 description: account.description ? account.description : "",
             });
@@ -296,7 +281,7 @@ function UserProfile(): React.ReactElement {
         if (field === 'phone' && !isValidPhoneNumber(fieldValue[field])) {
             toast('Invalid phone number', {type: 'error'});
             // set the value of phone back to the account phone number
-            setFieldValue(prevState => ({...prevState, [field]: account.phone}));
+            setFieldValue(prevState => ({...prevState, [field]: account.phoneNumber}));
             return;
         }
 
@@ -329,25 +314,31 @@ function UserProfile(): React.ReactElement {
     const handleEditServiceClick = (service: any) => {
         navigate('/addservice', {state: {service}});
     };
-
     const handleDeleteServiceClick = async () => {
         if (serviceToDelete) {
             try {
-                // delete the corresponding certificate
-                await axios.delete(`/api/certificate/${serviceToDelete}`, {
+                // delete the service first
+                const serviceResponse = await axios.delete(`/api/services/delete-service/${serviceToDelete}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
                 });
-
-                // delete the service
-                const response = await axios.delete(`/api/services/delete-service/${serviceToDelete}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                setServices(services.filter(service => service._id !== serviceToDelete));
+    
+                if (serviceResponse.status === 200 || serviceResponse.status === 204) {
+                    // update the services state immediately after successful service deletion
+                    setServices(services.filter(service => service._id !== serviceToDelete));
+    
+                    // attempt to delete the corresponding certificate without waiting for the result
+                    axios.delete(`/api/certificate/${serviceToDelete}`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    }).catch(error => {
+                        console.error('Error deleting certificate:', error);
+                    });
+                } else {
+                    console.error('Error deleting service:', serviceResponse.status);
+                }
             } catch (error) {
                 console.error('Error deleting service:', error);
             } finally {
@@ -356,6 +347,7 @@ function UserProfile(): React.ReactElement {
             }
         }
     };
+    
 
     const handleOpenDialog = (serviceId: string) => {
         setServiceToDelete(serviceId);
@@ -512,8 +504,6 @@ function UserProfile(): React.ReactElement {
                         {subscriptions.length > 0 ? (
                             subscriptions.map((subscription) => (
                                 <Box key={subscription.id} sx={{display: 'flex', flexDirection: 'column', mt: 2}}>
-                                    <Typography variant="body1"><strong>Subscription ID:</strong> {subscription.id}
-                                    </Typography>
                                     <Typography variant="body1"><strong>Status:</strong> {subscription.status}
                                     </Typography>
                                     <Typography variant="body1"><strong>Expiration

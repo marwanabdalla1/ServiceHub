@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Box, Typography, Card, CardContent, TextField, Button, Grid, CircularProgress, Stepper, Step, StepLabel } from '@mui/material';
+import { Container, Box, Typography, Card, CardContent, TextField, Button, Grid, CircularProgress, Stepper, Step, StepLabel, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
-import { Formik, Field, Form, ErrorMessage } from 'formik';
+import { Formik, Field, Form, ErrorMessage, FieldProps } from 'formik';
 import * as Yup from 'yup';
-import {GERMAN_CITIES_SUPPORT, GERMAN_POSTAL_REGEX, PHONE_NUMBER_REGEX} from "../shared/Constants";
+import { GERMAN_CITIES_SUPPORT, GERMAN_POSTAL_REGEX, PHONE_NUMBER_REGEX } from "../shared/Constants";
 
 interface UserDetails {
     address: string;
@@ -38,6 +38,7 @@ function UpdateSProfile() {
 
     const handleSaveProfile = async (values: UserDetails) => {
         const apiEndpoint = '/api/account';
+        console.log('values:', values);
         try {
             const response = await axios.put(apiEndpoint, values, {
                 headers: { 'Authorization': `Bearer ${token}` },
@@ -137,15 +138,22 @@ function UpdateSProfile() {
                                                     />
                                                 </Grid>
                                                 <Grid item xs={3}>
-                                                    <Field
-                                                        name="location"
-                                                        as={TextField}
-                                                        label="City"
-                                                        fullWidth
-                                                        variant="outlined"
-                                                        helperText={<ErrorMessage name="location" />}
-                                                        error={Boolean(ErrorMessage.name === "location")}
-                                                    />
+                                                    <Field name="location">
+                                                        {({ field }: FieldProps) => (
+                                                            <FormControl fullWidth variant="outlined">
+                                                                <InputLabel>City</InputLabel>
+                                                                <Select
+                                                                    {...field}
+                                                                    label="City"
+                                                                >
+                                                                    {Object.values(GERMAN_CITIES_SUPPORT).map((city) => (
+                                                                        <MenuItem key={city} value={city}>{city}</MenuItem>
+                                                                    ))}
+                                                                </Select>
+                                                            </FormControl>
+                                                        )}
+                                                    </Field>
+                                                    <ErrorMessage name="location" component="div" />
                                                 </Grid>
                                                 <Grid item xs={12}>
                                                     <Field

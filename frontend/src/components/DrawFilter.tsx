@@ -150,7 +150,7 @@ export const DrawerFilter: React.FC<DrawerFilterProps> = ({
                     icon: <DirectionsBikeIcon />,
                   },
                   {
-                    name: 'Moving',
+                    name: 'Moving Services',
                     icon: <LocalShippingIcon />,
                   },
                   {
@@ -166,15 +166,15 @@ export const DrawerFilter: React.FC<DrawerFilterProps> = ({
                     icon: <PetsIcon />,
                   },
                   {
-                    name: 'Landscaping',
+                    name: 'Landscaping Services',
                     icon: <SpaIcon />,
                   },
                   {
-                    name: 'Remodeling',
+                    name: 'Home Remodeling',
                     icon: <BuildIcon />,
                   },
                   {
-                    name: 'Cleaning',
+                    name: 'House Cleaning',
                     icon: <CleaningServicesIcon />,
                   },
                 ].map((item) => (
