@@ -308,7 +308,6 @@ export const handleTimeChange = async ({
     console.log("handle time change begin");
 
 
-
     console.log("request exists");
 
     // get data from the request (selectedRequest)

@@ -3,9 +3,15 @@ import moment from 'moment';
 import Timeslot, {ITimeslot} from '../models/timeslot';
 import mongoose, {ClientSession, Types} from "mongoose";
 import ServiceRequest from "../models/serviceRequest";
-import {ObjectId} from "mongodb";
-import {createNotificationDirect} from "./NotificationController";
 
+class TimeslotError extends Error {
+    statusCode: number;
+    constructor(message: string, statusCode: number) {
+        super(message);
+        this.statusCode = statusCode;
+        this.name = "TimeslotError";
+    }
+}
 
 
 async function generateWeeklyInstances(events: ITimeslot[], existingTimeslots: ITimeslot[], startDate: moment.Moment, endDate: moment.Moment) {
@@ -177,62 +183,6 @@ function adjustForOverlaps(newInstance: ITimeslot, existingTimeslots: ITimeslot[
 //     return weekInstances;
 // }
 
-// * Adjusts available timeslots based on overlaps with booked timeslots.
-// const adjustAvailableSlots = (availableSlots: ITimeslot[], bookedSlots: ITimeslot[]) => {
-//     let adjustedSlots = [];
-//
-//     // Sort both arrays by start time for proper comparison
-//     availableSlots.sort((a, b) => a.start.getTime() - b.start.getTime());
-//     bookedSlots.sort((a, b) => a.start.getTime() - b.start.getTime());
-//
-//     let ai = 0, bi = 0;
-//
-//     while (ai < availableSlots.length) {
-//         let availSlot = availableSlots[ai];
-//         let isAdjusted = false;
-//
-//         while (bi < bookedSlots.length && bookedSlots[bi].end <= availSlot.start) {
-//             bi++; // Move past booked slots that end before the available slot starts
-//         }
-//
-//         while (bi < bookedSlots.length && bookedSlots[bi].start < availSlot.end) {
-//             const bookedSlot = bookedSlots[bi];
-//
-//             if (bookedSlot.start <= availSlot.start && bookedSlot.end >= availSlot.end) {
-//                 // Booked slot completely covers available slot, no part of this slot is available
-//                 isAdjusted = true;
-//                 break;
-//             } else if (bookedSlot.start > availSlot.start && bookedSlot.end < availSlot.end) {
-//                 // Booked slot splits available slot into two
-//                 adjustedSlots.push({
-//                     ...availSlot,
-//                     end: new Date(bookedSlot.start)
-//                 });
-//                 availSlot = {
-//                     ...availSlot,
-//                     start: new Date(bookedSlot.end)
-//                 };
-//                 isAdjusted = true;
-//             } else if (bookedSlot.start <= availSlot.start && bookedSlot.end < availSlot.end) {
-//                 // Booked slot cuts off the start of the available slot
-//                 availSlot.start = new Date(bookedSlot.end);
-//                 isAdjusted = true;
-//             } else if (bookedSlot.start > availSlot.start && bookedSlot.end >= availSlot.end) {
-//                 // Booked slot cuts off the end of the available slot
-//                 availSlot.end = new Date(bookedSlot.start);
-//                 isAdjusted = true;
-//             }
-//             bi++;
-//         }
-//
-//         if (!isAdjusted) {
-//             adjustedSlots.push(availSlot);
-//         }
-//         ai++;
-//     }
-//
-//     return adjustedSlots;
-// };
 
 // New Endpoint to Extend Fixed Slots (updated code)
 export const extendFixedSlots: RequestHandler = async (req, res, next) => {
@@ -257,7 +207,7 @@ export const extendFixedSlots: RequestHandler = async (req, res, next) => {
         const potentialFutureEvents = await Timeslot.find({
             createdById: userId,
             isFixed: true,
-            start: { $gte: endDate.toDate() }
+            start: {$gte: endDate.toDate()}
         });
 
         console.log("potential future events:", potentialFutureEvents.length)
@@ -287,7 +237,7 @@ export const extendFixedSlots: RequestHandler = async (req, res, next) => {
                     console.log(`  Same End Time: ${sameEndTime} (${moment(futureEvent.end).format('HH:mm')} vs ${endTime})`);
 
                     return isAfter && sameDayOfWeek && sameStartTime && sameEndTime;
-            });
+                });
 
             console.log("future exists:", futureExists)
 
@@ -439,7 +389,7 @@ export const deleteTimeslot: RequestHandler = async (req, res, next) => {
                 $expr: {
                     $eq: [{$dayOfWeek: "$start"}, weekday] // Ensure it's the same day of the week
                 }
-            }, { $set: { isFixed: false } });
+            }, {$set: {isFixed: false}});
         }
 
         res.status(200).json({message: 'Timeslot deleted successfully'});
@@ -525,7 +475,7 @@ export const updateTimeslot: RequestHandler = async (req, res, next) => {
 // Existing Get Events Controller (updated code)
 export const getEvents: RequestHandler = async (req, res, next) => {
     const userId = (req as any).user.userId; // Assuming userId is available in the request (e.g., from authentication middleware)
-    const { start, end } = req.query; // Extracting start and end dates from the query parameters
+    const {start, end} = req.query; // Extracting start and end dates from the query parameters
 
     console.log("getEvents backend query:", start, end)
 
@@ -542,23 +492,23 @@ export const getEvents: RequestHandler = async (req, res, next) => {
 // Define a function to fetch timeslots
 async function getEventsDirect(userId: any, start?: string, end?: string) {
     try {
-        const query: any = { createdById: userId};
+        const query: any = {createdById: userId};
 
         if (start && end) {
             query.$and = [
-                { createdById: userId }, // reiterate for clarity in combined query structure
+                {createdById: userId}, // reiterate for clarity in combined query structure
                 {
                     $or: [
                         {
                             $and: [
-                                { start: { $gte: new Date(start) } },
-                                { end: { $lte: new Date(end) } }
+                                {start: {$gte: new Date(start)}},
+                                {end: {$lte: new Date(end)}}
                             ]
                         },
                         {
                             $and: [
-                                { transitStart: { $gte: new Date(start) } },
-                                { transitEnd: { $lte: new Date(end) } }
+                                {transitStart: {$gte: new Date(start)}},
+                                {transitEnd: {$lte: new Date(end)}}
                             ]
                         }
                     ]
@@ -566,8 +516,7 @@ async function getEventsDirect(userId: any, start?: string, end?: string) {
             ];
         }
 
-        const timeslots = Timeslot.find(query);
-        return timeslots;
+        return Timeslot.find(query);
     } catch (error) {
         console.error("Error fetching timeslots for user:", error);
         throw error; // Rethrow to handle it in the calling function
@@ -898,10 +847,8 @@ export const checkAvailability: RequestHandler = async (req, res) => {
     }
 };
 
-
-export const bookTimeslot: RequestHandler = async (req, res, next) => {
+export const bookTimeslotDirect = async (timeslotData: any, sessionPassed?: ClientSession) => {
     // const userId = (req as any).user.userId; // consumer id
-    console.log(req.body)
     const {
         start,
         end,
@@ -913,10 +860,21 @@ export const bookTimeslot: RequestHandler = async (req, res, next) => {
         transitStart,
         transitEnd,
         isUpdate
-    } = req.body;
-    const session = await mongoose.startSession();
-    try {
+    } = timeslotData;
+    // const session = await mongoose.startSession();
+
+    let session = sessionPassed;
+    let ownSession = false;  // Flag to track if the session was created here
+
+    if (!session) {
+        session = await mongoose.startSession();
         session.startTransaction();
+        ownSession = true;  // We started the session, so we'll manage it
+    }
+
+    console.log("the request that got created:", requestId)
+    try {
+        // session.startTransaction();
 
         // Find overlapping timeslots
         const overlappingSlots = await Timeslot.find({
@@ -930,9 +888,12 @@ export const bookTimeslot: RequestHandler = async (req, res, next) => {
 
         if (overlappingSlots.length <= 0) {
             // If there are any booked overlaps, abort the transaction
-            await session.abortTransaction();
-            session.endSession();
-            return res.status(409).json({message: "no timeslot, Timeslot is no longer available."});
+            // throw new Error("Timeslot is no longer available.")
+            throw new TimeslotError("Timeslot is no longer available.", 409);
+            //
+            // await session.abortTransaction();
+            // session.endSession();
+            // return res.status(409).json({message: "no timeslot, Timeslot is no longer available."});
         }
 
         // check availability
@@ -951,7 +912,8 @@ export const bookTimeslot: RequestHandler = async (req, res, next) => {
         }
 
         if (!available) {
-            throw new Error("Timeslot is no longer available.")
+            console.log("first available check is not available")
+            throw new TimeslotError("Timeslot is no longer available.", 409);
 
             // if (!isUpdate) {
             //
@@ -995,7 +957,7 @@ export const bookTimeslot: RequestHandler = async (req, res, next) => {
                     start: slot.start,
                     end: transitStart,
                     title: "available",
-                    isFixed: false, //todo: not sure if this should be true if the original timeslot is fixed
+                    isFixed: false,
                     createdById: slot.createdById,
                     isBooked: false
                 }, {
@@ -1020,30 +982,18 @@ export const bookTimeslot: RequestHandler = async (req, res, next) => {
             }
         }
 
-        await session.commitTransaction();
-
-        res.status(201).json(newTimeslot);
-    } catch (error: any) {
-        await session.abortTransaction();
-        console.error("Failed to book timeslot:", error);
-
-        // delete the corresponding request if there is an error in saving timeslots
-        if (error.message === "Timeslot is no longer available.") {
-            console.log("you're in ")
-            if (!req.body.isUpdate && req.body.requestId) {
-                try {
-                    await ServiceRequest.findByIdAndDelete(req.body.requestId).session(session);
-                    console.error('Rolled back the created request due to timeslot booking failure.');
-                } catch (deleteError) {
-                    console.error('Failed to delete the request:', deleteError);
-                    res.status(500).json({ message: "Failed to delete request", error: deleteError });
-                    return;
-                }
-            }
-            res.status(409).json({ message: error.message });
-        } else {
-            res.status(500).json({ message: "Failed to book timeslot", error: error.message });
+        if (ownSession) {
+            await session.commitTransaction();
         }
+        return newTimeslot
+    }
+    catch (error: any) {
+        if (ownSession) {
+            await session.abortTransaction();
+        }
+        console.error("Failed to book timeslot:", error);
+        throw error;  // Rethrow to handle elsewhere
+
 
         // if (!isUpdate) {
         //     if (requestId) {
@@ -1063,9 +1013,205 @@ export const bookTimeslot: RequestHandler = async (req, res, next) => {
         //     throw error
         // }
     } finally {
+        if (ownSession) {
+            await session.endSession();
+        }    }
+};
+
+
+export const bookTimeslot: RequestHandler = async (req, res, next) => {
+    const session = await mongoose.startSession();
+    try {
+        session.startTransaction();
+        const timeslotData = req.body;
+        const result = await bookTimeslotDirect(timeslotData, session);
+        await session.commitTransaction();
+        res.status(201).json(result);
+    } catch (error: any) {
+        await session.abortTransaction();
+        console.error("Failed to book timeslot:", error);
+        if (error instanceof TimeslotError) {
+            res.status(error.statusCode).json({ message: error.message });
+        } else {
+            res.status(500).json({ message: "Failed to book timeslot", error: error.message });
+        }
+    } finally {
         session.endSession();
     }
 };
+
+// export const bookTimeslot: RequestHandler = async (req, res, next) => {
+//     // const userId = (req as any).user.userId; // consumer id
+//     console.log(req.body)
+//     const {
+//         start,
+//         end,
+//         title,
+//         isFixed,
+//         isBooked,
+//         createdById,
+//         requestId,
+//         transitStart,
+//         transitEnd,
+//         isUpdate
+//     } = req.body;
+//     const session = await mongoose.startSession();
+//
+//     console.log("the request that got created:", requestId)
+//     try {
+//         session.startTransaction();
+//
+//         // Find overlapping timeslots
+//         const overlappingSlots = await Timeslot.find({
+//             createdById: createdById,
+//             end: {$gt: transitStart},
+//             start: {$lt: transitEnd},
+//             isBooked: false // assuming only unbooked slots are modifiable
+//         }).session(session);
+//
+//         console.log("overlaps: ", start, end);
+//
+//         if (overlappingSlots.length <= 0) {
+//             // If there are any booked overlaps, abort the transaction
+//             throw new Error("Timeslot is no longer available.")
+//             //
+//             // await session.abortTransaction();
+//             // session.endSession();
+//             // return res.status(409).json({message: "no timeslot, Timeslot is no longer available."});
+//         }
+//
+//         // check availability
+//         let available = false;
+//         const merged = mergeTimeslots(overlappingSlots)
+//
+//         console.log("merged", merged)
+//
+//         for (const slot of merged) {
+//             // if we find one unbooked slot that covers the booking duration, it is good
+//             if (slot.start <= new Date(transitStart) && slot.end >= new Date(transitEnd)) {
+//                 console.log("good!")
+//                 available = true;
+//                 break;
+//             }
+//         }
+//
+//         if (!available) {
+//             console.log("first available check is not available")
+//             throw new Error("Timeslot is no longer available.")
+//
+//             // if (!isUpdate) {
+//             //
+//             //     await ServiceRequest.findByIdAndDelete(requestId).session(session);
+//             //     await session.abortTransaction();
+//             //     session.endSession();
+//             //     return res.status(409).json({message: "Timeslot is not available."});
+//             // } else {
+//             //     throw new Error("Timeslot is no longer available.")
+//             // }
+//         }
+//
+//
+//         // Create the new timeslot for the booking
+//         const newTimeslot = new Timeslot({
+//             start,
+//             end,
+//             transitStart,
+//             transitEnd,
+//             title,
+//             isFixed,
+//             isBooked,
+//             createdById,
+//             requestId,
+//         });
+//
+//         // save the new timeslot
+//         await newTimeslot.save({session});
+//
+//         // Adjust timeslots based on the booked time
+//         for (const slot of overlappingSlots) {
+//             if (moment(new Date(slot.start)).isSame(moment(new Date(transitStart))) && moment(new Date(slot.end)).isSame(moment(new Date(transitEnd)))) {
+//                 // Case where the new slot exactly matches the existing one, remove the old slot
+//                 await Timeslot.findByIdAndDelete(slot._id, {session});
+//             } else if (moment(new Date(slot.start)).isBefore(moment(new Date(transitStart))) &&
+//                 moment(new Date(slot.end)).isAfter(moment(new Date(transitEnd)))) {
+//                 console.log("need to split!")
+//
+//                 // Split the timeslot into two parts before and after the booked slot
+//                 await Timeslot.create([{
+//                     start: slot.start,
+//                     end: transitStart,
+//                     title: "available",
+//                     isFixed: false,
+//                     createdById: slot.createdById,
+//                     isBooked: false
+//                 }, {
+//                     start: transitEnd,
+//                     end: slot.end,
+//                     title: "available",
+//                     isFixed: false,
+//                     createdById: slot.createdById,
+//                     isBooked: false
+//                 }], {session});
+//                 // Remove the original slot
+//                 await Timeslot.findByIdAndDelete(slot._id, {session});
+//
+//             } else {
+//                 // Adjust existing slot start or end
+//                 if (moment(new Date(slot.end)).isAfter(moment(new Date(transitEnd)))) {
+//                     slot.start = transitEnd;
+//                 } else if (moment(new Date(slot.start)).isBefore(moment(new Date(transitStart)))) {
+//                     slot.end = transitStart;
+//                 }
+//                 await slot.save({session});
+//             }
+//         }
+//
+//         await session.commitTransaction();
+//
+//         res.status(201).json(newTimeslot);
+//     } catch (error: any) {
+//         await session.abortTransaction();
+//         console.error("Failed to book timeslot:", error);
+//
+//         // delete the corresponding request if there is an error in saving timeslots
+//         if (error.message === "Timeslot is no longer available.") {
+//             console.log("you're in ")
+//             if (!req.body.isUpdate && req.body.requestId) {
+//                 try {
+//                     await ServiceRequest.findByIdAndDelete(req.body.requestId).session(session);
+//                     console.error('Rolled back the created request due to timeslot booking failure.');
+//                 } catch (deleteError) {
+//                     console.error('Failed to delete the request:', deleteError);
+//                     // res.status(500).json({ message: "Failed to delete request", error: deleteError });
+//                     // return;
+//                 }
+//             }
+//             res.status(409).json({message: error.message});
+//         } else {
+//             res.status(500).json({message: "Failed to book timeslot", error: error.message});
+//         }
+//
+//         // if (!isUpdate) {
+//         //     if (requestId) {
+//         //         try {
+//         //             await ServiceRequest.findByIdAndDelete(requestId);
+//         //             console.error('Rolled back the created request due to timeslot booking failure.');
+//         //         } catch (deleteError) {
+//         //             console.error('Failed to delete the request:', deleteError);
+//         //         }
+//         //     }
+//         //     if (error.response?.status === 409) {
+//         //         return res.status(409).json({message: "Timeslot is no longer available."});
+//         //     }
+//         //
+//         //     res.status(500).json({message: "Failed to book timeslot", error: error.message});
+//         // } else {
+//         //     throw error
+//         // }
+//     } finally {
+//         session.endSession();
+//     }
+// };
 
 // export const bookTimeslot = async (timeslotData: any, session: ClientSession | null = null) => {
 //     // const userId = (req as any).user.userId; // consumer id
@@ -1246,7 +1392,10 @@ export async function cancelTimeslotWithRequestId(requestId: string): Promise<{ 
 }
 
 // update the timeslot to add jobid
-export async function updateTimeslotWithRequestId(requestId: string, jobId: string): Promise<{ success: boolean, message: string }> {
+export async function updateTimeslotWithRequestId(requestId: string, jobId: string): Promise<{
+    success: boolean,
+    message: string
+}> {
     try {
         const foundTimeslot = await findTimeslotByRequestId(requestId);
         if (!foundTimeslot) {
@@ -1523,8 +1672,11 @@ export const getNextAvailability: RequestHandler = async (req, res, next) => {
             start: {$gte: new Date()}
         }).sort({start: 1}).lean();
 
+        // merged
+        const merged = mergeTimeslots(timeslots)
+
         // const mergedTimeslots = mergeTimeslots(timeslots);
-        const adjustedTimeslots = adjustForTransit(timeslots, transitTime);
+        const adjustedTimeslots = adjustForTransit(merged, transitTime);
 
         const validTimeslots = adjustedTimeslots.filter(slot => {
             const duration = getDurationInMinutes(new Date(slot.start), new Date(slot.end));

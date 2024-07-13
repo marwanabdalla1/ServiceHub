@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import {useBooking, BookingDetails} from '../../contexts/BookingContext';
 import {useNavigate} from "react-router-dom";
-import axios from "axios";
+import axios, {AxiosError} from "axios";
 import {RequestStatus} from "../../models/enums";
 import {useAuth} from "../../contexts/AuthContext";
 import {Timeslot} from "../../models/Timeslot";
@@ -136,38 +136,39 @@ function ReviewAndConfirm({bookingDetails, handleCancel}: ReviewAndConfirmProps)
                 console.log('Booking confirmed:', response.data);
 
 
-                const timeSlotWithRequest = {
-                    ...bookingDetails.timeSlot,
-                    // title: bookingDetails.timeSlot?.title,
-                    requestId: requestId,
-                };
+                // not needed, now all handled in backend
+                // const timeSlotWithRequest = {
+                //     ...bookingDetails.timeSlot,
+                //     // title: bookingDetails.timeSlot?.title,
+                //     requestId: requestId,
+                // };
 
                 // try {
                 // step 2: post the timeslot into timeslot table
                 // todo: comment out later
-                const timeslotResponse = await bookTimeSlot(timeSlotWithRequest, token);
-                console.log("Timeslot booked successfully", timeslotResponse);
-
-                // // step 3: send notification to provider
-                const notificationContent = `You have a new service request for ${requestData.serviceType} at ${formatDateTime(requestData.timeSlot?.start)}.`;
-
-                const notificationData = {
-                    isViewed: false,
-                    content: notificationContent,
-                    notificationType: "New Request",
-                    serviceRequest: requestId,
-                    recipient: requestData.provider
-                };
-                // generate new notification
-                try {
-                    const notification = await axios.post("api/notifications/", notificationData, {
-                        headers: {Authorization: `Bearer ${token}`}
-                    });
-                    console.log("Notification sent!", notification);
-
-                } catch (notificationError) {
-                    console.error('Error sending notification:', notificationError);
-                }
+                // const timeslotResponse = await bookTimeSlot(timeSlotWithRequest, token);
+                // console.log("Timeslot booked successfully", timeslotResponse);
+                //
+                // // // step 3: send notification to provider
+                // const notificationContent = `You have a new service request for ${requestData.serviceType} at ${formatDateTime(requestData.timeSlot?.start)}.`;
+                //
+                // const notificationData = {
+                //     isViewed: false,
+                //     content: notificationContent,
+                //     notificationType: "New Request",
+                //     serviceRequest: requestId,
+                //     recipient: requestData.provider
+                // };
+                // // generate new notification
+                // try {
+                //     const notification = await axios.post("api/notifications/", notificationData, {
+                //         headers: {Authorization: `Bearer ${token}`}
+                //     });
+                //     console.log("Notification sent!", notification);
+                //
+                // } catch (notificationError) {
+                //     console.error('Error sending notification:', notificationError);
+                // }
 
                 // navigate('/confirmation'); // Navigate to a confirmation page or show a confirmation message
                 navigate(`/confirmation/${requestId}/booking`); // Navigate to a confirmation page or show a confirmation message
@@ -177,7 +178,7 @@ function ReviewAndConfirm({bookingDetails, handleCancel}: ReviewAndConfirmProps)
             } catch (error: any) {
                 console.error('Error confirming booking:', error);
 
-                if (error instanceof BookingError && error.code === 409) {
+                if (error.code === 409 || error.response?.status === 409) {
                     setAlertMessage('Unfortunately, the selected timeslot is no longer available. Please select another time.');
                     setAlertSeverity('error');
                     setShowAlert(true);
@@ -194,21 +195,12 @@ function ReviewAndConfirm({bookingDetails, handleCancel}: ReviewAndConfirmProps)
                     // }
                 } else {
                     // alert('An error occurred while confirming your booking. Please try again.');
-
                     setAlertMessage('An error occurred while confirming your booking. Please try again.');
                     setAlertSeverity('error');
                     setShowAlert(true);
-
                     setCountdown(5);
                 }
             }
-
-
-            // } catch (error) {
-            //     console.error('Error confirming booking:', error);
-            //     alert('Failed to confirm booking. Please retry.'); // General error handling
-            //     navigate(`/offerings/${bookingDetails.serviceOffering?._id}`);
-            // }
 
         }
     ;

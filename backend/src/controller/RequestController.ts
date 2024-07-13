@@ -1,14 +1,16 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import Account from '../models/account';
-import ServiceOffering from "../models/serviceOffering";
 import ServiceRequest, { IServiceRequest } from "../models/serviceRequest";
-import mongoose, {Document, Types} from 'mongoose';
 import Timeslot from "../models/timeslot";
-import {createNotification, createNotificationDirect} from "./NotificationController";
-import Notification from "../models/notification";
+import { createNotificationDirect} from "./NotificationController";
 import {NotificationType, RequestStatus} from "../models/enums";
-import {bookTimeslot, cancelTimeslotDirect, cancelTimeslotWithRequestId} from "./TimeSlotController";
-import { PipelineStage } from 'mongoose';
+import {
+    bookTimeslot,
+    bookTimeslotDirect,
+    cancelTimeslotDirect,
+    cancelTimeslotWithRequestId
+} from "./TimeSlotController";
+import mongoose, { PipelineStage } from 'mongoose';
 import {sortBookingItems} from "../util/requestAndJobUtils";  // Import PipelineStage for correct typing
 import {formatDateTime} from "../../../frontend/src/utils/dateUtils";
 
@@ -35,6 +37,7 @@ interface Query {
     [key: string]: any;  // Allows additional properties with any type
 }
 
+// new, all-in-one
 export const createServiceRequest: RequestHandler = async (req: Request, res: Response, next) => {
     const user = (req as any).user;
 
@@ -81,37 +84,124 @@ export const createServiceRequest: RequestHandler = async (req: Request, res: Re
         if (!newServiceRequest._id) {
             return res.status(400).send({ message: "Failed to create service request." });
         }
+
+        await bookTimeslotDirect(timeSlot, session);
+
         // update the user
         await updateUserRequestHistory(req.body.provider, newServiceRequest._id.toString());
 
+        await session.commitTransaction();
+
+
         // await newServiceRequest.save();
         res.status(201).send(newServiceRequest);
-
-        await session.commitTransaction();
-        session.endSession();
         //
         // // Attempt to create a notification
-        // now its at frontend
-        // try {
-        //     const notificationContent = `You have a new service request for ${requestBody.serviceType} at ${formatDateTime(timeSlot.start)}.`;
-        //
-        //     await createNotificationDirect({
-        //         content: "A new service request has been created.",
-        //         notificationType: "New Request",
-        //         serviceRequest: newServiceRequest._id.toString(),
-        //         recipient: req.body.provider // Assuming the provider should be notified
-        //     });
-        // } catch (notificationError: any) {
-        //     console.error("Failed to create notification:", notificationError.message);
-        //     // Optionally handle the error further, e.g., logging to an error monitoring service
-        // }
+        try {
+            const notificationContent = `You have a new service request for ${requestBody.serviceType} at ${formatDateTime(timeSlot.start)}.`;
+
+            await createNotificationDirect({
+                content:notificationContent,
+                notificationType: "New Request",
+                serviceRequest: newServiceRequest._id.toString(),
+                recipient: req.body.provider // Assuming the provider should be notified
+            });
+        } catch (notificationError: any) {
+            console.error("Failed to create notification:", notificationError.message);
+            // Optionally handle the error further, e.g., logging to an error monitoring service
+        }
 
     } catch (error: any) {
         await session.abortTransaction();
+        if (error.statusCode===409) {
+            res.status(error.statusCode).send({ message: error.message + "it's new baby!" });
+        } else{
+            res.status(500).send({ message: error.message || "Internal server error" });
+        }
+        // res.status(400).send({ message: error.message });
+    } finally{
         session.endSession();
-        res.status(400).send({ message: error.message });
     }
 };
+
+
+// export const createServiceRequest: RequestHandler = async (req: Request, res: Response, next) => {
+//     const user = (req as any).user;
+//
+//     console.log("request body:" + JSON.stringify(req.body), "userID: ", user.userId)
+//     const error = errorHandler(req, res, [
+//         "requestStatus",
+//         "serviceType",
+//         // "appointmentStartTime",
+//         // "appointmentEndTime",
+//         // "uploads",
+//         // "comment",
+//         "serviceFee",
+//         "serviceOffering",
+//         // "job",
+//         "provider",
+//         "requestedBy",
+//     ]);
+//     if (error) {
+//         return error;
+//     }
+//
+//
+//     // Validate that the consumer in the request body matches the authenticated user's ID
+//     if (req.body.requestedBy !== user.userId) {
+//         return res.status(403).json({
+//             error: "Unauthorized",
+//             message: "Unable to create this request" //only the corresponding requester can create requests
+//         });
+//     }
+//
+//     const session = await mongoose.startSession();
+//
+//     try {
+//         session.startTransaction();
+//
+//         // Extract fields from req.body and possibly validate or transform them
+//         const { timeSlot, ...requestBody } = req.body;
+//         // const requestBody = req.body; // Simplified, assuming body has all required fields
+//
+//         console.log("request body: " + requestBody)
+//         let newServiceRequest = await ServiceRequest.create(requestBody);
+//
+//
+//         if (!newServiceRequest._id) {
+//             return res.status(400).send({ message: "Failed to create service request." });
+//         }
+//         // update the user
+//         await updateUserRequestHistory(req.body.provider, newServiceRequest._id.toString());
+//
+//         // await newServiceRequest.save();
+//         res.status(201).send(newServiceRequest);
+//
+//         await session.commitTransaction();
+//         session.endSession();
+//         //
+//         // // Attempt to create a notification
+//         // now its at frontend
+//         // try {
+//         //     const notificationContent = `You have a new service request for ${requestBody.serviceType} at ${formatDateTime(timeSlot.start)}.`;
+//         //
+//         //     await createNotificationDirect({
+//         //         content: "A new service request has been created.",
+//         //         notificationType: "New Request",
+//         //         serviceRequest: newServiceRequest._id.toString(),
+//         //         recipient: req.body.provider // Assuming the provider should be notified
+//         //     });
+//         // } catch (notificationError: any) {
+//         //     console.error("Failed to create notification:", notificationError.message);
+//         //     // Optionally handle the error further, e.g., logging to an error monitoring service
+//         // }
+//
+//     } catch (error: any) {
+//         await session.abortTransaction();
+//         session.endSession();
+//         res.status(400).send({ message: error.message });
+//     }
+// };
 
 // also update the requestHistory arrays in the account
 async function updateUserRequestHistory(userId: string, requestId: string) {
@@ -124,6 +214,8 @@ async function updateUserRequestHistory(userId: string, requestId: string) {
         throw new Error("Failed to update user's request history");
     }
 }
+
+
 
 
 export const updateServiceRequest: RequestHandler = async (req: Request, res: Response, next) => {
@@ -166,23 +258,31 @@ export const updateServiceRequest: RequestHandler = async (req: Request, res: Re
         // res.send(updatedRequest);
 
 
+
         // todo: modify Create and send notification (now this is in frontend)
-        // Assuming recipient is determined by logic - can be provider or requester based on context
         // const notificationContent = `Service request ${requestId} has been updated.`;
 
-        // Notify the provider
-        // await createNotification({
-        //     content: notificationContent,
-        //     serviceRequest: requestId,
-        //     recipient: serviceRequest.provider
-        // });
+        // if (updates.requestStatus.toString() !== RequestStatus.requestorActionNeeded.toString()){
+        //     const content = `Please change the booking time for your service request ${updatedRequest.serviceType} originally scheduled on the ${formatDateTime(serviceRequest.timeslot?.start)}.${
+        //         (comment && comment!="") ? `\n Comment from the provider: ${comment}` : ''
+        //     }`
+        // } else{
+        //     const content: `Your service request for ${updatedRequest.serviceType} on the ${formatDateTime(selectedRequest.timeslot?.start)} has been accepted`,
         //
-        // // Notify the requestedBy
-        // await createNotification({
-        //     content: notificationContent,
-        //     serviceRequest: requestId,
-        //     recipient: serviceRequest.requestedBy
-        // });
+        // }
+        // try {
+        //     await createNotificationDirect({
+        //         content: notificationContent,
+        //         serviceRequest: requestId,
+        //         notificationType,
+        //         recipient: createdById,
+        //         job: undefined,
+        //         review: undefined
+        //     });
+        // } catch (notificationError) {
+        //     console.error("Failed to create notification:", notificationError);
+        //     // Optionally handle the failure of notification creation
+        // }
         res.status(200).json(updatedRequest);
 
     } catch (error) {
@@ -359,7 +459,6 @@ export const getServiceRequestsByRequester: RequestHandler = async (req, res) =>
 
 
 // when provider requests the consumer to select a new timeslot
-// todo: to finish
 export const requestChangeTimeslot: RequestHandler = async (req, res, next) => {
     const { createdById, requestId } = req.body;
     let success = true;  // Flag to track success of booking
