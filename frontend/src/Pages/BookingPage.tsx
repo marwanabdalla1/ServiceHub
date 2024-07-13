@@ -97,7 +97,7 @@ const BookingPage = () => {
 
     return (
         <Container maxWidth="lg" sx={{mt: 4, display: 'flex'}}>
-            <Grid container spacing={10}>
+            <Grid container spacing={8}>
                 <Grid item xs={9}>
                     <Box display="flex" flexDirection="column" mt={2} width={"100%"} mb={4} mr={10}>
                         <Stepper activeStep={step - 1} alternativeLabel sx={{mb: 2}}>
