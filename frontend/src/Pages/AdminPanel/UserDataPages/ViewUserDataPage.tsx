@@ -147,7 +147,7 @@ export default function ViewUserData(): React.ReactElement {
     const handleDeleteServiceClick = async () => {
         if (serviceToDelete && token) {
             try {
-                await deleteService(serviceToDelete, token)
+                await deleteService(serviceToDelete, token, services, setServices);
                 setServices(services.filter(service => service._id !== serviceToDelete));
             } catch (error) {
                 console.error('Error deleting service:', error);

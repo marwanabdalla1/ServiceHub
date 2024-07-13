@@ -103,9 +103,12 @@ export const deleteAccount = async (token: string, accountId: string | null) => 
         });
     }
     if (token && accountId) {
-        await axios.delete(`/api/account/${accountId}`, {
+        await axios.delete(`/api/account`, {
             headers: {
                 'Authorization': `Bearer ${token}`
+            },
+            data: {
+                accountId: accountId
             }
         });
     }

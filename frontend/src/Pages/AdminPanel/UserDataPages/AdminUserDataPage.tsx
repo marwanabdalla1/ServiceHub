@@ -6,6 +6,7 @@ import {
 } from '@mui/material';
 import {useAuth} from "../../../contexts/AuthContext";
 import {useNavigate} from "react-router-dom";
+import {deleteAccount} from "../../../services/accountService";
 
 interface Account {
     email: string;
@@ -57,15 +58,14 @@ export default function AdminUserData(): React.ReactElement {
         fetchUsers();
     };
 
-    const handleDelete = async (accountId:string) => {
+    const handleDelete = async (accountId: string) => {
         try {
-            await axios.delete(`/api/account/admin/userdata/${accountId}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            // Refresh the user list after deletion
-            fetchUsers();
+            if (token) {
+                await deleteAccount(token, accountId);
+                // Refresh the user list after deletion
+                await fetchUsers();
+            }
+
         } catch (error) {
             console.error('Error deleting user data', error);
         }
@@ -126,14 +126,13 @@ export default function AdminUserData(): React.ReactElement {
                     </Grid>
                 </Grid>
             </form>
-            <TableContainer component={Paper}  sx={{marginTop: 4}}>
+            <TableContainer component={Paper} sx={{marginTop: 4}}>
                 <Table>
                     <TableHead>
                         <TableRow>
                             <TableCell align="center">Email</TableCell>
                             <TableCell align="center">First Name</TableCell>
                             <TableCell align="center">Last Name</TableCell>
-                            <TableCell align="center">Role</TableCell>
                             <TableCell align="center">Created At</TableCell>
                             <TableCell align="center">Account ID</TableCell>
                             <TableCell align="center">Action</TableCell>
@@ -145,15 +144,16 @@ export default function AdminUserData(): React.ReactElement {
                                 <TableCell align="center">{user.email}</TableCell>
                                 <TableCell align="center">{user.firstName}</TableCell>
                                 <TableCell align="center">{user.lastName}</TableCell>
-                                <TableCell align="center">{user.role}</TableCell>
                                 <TableCell align="center">{new Date(user.createdOn).toLocaleDateString()}</TableCell>
                                 <TableCell align="center">{user._id}</TableCell>
                                 <TableCell align="center">
                                     <Box textAlign="center">
-                                        <Button onClick={() => handleView(user._id)} variant="contained" color="primary" style={{marginRight: '20px'}}>
+                                        <Button onClick={() => handleView(user._id)} variant="contained" color="primary"
+                                                style={{marginRight: '20px'}}>
                                             View
                                         </Button>
-                                        <Button onClick={() => handleDelete(user._id)} variant="contained" color="error">
+                                        <Button onClick={() => handleDelete(user._id)} variant="contained"
+                                                color="error">
                                             Delete
                                         </Button>
                                     </Box>

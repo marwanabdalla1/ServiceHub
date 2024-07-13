@@ -143,10 +143,8 @@ export const editService = async (req: Request, res: Response, next: NextFunctio
 
 export const deleteService = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const userId = (req as any).user.userId;
+        const authedUserId = (req as any).user.userId;
         const serviceId = req.params.id;
-        console.log("User id", userId);
-        console.log("Service id", serviceId);
 
         // Find the service offering
         const serviceOffering = await ServiceOffering.findById(serviceId);
@@ -154,21 +152,24 @@ export const deleteService = async (req: Request, res: Response, next: NextFunct
             return res.status(404).send('Service offering not found');
         }
 
-        // Validate if the service belongs to the user
-        if (!serviceOffering.provider.equals(userId)) {
+        const userId = serviceOffering.provider.toString();
+        const authedAccount = await Account.findById(authedUserId);
+
+        // Validate if the service belongs to the user or is an admin
+        if (!serviceOffering.provider.equals(authedUserId) && !authedAccount?.isAdmin) {
             return res.status(403).send('Unauthorized to delete this service offering');
         }
 
-        await review.deleteMany({ serviceOffering: new mongoose.Types.ObjectId(serviceId) });
+        await review.deleteMany({serviceOffering: new mongoose.Types.ObjectId(serviceId)});
 
         await serviceRequest.updateMany(
-            { provider: new mongoose.Types.ObjectId(userId) },
-            { $set: { serviceOffering: null }, requestStatus: RequestStatus.cancelled }
+            {provider: new mongoose.Types.ObjectId(userId)},
+            {$set: {serviceOffering: null}, requestStatus: RequestStatus.cancelled}
         );
 
         await job.updateMany(
-            { provider: new mongoose.Types.ObjectId(userId) },
-            { $set: { serviceOffering: null }, status: JobStatus.cancelled }
+            {provider: new mongoose.Types.ObjectId(userId)},
+            {$set: {serviceOffering: null}, status: JobStatus.cancelled}
         );
 
         // Delete the service offering from the database

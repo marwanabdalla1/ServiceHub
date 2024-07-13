@@ -227,7 +227,7 @@ function UserProfile(): React.ReactElement {
     const handleDeleteServiceClick = async () => {
         if (serviceToDelete && token) {
             try {
-                await deleteService(serviceToDelete, token);
+                await deleteService(serviceToDelete, token, services, setServices);
                 setServices(services.filter(service => service._id !== serviceToDelete));
             } catch (error) {
                 console.error('Error deleting service:', error);
@@ -251,7 +251,7 @@ function UserProfile(): React.ReactElement {
 
     const handleDeleteAccount = async () => {
         try {
-            if(token){
+            if (token) {
                 deleteAccount(token, null);
             }
             navigate('/login');
