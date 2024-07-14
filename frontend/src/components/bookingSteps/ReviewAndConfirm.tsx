@@ -14,7 +14,7 @@ import {
 import {useBooking, BookingDetails} from '../../contexts/BookingContext';
 import {useNavigate} from "react-router-dom";
 import axios, {AxiosError} from "axios";
-import {RequestStatus} from "../../models/enums";
+import {RequestStatus, ServiceType} from "../../models/enums";
 import {useAuth} from "../../contexts/AuthContext";
 import {Timeslot} from "../../models/Timeslot";
 import {bookTimeSlot, BookingError} from '../../services/timeslotService';
@@ -87,10 +87,26 @@ function ReviewAndConfirm({bookingDetails, handleCancel}: ReviewAndConfirmProps)
             this.code = code; // Custom property to store specific error codes
         }
     }
-
-
-
-
+    
+    const sendEmailNotification = async (email: string,
+        name: string,
+        serviceType: ServiceType | undefined,
+        startTime: Date) => {
+try {
+    await axios.post('/api/email/requestConfirmation', {
+            email: email,
+            name: name,
+            serviceType: serviceType,
+            startTime: startTime,
+        }).then((res) => {
+            console.log(`Email sent to ${email}:`, res);
+        }).catch((err) => {
+            console.error(`Error sending email to ${email}:`, err);
+        });
+    } catch (error) {
+        console.error("There was an error sending the email", error);
+    }
+};
     const handleConfirmBooking = async () => {
 
 
@@ -134,6 +150,10 @@ function ReviewAndConfirm({bookingDetails, handleCancel}: ReviewAndConfirmProps)
                 setRequestId(requestId);
                 console.log()
                 console.log('Booking confirmed:', response.data);
+
+                sendEmailNotification(bookingDetails.requestedBy?.email ? bookingDetails.requestedBy?.email : "", 
+                                        bookingDetails.requestedBy?.firstName ? bookingDetails.requestedBy?.firstName : "", 
+                                        bookingDetails.serviceType, bookingDetails.timeSlot?.start ? bookingDetails.timeSlot?.start : new Date());
 
 
                 // not needed, now all handled in backend
