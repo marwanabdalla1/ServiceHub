@@ -237,7 +237,7 @@ export const handleCancel = async ({
         isViewed: false,
         content: `The service request for ${selectedRequest.serviceType} from ${selectedRequest.requestedBy.firstName} ${selectedRequest.requestedBy.lastName} originally scheduled for ${formatDateTime(timeslot?.start)} has been cancelled.`,
         serviceRequest: selectedRequest._id,
-        recipient: selectedRequest.requestedBy._id,
+        recipient: selectedRequest.provider._id,
         notificationType: "Request Status Changed",
         ...rest,
     };

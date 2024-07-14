@@ -1,8 +1,9 @@
 import axios from 'axios';
-import { ServiceOffering } from '../models/ServiceOffering';
+import {ServiceOffering} from '../models/ServiceOffering';
 import React from "react";
-import { Review } from '../Pages/ProviderProfilePage';
+import {Review} from '../Pages/ProviderProfilePage';
 import {Feedback} from "../models/Feedback";
+import {toast} from "react-toastify";
 
 export const defaultProfileImage = '/images/default-profile.png'; // Use relative path for public folder
 
@@ -45,7 +46,11 @@ export const fetchProfileImageById = async (providerId: string): Promise<string>
     return defaultProfileImage; // Return default image on error or not found
 };
 
-export const fetchProfileImagesForServiceOffering = async (offerings: ServiceOffering[], setProfileImages: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>, setLoadingImages: React.Dispatch<React.SetStateAction<{ [key: string]: boolean }>>, setLoading: React.Dispatch<React.SetStateAction<boolean>>) => {
+export const fetchProfileImagesForServiceOffering = async (offerings: ServiceOffering[], setProfileImages: React.Dispatch<React.SetStateAction<{
+    [key: string]: string
+}>>, setLoadingImages: React.Dispatch<React.SetStateAction<{
+    [key: string]: boolean
+}>>, setLoading: React.Dispatch<React.SetStateAction<boolean>>) => {
     const newProfileImages: { [key: string]: string } = {};
     const newLoadingImages: { [key: string]: boolean } = {};
     offerings.forEach(offering => {
@@ -121,3 +126,39 @@ export const deleteProfileImage = async (token: string | null, setProfileImage: 
     });
     setProfileImage(defaultProfileImage);
 }
+
+export const handleProfileImageUpload = (setImage: React.Dispatch<React.SetStateAction<string | null>>, token: string | null) => (event: React.ChangeEvent<HTMLInputElement>) => {
+    const image = event.target.files ? event.target.files[0] : null;
+    if (!image) {
+        console.error('No image selected');
+        return;
+    }
+    if (!token) {
+        toast.error("You need to login to upload profile image");
+        return;
+    }
+    setImage(URL.createObjectURL(image));
+    handleProfileImageUploadByToken(image, token).then(() => {
+        toast.success("Image uploaded successfully");
+    });
+    console.log("set file finished: ", image);
+};
+
+export const handleProfileImageUploadByToken = async (image: File | null, token: string) => {
+    if (!image) {
+        console.error('No image selected');
+        return;
+    }
+    const formData = new FormData();
+    formData.append('file', image);
+
+    try {
+        await axios.post(`/api/file/upload/profileImage`, formData, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+    } catch (error) {
+        console.error('Error uploading image:', error);
+    }
+};

@@ -170,15 +170,17 @@ export const deleteCertificate: RequestHandler = async (req, res) => {
 
         // Check if the service exists
         if (!service) {
+            console.log("Service not found");
             return res.status(404).json({
                 error: "Not Found",
                 message: "Service not found."
             });
         }
-
+        console.log("Service found");
         // Check if the certificate exists
         // No matter iscertified is true or false, the certificate can be deleted
         if (service.get('certificateId') === "" || service.get('certificateId') === null || service.get('certificateId') === undefined) {
+            console.log("Certificate not found");
             return;
         }
         const _id = new ObjectId(service.get('certificateId'));
