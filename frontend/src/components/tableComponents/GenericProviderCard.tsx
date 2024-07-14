@@ -9,7 +9,7 @@ import {ServiceRequest} from "../../models/ServiceRequest";
 import {Job} from "../../models/Job";
 import {useAuth} from "../../contexts/AuthContext";
 import {Account} from "../../models/Account";
-import {Button, Divider, IconButton} from "@mui/material";
+import {Divider, IconButton} from "@mui/material";
 import {JobStatus, RequestStatus} from "../../models/enums";
 import OpenInFullIcon from "@mui/icons-material/OpenInFull";
 import CloseFullscreenIcon from '@mui/icons-material/CloseFullscreen';
@@ -87,6 +87,7 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
         const renderActions = () => {
             const buttons = [];
             if (!isJob(item)) {
+
                 // ServiceRequest actions
                 if (item.requestStatus === "cancelled") {
                     console.log("No Actions possible for CANCELLED requests!");
@@ -99,7 +100,7 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
                     console.log("request with job:", item)
                     buttons.push(<BlackButton text="View Job" onClick={() => navigate(`/incoming/jobs/${item.job}`)}
                                               sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
-                } else if (item.requestStatus === "pending") {
+                } else if (item.requestStatus === "pending" && item.timeslot) {
                     buttons.push(<BlackButton text="Accept" onClick={() => actions.accept?.(item)}
                                               sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
                     buttons.push(<BlackButton text="Decline" onClick={() => actions.decline?.(item)}
@@ -107,6 +108,9 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
                     buttons.push(<BlackButton text="Request Time Change" onClick={() => actions.changeTime?.(true)}
                                               sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
 
+                } else if (item.requestStatus === "pending" && !item.timeslot) {
+                    buttons.push(<BlackButton text="Timeslot invalid. Click to cancel request" onClick={() =>  actions.cancelRequest?.(item)}
+                                              sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
                 }
                 if (actions.cancelRequest && ["action needed from requestor"].includes(item.requestStatus)) {
                     buttons.push(<BlackButton text="Cancel Request" onClick={() => actions.cancelRequest?.(item)}
@@ -166,7 +170,6 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
         };
 
         const generalStatus = 'requestStatus' in item ? item.requestStatus : JobStatus[item.status];
-
 
         return (
             <Card>
@@ -230,14 +233,14 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
                             Appointment Start Time:
                         </Typography>
                         <Typography variant="body2" component="span">
-                            {formatDateTime(item.timeslot?.start)}
+                            {item.timeslot ? formatDateTime(item.timeslot.start) : formatDateTime(item.appointmentStartTime) + " (invalid)"}
                         </Typography>
 
                         <Typography variant="body2" color="text.secondary" component="span">
                             Appointment End Time:
                         </Typography>
                         <Typography variant="body2" component="span">
-                            {formatDateTime(item.timeslot?.end)}
+                            {item.timeslot ? formatDateTime(item.timeslot.end) : formatDateTime(item.appointmentEndTime) + " (invalid)"}
                         </Typography>
 
 

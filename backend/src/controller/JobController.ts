@@ -1,15 +1,11 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import Account from '../models/account';
-import ServiceOffering from "../models/serviceOffering";
-import ServiceRequest, { IServiceRequest } from "../models/serviceRequest";
-import Notification from "../models/notification"
 import Job, { IJob } from "../models/job";
 
-import { Document } from 'mongoose';
-import {updateTimeslotWithRequestId} from "./TimeSlotController";
+import {cancelTimeslotWithRequestId, updateTimeslotWithRequestId} from "./TimeSlotController";
 import Timeslot from "../models/timeslot";
 import {sortBookingItems} from "../util/requestAndJobUtils";
-import { request } from 'http';
+
 
 
 interface Query {
@@ -46,14 +42,11 @@ export const createJob: RequestHandler = async (req: Request, res: Response) => 
         "serviceType",
         "appointmentStartTime",
         "appointmentEndTime", //could be undefined
-        // "uploads",
-        // "comment",
         "serviceFee",
         "serviceOffering",
         "request",
         "provider",
         "receiver",
-        // "profileImageUrl",
     ];
 
     const error = errorHandler(req, res, requiredProperties);
@@ -87,7 +80,6 @@ export const createJob: RequestHandler = async (req: Request, res: Response) => 
             return res.status(400).send({ message: "Failed to create service request." });
         }
 
-        await updateTimeslotWithRequestId(newJob.request.toString(), newJob._id.toString())
 
         // push notification to receiver
         // const notificationContent = `A new job has been created.`;
@@ -106,7 +98,6 @@ export const createJob: RequestHandler = async (req: Request, res: Response) => 
         // update timeslot
 
         await updateUserJobHistory(req.body.provider, newJob._id.toString());
-
 
         res.status(201).send(newJob);
     } catch (error: any) {
@@ -267,6 +258,15 @@ export const updateJob: RequestHandler = async (req: Request, res: Response) => 
     try {
         // Update the user in the database using the userId from the JWT token
         const updatedJob = await Job.findByIdAndUpdate(jobId, updates, { new: true, upsert: true, strict: true });
+
+
+        // handle cancellation
+        const requiresCancellation = [ "cancelled"].includes(updates.status);
+        console.log("requires cancellation: ",requiresCancellation)
+        if (requiresCancellation) {
+            const cancellationResult = await cancelTimeslotWithRequestId(job.request.toString());
+            console.log(cancellationResult.message);
+        }
 
         res.status(200).json(updatedJob);
     } catch (error) {

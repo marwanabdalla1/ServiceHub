@@ -4,8 +4,8 @@ import { isPast, isFuture, parseISO, compareAsc, compareDesc } from 'date-fns';
 export function sortBookingItems(itemWithTimeslots: any[]) {
     const now = new Date();
     return itemWithTimeslots.sort((a, b) => {
-        const dateA = a.timeslot?.start
-        const dateB = b.timeslot?.start
+        const dateA = a.timeslot?.start || a.appointmentStartTime;
+        const dateB = b.timeslot?.start || b.appointmentStartTime;
 
         // Sort logic to put invalid or special cases at the end or start
         if (!dateA && !dateB) return 0;

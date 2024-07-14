@@ -27,7 +27,8 @@ import useErrorHandler from '../hooks/useErrorHandler';
 import ErrorPage from "./ErrorPage";
 
 // Define the props interface
-interface RequestDetailsPageProps {}
+interface RequestDetailsPageProps {
+}
 
 type Item = ServiceRequest | Job;
 
@@ -75,7 +76,7 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
 
                 console.log(response)
                 if (!response) {
-                    setError({title:'404 Not Found', message:'The request you\'re looking for cannot be found.'});
+                    setError({title: '404 Not Found', message: 'The request you\'re looking for cannot be found.'});
                     return;
                 }
 
@@ -141,7 +142,7 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
         if (loading) {
             return (
                 <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
-                    <CircularProgress />
+                    <CircularProgress/>
                 </Box>
             )
         } else {
@@ -151,7 +152,6 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
     }
 
 
-
     // Authorization check
     // if ((role === "provider" && account?._id !== request.provider._id) ||
     //     (role === "consumer" && account?._id !== request.requestedBy._id)) {
@@ -159,80 +159,103 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
     //     navigate("/unauthorized")
     // }
 
-    const onCancel = () => {
+    const onCancel = async () => {
         if (!request) {
             console.error('No request selected');
             return;
         }
 
 
-        handleCancel({
-            selectedRequest: request,
-            serviceRequests: [],
-            setServiceRequests: null,
-            token: token,
-            setShowMediaCard: () => {
-            },
-        });
-
-        window.location.reload();
+        try{
+            await handleCancel({
+                selectedRequest: request,
+                serviceRequests: [],
+                setServiceRequests: null,
+                token: token,
+                setShowMediaCard: () => {
+                },
+            });
+            window.location.reload();
+        }
+        catch (error) {
+            console.error('Error accepting request:', error);
+            // Handle error appropriately if needed
+        }
 
     };
 
-    const onDecline = () => {
+    const onDecline = async() => {
         if (!request) {
             console.error('No request selected');
             return;
         }
-        handleDecline({
-            selectedRequest: request,
-            serviceRequests: [],
-            setServiceRequests: null,
-            token: token,
-            setShowMediaCard: () => {
-            },
-        });
+        try{
+            await handleDecline({
+                selectedRequest: request,
+                serviceRequests: [],
+                setServiceRequests: null,
+                token: token,
+                setShowMediaCard: () => {
+                },
+            });
 
-        window.location.reload();
-
-    };
-
-    const onAccept = () => {
-        if (!request) {
-            console.error('No request selected');
-            return;
+            window.location.reload();
         }
-        handleAccept({
-            selectedRequest: request,
-            serviceRequests: [],
-            setServiceRequests: null,
-            token: token,
-            setShowMediaCard: () => {
-            },
-        });
-        window.location.reload();
+        catch (error) {
+            console.error('Error accepting request:', error);
+            // Handle error appropriately if needed
+        }
 
 
     };
 
-    const onTimeChange = () => {
+    const onAccept = async() => {
+        console.log("accepting in progress...", request)
         if (!request) {
             console.error('No request selected');
             return;
         }
-        handleTimeChange({
-            selectedRequest: request,
-            serviceRequests: [],
-            setServiceRequests: null,
-            token: token,
-            setShowMediaCard: () => {
-            },
-            comment,
-            setTimeChangePopUp,
-            navigate
-        });
+        try {
+            await handleAccept({
+                selectedRequest: request,
+                serviceRequests: [],
+                setServiceRequests: null,
+                token: token,
+                setShowMediaCard: () => {
+                },
+            });
+            window.location.reload();
+        } catch (error) {
+            console.error('Error accepting request:', error);
+            // Handle error appropriately if needed
+        }
 
-        window.location.reload();
+    };
+
+    const onTimeChange = async() => {
+        if (!request) {
+            console.error('No request selected');
+            return;
+        }
+        try {
+            await handleTimeChange({
+                selectedRequest: request,
+                serviceRequests: [],
+                setServiceRequests: null,
+                token: token,
+                setShowMediaCard: () => {
+                },
+                comment,
+                setTimeChangePopUp,
+                navigate
+            });
+            window.location.reload();
+
+        } catch (error) {
+            console.error('Error accepting request:', error);
+            // Handle error appropriately if needed
+        }
+
     };
 
 
@@ -310,17 +333,6 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
                 </Typography>
                 <CardComponent {...cardProps} />
 
-                {/*<MediaCard*/}
-                {/*    offeredService={request}*/}
-                {/*    provider={request.provider}*/}
-                {/*    receiver={request.receiver}*/}
-                {/*    onComplete={handleAccept}*/}
-                {/*    onCancel={handleCancel}*/}
-                {/*    onReview={handleReview}*/}
-                {/*    onRevoke={handleRevoke}*/}
-                {/*    onClose={handleCancel}*/}
-                {/*    // showExpandIcon={false} // Disable the expand icon for the details page*/}
-                {/*/>*/}
             </Box>
         </Container>
     );
