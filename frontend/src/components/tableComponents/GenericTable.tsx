@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
     Table,
     TableBody,
@@ -6,9 +6,7 @@ import {
     TableContainer,
     TableHead,
     TableRow,
-    Paper,
     TablePagination,
-    Container,
     Tooltip, IconButton
 } from '@mui/material';
 import GenericTableRow from "./GenericTableRow";
@@ -55,12 +53,6 @@ function GenericTable({data, count, page, setPage, rowsPerPage, setRowsPerPage, 
         setRowsPerPage(parseInt(event.target.value, 10));
         setPage(0); // Reset page to zero after row change
     };
-
-    const handleToggleMediaCard = (req: Item | null) => {
-        setSelectedItem(req);
-        setShowMediaCard(req !== null);
-    };
-
 
 
     return (

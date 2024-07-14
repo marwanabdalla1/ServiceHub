@@ -1,7 +1,7 @@
-import { RequestHandler } from 'express';
+import {RequestHandler} from 'express';
 import moment from 'moment';
-import Timeslot, { ITimeslot } from '../models/timeslot';
-import mongoose, { ClientSession, Types } from "mongoose";
+import Timeslot, {ITimeslot} from '../models/timeslot';
+import mongoose, {ClientSession, Types} from "mongoose";
 
 // Custom error class for Timeslot-related errors
 class TimeslotError extends Error {
@@ -794,8 +794,7 @@ export async function cancelTimeslotDirect(timeslotId: String | Types.ObjectId) 
         timeslot.requestId = undefined;
         timeslot.jobId = undefined;
 
-        const updatedTimeslot = await timeslot.save();
-        return updatedTimeslot;
+        return await timeslot.save();
     } catch (error) {
         console.error("Failed to cancel timeslot:", error);
         throw error;
