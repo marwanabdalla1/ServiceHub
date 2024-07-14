@@ -42,7 +42,7 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ header }) => {
   useEffect(() => {
     if (socket) {
       socket.on('notification', (notification: Notification) => {
-        console.log('Received notification:', notification); // Add this line
+        console.log('Received notification:', notification);
         setNotifications(prevNotifications => [notification, ...prevNotifications]);
       });
 
@@ -70,6 +70,14 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ header }) => {
     };
   }, [isOpen]);
 
+  const handleNotificationViewed = (id: string) => {
+    setNotifications(prevNotifications =>
+      prevNotifications.map(notification =>
+        notification._id === id ? { ...notification, isViewed: true } : notification
+      )
+    );
+  };
+
   const unreadNotificationsCount = notifications.filter(notification => !notification.isViewed).length;
 
   return (
@@ -86,6 +94,7 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ header }) => {
         <NotificationDropdown
           data={notifications}
           header={header}
+          onNotificationViewed={handleNotificationViewed}
         />
       )}
     </div>
