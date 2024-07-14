@@ -16,7 +16,7 @@ import { RequestStatus, ServiceType, JobStatus } from '../../models/enums';
 
 import GenericTableRow from '../../components/tableComponents/GenericTableRow';
 import GenericConsumerCard from "../../components/tableComponents/GenericConsumerCard";
-import { handleCancel, sortBookingItems } from "../../utils/jobHandler";
+import { handleCancel } from "../../utils/jobHandler";
 
 import { useAuth } from "../../contexts/AuthContext";
 import { useEffect, useState } from "react";
@@ -89,10 +89,12 @@ export default function ReceivedServiceTable() {
 
     const handleChangeServiceType = (event: any) => {
         setServiceTypeFilter(event.target.value);
+        setPage(0);
     };
 
     const handleChangeStatus = (event: any) => {
         setStatusFilter(event.target.value);
+        setPage(0);
     };
 
     const onCancel = () => {

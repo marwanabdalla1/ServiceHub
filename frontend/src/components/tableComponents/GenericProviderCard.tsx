@@ -112,7 +112,7 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
                     buttons.push(<BlackButton text="Timeslot invalid. Click to cancel request" onClick={() =>  actions.cancelRequest?.(item)}
                                               sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
                 }
-                if (actions.cancelRequest && ["action needed from requestor"].includes(item.requestStatus)) {
+                if (actions.cancelRequest && ["action needed from requester"].includes(item.requestStatus)) {
                     buttons.push(<BlackButton text="Cancel Request" onClick={() => actions.cancelRequest?.(item)}
                                               sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
 

@@ -345,7 +345,7 @@ export const handleTimeChange = async ({
 
         // update the request status
         const updateRequestData = {
-            requestStatus: RequestStatus.requestorActionNeeded,
+            requestStatus: RequestStatus.requesterActionNeeded,
         };
         console.log("selected request id:", selectedRequest._id, updateRequestData)
         const updateResponse = await axios.patch(`/api/requests/${selectedRequest._id}`, updateRequestData, {

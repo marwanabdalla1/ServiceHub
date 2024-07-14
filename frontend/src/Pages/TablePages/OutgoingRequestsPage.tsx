@@ -77,10 +77,13 @@ export default function RequestHistoryTable() {
 
     const handleChangeServiceType = (event: any) => {
         setServiceTypeFilter(event.target.value);
+        setPage(0);
+
     };
 
     const handleChangeStatus = (event: any) => {
         setStatusFilter(event.target.value);
+        setPage(0);
     };
 
     const onCancel = () => {

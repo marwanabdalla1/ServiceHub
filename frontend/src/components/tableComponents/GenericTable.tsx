@@ -15,7 +15,6 @@ import {ServiceRequest} from "../../models/ServiceRequest";
 import InfoIcon from '@mui/icons-material/Info';
 
 
-
 type Item = ServiceRequest | Job;
 
 interface GenericTableProps {
@@ -25,17 +24,24 @@ interface GenericTableProps {
     setPage: (page: number) => void; // setter for current page
     rowsPerPage: number;          // rows per page
     setRowsPerPage: (rowsPerPage: number) => void; // setter for rows per page
-    setShowMediaCard: (show:boolean) => void;
+    setShowMediaCard: (show: boolean) => void;
     onViewDetails: (item: Item | ServiceRequest | Job | null) => void;
 
 }
 
 
-
-function GenericTable({data, count, page, setPage, rowsPerPage, setRowsPerPage, setShowMediaCard, onViewDetails }:GenericTableProps) {
+function GenericTable({
+                          data,
+                          count,
+                          page,
+                          setPage,
+                          rowsPerPage,
+                          setRowsPerPage,
+                          setShowMediaCard,
+                          onViewDetails
+                      }: GenericTableProps) {
     const [selectedItem, setSelectedItem] = React.useState<ServiceRequest | Job | null>(null);
     const [selectedItems, setSelectedItems] = React.useState<Item[]>([]);
-
 
 
     const handleChangePage = (
@@ -62,26 +68,31 @@ function GenericTable({data, count, page, setPage, rowsPerPage, setRowsPerPage, 
                     <TableHead>
                         <TableRow>
                             <TableCell>Type</TableCell>
-                            <TableCell>Status</TableCell>
+                            <TableCell>Status
+                            </TableCell>
                             <TableCell>Appointment Time
-                                <Tooltip title="Invalid appointment time occurs when the request is cancelled, declined or when the provider has required the time to be changed." placement="top">
+                                <Tooltip
+                                    title="Invalid appointment time occurs when the request is cancelled, declined or when the provider has required the time to be changed."
+                                    placement="top">
                                     <IconButton>
-                                        <InfoIcon />
+                                        <InfoIcon/>
                                     </IconButton>
                                 </Tooltip>
                             </TableCell>
                             <TableCell>
-                                <Tooltip title="Tables are sorted by upcoming appointments nearest to today, followed by recent past appointments." placement="top">
-                                <IconButton>
-                                    <InfoIcon />
-                                </IconButton>
+                                <Tooltip
+                                    title="Tables are sorted by upcoming appointments nearest to today, followed by recent past appointments."
+                                    placement="top">
+                                    <IconButton>
+                                        <InfoIcon/>
+                                    </IconButton>
                                 </Tooltip>
                             </TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {data.map((row) => (
-                            <GenericTableRow key={row._id} item={row} onViewDetails={onViewDetails} />
+                            <GenericTableRow key={row._id} item={row} onViewDetails={onViewDetails}/>
                         ))}
                     </TableBody>
                 </Table>

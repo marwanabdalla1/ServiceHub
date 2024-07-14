@@ -12,6 +12,7 @@ import * as dotenv from 'dotenv'
 import mongoose from "mongoose";
 import {JobStatus, RequestStatus} from "../models/enums";
 import logger from "../../logger";
+import {cancelTimeslotDirect} from "./TimeSlotController";
 
 dotenv.config();
 
@@ -84,6 +85,9 @@ export const deleteAccount: RequestHandler = async (req, res, next) => {
         );
         logger.info(`Updated jobs for userId: ${userId}`);
 
+        // cancel all associated timeslots if this is a consumer
+        await cancelAllLinkedTimeslots(userId);
+
         // Delete the user account
         await Account.findByIdAndDelete(userId);
         logger.info(`Deleted user account for userId: ${userId}`);
@@ -101,6 +105,65 @@ export const deleteAccount: RequestHandler = async (req, res, next) => {
         });
     }
 };
+
+// helper function to delete all linked timeslots to a consumer
+export async function cancelAllLinkedTimeslots(userId: string) {
+    try {
+
+        await serviceRequest.updateMany(
+            {requestedBy: new mongoose.Types.ObjectId(userId)},
+            {$set: {requestedBy: null, requestStatus: RequestStatus.cancelled}}
+        );
+
+        await job.updateMany(
+            {receiver: new mongoose.Types.ObjectId(userId)},
+            {$set: {receiver: null, status: JobStatus.cancelled}}
+        );
+
+        // find all corresponding timeslots linked to these cancelled service requests
+        const cancelledEntities = await Promise.all([
+            serviceRequest.find({
+                $or: [
+                    { provider: null },
+                    { requestedBy: null }
+                ],
+                requestStatus: RequestStatus.cancelled
+            }, '_id'),
+            job.find({
+                $or: [
+                    { provider: null },
+                    { receiver: null }
+                ],
+                status: JobStatus.cancelled
+            }, '_id')
+        ]);
+
+        const requestIds = cancelledEntities[0].map(req => req._id);
+        const jobIds = cancelledEntities[1].map(job => job._id);
+
+        // Find all timeslots with these service request / job IDs
+        const timeslotsToCancel = await Timeslot.find({
+            $or: [
+                {requestId: {$in: requestIds}},
+                {jobId: {$in: jobIds}}
+            ]
+        });
+
+        // Cancel each timeslot using the existing function
+        for (const timeslot of timeslotsToCancel) {
+            try {
+                // @ts-ignore
+                await cancelTimeslotDirect(timeslot._id);
+            } catch (error) {
+                console.error(`Failed to cancel timeslot ${timeslot._id}:`, error);
+            }
+        }
+    } catch (error) {
+        console.error("Failed to process cancellation:", error);
+    }
+}
+
+
 
 
 /**
@@ -245,7 +308,7 @@ export const adminUserData: RequestHandler = async (req, res) => {
         if (accountId) {
             query._id = accountId;
         }
-        query.isAdmin = { $ne: true };
+        query.isAdmin = {$ne: true};
 
         const accounts = await Account.find(query).select('email firstName lastName role createdOn');
         res.status(200).json(accounts);

@@ -5,6 +5,7 @@ import Job, { IJob } from "../models/job";
 import {cancelTimeslotWithRequestId, updateTimeslotWithRequestId} from "./TimeSlotController";
 import Timeslot from "../models/timeslot";
 import {sortBookingItems} from "../util/requestAndJobUtils";
+import ServiceRequest from "../models/serviceRequest";
 
 
 
@@ -273,6 +274,8 @@ export const updateJob: RequestHandler = async (req: Request, res: Response) => 
         res.status(400).send(error);
     }
 }
+
+
 
 export const getJobById: RequestHandler = async (req, res) => {
     const { jobId } = req.params;  // Extract the Job ID from URL parameters

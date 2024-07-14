@@ -36,7 +36,7 @@ export enum RequestStatus {
     pending = "pending",
     cancelled = "cancelled",
     declined = "declined",
-    requestorActionNeeded = "action needed from requestor"
+    requesterActionNeeded = "action needed from requester"
 }
 
 export enum ServiceType {

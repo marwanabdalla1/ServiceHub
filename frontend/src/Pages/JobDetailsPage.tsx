@@ -52,7 +52,7 @@ const JobDetailsPage: React.FC<JobDetailsPageProps> = () => {
                     const response = await axios.get<Job>(`/api/jobs/${jobId}`, {
                         headers: {Authorization: `Bearer ${token}`},
                     });
-                    console.log("job data,", response.data)
+                    console.log("job data with timeslot,", response.data)
                     setJob(response.data);
                     setLoading(false);
 

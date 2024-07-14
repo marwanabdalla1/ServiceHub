@@ -21,7 +21,7 @@ import axios from "axios";
 import { Link, useNavigate } from 'react-router-dom';
 import { now } from 'moment';
 import { formatDateTime } from '../../utils/dateUtils';
-import { handleComplete, handleRevoke, handleCancel, sortBookingItems } from "../../utils/jobHandler";
+import { handleComplete, handleRevoke, handleCancel } from "../../utils/jobHandler";
 import useAlert from "../../hooks/useAlert";
 import AlertCustomized from "../../components/AlertCustomized";
 import { Button, FormControl, InputLabel, MenuItem, Select, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from "@mui/material";
@@ -92,10 +92,12 @@ export default function OfferedServicesTable() {
 
     const handleChangeServiceType = (event: any) => {
         setServiceTypeFilter(event.target.value);
+        setPage(0);
     };
 
     const handleChangeStatus = (event: any) => {
         setStatusFilter(event.target.value);
+        setPage(0);
     };
 
     const onComplete = () => {

@@ -1,17 +1,15 @@
-import { JobStatus, RequestStatus } from "../models/enums";
+import {JobStatus, RequestStatus} from "../models/enums";
 import axios from "axios";
-import { formatDateTime } from "./dateUtils";
-import { NavigateFunction } from "react-router-dom";
-import { Job } from "../models/Job";
-import { Account } from "../models/Account";
+import {formatDateTime} from "./dateUtils";
+import {NavigateFunction} from "react-router-dom";
+import {Job} from "../models/Job";
+import {Account} from "../models/Account";
 import useAlert from "../hooks/useAlert";
-import { useCallback } from "react";
-import { AlertColor } from "@mui/material";
+import {useCallback} from "react";
+import {AlertColor} from "@mui/material";
 import moment from 'moment';
-import { ServiceRequest } from "../models/ServiceRequest";
-import { isPast, isFuture, parseISO, compareAsc, compareDesc } from 'date-fns';
-
-
+import {ServiceRequest} from "../models/ServiceRequest";
+import {isPast, isFuture, parseISO, compareAsc, compareDesc} from 'date-fns';
 
 
 interface JobHandlerParams {
@@ -30,90 +28,90 @@ interface JobHandlerParamsWithAlert extends JobHandlerParams {
 
 
 export const handleComplete = async ({
-    selectedJob,
-    jobs,
-    setJobs,
-    token,
-    setShowMediaCard,
-    triggerAlert
-}: JobHandlerParamsWithAlert) => {
+                                         selectedJob,
+                                         jobs,
+                                         setJobs,
+                                         token,
+                                         setShowMediaCard,
+                                         triggerAlert
+                                     }: JobHandlerParamsWithAlert) => {
 
 
-    //   sanity check: appointment time has to be in the past
-    console.log("dates:", selectedJob.timeslot?.end, "\n date 2", new Date(), formatDateTime(selectedJob.timeslot?.end) > formatDateTime(new Date()))
-    //TODO: delete the comment
-    if (!selectedJob.timeslot?.end || moment(selectedJob.timeslot.end).isAfter(moment())) {
-        //     //TODO: add modal to let user know
-        console.error('The job cannot be completed, since its appointment is in the future.');
-        triggerAlert("Job Cannot Be Completed", "The job cannot be completed, since the appointment ends in the future. Please try again after the end time.", "error", 100000, "dialog", "center")
-        return;
-    }
+        //   sanity check: appointment time has to be in the past
+        console.log("dates:", selectedJob.timeslot?.end, "\n date 2", new Date(), formatDateTime(selectedJob.timeslot?.end) > formatDateTime(new Date()))
+        //TODO: delete the comment
+        // if (!selectedJob.timeslot?.end || moment(selectedJob.timeslot.end).isAfter(moment())) {
+        //     //     //TODO: add modal to let user know
+        //     console.error('The job cannot be completed, since its appointment is in the future.');
+        //     triggerAlert("Job Cannot Be Completed", "The job cannot be completed, since the appointment ends in the future. Please try again after the end time.", "error", 100000, "dialog", "center")
+        //     return;
+        // }
 
-    try {
+        try {
 
-        // update the job
-        const updateJobData = {
-            status: JobStatus.completed,
-        };
-        console.log("selected request id:", selectedJob?._id, updateJobData)
-        const updateJob = await axios.put(`/api/jobs/${selectedJob?._id}`, updateJobData, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        console.log('Job Updated:', updateJob.data);
-        console.log("jobs: " + jobs[0]);
-        // Update local state to reflect these changes
-        const updatedOfferedServices = jobs.map(job => {
-            if (job._id === selectedJob._id) {
-                return { ...job, ...updateJobData };
+            // update the job
+            const updateJobData = {
+                status: JobStatus.completed,
+            };
+            console.log("selected request id:", selectedJob?._id, updateJobData)
+            const updateJob = await axios.put(`/api/jobs/${selectedJob?._id}`, updateJobData, {
+                headers: {Authorization: `Bearer ${token}`}
+            });
+            console.log('Job Updated:', updateJob.data);
+            console.log("jobs: " + jobs[0]);
+            // Update local state to reflect these changes
+            const updatedOfferedServices = jobs.map(job => {
+                if (job._id === selectedJob._id) {
+                    return {...job, ...updateJobData};
+                }
+                return job;
+            });
+
+            if (setJobs) {
+                setJobs(updatedOfferedServices);
             }
-            return job;
-        });
-
-        if (setJobs) {
-            setJobs(updatedOfferedServices);
+            setShowMediaCard(false);
+        } catch (error) {
+            console.error('Error completing job:', error);
         }
-        setShowMediaCard(false);
-    } catch (error) {
-        console.error('Error completing job:', error);
+
+        const {status, _id, receiver, provider, ...rest} = selectedJob;
+// Prepare notification data
+        const notificationData = {
+            isViewed: false,
+            content: `Your service for ${selectedJob.serviceType} on the ${formatDateTime(selectedJob.timeslot?.start)} has been marked as complete`,
+            job: selectedJob._id,
+            recipient: selectedJob.receiver._id,
+            notificationType: "Job Status Changed",
+            ...rest,
+        };
+
+        console.log("notification data at frontend:", notificationData);
+
+// generate new notification
+        try {
+            const notification = await axios.post("api/notifications/", notificationData, {
+                headers: {Authorization: `Bearer ${token}`}
+            });
+            console.log("Notification sent!", notification);
+
+
+        } catch (notificationError) {
+            console.error('Error sending notification:', notificationError);
+        }
+
+
     }
-
-    const { status, _id, receiver, provider, ...rest } = selectedJob;
-    // Prepare notification data
-    const notificationData = {
-        isViewed: false,
-        content: `Your service for ${selectedJob.serviceType} on the ${formatDateTime(selectedJob.timeslot?.start)} has been marked as complete`,
-        job: selectedJob._id,
-        recipient: selectedJob.receiver._id,
-        notificationType: "Job Status Changed",
-        ...rest,
-    };
-
-    console.log("notification data at frontend:", notificationData);
-
-    // generate new notification
-    try {
-        const notification = await axios.post("api/notifications/", notificationData, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        console.log("Notification sent!", notification);
-
-
-    } catch (notificationError) {
-        console.error('Error sending notification:', notificationError);
-    }
-
-
-}
-    ;
+;
 
 // handle revoking completed job
 export const handleRevoke = async ({
-    selectedJob,
-    jobs,
-    setJobs,
-    token,
-    setShowMediaCard
-}: JobHandlerParams) => {
+                                       selectedJob,
+                                       jobs,
+                                       setJobs,
+                                       token,
+                                       setShowMediaCard
+                                   }: JobHandlerParams) => {
 
 
     try {
@@ -124,13 +122,13 @@ export const handleRevoke = async ({
         };
         console.log("selected job id:", selectedJob?._id, updateOfferedServiceData)
         const updateJob = await axios.put(`/api/jobs/${selectedJob?._id}`, updateOfferedServiceData, {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: {Authorization: `Bearer ${token}`}
         });
         console.log('Job Updated:', updateJob.data);
         // Update local state to reflect these changes
         const updatedOfferedServices = jobs.map(job => {
             if (job._id === selectedJob._id) {
-                return { ...job, ...updateOfferedServiceData };
+                return {...job, ...updateOfferedServiceData};
             }
             return job;
         });
@@ -143,7 +141,7 @@ export const handleRevoke = async ({
         console.error('Error completing job:', error);
     }
 
-    const { status, _id, receiver, provider, ...rest } = selectedJob;
+    const {status, _id, receiver, provider, ...rest} = selectedJob;
     // Prepare notification data
     const notificationData = {
         isViewed: false,
@@ -159,7 +157,7 @@ export const handleRevoke = async ({
     // generate new notification
     try {
         const notification = await axios.post("api/notifications/", notificationData, {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: {Authorization: `Bearer ${token}`}
         });
         console.log("Notification sent!", notification);
 
@@ -172,13 +170,13 @@ export const handleRevoke = async ({
 };
 
 export const handleCancel = async ({
-    selectedJob,
-    jobs,
-    setJobs,
-    token,
-    account,
-    setShowMediaCard
-}: JobHandlerParams) => {
+                                       selectedJob,
+                                       jobs,
+                                       setJobs,
+                                       token,
+                                       account,
+                                       setShowMediaCard
+                                   }: JobHandlerParams) => {
 
 
     try {
@@ -189,7 +187,7 @@ export const handleCancel = async ({
         };
         console.log("selected job id:", selectedJob?._id, updateOfferedServiceData)
         const updateResponse = await axios.put(`/api/jobs/${selectedJob?._id}`, updateOfferedServiceData, {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: {Authorization: `Bearer ${token}`}
         });
         console.log('Job Updated:', updateResponse.data);
 
@@ -198,7 +196,7 @@ export const handleCancel = async ({
         if (jobs && setJobs) {
             const updatedOfferedServices = jobs.map(job => {
                 if (job._id === selectedJob._id) {
-                    return { ...job, ...updateOfferedServiceData };
+                    return {...job, ...updateOfferedServiceData};
                 }
                 return job;
             });
@@ -211,7 +209,7 @@ export const handleCancel = async ({
         console.error('Error cancelling Request:', error);
     }
 
-    const { status, _id, receiver, provider, ...rest } = selectedJob;
+    const {status, _id, receiver, provider, ...rest} = selectedJob;
     // Prepare notification data
     const notificationDataToConsumer = {
         isViewed: false,
@@ -238,12 +236,12 @@ export const handleCancel = async ({
     // generate new notification
     try {
         const notificationToConsumer = await axios.post("api/notifications/", notificationDataToConsumer, {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: {Authorization: `Bearer ${token}`}
         });
         console.log("Notification sent to consumer!", notificationToConsumer);
 
         const notificationToProvider = await axios.post("api/notifications/", notificationDataToProvider, {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: {Authorization: `Bearer ${token}`}
         });
         console.log("Notification sent to provider!", notificationToProvider);
 
@@ -307,9 +305,9 @@ export const handleCancel = async ({
 
 
 export const sendEmailNotification = async (initiatorEmail: string,
-    initiatorName: string,
-    receiverEmail: string,
-    receiverName: string, selectedJob: Job | ServiceRequest) => {
+                                            initiatorName: string,
+                                            receiverEmail: string,
+                                            receiverName: string, selectedJob: Job | ServiceRequest) => {
     try {
         await axios.post('/api/email/cancelNotification', {
             initiatorEmail: initiatorEmail,
@@ -328,36 +326,3 @@ export const sendEmailNotification = async (initiatorEmail: string,
     }
 };
 
-
-// Function to sort requests
-// todo: delete this once it's handled in the backend
-export const sortBookingItems = (bookingItems: ServiceRequest[] | Job[]) => {
-    return bookingItems.sort((a, b) => {
-        const dateA = a.timeslot?.start
-        const dateB = b.timeslot?.start
-
-        // Sort logic to put invalid or special cases at the end or start
-        if (!dateA && !dateB) return 0;
-        if (!dateA) return 1; // or -1 to put at start
-        if (!dateB) return -1; // or 1 to put at start
-
-        // Future dates sorted descending from nearest to farthest
-        if (isFuture(dateA) && isFuture(dateB)) {
-            return compareAsc(dateA, dateB);
-        }
-        // Past dates sorted ascending from the most recent to the oldest
-        if (isPast(dateA) && isPast(dateB)) {
-            return compareDesc(dateA, dateB);
-        }
-
-        // Future dates should come before past dates
-        if (isFuture(dateA) && isPast(dateB)) {
-            return -1;
-        }
-        if (isPast(dateA) && isFuture(dateB)) {
-            return 1;
-        }
-
-        return 0;
-    });
-};

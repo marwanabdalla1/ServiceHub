@@ -99,12 +99,12 @@ const GenericConsumerCard: React.FC<GenericConsumerCardProps> = ({
                 console.log("request with job:", item)
                 buttons.push(<BlackButton text="View Job" onClick={() => navigate(`/outgoing/jobs/${item.job}`)}
                                           sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
-            } else if (actions.cancelRequest && ["pending", "action needed from requestor"].includes(item.requestStatus)) {
+            } else if (actions.cancelRequest && ["pending", "action needed from requester"].includes(item.requestStatus)) {
                 buttons.push(<BlackButton text="Cancel Request" onClick={() => actions.cancelRequest?.(item)}
                                           sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
 
             }
-            if (item.requestStatus === "action needed from requestor") {
+            if (item.requestStatus.toString() === "action needed from requester") {
                 buttons.push(<BlackButton text="Action Needed: Change Time" onClick={() => handleProposeNewTime(item)}
                                           sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
             }
