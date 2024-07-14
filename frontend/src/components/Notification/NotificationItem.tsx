@@ -6,6 +6,7 @@ import { useAuth } from "../../contexts/AuthContext"; // Import useNavigate for 
 import axios from 'axios'; // Import axios for making API calls
 
 interface NotificationItemProps extends Notification {
+  onNotificationViewed: (id: string) => void;
 }
 
 const NotificationItem: React.FC<NotificationItemProps> = ({
@@ -17,6 +18,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
   review,
   job,
   serviceRequest,
+  onNotificationViewed,
 }) => {
   const [isViewed, setIsViewed] = useState(initialIsViewed); // Local state for isViewed
   const timeAgo = formatDistanceToNow(new Date(updatedAt), { addSuffix: true });
@@ -44,6 +46,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
 
   const handleClick = async () => {
     setIsViewed(true); // Update local state immediately
+    onNotificationViewed(_id); // Update the parent state
     const updatedNotification = await updateNotificationStatus();
     if (updatedNotification) {
       // Define the URL based on NotificationType

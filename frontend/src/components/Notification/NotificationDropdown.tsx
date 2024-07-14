@@ -5,11 +5,13 @@ import { Notification } from '../../models/Notification'; // Import Notification
 interface NotificationDropdownProps {
   data: Notification[];
   header?: string;
+  onNotificationViewed: (id: string) => void;
 }
 
 const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   data,
   header = 'Notifications',
+  onNotificationViewed,
 }) => {
   return (
     <div className="absolute right-0 mt-2 w-96 bg-white shadow-lg rounded-lg">
@@ -21,6 +23,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
           <NotificationItem
             key={notification._id}
             {...notification}
+            onNotificationViewed={onNotificationViewed}
           />
         ))}
       </div>
