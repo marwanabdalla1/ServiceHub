@@ -15,19 +15,6 @@ import axios from "axios";
 import {useNavigate} from "react-router-dom";
 import {useRecovery} from "../../../contexts/RecoveryContext";
 
-function Copyright(props: PropsWithChildren<{}>) {
-    return (
-        <Typography variant="body2" color="text.secondary" align="center" {...props}>
-            {'Copyright © '}
-            <Link color="inherit" href="https://mui.com/">
-                Service Hub
-            </Link>{' '}
-            {new Date().getFullYear()}
-            {'.'}
-        </Typography>
-    );
-}
-
 const defaultTheme = createTheme({
     palette: {
         primary: {
@@ -129,9 +116,6 @@ export default function ResetPassword() {
                             </Grid>
                         </Grid>
                     </Box>
-                </Box>
-                <Box sx={{mt: 8, mb: 4}}>
-                    <Copyright/>
                 </Box>
             </Container>
         </ThemeProvider>
