@@ -33,6 +33,7 @@ import {
 } from "../services/fetchProfileImage";
 import {deleteAccount, saveAddress, updateAccountFields} from "../services/accountService";
 import {deleteService} from "../services/serviceOfferingService";
+import ConfirmDeleteDialog from "../components/dialogs/ConfirmDeleteDialog";
 
 type EditModeType = {
     [key: string]: boolean;
@@ -57,6 +58,7 @@ function UserProfile(): React.ReactElement {
     const client_reference_id = userAccount?._id;
     const [openAddressDialog, setOpenAddressDialog] = useState(false);
     const [openServiceDeleteDialog, setOpenServiceDeleteDialog] = useState(false);
+    const [openDeleteAccountDialog, setOpenDeleteAccountDialog] = useState(false);
     const navigate = useNavigate();
 
     const fetchSubscriptionData = async (clientReferenceId: string) => {
@@ -255,6 +257,33 @@ function UserProfile(): React.ReactElement {
         setServiceToDelete(null);
     };
 
+    const handleDeleteAccountOpenDialog = () => {
+        setOpenDeleteAccountDialog(true);
+    };
+
+    const handleDeleteAccountCloseDialog = () => {
+        setOpenDeleteAccountDialog(false);
+    };
+
+    const handleConfirmDeleteAccount = async (email?: string) => {
+        console.log('Email:', email);
+        console.log('Account email:', account.email);
+        if (email === account.email) {
+            try {
+                if (token) {
+                    await deleteAccount(token, null);
+                }
+                navigate('/login');
+            } catch (error) {
+                console.error('Error deleting account:', error);
+            }
+        } else {
+            toast("Emails do not match");
+            return;
+        }
+        setOpenDeleteAccountDialog(false);
+    };
+
     const handleDeleteAccount = async () => {
         try {
             if (token) {
@@ -448,8 +477,9 @@ function UserProfile(): React.ReactElement {
                     ) : (
                         <div></div>
                     )}
-                    <Button onClick={handleDeleteAccount} sx={{backgroundColor: 'red', color: 'white', mt: 2}}>Delete
-                        Account</Button>
+                    <Button onClick={handleDeleteAccountOpenDialog} sx={{backgroundColor: 'red', color: 'white', mt: 2}}>
+                        Delete Account
+                    </Button>
                 </Box>
             </Paper>
             <AddressDialog
@@ -463,22 +493,21 @@ function UserProfile(): React.ReactElement {
                 }}
             />
 
-            <Dialog open={openServiceDeleteDialog} onClose={handleServiceDeleteCloseDialog}>
-                <DialogTitle>{"Confirm Delete"}</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>
-                        Are you sure you want to delete this service?
-                    </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleServiceDeleteCloseDialog} color="primary">
-                        Cancel
-                    </Button>
-                    <Button onClick={handleDeleteServiceClick} color="primary" autoFocus>
-                        Delete
-                    </Button>
-                </DialogActions>
-            </Dialog>
+            <ConfirmDeleteDialog
+                open={openServiceDeleteDialog}
+                onClose={handleServiceDeleteCloseDialog}
+                onConfirm={handleDeleteServiceClick}
+                message="Are you sure you want to delete this service?"
+                isDeleteAccount={false}
+            />
+
+            <ConfirmDeleteDialog
+                open={openDeleteAccountDialog}
+                onClose={handleDeleteAccountCloseDialog}
+                onConfirm={handleConfirmDeleteAccount}
+                message="Are you sure you want to delete your account?"
+                isDeleteAccount={true}
+            />
         </Container>
     );
 }
