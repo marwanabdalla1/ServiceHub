@@ -1,18 +1,17 @@
-import { Request, Response, NextFunction, RequestHandler } from 'express'; // Importing necessary types and interfaces from express
-import Account from '../models/account'; // Importing Account model
-import ServiceRequest, { IServiceRequest } from "../models/serviceRequest"; // Importing ServiceRequest model and interface
-import Timeslot from "../models/timeslot"; // Importing Timeslot model
-import { createNotificationDirect } from "./NotificationController"; // Importing function to create notifications
-import { NotificationType, RequestStatus } from "../models/enums"; // Importing enums for NotificationType and RequestStatus
+import { Request, Response, RequestHandler } from 'express';
+import Account from '../models/account';
+import ServiceRequest from "../models/serviceRequest";
+import Timeslot from "../models/timeslot";
+import { createNotificationDirect } from "./NotificationController";
+import { NotificationType, RequestStatus } from "../models/enums";
 import {
     bookTimeslot,
     bookTimeslotDirect,
-    cancelTimeslotDirect,
     cancelTimeslotWithRequestId
 } from "./TimeSlotController"; // Importing functions to handle timeslot operations
-import mongoose, { PipelineStage } from 'mongoose'; // Importing mongoose and PipelineStage for correct typing
-import { sortBookingItems } from "../util/requestAndJobUtils"; // Importing utility function to sort booking items
-import { formatDateTime } from "../../../frontend/src/utils/dateUtils"; // Importing date formatting utility
+import mongoose from 'mongoose';
+import { sortBookingItems } from "../util/requestAndJobUtils";
+import { formatDateTime } from "../../../frontend/src/utils/dateUtils";
 
 
 /**
@@ -69,6 +68,8 @@ export const createServiceRequest: RequestHandler = async (req: Request, res: Re
         });
     }
 
+
+    // use transaction: either both request + timeslot succeeds or neither
     const session = await mongoose.startSession();
 
     try {
@@ -102,11 +103,10 @@ export const createServiceRequest: RequestHandler = async (req: Request, res: Re
                 content: notificationContent,
                 notificationType: "New Request",
                 serviceRequest: newServiceRequest._id.toString(),
-                recipient: req.body.provider // Assuming the provider should be notified
+                recipient: req.body.provider
             });
         } catch (notificationError: any) {
             console.error("Failed to create notification:", notificationError.message);
-            // Optionally handle the error further, e.g., logging to an error monitoring service
         }
 
     } catch (error: any) {
@@ -160,7 +160,7 @@ export const updateServiceRequest: RequestHandler = async (req: Request, res: Re
     }
 
     try {
-        const requiresCancellation = [RequestStatus.declined, RequestStatus.cancelled, RequestStatus.requestorActionNeeded].includes(updates.requestStatus);
+        const requiresCancellation = [RequestStatus.declined, "declined", RequestStatus.cancelled, RequestStatus.requestorActionNeeded].includes(updates.requestStatus);
         console.log("requires cancellation: ", RequestStatus.requestorActionNeeded)
         if (requiresCancellation) {
             const cancellationResult = await cancelTimeslotWithRequestId(requestId);
@@ -196,7 +196,7 @@ export const getServiceRequestsByProvider: RequestHandler = async (req, res) => 
 
         console.log("queries", req.query)
 
-        let query: Query = { provider: providerId };
+        let query: Query = { provider: providerId, requestStatus: { $ne: 'accepted' }  };
 
         // Adding filters based on query parameters
         if (requestStatus) {
@@ -256,7 +256,7 @@ export const getServiceRequestsByRequester: RequestHandler = async (req, res) =>
 
         console.log("queries", req.query)
 
-        let query: Query = { requestedBy: requesterId };
+        let query: Query = { requestedBy: requesterId, requestStatus: { $ne: 'accepted' }  };
 
         // Adding filters based on query parameters
         if (requestStatus) {
@@ -305,10 +305,12 @@ export const handleChangeTimeslot: RequestHandler = async (req, res, next) => {
     let success = true;  // Flag to track success of booking
 
     try {
+        // book the new timeslot
         const hi = await bookTimeslot(req, res, next);
 
         // update the request status to pending again
         const updatedRequest = await ServiceRequest.findByIdAndUpdate(requestId, { requestStatus: RequestStatus.pending }, { new: true, upsert: true, strict: true });
+        console.log("updated request after changing time:", updatedRequest)
 
     } catch (error) {
         console.error("Error in handling timeslot change:", error);

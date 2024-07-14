@@ -2,7 +2,6 @@ import { RequestHandler } from 'express';
 import moment from 'moment';
 import Timeslot, { ITimeslot } from '../models/timeslot';
 import mongoose, { ClientSession, Types } from "mongoose";
-import ServiceRequest from "../models/serviceRequest";
 
 // Custom error class for Timeslot-related errors
 class TimeslotError extends Error {
@@ -753,8 +752,9 @@ export async function cancelTimeslotWithRequestId(requestId: string): Promise<{ 
     }
 }
 
+
 // Update a timeslot with a job ID based on request ID
-export async function updateTimeslotWithRequestId(requestId: string, jobId: string): Promise<{ success: boolean, message: string }> {
+export async function updateTimeslotWithRequestId(requestId: string, jobId: string): Promise<{ success: boolean, message: string, timeslot?: any }> {
     try {
         const foundTimeslot = await findTimeslotByRequestId(requestId);
         if (!foundTimeslot) {
@@ -765,7 +765,7 @@ export async function updateTimeslotWithRequestId(requestId: string, jobId: stri
         foundTimeslot.jobId = new Types.ObjectId(jobId);
 
         const updatedTimeslot = await foundTimeslot.save();
-        return { success: true, message: "Timeslot updated successfully with the job" };
+        return { success: true, timeslot: updatedTimeslot, message: "Timeslot updated successfully with the job" };
     } catch (error) {
         console.error("Error updating timeslot:", error);
         throw new Error("Failed to update timeslot");

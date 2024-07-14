@@ -1,11 +1,11 @@
 import * as React from 'react';
 import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
-import Button from '@mui/material/Button';
 import { ServiceRequest } from '../../models/ServiceRequest';
 import BlackButton from '../inputs/blackbutton';
-import {ServiceType, RequestStatus, JobStatus} from '../../models/enums';
+import {JobStatus} from '../../models/enums';
 import {Job} from "../../models/Job";
+import {formatDateTime} from "../../utils/dateUtils";
 
 type Item = ServiceRequest | Job;
 
@@ -30,12 +30,14 @@ const GenericRow: React.FC<GenericRowProps> = ({ item, onViewDetails }) => {
 
     const status = 'requestStatus' in item ?  item.requestStatus: JobStatus[item.status];
 
+    const displayedTime = item.timeslot ? formatDateTime(item.timeslot.end) : formatDateTime(item.appointmentEndTime) + " (invalid)"
+
 
     return (
         <TableRow>
             <TableCell>{item.serviceType}</TableCell>
             <TableCell>{status}</TableCell>
-            <TableCell>{formatDateTime(item.timeslot?.start)}</TableCell>
+            <TableCell>{displayedTime}</TableCell>
             <TableCell>
                 <BlackButton text="View" onClick={() => onViewDetails(item)} />
             </TableCell>

@@ -1,30 +1,18 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
+
 import Typography from '@mui/material/Typography';
-import Breadcrumbs from '@mui/material/Breadcrumbs';
-import Link from '@mui/material/Link';
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+
+import {Link as Routerlink} from 'react-router-dom'
+
 import { ServiceRequest } from '../../models/ServiceRequest';
-
-import GenericProviderCard from '../../components/tableComponents/GenericProviderCard';
-import GenericTableRow from '../../components/tableComponents/GenericTableRow';
-
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-import { formatDateTime } from '../../utils/dateUtils';
 import { handleCancel } from "../../utils/requestHandler";
 import GenericConsumerCard from "../../components/tableComponents/GenericConsumerCard";
 import { Job } from "../../models/Job";
 import { Button, FormControl, InputLabel, MenuItem, Select, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from "@mui/material";
-import { sortBookingItems } from "../../utils/jobHandler";
 import GenericTable from "../../components/tableComponents/GenericTable";
 import { ServiceType } from "../../models/enums";
 
@@ -41,7 +29,7 @@ export default function RequestHistoryTable() {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
 
-    const statusOptions = ['All Requests', 'Pending', 'Action Needed from Requester', 'Accepted', 'Cancelled', 'Declined'];
+    const statusOptions = ['All Requests', 'Pending', 'Action Needed from Requester', 'Cancelled', 'Declined']; //accepted ones excluded
     const [statusFilter, setStatusFilter] = useState('All Requests');
 
     const [serviceTypeFilter, setServiceTypeFilter] = useState("ALL");
@@ -119,8 +107,12 @@ export default function RequestHistoryTable() {
             <div style={{ flex: 1, padding: '20px' }}>
                 <Box sx={{ minWidth: 275, margin: 2 }}>
                     <Box>
-                        <Typography variant="h6" component="div" sx={{ marginBottom: '16px' }}>
+                        <Typography variant="h6" component="div" sx={{ marginBottom: '10px' }}>
                             My Outgoing Requests
+                        </Typography>
+                        <Typography variant="body2" component="div" sx={{marginBottom: '18px'}}>
+                            Hint: Accepted requests automatically turn into
+                            <Routerlink to="/outgoing/jobs"> jobs</Routerlink> and are not shown here.
                         </Typography>
                     </Box>
                     <Box sx={{ display: 'flex', marginBottom: 2 }}>

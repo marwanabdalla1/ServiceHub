@@ -6,7 +6,6 @@ import {Job} from '../models/Job';
 import {Container, Typography, Box, CircularProgress} from '@mui/material';
 import {useAuth} from '../contexts/AuthContext';
 import {Review} from "../models/Review"; // Assuming you have a component to list reviews
-import handleAccept from "./TablePages/IncomingRequestsPage"
 import GenericProviderCard from "../components/tableComponents/GenericProviderCard";
 import GenericConsumerCard from "../components/tableComponents/GenericConsumerCard";
 import {handleCancel, handleComplete, handleRevoke} from "../utils/jobHandler";
@@ -26,262 +25,280 @@ type Item = ServiceRequest | Job;
 
 // tood: modify this
 const JobDetailsPage: React.FC<JobDetailsPageProps> = () => {
-    const {jobId} = useParams<{ jobId: string }>();
-    const [job, setJob] = useState<Job | null>(null);
-    const {token, account} = useAuth();
-    const [reviews, setReviews] = useState<Review[]>([]);
+        const {jobId} = useParams<{ jobId: string }>();
+        const [job, setJob] = useState<Job | null>(null);
+        const {token, account} = useAuth();
+        const [reviews, setReviews] = useState<Review[]>([]);
 
-    const {error, setError, handleError} = useErrorHandler();
+        const {error, setError, handleError} = useErrorHandler();
 
-    const [role, setRole] = useState<string | undefined>(undefined)
-    const location = useLocation();
-    const [redirectPath, setRedirectPath] = useState(() => location.state?.redirectPath || undefined);
-    const [loading, setLoading] = useState(true);
+        const [role, setRole] = useState<string | undefined>(undefined)
+        const location = useLocation();
+        const [redirectPath, setRedirectPath] = useState(() => location.state?.redirectPath || undefined);
+        const [loading, setLoading] = useState(true);
 
-    const {alert, triggerAlert, closeAlert} = useAlert(100000);
-
-
-    const navigate = useNavigate();
+        const {alert, triggerAlert, closeAlert} = useAlert(100000);
 
 
-    useEffect(() => {
-        setLoading(true);
+        const navigate = useNavigate();
 
-        const fetchJob = async () => {
-            try {
 
-                const response = await axios.get<Job>(`/api/jobs/${jobId}`, {
-                    headers: {Authorization: `Bearer ${token}`},
-                });
-                console.log("job data,", response.data)
-                setJob(response.data);
-                setLoading(false);
+        useEffect(() => {
+            setLoading(true);
 
-                console.log(response)
-                if (!response) {
-                    setError({title: '404 Not Found', message: 'The job you\'re looking for cannot be found.'});
-                    return;
-                }
-
-                // Fetch reviews for the job
+            const fetchJob = async () => {
                 try {
-                    const reviewsResponse = await axios.get<Review[]>(`/api/reviews/by-jobs/${jobId}`, {
+
+                    const response = await axios.get<Job>(`/api/jobs/${jobId}`, {
                         headers: {Authorization: `Bearer ${token}`},
                     });
+                    console.log("job data,", response.data)
+                    setJob(response.data);
+                    setLoading(false);
 
-                    console.log("reviews response", reviewsResponse)
+                    console.log(response)
+                    if (!response) {
+                        setError({title: '404 Not Found', message: 'The job you\'re looking for cannot be found.'});
+                        return;
+                    }
 
-                    if (!reviewsResponse) {
-                        console.log('No reviews found');
+                    // Fetch reviews for the job
+                    try {
+                        const reviewsResponse = await axios.get<Review[]>(`/api/reviews/by-jobs/${jobId}`, {
+                            headers: {Authorization: `Bearer ${token}`},
+                        });
+
+                        console.log("reviews response", reviewsResponse)
+
+                        if (!reviewsResponse) {
+                            console.log('No reviews found');
+                            setReviews([]);
+                        } else {
+                            setReviews(reviewsResponse.data);
+                        }
+                    } catch (error) {
                         setReviews([]);
-                    } else {
-                        setReviews(reviewsResponse.data);
                     }
                 } catch (error) {
-                    setReviews([]);
+                    console.error('Failed to fetch job details:', error);
+                    setLoading(false);
+                    handleError(error)
+
+
                 }
-            } catch (error) {
-                console.error('Failed to fetch job details:', error);
-                setLoading(false);
-                handleError(error)
+            };
 
-
+            if (jobId) {
+                fetchJob();
             }
-        };
-
-        if (jobId) {
-            fetchJob();
-        }
-    }, [jobId, token]);
+        }, [jobId, token]);
 
 
-    useEffect(() => {
-        // Adjust paths based on role
-        if (job) {
-            const isProvider = account?._id === job.provider._id;
-            const isConsumer = account?._id === job.receiver._id;
+        useEffect(() => {
+            // Adjust paths based on role
+            if (job) {
+                const isProvider = account?._id === job.provider._id;
+                const isConsumer = account?._id === job.receiver._id;
 
-            const pathIncludesIncoming = location.pathname.includes("incoming");
-            const pathIncludesOutgoing = location.pathname.includes("outgoing");
+                const pathIncludesIncoming = location.pathname.includes("incoming");
+                const pathIncludesOutgoing = location.pathname.includes("outgoing");
 
-            if ((pathIncludesIncoming && !isProvider) || (pathIncludesOutgoing && !isConsumer)) {
-                navigate("/unauthorized");
-            } else if (isProvider) {
-                setRole("provider");
-                if (!redirectPath) {
-                    setRedirectPath('/incoming/jobs');
+                if ((pathIncludesIncoming && !isProvider) || (pathIncludesOutgoing && !isConsumer)) {
+                    navigate("/unauthorized");
+                } else if (isProvider) {
+                    setRole("provider");
+                    if (!redirectPath) {
+                        setRedirectPath('/incoming/jobs');
+                    }
+                } else if (isConsumer) {
+                    setRole("consumer");
+                    if (!redirectPath) {
+                        setRedirectPath('/outgoing/jobs');
+                    }
+                } else {
+                    // If neither, navigate to unauthorized
+                    navigate("/unauthorized");
                 }
-            } else if (isConsumer) {
-                setRole("consumer");
-                if (!redirectPath) {
-                    setRedirectPath('/outgoing/jobs');
-                }
+            }
+        }, [job, account, token])
+
+        // unmount
+        useEffect(() => {
+            return () => {
+                setError(null);
+            };
+        }, []);
+
+        if (!job) {
+            if (loading) {
+                return (
+                    <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+                        <CircularProgress/>
+                    </Box>
+                )
             } else {
-                // If neither, navigate to unauthorized
-                navigate("/unauthorized");
+                console.log("error")
+                return <ErrorPage title={"404 Not Found"} message={'The job you\'re looking for cannot be found.'}/>
             }
         }
-    }, [job, account, token])
+        // // Authorization check
+        // if ((role === "provider" && account?._id !== job.provider._id) ||
+        //     (role === "consumer" && account?._id !== job.receiver._id)) {
+        //     navigate("/unauthorized")
+        // }
 
-    // unmount
-    useEffect(() => {
-        return () => {
-            setError(null);
+
+        if (error) {
+            console.log("youre in iferror", error)
+            return <ErrorPage title={error.title} message={error.message}/>
+        }
+
+
+        const onCancel = async () => {
+            if (!job) {
+                console.error('No job selected');
+                return;
+            }
+            try {
+                await handleCancel({
+                    selectedJob: job,
+                    jobs: [],
+                    setJobs: null,
+                    token: token,
+                    account: account,
+                    setShowMediaCard: () => {
+                    },
+                });
+
+                window.location.reload();
+            } catch (error) {
+                console.error('Error accepting request:', error);
+                // Handle error appropriately if needed
+            }
+
         };
-    }, []);
 
-    if (!job) {
-        if (loading) {
-            return (
-                <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
-                    <CircularProgress />
-                </Box>
-            )
-        } else {
-            console.log("error")
-            return <ErrorPage title={"404 Not Found"} message={'The job you\'re looking for cannot be found.'}/>
-        }
-    }
-    // // Authorization check
-    // if ((role === "provider" && account?._id !== job.provider._id) ||
-    //     (role === "consumer" && account?._id !== job.receiver._id)) {
-    //     navigate("/unauthorized")
-    // }
+        const onComplete = async () => {
+            if (!job) {
+                console.error('No job selected');
+                return;
+            }
+            try {
+                await handleComplete({
+                    selectedJob: job,
+                    jobs: [],
+                    setJobs: null,
+                    token: token,
+                    setShowMediaCard: () => {
+                    },
+                    triggerAlert,
+                });
+
+                window.location.reload();
+            } catch
+                (error) {
+                console.error('Error accepting request:', error);
+                // Handle error appropriately if needed
+            }
+        };
+
+// handle revoking completed job
+        const onRevoke = async () => {
+            if (!job) {
+                console.error('No job selected');
+                return;
+            }
+            try {
+                await handleRevoke({
+                    selectedJob: job,
+                    jobs: [],
+                    setJobs: null,
+                    token: token,
+                    setShowMediaCard: () => {
+                    },
+                });
+                window.location.reload();
+
+            } catch (error) {
+                console.error('Error accepting request:', error);
+                // Handle error appropriately if needed
+            }
+
+        };
+
+        const handleReview = (job: Item) => {
+            navigate(`/customer_review/${job._id}`);
+        };
 
 
-
-    if (error) {
-        console.log("youre in iferror", error)
-        return <ErrorPage title={error.title} message={error.message}/>
-    }
-
-
-    const onCancel = () => {
-        if (!job) {
-            console.error('No job selected');
-            return;
-        }
-        handleCancel({
-            selectedJob: job,
-            jobs: [],
-            setJobs: null,
-            token: token,
-            account: account,
-            setShowMediaCard: () => {
+        const providerProps = {
+            item: job,
+            provider: job.provider,
+            receiver: job.receiver,
+            onClose: () => {
             },
-        });
+            inDetailPage: true,
+            redirectPath: redirectPath,
 
-        window.location.reload();
-    };
 
-    const onComplete = () => {
-        if (!job) {
-            console.error('No job selected');
-            return;
-        }
-        handleComplete({
-            selectedJob: job,
-            jobs: [],
-            setJobs: null,
-            token: token,
-            setShowMediaCard: () => {
+            actions: {
+                cancelJob: onCancel,      // Placeholder function
+                complete: onComplete,
+                review: () => handleReview(job),
+                revoke: onRevoke
+            }
+        };
+
+        const consumerProps = {
+            item: job,
+            provider: job.provider,
+            receiver: job.receiver,
+            onClose: () => {
             },
-            triggerAlert,
-        });
-
-        window.location.reload();
-    };
-
-    // handle revoking completed job
-    const onRevoke = () => {
-        if (!job) {
-            console.error('No job selected');
-            return;
-        }
-        handleRevoke({
-            selectedJob: job,
-            jobs: [],
-            setJobs: null,
-            token: token,
-            setShowMediaCard: () => {
-            },
-        });
-
-        window.location.reload();
-    };
-
-    const handleReview = (job: Item) => {
-        navigate(`/customer_review/${job._id}`);
-    };
+            inDetailPage: true,
+            redirectPath: redirectPath,
+            actions: {
+                cancelJob: onCancel,      // Placeholder function
+                review: () => handleReview(job)
+            }
+        };
 
 
-    const providerProps = {
-        item: job,
-        provider: job.provider,
-        receiver: job.receiver,
-        onClose: () => {
-        },
-        inDetailPage: true,
-        redirectPath: redirectPath,
+        const CardComponent = role === "provider" ? GenericProviderCard : GenericConsumerCard;
+        const cardProps = role === "provider" ? providerProps : consumerProps;
 
+        return (
+            <Container>
+                <div>
+                    {/*<button onClick={handleAction}>Do Something</button>*/}
+                    <AlertCustomized alert={alert} closeAlert={closeAlert}/>
+                </div>
 
-        actions: {
-            cancelJob: onCancel,      // Placeholder function
-            complete: onComplete,
-            review: () => handleReview(job),
-            revoke: onRevoke
-        }
-    };
-
-    const consumerProps = {
-        item: job,
-        provider: job.provider,
-        receiver: job.receiver,
-        onClose: () => {
-        },
-        inDetailPage: true,
-        redirectPath: redirectPath,
-        actions: {
-            cancelJob: onCancel,      // Placeholder function
-            review: () => handleReview(job)
-        }
-    };
-
-
-    const CardComponent = role === "provider" ? GenericProviderCard : GenericConsumerCard;
-    const cardProps = role === "provider" ? providerProps : consumerProps;
-
-    return (
-        <Container>
-            <div>
-                {/*<button onClick={handleAction}>Do Something</button>*/}
-                <AlertCustomized alert={alert} closeAlert={closeAlert}/>
-            </div>
-
-            <Box sx={{mt: 4}}>
-                <Typography variant="h4" gutterBottom>
-                    {job.serviceType} Job Details
-                </Typography>
-                <CardComponent {...cardProps} />
-
-                {/*<MediaCard*/}
-                {/*    offeredService={job}*/}
-                {/*    provider={job.provider}*/}
-                {/*    receiver={job.receiver}*/}
-                {/*    onComplete={handleAccept}*/}
-                {/*    onCancel={handleCancel}*/}
-                {/*    onReview={handleReview}*/}
-                {/*    onRevoke={handleRevoke}*/}
-                {/*    onClose={handleCancel}*/}
-                {/*    // showExpandIcon={false} // Disable the expand icon for the details page*/}
-                {/*/>*/}
                 <Box sx={{mt: 4}}>
-                    <Typography variant="h5">Reviews</Typography>
-                    {/*<ReviewList reviews={reviews} /> /!* Render reviews *!/*/}
+                    <Typography variant="h4" gutterBottom>
+                        {job.serviceType} Job Details
+                    </Typography>
+                    <CardComponent {...cardProps} />
+
+                    {/*<MediaCard*/}
+                    {/*    offeredService={job}*/}
+                    {/*    provider={job.provider}*/}
+                    {/*    receiver={job.receiver}*/}
+                    {/*    onComplete={handleAccept}*/}
+                    {/*    onCancel={handleCancel}*/}
+                    {/*    onReview={handleReview}*/}
+                    {/*    onRevoke={handleRevoke}*/}
+                    {/*    onClose={handleCancel}*/}
+                    {/*    // showExpandIcon={false} // Disable the expand icon for the details page*/}
+                    {/*/>*/}
+                    <Box sx={{mt: 4}}>
+                        <Typography variant="h5">Reviews</Typography>
+                        {/*<ReviewList reviews={reviews} /> /!* Render reviews *!/*/}
+                    </Box>
                 </Box>
-            </Box>
-        </Container>
-    );
-};
+            </Container>
+        );
+    }
+;
 
 export default JobDetailsPage;

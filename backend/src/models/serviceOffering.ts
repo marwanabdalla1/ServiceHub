@@ -4,8 +4,6 @@ import {IAccount} from "./account";
 
 export interface IServiceOffering extends Document {
     serviceType: ServiceType;
-    lastUpdatedOn: Date;
-    createdOn: Date;
     certificateId: string;
     hourlyRate: number;
     description: string;
@@ -24,7 +22,6 @@ export interface IServiceOffering extends Document {
 
 const ServiceOfferingSchema: Schema = new Schema({
     serviceType: { type: String, enum: Object.values(ServiceType), required: true },
-    lastUpdatedOn: { type: Date, required: true },
     certificateId: { type: String, required: false},
     hourlyRate: { type: Number, required: true },
     description: { type: String, required: false },

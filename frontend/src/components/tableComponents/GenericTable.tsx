@@ -71,7 +71,13 @@ function GenericTable({data, count, page, setPage, rowsPerPage, setRowsPerPage, 
                         <TableRow>
                             <TableCell>Type</TableCell>
                             <TableCell>Status</TableCell>
-                            <TableCell>Appointment Time</TableCell>
+                            <TableCell>Appointment Time
+                                <Tooltip title="Invalid appointment time occurs when the request is cancelled, declined or when the provider has required the time to be changed." placement="top">
+                                    <IconButton>
+                                        <InfoIcon />
+                                    </IconButton>
+                                </Tooltip>
+                            </TableCell>
                             <TableCell>
                                 <Tooltip title="Tables are sorted by upcoming appointments nearest to today, followed by recent past appointments." placement="top">
                                 <IconButton>
