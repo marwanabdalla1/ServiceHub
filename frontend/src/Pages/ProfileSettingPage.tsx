@@ -408,7 +408,7 @@ function UserProfile(): React.ReactElement {
                     </Box>
                     {isProvider ? (
                         <BlueButton
-                            text="View My Schedule"
+                            text="View My Work Schedule"
                             onClick={handleViewScheduleClick}
                             sx={{
                                 backgroundColor: '#93c5fd',
