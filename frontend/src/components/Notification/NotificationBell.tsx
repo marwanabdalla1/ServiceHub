@@ -19,7 +19,6 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ header }) => {
 
   const toggleDropdown = () => setIsOpen(!isOpen);
 
-
   const fetchNotifications = () => {
     if (token) {
       axios.get<Notification[]>('/api/notifications', {
@@ -71,13 +70,15 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ header }) => {
     };
   }, [isOpen]);
 
+  const unreadNotificationsCount = notifications.filter(notification => !notification.isViewed).length;
+
   return (
     <div className="relative" ref={dropdownRef}>
       <button onClick={toggleDropdown} className="relative flex items-center justify-center">
         <IoNotificationsOutline className="h-6 w-6" />
-        {notifications.length > 0 && (
+        {unreadNotificationsCount > 0 && (
           <span className="absolute top-0 right-0 flex items-center justify-center h-3 w-3 rounded-full ring-2 ring-white bg-red-400 text-white text-xs">
-            {notifications.length}
+            {unreadNotificationsCount}
           </span>
         )}
       </button>
