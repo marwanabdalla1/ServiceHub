@@ -1,9 +1,4 @@
-import jwt from 'jsonwebtoken';
-import Account from "../models/account";
 import { RequestHandler } from "express";
-import * as dotenv from 'dotenv'
-import bcrypt from 'bcrypt';
-import { ERRORS } from "../helpers/authHelper";
 import Review from "../models/review";
 import Notification from "../models/notification"
 import Job from "../models/job";
@@ -12,7 +7,6 @@ import mongoose from "mongoose";
 //
 //
 
-// todo (i think its done): sanity check: (add after job and request controllers are done)
 // the reviewer has to have used the service (or is the provider)
 // no other reviews has existed for this job
 export const submitReview: RequestHandler = async (req, res) => {
@@ -278,35 +272,6 @@ export const getAllReviewsByOffering: RequestHandler = async (req, res) => {
 
             return res.json({ review: reviews });
         }
-        // else {
-        //     return res.json({ success: false });
-        // }
-
-        // Fetch profile images
-        // const profileImagePromises = reviews.map(async (review) => {
-        //     const reviewer = review.reviewer as mongoose.Document & { profileImageId: string };
-        //     let profileImageUrl = null;
-        //
-        //     if (reviewer && reviewer.profileImageId) {
-        //         const profileImageResponse = await Account.findById(reviewer._id).select('profileImageUrl');
-        //         profileImageUrl = profileImageResponse?.profileImageUrl || null;
-        //     }
-        //
-        //     return {
-        //         ...review.toObject(),
-        //         reviewer: {
-        //             ...reviewer.toObject(),
-        //             profileImageUrl: profileImageUrl,
-        //         },
-        //     };
-        // });
-
-        // const reviewsWithProfileImages = await Promise.all(profileImagePromises);
-        //
-        // if (reviewsWithProfileImages) {
-        //     return res.json({ review: reviewsWithProfileImages });
-        // }
-
 
     } catch (error) {
         res.status(500).json({ success: false, message: "Server error", error });

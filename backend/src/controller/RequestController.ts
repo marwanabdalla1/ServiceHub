@@ -306,7 +306,7 @@ export const handleChangeTimeslot: RequestHandler = async (req, res, next) => {
 
     try {
         // book the new timeslot
-        const hi = await bookTimeslot(req, res, next);
+        const bookedTimeslot = await bookTimeslot(req, res, next);
 
         // update the request status to pending again
         const updatedRequest = await ServiceRequest.findByIdAndUpdate(requestId, { requestStatus: RequestStatus.pending }, { new: true, upsert: true, strict: true });

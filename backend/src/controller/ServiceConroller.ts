@@ -8,7 +8,7 @@ import review from '../models/review';
 import job from '../models/job';
 
 
-export const addService = async (req: Request, res: Response, next: NextFunction) => {
+export const addService = async (req: Request, res: Response) => {
     try {
         const userId = (req as any).user.userId;
         console.log("User id", userId);
@@ -85,7 +85,7 @@ export const addService = async (req: Request, res: Response, next: NextFunction
 }
 
 
-export const editService = async (req: Request, res: Response, next: NextFunction) => {
+export const editService = async (req: Request, res: Response) => {
     try {
         const userId = (req as any).user.userId;
         const serviceId = req.params.id;
