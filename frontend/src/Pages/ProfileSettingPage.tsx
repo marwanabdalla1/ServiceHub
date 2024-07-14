@@ -25,7 +25,12 @@ import {toast} from "react-toastify";
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddressDialog from "../components/dialogs/AddressDialog";
 import {isValidPhoneNumber} from "../validators/AccountDataValidator";
-import {deleteProfileImage, fetchProfileImageByToken, handleProfileImageUpload} from "../services/fetchProfileImage";
+import {
+    defaultProfileImage,
+    deleteProfileImage,
+    fetchProfileImageByToken,
+    handleProfileImageUpload
+} from "../services/fetchProfileImage";
 import {deleteAccount, saveAddress, updateAccountFields} from "../services/accountService";
 import {deleteService} from "../services/serviceOfferingService";
 
@@ -42,7 +47,7 @@ function UserProfile(): React.ReactElement {
     const [account, setAccount] = useState<any>(null);
     const {token, logoutUser} = useAuth();
     const [services, setServices] = useState<any[]>([]);
-    const [openDialog, setOpenDialog] = useState(false);
+
     const [serviceToDelete, setServiceToDelete] = useState<string | null>(null);
     const [profileImage, setProfileImage] = useState<string | null>(null);
     const [subscriptions, setSubscriptions] = useState<any[]>([]);
@@ -51,6 +56,7 @@ function UserProfile(): React.ReactElement {
     const isPremium = userAccount?.isPremium;
     const client_reference_id = userAccount?._id;
     const [openAddressDialog, setOpenAddressDialog] = useState(false);
+    const [openServiceDeleteDialog, setOpenServiceDeleteDialog] = useState(false);
     const navigate = useNavigate();
 
     const fetchSubscriptionData = async (clientReferenceId: string) => {
@@ -232,20 +238,20 @@ function UserProfile(): React.ReactElement {
             } catch (error) {
                 console.error('Error deleting service:', error);
             } finally {
-                setOpenDialog(false);
+                setOpenServiceDeleteDialog(false);
                 setServiceToDelete(null);
             }
         }
     };
 
 
-    const handleOpenDialog = (serviceId: string) => {
+    const handleServiceDeleteOpenDialog = (serviceId: string) => {
         setServiceToDelete(serviceId);
-        setOpenDialog(true);
+        setOpenServiceDeleteDialog(true);
     };
 
-    const handleCloseDialog = () => {
-        setOpenDialog(false);
+    const handleServiceDeleteCloseDialog = () => {
+        setOpenServiceDeleteDialog(false);
         setServiceToDelete(null);
     };
 
@@ -310,11 +316,34 @@ function UserProfile(): React.ReactElement {
                     Public Profile
                 </Typography>
                 <Box sx={{display: 'flex', flexDirection: 'column', gap: 3, p: 3}}>
-                    <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5}}>
-                        <IconButton onClick={() => deleteProfileImage(token, setProfileImage)} size="small"
-                                    sx={{alignSelf: 'flex-end'}}>
-                            <DeleteIcon/>
-                        </IconButton>
+                    <Box sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: 0.5,
+                        position: 'relative'
+                    }}>
+                        {defaultProfileImage !== profileImage && (
+                            <IconButton
+                                onClick={() => deleteProfileImage(token, setProfileImage)}
+                                size="small"
+                                sx={{
+                                    position: 'absolute',
+                                    top: 5,
+                                    right: 305,
+                                    transform: 'translate(50%, -50%)',
+                                    backgroundColor: 'white',
+                                    border: '1px solid #ccc',
+                                    padding: '2px',
+                                    '&:hover': {
+                                        backgroundColor: 'red',
+                                        color: 'white',
+                                    },
+                                }}
+                            >
+                                <DeleteIcon sx={{fontSize: 16}}/>
+                            </IconButton>
+                        )}
                         <Avatar src={profileImage ? profileImage : undefined}
                                 sx={{width: 80, height: 80}}/>
                         <LightBlueFileButton text="Upload Profile Picture"
@@ -370,7 +399,7 @@ function UserProfile(): React.ReactElement {
                                                         onClick={() => handleEditServiceClick(service)}>Edit</Button>
                                                 </Grid>
                                                 <Grid item>
-                                                    <Button onClick={() => handleOpenDialog(service._id)}
+                                                    <Button onClick={() => handleServiceDeleteOpenDialog(service._id)}
                                                             sx={{color: 'red'}}>Delete</Button>
                                                 </Grid>
                                             </Grid>
@@ -434,7 +463,7 @@ function UserProfile(): React.ReactElement {
                 }}
             />
 
-            <Dialog open={openDialog} onClose={handleCloseDialog}>
+            <Dialog open={openServiceDeleteDialog} onClose={handleServiceDeleteCloseDialog}>
                 <DialogTitle>{"Confirm Delete"}</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
@@ -442,7 +471,7 @@ function UserProfile(): React.ReactElement {
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleCloseDialog} color="primary">
+                    <Button onClick={handleServiceDeleteCloseDialog} color="primary">
                         Cancel
                     </Button>
                     <Button onClick={handleDeleteServiceClick} color="primary" autoFocus>
