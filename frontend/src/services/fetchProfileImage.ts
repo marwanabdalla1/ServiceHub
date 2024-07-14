@@ -30,7 +30,9 @@ export const fetchProfileImageByToken = async (token: string): Promise<string> =
 
 export const fetchProfileImageById = async (providerId: string): Promise<string> => {
     try {
-        const response = await axios.get(`/api/file/profileImage/${providerId}`);
+        const response = await axios.get(`/api/file/profileImage/${providerId}`, {
+            responseType: 'blob'
+        });
         if (response.status === 200) {
             return URL.createObjectURL(response.data);
         }

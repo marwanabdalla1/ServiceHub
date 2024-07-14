@@ -31,14 +31,20 @@ const AdminNavbar: React.FC<AdminNavbarProps> = () => {
     };
 
     return (
-        <nav className="bg-blue-300 shadow-md h-20">
-            <div className="flex justify-between items-center h-full">
-                {/* Left Section: Logo */}
-                <div className="flex items-center h-full">
-                    <Link to="/">
-                        <img src="/images/logo.png" alt="Logo" className="h-16 ml-4" />
-                    </Link>
-                </div>
+        <div style={{
+            position: 'fixed',
+            top: 0,
+            width: '100%',
+            zIndex: 1100,
+        }}>
+            <nav className="bg-blue-300 shadow-md h-20">
+                <div className="flex justify-between items-center h-full">
+                    {/* Left Section: Logo */}
+                    <div className="flex items-center h-full">
+                        <Link to="/">
+                            <img src="/images/logo.png" alt="Logo" className="h-16 ml-4"/>
+                        </Link>
+                    </div>
 
                 {/* Right Section: Icons and Menu */}
                 <div className="flex items-center space-x-4 m-4">
@@ -68,23 +74,25 @@ const AdminNavbar: React.FC<AdminNavbarProps> = () => {
                 </div>
             </div>
 
-            <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={handleMenuClose}
-                anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'center',
-                }}
-                transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'center',
-                }}
-            >
-                <MenuItem component={Link} to="/admin/verifyCertificate" onClick={handleMenuClose}>Verify Certificates</MenuItem>
-                <MenuItem component={Link} to="/admin/UserData" onClick={handleMenuClose}>User Data</MenuItem>
-            </Menu>
-        </nav>
+                <Menu
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl)}
+                    onClose={handleMenuClose}
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'center',
+                    }}
+                    transformOrigin={{
+                        vertical: 'top',
+                        horizontal: 'center',
+                    }}
+                >
+                    <MenuItem component={Link} to="/admin/verifyCertificate" onClick={handleMenuClose}>Verify
+                        Certificates</MenuItem>
+                    <MenuItem component={Link} to="/admin/UserData" onClick={handleMenuClose}>User Data</MenuItem>
+                </Menu>
+            </nav>
+        </div>
     );
 };
 
