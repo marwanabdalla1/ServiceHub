@@ -23,6 +23,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { loadAccount, saveAddress, updateAccountFields } from '../../../services/accountService';
 import { deleteService } from '../../../services/serviceOfferingService';
 import BlueButton from "../../../components/inputs/BlueButton";
+import ConfirmDeleteDialog from "../../../components/dialogs/ConfirmDeleteDialog";
 
 type EditModeType = {
     [key: string]: boolean;
@@ -38,7 +39,7 @@ export default function ViewUserData(): React.ReactElement {
     const [account, setAccount] = useState<any>(null);
     const { token } = useAuth();
     const [services, setServices] = useState<any[]>([]);
-    const [openDialog, setOpenDialog] = useState(false);
+    const [openServiceDeleteDialog, setOpenServiceDeleteDialog] = useState(false);
     const [openAddressDialog, setOpenAddressDialog] = useState(false);
     const [serviceToDelete, setServiceToDelete] = useState<string | null>(null);
     const [editMode, setEditMode] = useState<EditModeType>({
@@ -136,14 +137,6 @@ export default function ViewUserData(): React.ReactElement {
 
     const navigate = useNavigate();
 
-    const handleAddServiceClick = () => {
-        navigate('/addservice');
-    };
-
-    const handleEditServiceClick = (service: any) => {
-        navigate('/addservice', { state: { service } });
-    };
-
     const handleDeleteServiceClick = async () => {
         if (serviceToDelete && token) {
             try {
@@ -152,19 +145,19 @@ export default function ViewUserData(): React.ReactElement {
             } catch (error) {
                 console.error('Error deleting service:', error);
             } finally {
-                setOpenDialog(false);
+                setOpenServiceDeleteDialog(false);
                 setServiceToDelete(null);
             }
         }
     };
 
-    const handleOpenDialog = (serviceId: string) => {
+    const handleServiceDeleteOpenDialog = (serviceId: string) => {
         setServiceToDelete(serviceId);
-        setOpenDialog(true);
+        setOpenServiceDeleteDialog(true);
     };
 
-    const handleCloseDialog = () => {
-        setOpenDialog(false);
+    const handleServiceDeleteCloseDialog = () => {
+        setOpenServiceDeleteDialog(false);
         setServiceToDelete(null);
     };
 
@@ -245,7 +238,7 @@ export default function ViewUserData(): React.ReactElement {
                                                     </Box>
                                                 </Grid>
                                                 <Grid item>
-                                                    <Button onClick={() => handleOpenDialog(service._id)} sx={{ color: 'red' }}>Delete</Button>
+                                                    <Button onClick={() => handleServiceDeleteOpenDialog(service._id)} sx={{ color: 'red' }}>Delete</Button>
                                                 </Grid>
                                             </Grid>
                                         ))
@@ -269,22 +262,13 @@ export default function ViewUserData(): React.ReactElement {
                 }}
             />
 
-            <Dialog open={openDialog} onClose={handleCloseDialog}>
-                <DialogTitle>{"Confirm Delete"}</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>
-                        Are you sure you want to delete this service?
-                    </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleCloseDialog} color="primary">
-                        Cancel
-                    </Button>
-                    <Button onClick={handleDeleteServiceClick} color="primary" autoFocus>
-                        Delete
-                    </Button>
-                </DialogActions>
-            </Dialog>
+            <ConfirmDeleteDialog
+                open={openServiceDeleteDialog}
+                onClose={handleServiceDeleteCloseDialog}
+                onConfirm={handleDeleteServiceClick}
+                message="Are you sure you want to delete this service?"
+                isDeleteAccount={false}
+            />
         </Container>
     );
 }

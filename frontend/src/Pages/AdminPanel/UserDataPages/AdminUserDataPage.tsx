@@ -7,6 +7,8 @@ import {
 import {useAuth} from "../../../contexts/AuthContext";
 import {useNavigate} from "react-router-dom";
 import {deleteAccount} from "../../../services/accountService";
+import ConfirmDeleteDialog from "../../../components/dialogs/ConfirmDeleteDialog";
+import {toast} from "react-toastify";
 
 interface Account {
     email: string;
@@ -27,6 +29,8 @@ export default function AdminUserData(): React.ReactElement {
     });
     const {token} = useAuth();
     const navigate = useNavigate();
+    const [openDeleteAccountDialog, setOpenDeleteAccountDialog] = useState(false);
+    const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
 
     useEffect(() => {
         fetchUsers();
@@ -58,17 +62,33 @@ export default function AdminUserData(): React.ReactElement {
         fetchUsers();
     };
 
-    const handleDelete = async (accountId: string) => {
-        try {
-            if (token) {
-                await deleteAccount(token, accountId);
-                // Refresh the user list after deletion
-                await fetchUsers();
-            }
+    const handleDelete = (account: Account) => {
+        setSelectedAccount(account);
+        setOpenDeleteAccountDialog(true);
+    };
 
-        } catch (error) {
-            console.error('Error deleting user data', error);
+    const handleDeleteAccountCloseDialog = () => {
+        setOpenDeleteAccountDialog(false);
+        setSelectedAccount(null);
+    };
+
+    const handleConfirmDeleteAccount = async (email?: string) => {
+        if (email === selectedAccount?.email) {
+            try {
+                if (token&&selectedAccount) {
+                    await deleteAccount(token, selectedAccount._id);
+                    // Refresh the user list after deletion
+                    await fetchUsers();
+                }
+            } catch (error) {
+                toast.error('Error deleting user data.');
+            }
+        } else {
+            toast.error("Emails do not match");
+            return;
         }
+        setOpenDeleteAccountDialog(false);
+        setSelectedAccount(null);
     };
 
     const handleView = (accountId: string) => {
@@ -152,7 +172,7 @@ export default function AdminUserData(): React.ReactElement {
                                                 style={{marginRight: '20px'}}>
                                             View
                                         </Button>
-                                        <Button onClick={() => handleDelete(user._id)} variant="contained"
+                                        <Button onClick={() => handleDelete(user)} variant="contained"
                                                 color="error">
                                             Delete
                                         </Button>
@@ -164,6 +184,15 @@ export default function AdminUserData(): React.ReactElement {
                 </Table>
             </TableContainer>
 
+            {selectedAccount && (
+                <ConfirmDeleteDialog
+                    open={openDeleteAccountDialog}
+                    onClose={handleDeleteAccountCloseDialog}
+                    onConfirm={handleConfirmDeleteAccount}
+                    message="Are you sure you want to delete this account?"
+                    isDeleteAccount={true}
+                />
+            )}
         </Container>
     );
 };
