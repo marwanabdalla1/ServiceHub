@@ -1,22 +1,27 @@
-import { Request, Response, NextFunction, RequestHandler } from 'express';
-import Account from '../models/account';
-import ServiceRequest, { IServiceRequest } from "../models/serviceRequest";
-import Timeslot from "../models/timeslot";
-import { createNotificationDirect} from "./NotificationController";
-import {NotificationType, RequestStatus} from "../models/enums";
+import { Request, Response, NextFunction, RequestHandler } from 'express'; // Importing necessary types and interfaces from express
+import Account from '../models/account'; // Importing Account model
+import ServiceRequest, { IServiceRequest } from "../models/serviceRequest"; // Importing ServiceRequest model and interface
+import Timeslot from "../models/timeslot"; // Importing Timeslot model
+import { createNotificationDirect } from "./NotificationController"; // Importing function to create notifications
+import { NotificationType, RequestStatus } from "../models/enums"; // Importing enums for NotificationType and RequestStatus
 import {
     bookTimeslot,
     bookTimeslotDirect,
     cancelTimeslotDirect,
     cancelTimeslotWithRequestId
-} from "./TimeSlotController";
-import mongoose, { PipelineStage } from 'mongoose';
-import {sortBookingItems} from "../util/requestAndJobUtils";  // Import PipelineStage for correct typing
-import {formatDateTime} from "../../../frontend/src/utils/dateUtils";
+} from "./TimeSlotController"; // Importing functions to handle timeslot operations
+import mongoose, { PipelineStage } from 'mongoose'; // Importing mongoose and PipelineStage for correct typing
+import { sortBookingItems } from "../util/requestAndJobUtils"; // Importing utility function to sort booking items
+import { formatDateTime } from "../../../frontend/src/utils/dateUtils"; // Importing date formatting utility
 
 
-
-
+/**
+ * Handles missing required properties in the request body.
+ * @param req - Express request object
+ * @param res - Express response object
+ * @param requiredProperties - Array of required properties to check in the request body
+ * @returns {boolean} - Returns true if any required property is missing, otherwise false
+ */
 function errorHandler(req: Request, res: Response, requiredProperties: string[]) {
     for (let property of requiredProperties) {
         if (!req.body[property]) {
@@ -30,14 +35,16 @@ function errorHandler(req: Request, res: Response, requiredProperties: string[])
     return false;
 }
 
-
+/**
+ * Interface for query parameters to allow additional properties with any type.
+ */
 interface Query {
     provider?: string;
     requestedBy?: string;
     [key: string]: any;  // Allows additional properties with any type
 }
 
-// new, all-in-one
+// Create a new service request
 export const createServiceRequest: RequestHandler = async (req: Request, res: Response, next) => {
     const user = (req as any).user;
 
@@ -45,20 +52,14 @@ export const createServiceRequest: RequestHandler = async (req: Request, res: Re
     const error = errorHandler(req, res, [
         "requestStatus",
         "serviceType",
-        // "appointmentStartTime",
-        // "appointmentEndTime",
-        // "uploads",
-        // "comment",
         "serviceFee",
         "serviceOffering",
-        // "job",
         "provider",
         "requestedBy",
     ]);
     if (error) {
         return error;
     }
-
 
     // Validate that the consumer in the request body matches the authenticated user's ID
     if (req.body.requestedBy !== user.userId) {
@@ -75,33 +76,30 @@ export const createServiceRequest: RequestHandler = async (req: Request, res: Re
 
         // Extract fields from req.body and possibly validate or transform them
         const { timeSlot, ...requestBody } = req.body;
-        // const requestBody = req.body; // Simplified, assuming body has all required fields
 
         console.log("request body: " + requestBody)
         let newServiceRequest = await ServiceRequest.create(requestBody);
-
 
         if (!newServiceRequest._id) {
             return res.status(400).send({ message: "Failed to create service request." });
         }
 
-        await bookTimeslotDirect(timeSlot, session);
+        const timeSlotData = { ...timeSlot, requestId: newServiceRequest._id.toString() };
+        await bookTimeslotDirect(timeSlotData, session);
 
         // update the user
         await updateUserRequestHistory(req.body.provider, newServiceRequest._id.toString());
 
         await session.commitTransaction();
 
-
-        // await newServiceRequest.save();
         res.status(201).send(newServiceRequest);
-        //
-        // // Attempt to create a notification
+
+        // Attempt to create a notification
         try {
             const notificationContent = `You have a new service request for ${requestBody.serviceType} at ${formatDateTime(timeSlot.start)}.`;
 
             await createNotificationDirect({
-                content:notificationContent,
+                content: notificationContent,
                 notificationType: "New Request",
                 serviceRequest: newServiceRequest._id.toString(),
                 recipient: req.body.provider // Assuming the provider should be notified
@@ -113,97 +111,21 @@ export const createServiceRequest: RequestHandler = async (req: Request, res: Re
 
     } catch (error: any) {
         await session.abortTransaction();
-        if (error.statusCode===409) {
+        if (error.statusCode === 409) {
             res.status(error.statusCode).send({ message: error.message + "it's new baby!" });
-        } else{
+        } else {
             res.status(500).send({ message: error.message || "Internal server error" });
         }
-        // res.status(400).send({ message: error.message });
-    } finally{
+    } finally {
         session.endSession();
     }
 };
 
-// old one
-// export const createServiceRequest: RequestHandler = async (req: Request, res: Response, next) => {
-//     const user = (req as any).user;
-//
-//     console.log("request body:" + JSON.stringify(req.body), "userID: ", user.userId)
-//     const error = errorHandler(req, res, [
-//         "requestStatus",
-//         "serviceType",
-//         // "appointmentStartTime",
-//         // "appointmentEndTime",
-//         // "uploads",
-//         // "comment",
-//         "serviceFee",
-//         "serviceOffering",
-//         // "job",
-//         "provider",
-//         "requestedBy",
-//     ]);
-//     if (error) {
-//         return error;
-//     }
-//
-//
-//     // Validate that the consumer in the request body matches the authenticated user's ID
-//     if (req.body.requestedBy !== user.userId) {
-//         return res.status(403).json({
-//             error: "Unauthorized",
-//             message: "Unable to create this request" //only the corresponding requester can create requests
-//         });
-//     }
-//
-//     const session = await mongoose.startSession();
-//
-//     try {
-//         session.startTransaction();
-//
-//         // Extract fields from req.body and possibly validate or transform them
-//         const { timeSlot, ...requestBody } = req.body;
-//         // const requestBody = req.body; // Simplified, assuming body has all required fields
-//
-//         console.log("request body: " + requestBody)
-//         let newServiceRequest = await ServiceRequest.create(requestBody);
-//
-//
-//         if (!newServiceRequest._id) {
-//             return res.status(400).send({ message: "Failed to create service request." });
-//         }
-//         // update the user
-//         await updateUserRequestHistory(req.body.provider, newServiceRequest._id.toString());
-//
-//         // await newServiceRequest.save();
-//         res.status(201).send(newServiceRequest);
-//
-//         await session.commitTransaction();
-//         session.endSession();
-//         //
-//         // // Attempt to create a notification
-//         // now its at frontend
-//         // try {
-//         //     const notificationContent = `You have a new service request for ${requestBody.serviceType} at ${formatDateTime(timeSlot.start)}.`;
-//         //
-//         //     await createNotificationDirect({
-//         //         content: "A new service request has been created.",
-//         //         notificationType: "New Request",
-//         //         serviceRequest: newServiceRequest._id.toString(),
-//         //         recipient: req.body.provider // Assuming the provider should be notified
-//         //     });
-//         // } catch (notificationError: any) {
-//         //     console.error("Failed to create notification:", notificationError.message);
-//         //     // Optionally handle the error further, e.g., logging to an error monitoring service
-//         // }
-//
-//     } catch (error: any) {
-//         await session.abortTransaction();
-//         session.endSession();
-//         res.status(400).send({ message: error.message });
-//     }
-// };
-
-// also update the requestHistory arrays in the account
+/**
+ * Updates the requestHistory arrays in the account.
+ * @param userId - ID of the user to update
+ * @param requestId - ID of the request to add to the user's history
+ */
 async function updateUserRequestHistory(userId: string, requestId: string) {
     try {
         await Account.findByIdAndUpdate(userId, {
@@ -215,17 +137,18 @@ async function updateUserRequestHistory(userId: string, requestId: string) {
     }
 }
 
-
+/**
+ * Updates an existing service request.
+ */
 export const updateServiceRequest: RequestHandler = async (req: Request, res: Response, next) => {
-    // Get the userId from the JWT token
     const userId = (req as any).user.userId;
-    const { requestId } = req.params; //get request ID from parameter
+    const { requestId } = req.params;
     const updates = req.body;
 
     console.log("update service request: ", userId, requestId)
     console.log("request updates:", updates)
 
-    const serviceRequest = await ServiceRequest.findById(requestId)
+    const serviceRequest = await ServiceRequest.findById(requestId);
 
     if (!serviceRequest) {
         return res.status(404).json({ message: "Service Request not found" });
@@ -237,41 +160,17 @@ export const updateServiceRequest: RequestHandler = async (req: Request, res: Re
     }
 
     try {
-        // Check if status is being updated to one of the specific statuses
         const requiresCancellation = [RequestStatus.declined, RequestStatus.cancelled, RequestStatus.requestorActionNeeded].includes(updates.requestStatus);
         console.log("requires cancellation: ", RequestStatus.requestorActionNeeded)
         if (requiresCancellation) {
-            // Cancel the associated timeslot
             const cancellationResult = await cancelTimeslotWithRequestId(requestId);
             console.log(cancellationResult.message);
         }
 
         console.log("cancellation done", requestId)
 
-        // Update the user in the database using the userId from the JWT token
         const updatedRequest = await ServiceRequest.findByIdAndUpdate(requestId, updates, { new: true, upsert: true, strict: true });
-        // if (!updatedRequest) {
-        //     return res.status(404).send({ message: 'User not found' });
-        // }
-        // res.send(updatedRequest);
 
-
-        // maybe todo: move notification to here but actually it needs the info from frontend
-        // const notificationContent = `Service request ${requestId} has been updated.`;
-
-        // Notify the provider
-        // await createNotification({
-        //     content: notificationContent,
-        //     serviceRequest: requestId,
-        //     recipient: serviceRequest.provider
-        // });
-        //
-        // // Notify the requestedBy
-        // await createNotification({
-        //     content: notificationContent,
-        //     serviceRequest: requestId,
-        //     recipient: serviceRequest.requestedBy
-        // });
         res.status(200).json(updatedRequest);
 
     } catch (error) {
@@ -279,17 +178,15 @@ export const updateServiceRequest: RequestHandler = async (req: Request, res: Re
     }
 }
 
-
-//get all requests of a provider
-// In serviceRequestController.js
+/**
+ * Retrieves all service requests for a specific provider.
+ */
 export const getServiceRequestsByProvider: RequestHandler = async (req, res) => {
     try {
-
-
-        const { providerId } = req.params; // Extract the provider ID from the URL parameter
+        const { providerId } = req.params;
         const userId = (req as any).user.userId;
 
-        //make sure only the provider him/herself can get this
+        // Ensure only the provider can get their own requests
         if (userId !== providerId) {
             console.log("userId: ", userId, "\n providerId: ", providerId)
             return res.status(403).json({ message: "Unauthorized access." });
@@ -299,8 +196,7 @@ export const getServiceRequestsByProvider: RequestHandler = async (req, res) => 
 
         console.log("queries", req.query)
 
-
-        let query:Query = { provider: providerId };
+        let query: Query = { provider: providerId };
 
         // Adding filters based on query parameters
         if (requestStatus) {
@@ -310,51 +206,12 @@ export const getServiceRequestsByProvider: RequestHandler = async (req, res) => 
             query.serviceType = serviceType;
         }
 
-        // Building the MongoDB aggregate pipeline
-        // const pipeline = [
-        //     { $match: query },
-        //     {
-        //         $lookup: {
-        //             from: 'timeslots',
-        //             localField: '_id',
-        //             foreignField: 'requestId',
-        //             as: 'timeslot'
-        //         }
-        //     },
-        //
-        //     // keeps empty timeslots as null
-        //     { $unwind: { path: "$timeslot", preserveNullAndEmptyArrays: true } },
-        //     {
-        //         $addFields: {
-        //             "timeslot.isFuture": { $gt: ["$timeslot.start", new Date()] },
-        //             "timeslot.isPast": { $lt: ["$timeslot.end", new Date()] }
-        //         }
-        //     },
-        //     {
-        //         $sort: {
-        //             "timeslot.isFuture": -1, // Future requests first
-        //             "timeslot.start": 1 // Then sort by date ascending
-        //         }
-        //     },
-        //     { $skip: (Number(page) - 1) * Number(limit) },
-        //     { $limit: limit }
-        // ];
-
-        // const serviceRequests = await ServiceRequest.aggregate(pipeline);
-        //
-        // if (serviceRequests.length === 0) {
-        //     return res.status(404).json({ message: "No service requests found for this provider." });
-        // }
-        //
-        // res.status(200).json(serviceRequests);
-
         const serviceRequests = await ServiceRequest.find(query)
             .populate([
                 { path: 'requestedBy', select: 'firstName lastName email profileImageId' },
                 { path: 'provider', select: 'firstName lastName email profileImageId' }
             ])
             .exec();
-
 
         if (serviceRequests.length === 0) {
             return res.status(404).json({ message: "No service requests found for this provider." });
@@ -367,15 +224,13 @@ export const getServiceRequestsByProvider: RequestHandler = async (req, res) => 
 
         const sortedRequestsWithTimeslots = sortBookingItems(requestsWithTimeslots);
 
-
         console.log("sorted requests", requestsWithTimeslots)
-        const paginatedRequestsWithTimeslots = sortedRequestsWithTimeslots.slice((Number(page)-1) * Number(limit), (Number(page)) * Number(limit));
-
+        const paginatedRequestsWithTimeslots = sortedRequestsWithTimeslots.slice((Number(page) - 1) * Number(limit), (Number(page)) * Number(limit));
 
         res.status(200).json({
             data: paginatedRequestsWithTimeslots,
-            total:sortedRequestsWithTimeslots.length});
-
+            total: sortedRequestsWithTimeslots.length
+        });
 
     } catch (error: any) {
         console.error("Failed to retrieve service requests:", error);
@@ -383,15 +238,15 @@ export const getServiceRequestsByProvider: RequestHandler = async (req, res) => 
     }
 };
 
-
+/**
+ * Retrieves all service requests for a specific requester.
+ */
 export const getServiceRequestsByRequester: RequestHandler = async (req, res) => {
     try {
-
-
-        const { requesterId } = req.params; // Extract the provider ID from the URL parameter
+        const { requesterId } = req.params;
         const userId = (req as any).user.userId;
 
-        //make sure only the provider him/herself can get this
+        // Ensure only the requester can get their own requests
         if (userId !== requesterId) {
             console.log("userId: ", userId, "\n requesterId: ", requesterId)
             return res.status(403).json({ message: "Unauthorized access." });
@@ -401,7 +256,7 @@ export const getServiceRequestsByRequester: RequestHandler = async (req, res) =>
 
         console.log("queries", req.query)
 
-        let query:Query = { requestedBy: requesterId };
+        let query: Query = { requestedBy: requesterId };
 
         // Adding filters based on query parameters
         if (requestStatus) {
@@ -418,11 +273,9 @@ export const getServiceRequestsByRequester: RequestHandler = async (req, res) =>
             ])
             .exec();
 
-        //
         if (serviceRequests.length === 0) {
             return res.status(404).json({ message: "No service requests found for this requester." });
         }
-
 
         const requestsWithTimeslots = await Promise.all(serviceRequests.map(async (request) => {
             const timeslot = await Timeslot.findOne({ requestId: request._id }).exec();
@@ -430,15 +283,13 @@ export const getServiceRequestsByRequester: RequestHandler = async (req, res) =>
         }));
 
         const sortedRequestsWithTimeslots = sortBookingItems(requestsWithTimeslots);
-        //
 
         const paginatedRequestsWithTimeslots = sortedRequestsWithTimeslots.slice((Number(page) - 1) * Number(limit), Number(page) * Number(limit));
 
         res.status(200).json({
             data: paginatedRequestsWithTimeslots,
-            total:sortedRequestsWithTimeslots.length}
-        );
-
+            total: sortedRequestsWithTimeslots.length
+        });
 
     } catch (error: any) {
         console.error("Failed to retrieve service requests:", error);
@@ -446,7 +297,9 @@ export const getServiceRequestsByRequester: RequestHandler = async (req, res) =>
     }
 };
 
-// when consumer changes the timeslot
+/**
+ * Handles changing the timeslot for a service request.
+ */
 export const handleChangeTimeslot: RequestHandler = async (req, res, next) => {
     const { createdById, requestId } = req.body;
     let success = true;  // Flag to track success of booking
@@ -455,29 +308,20 @@ export const handleChangeTimeslot: RequestHandler = async (req, res, next) => {
         const hi = await bookTimeslot(req, res, next);
 
         // update the request status to pending again
-        const updatedRequest = await ServiceRequest.findByIdAndUpdate(requestId, {requestStatus: RequestStatus.pending}, { new: true, upsert: true, strict: true });
-
-
-        // // Check if the response has been sent by bookTimeslot
-        // if (res.headersSent) {
-        //     return; // If the response is sent, bookTimeslot was successful
-        // }
+        const updatedRequest = await ServiceRequest.findByIdAndUpdate(requestId, { requestStatus: RequestStatus.pending }, { new: true, upsert: true, strict: true });
 
     } catch (error) {
         console.error("Error in handling timeslot change:", error);
         success = false;  // Update success flag to false on error
-        // Only send this error response if headers have not been sent
         if (!res.headersSent) {
             res.status(500).json({ message: "Failed to process timeslot change." });
         }
     } finally {
-        // Notification should happen regardless of the booking outcome
         const notificationContent = success
             ? `The timeslot of the existing request ${requestId} has been successfully changed.`
             : `Failed to change the timeslot of the existing request ${requestId}.`;
-        const notificationType = NotificationType.timeRequestChanged; // Adjust if you have specific types for success/failure
+        const notificationType = NotificationType.timeRequestChanged;
 
-        // Perform notification creation
         try {
             await createNotificationDirect({
                 content: notificationContent,
@@ -489,18 +333,16 @@ export const handleChangeTimeslot: RequestHandler = async (req, res, next) => {
             });
         } catch (notificationError) {
             console.error("Failed to create notification:", notificationError);
-            // Optionally handle the failure of notification creation
         }
     }
 };
 
-
-
+/**
+ * Retrieves a service request by its ID.
+ */
 export const getRequestById: RequestHandler = async (req, res) => {
     try {
-
-        const { requestId } = req.params; // Extract the provider ID from the URL parameter
-
+        const { requestId } = req.params;
 
         const userId = (req as any).user.userId;
 
@@ -510,17 +352,16 @@ export const getRequestById: RequestHandler = async (req, res) => {
 
         const serviceRequest = await ServiceRequest.findById(requestId).populate([
             { path: 'requestedBy', select: 'firstName lastName email profileImageId' },
-            { path: 'provider', select: 'firstName lastName email profileImageId' }]).exec();
-
-
+            { path: 'provider', select: 'firstName lastName email profileImageId' }
+        ]).exec();
 
         console.log(serviceRequest)
 
-        if (!serviceRequest){
+        if (!serviceRequest) {
             return res.status(404).json({ message: "Service request not found." });
         }
 
-        //make sure only the provider/consumer him/herself can get this
+        // Ensure only the provider/consumer can access this request
         if (userId !== serviceRequest.requestedBy._id.toString() && userId !== serviceRequest.provider._id.toString()) {
             console.log("userId: ", userId, "\n requesterId: ", serviceRequest.requestedBy._id, "provider ID:", serviceRequest.provider._id)
             return res.status(403).json({ message: "Unauthorized access." });
@@ -528,8 +369,6 @@ export const getRequestById: RequestHandler = async (req, res) => {
 
         const timeslot = await Timeslot.findOne({ requestId: requestId }).exec();
         const requestWithTimeslot = { ...serviceRequest.toObject(), timeslot: timeslot || undefined };
-
-
 
         console.log("incoming requests with their timeslots", requestWithTimeslot)
 
@@ -541,9 +380,9 @@ export const getRequestById: RequestHandler = async (req, res) => {
     }
 };
 
-
-
-
+/**
+ * Deletes a service request by its ID.
+ */
 export const deleteRequest: RequestHandler = async (req, res) => {
     const { requestId } = req.params;
     console.log(req)
