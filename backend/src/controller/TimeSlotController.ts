@@ -809,54 +809,6 @@ export async function cancelTimeslotDirect(timeslotId: String | Types.ObjectId) 
     }
 }
 
-// clean up timeslots where the provider or consumer account have been deleted
-export async function cleanupOrphanedTimeslots() {
-    try {
-        // Retrieve IDs of service requests and jobs with nullified user references
-        const [orphanedRequests, orphanedJobs] = await Promise.all([
-            ServiceRequest.find({
-                $or: [
-                    { provider: null },
-                    { requestedBy: null }
-                ],
-                requestStatus: RequestStatus.cancelled  // Assuming these are also marked as cancelled
-            }, '_id'),
-            Job.find({
-                $or: [
-                    { provider: null },
-                    { receiver: null }
-                ],
-                status: JobStatus.cancelled  // Assuming these are also marked as cancelled
-            }, '_id')
-        ]);
-
-        const requestIds = orphanedRequests.map(req => req._id);
-        const jobIds = orphanedJobs.map(job => job._id);
-
-        // Combine all IDs to a single array without duplicates
-        const allOrphanIds = [...new Set([...requestIds, ...jobIds])];
-
-        // Find all timeslots linked to these IDs
-        const timeslotsToClean = await Timeslot.find({
-            $or: [
-                { requestId: { $in: allOrphanIds } },
-                { jobId: { $in: allOrphanIds } }
-            ]
-        });
-
-        // Cancel each timeslot using the existing function
-        for (const timeslot of timeslotsToClean) {
-            try {
-                // @ts-ignore
-                await cancelTimeslotDirect(timeslot._id);
-            } catch (error) {
-                console.error(`Failed to cancel timeslot ${timeslot._id}:`, error);
-            }
-        }
-    } catch (error) {
-        console.error("Failed to process cleanup:", error);
-    }
-}
 
 // Find a timeslot by request ID
 export async function findTimeslotByRequestId(requestId: String | Types.ObjectId): Promise<ITimeslot | null> {
