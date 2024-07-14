@@ -53,7 +53,6 @@ export const addService = async (req: Request, res: Response, next: NextFunction
         // Create a new ServiceOffering object
         const newServiceOffering = new ServiceOffering({
             serviceType: serviceType,
-            lastUpdatedOn: new Date(),
             hourlyRate: Number(hourlyRate),
             description: description,
             acceptedPaymentMethods: acceptedPaymentMethods.map((method: { title: any; }) => method.title) || [],
@@ -129,7 +128,6 @@ export const editService = async (req: Request, res: Response, next: NextFunctio
 
             serviceOffering.baseDuration = defaultSlotTime;
         serviceOffering.bufferTimeDuration = travelTime;
-        serviceOffering.lastUpdatedOn = new Date();
 
         // Save the updated service offering to the database
         const updatedServiceOffering = await serviceOffering.save();

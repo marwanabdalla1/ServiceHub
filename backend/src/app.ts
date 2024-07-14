@@ -1,6 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import http from "http";
 import account from "./models/account";
 import errorHandler from "./middleware/errorHandler";
 import logger from "./middleware/reqlogger";
@@ -23,11 +24,13 @@ import RecoveryRouter from "./routes/Recovery";
 import EmailRouter from "./routes/Email";
 import { env } from "process";
 import mongoose from "mongoose";
-
+import { initializeSocket } from "./socket";
 // Import the models to ensure they are registered
 import './models/serviceOffering';
 
 const app = express();
+const server = http.createServer(app);
+const io = initializeSocket(server);
 
 // Override the default required string check to allow empty strings
 mongoose.Schema.Types.String.checkRequired(v => v != null);
@@ -85,7 +88,7 @@ const port = env.PORT || 8080;
 mongoose.connect(env.MONGO_CONNECTION_STRING || "")
     .then(() => {
         console.log("Connected to MongoDB");
-        app.listen(port, () => {
+        server.listen(port, () => {
             console.log(`Server running on port: ${port}`);
         });
     })
@@ -94,3 +97,4 @@ mongoose.connect(env.MONGO_CONNECTION_STRING || "")
     });
 
 export default app;
+export { io }; // Export io for use in other modules

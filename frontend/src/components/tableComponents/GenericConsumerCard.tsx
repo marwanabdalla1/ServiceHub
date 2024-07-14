@@ -9,12 +9,12 @@ import {ServiceRequest} from "../../models/ServiceRequest";
 import {Job} from "../../models/Job";
 import {useAuth} from "../../contexts/AuthContext";
 import {Account} from "../../models/Account";
-import {Button, Divider, IconButton} from "@mui/material";
+import {Divider, IconButton} from "@mui/material";
 import {JobStatus, RequestStatus} from "../../models/enums";
 import OpenInFullIcon from "@mui/icons-material/OpenInFull";
 import CloseFullscreenIcon from '@mui/icons-material/CloseFullscreen';
 import CloseIcon from "@mui/icons-material/Close";
-import {Link as RouterLink, redirect, useNavigate} from "react-router-dom";
+import {Link as RouterLink, useNavigate} from "react-router-dom";
 import {formatDateTime} from "../../utils/dateUtils";
 import { defaultProfileImage, fetchProfileImageById } from '../../services/fetchProfileImage';
 import Link from "@mui/material/Link";
@@ -95,7 +95,11 @@ const GenericConsumerCard: React.FC<GenericConsumerCardProps> = ({
                 // } else if (item.requestStatus === RequestStatus.accepted) {
                 //     buttons.push(<BlackButton text="Cancel Request" onClick={() => actions.cancelRequest?.(item)}
                 //                               sx={{marginRight: "1rem"}}/>);
-            } else if (actions.cancelRequest && ["pending", "accepted", "action needed from requestor"].includes(item.requestStatus)) {
+            } else if (item.requestStatus === RequestStatus.accepted && item.job) {
+                console.log("request with job:", item)
+                buttons.push(<BlackButton text="View Job" onClick={() => navigate(`/outgoing/jobs/${item.job}`)}
+                                          sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
+            } else if (actions.cancelRequest && ["pending", "action needed from requestor"].includes(item.requestStatus)) {
                 buttons.push(<BlackButton text="Cancel Request" onClick={() => actions.cancelRequest?.(item)}
                                           sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
 
@@ -145,7 +149,6 @@ const GenericConsumerCard: React.FC<GenericConsumerCardProps> = ({
     };
 
     const generalStatus = 'requestStatus' in item ? item.requestStatus : JobStatus[item.status];
-
 
     return (
         <Card>
@@ -210,14 +213,14 @@ const GenericConsumerCard: React.FC<GenericConsumerCardProps> = ({
                         Appointment Start Time:
                     </Typography>
                     <Typography variant="body2" component="span">
-                        {formatDateTime(item.timeslot?.start)}
+                        {item.timeslot ? formatDateTime(item.timeslot.start) : formatDateTime(item.appointmentStartTime) + " (invalid)"}
                     </Typography>
 
                     <Typography variant="body2" color="text.secondary" component="span">
                         Appointment End Time:
                     </Typography>
                     <Typography variant="body2" component="span">
-                        {formatDateTime(item.timeslot?.end)}
+                        {item.timeslot ? formatDateTime(item.timeslot.end) : formatDateTime(item.appointmentEndTime) + " (invalid)"}
                     </Typography>
 
 

@@ -14,7 +14,7 @@ import {
 
 import {Link} from 'react-router-dom'
 import Typography from '@mui/material/Typography';
-import {ServiceRequest, ServiceRequest as Request} from '../../models/ServiceRequest';
+import {ServiceRequest} from '../../models/ServiceRequest';
 import GenericProviderCard from '../../components/tableComponents/GenericProviderCard'
 import {ServiceType} from '../../models/enums'
 import {useEffect} from "react";
@@ -37,7 +37,6 @@ import useAlert from '../../hooks/useAlert';
 type Item = ServiceRequest | Job;
 
 export default function IncomingRequestTable() {
-    const [isModalOpen, setIsModalOpen] = useState(false);
     const [showMediaCard, setShowMediaCard] = React.useState(false);
     const [selectedRequest, setSelectedRequest] = React.useState<ServiceRequest | null>(null);
     const [serviceRequests, setServiceRequests] = React.useState<ServiceRequest[]>([]);
@@ -53,8 +52,7 @@ export default function IncomingRequestTable() {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
 
-    const serviceTypeOptions = Object.keys(ServiceType)
-    const statusOptions = ['All Requests', 'Pending', 'Action Needed from Requester', 'Accepted', 'Cancelled', 'Declined'];
+    const statusOptions = ['All Requests', 'Pending', 'Action Needed from Requester', 'Cancelled', 'Declined']; //exclude accepted
     const [statusFilter, setStatusFilter] = useState('All Requests');
     const [serviceTypeFilter, setServiceTypeFilter] = useState("ALL");
 
@@ -103,14 +101,6 @@ export default function IncomingRequestTable() {
         setStatusFilter(event.target.value);
     };
 
-    const openModal = (request: Request) => {
-        setSelectedRequest(request);
-        setIsModalOpen(true);
-    };
-
-    const closeModal = () => {
-        setIsModalOpen(false);
-    };
 
     const handleToggleMediaCard = (req: ServiceRequest | Item | null) => {
         if (req && (req as ServiceRequest).requestedBy === null) {
@@ -121,19 +111,6 @@ export default function IncomingRequestTable() {
         setShowMediaCard(req !== null);
     };
 
-    const handleChangePage = (
-        event: React.MouseEvent<HTMLButtonElement> | null,
-        newPage: number
-    ): void => {
-        setPage(newPage);
-    };
-
-    const handleChangeRowsPerPage = (
-        event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
-    ): void => {
-        setRowsPerPage(parseInt(event.target.value, 10));
-        setPage(0); // Reset page to zero after row change
-    };
 
     const onAccept = () => {
         if (!selectedRequest) {
@@ -210,9 +187,9 @@ export default function IncomingRequestTable() {
                         <Typography variant="h6" component="div" sx={{marginBottom: '10px'}}>
                             Incoming Requests
                         </Typography>
-                        <Typography variant="body2" component="div" sx={{marginBottom: '16px'}}>
+                        <Typography variant="body2" component="div" sx={{marginBottom: '18px'}}>
                             Hint: Accepted requests automatically turn into
-                            <Link to="/incoming/jobs"> jobs</Link>.
+                            <Link to="/incoming/jobs"> jobs</Link> and are thus not shown here.
                         </Typography>
                     </Box>
 

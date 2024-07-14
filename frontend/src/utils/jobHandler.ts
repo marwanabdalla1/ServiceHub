@@ -40,70 +40,71 @@ export const handleComplete = async ({
 
 
     //   sanity check: appointment time has to be in the past
-    // console.log("dates:", selectedJob.timeslot?.end, "\n date 2", new Date(), formatDateTime(selectedJob.timeslot.end) > formatDateTime(new Date()))
+    console.log("dates:", selectedJob.timeslot?.end, "\n date 2", new Date(), formatDateTime(selectedJob.timeslot?.end) > formatDateTime(new Date()))
     //TODO: delete the comment
-    // if (!selectedJob.timeslot?.end || moment(selectedJob.timeslot.end).isAfter(moment())) {
-    //     //TODO: add modal to let user know
-    //     console.error('The job cannot be completed, since its appointment is in the future.');
-    //     triggerAlert("Job Cannot Be Completed", "The job cannot be completed, since the appointment ends in the future. Please try again after the end time.", "error", 100000, "dialog", "center")
-    //     return;
-    // }
+    if (!selectedJob.timeslot?.end || moment(selectedJob.timeslot.end).isAfter(moment())) {
+        //     //TODO: add modal to let user know
+        console.error('The job cannot be completed, since its appointment is in the future.');
+        triggerAlert("Job Cannot Be Completed", "The job cannot be completed, since the appointment ends in the future. Please try again after the end time.", "error", 100000, "dialog", "center")
+        return;
+    }
 
-    // try {
-    //
-    //     // update the job
-    //     const updateJobData = {
-    //         status: JobStatus.completed,
-    //     };
-    //     console.log("selected request id:", selectedJob?._id, updateJobData)
-    //     const updateJob = await axios.put(`/api/jobs/${selectedJob?._id}`, updateJobData, {
-    //         headers: {Authorization: `Bearer ${token}`}
-    //     });
-    //     console.log('Job Updated:', updateJob.data);
-    //     console.log("jobs: " + jobs[0]);
-    //     // Update local state to reflect these changes
-    //     const updatedOfferedServices = jobs.map(job => {
-    //         if (job._id === selectedJob._id) {
-    //             return {...job, ...updateJobData};
-    //         }
-    //         return job;
-    //     });
-    //
-    //     if (setJobs) {
-    //         setJobs(updatedOfferedServices);
-    //     }
-    //     setShowMediaCard(false);
-    // } catch (error) {
-    //     console.error('Error completing job:', error);
-    // }
-    //
-    // const {status, _id, receiver, provider, ...rest} = selectedJob;
-    // // Prepare notification data
-    // const notificationData = {
-    //     isViewed: false,
-    //     content: `Your service for ${selectedJob.serviceType} on the ${formatDateTime(selectedJob.timeslot?.start)} has been marked as complete`,
-    //     job: selectedJob._id,
-    //     recipient: selectedJob.receiver._id,
-    //     notificationType: "Job Status Changed",
-    //     ...rest,
-    // };
-    //
-    // console.log("notification data at frontend:", notificationData);
-    //
-    // // generate new notification
-    // try {
-    //     const notification = await axios.post("api/notifications/", notificationData, {
-    //         headers: {Authorization: `Bearer ${token}`}
-    //     });
-    //     console.log("Notification sent!", notification);
-    //
-    //
-    // } catch (notificationError) {
-    //     console.error('Error sending notification:', notificationError);
-    // }
+    try {
+
+        // update the job
+        const updateJobData = {
+            status: JobStatus.completed,
+        };
+        console.log("selected request id:", selectedJob?._id, updateJobData)
+        const updateJob = await axios.put(`/api/jobs/${selectedJob?._id}`, updateJobData, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        console.log('Job Updated:', updateJob.data);
+        console.log("jobs: " + jobs[0]);
+        // Update local state to reflect these changes
+        const updatedOfferedServices = jobs.map(job => {
+            if (job._id === selectedJob._id) {
+                return { ...job, ...updateJobData };
+            }
+            return job;
+        });
+
+        if (setJobs) {
+            setJobs(updatedOfferedServices);
+        }
+        setShowMediaCard(false);
+    } catch (error) {
+        console.error('Error completing job:', error);
+    }
+
+    const { status, _id, receiver, provider, ...rest } = selectedJob;
+    // Prepare notification data
+    const notificationData = {
+        isViewed: false,
+        content: `Your service for ${selectedJob.serviceType} on the ${formatDateTime(selectedJob.timeslot?.start)} has been marked as complete`,
+        job: selectedJob._id,
+        recipient: selectedJob.receiver._id,
+        notificationType: "Job Status Changed",
+        ...rest,
+    };
+
+    console.log("notification data at frontend:", notificationData);
+
+    // generate new notification
+    try {
+        const notification = await axios.post("api/notifications/", notificationData, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        console.log("Notification sent!", notification);
 
 
-};
+    } catch (notificationError) {
+        console.error('Error sending notification:', notificationError);
+    }
+
+
+}
+    ;
 
 // handle revoking completed job
 export const handleRevoke = async ({
@@ -303,7 +304,6 @@ export const handleCancel = async ({
     // }
 
 };
-
 
 
 export const sendEmailNotification = async (initiatorEmail: string,
