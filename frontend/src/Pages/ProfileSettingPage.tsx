@@ -156,7 +156,7 @@ function UserProfile(): React.ReactElement {
         firstName: false,
         lastName: false,
         email: false,
-        phone: false,
+        phoneNumber: false,
         address: false,
         description: false,
         service: false
@@ -167,7 +167,7 @@ function UserProfile(): React.ReactElement {
         firstName: "",
         lastName: "",
         email: "",
-        phone: "",
+        phoneNumber: "",
         address: "",
         description: "",
     });
@@ -183,7 +183,7 @@ function UserProfile(): React.ReactElement {
                 firstName: account.firstName,
                 lastName: account.lastName,
                 email: account.email,
-                phone: account.phoneNumber ? account.phoneNumber : "",
+                phoneNumber: account.phoneNumber ? account.phoneNumber : "",
                 address: concatenatedAddress,
                 description: account.description ? account.description : "",
             });
@@ -324,7 +324,7 @@ function UserProfile(): React.ReactElement {
                     {renderField("First Name", "firstName", false)}
                     {renderField("Last Name", "lastName", false)}
                     {renderField("Email Address", "email", false)}
-                    {renderField("Phone Number", "phone")}
+                    {renderField("Phone Number", "phoneNumber")}
                     {renderField("Address", "address")}
                     {renderField("Description", "description")}
                     <Button onClick={logoutUser}>Logout</Button>

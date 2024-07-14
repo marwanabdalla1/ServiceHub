@@ -45,7 +45,7 @@ export default function ViewUserData(): React.ReactElement {
         firstName: false,
         lastName: false,
         email: false,
-        phone: false,
+        phoneNumber: false,
         address: false,
         description: false,
         service: false
@@ -55,7 +55,7 @@ export default function ViewUserData(): React.ReactElement {
         firstName: "",
         lastName: "",
         email: "",
-        phone: "",
+        phoneNumber: "",
         address: "",
         description: "",
     });
@@ -103,7 +103,7 @@ export default function ViewUserData(): React.ReactElement {
                 firstName: account.firstName,
                 lastName: account.lastName,
                 email: account.email,
-                phone: account.phone ? account.phone : "",
+                phoneNumber: account.phoneNumber ? account.phoneNumber : "",
                 address: concatenatedAddress,
                 description: account.description ? account.description : "",
             });
@@ -214,7 +214,7 @@ export default function ViewUserData(): React.ReactElement {
                     {renderField("First Name", "firstName")}
                     {renderField("Last Name", "lastName")}
                     {renderField("Email Address", "email")}
-                    {renderField("Phone Number", "phone")}
+                    {renderField("Phone Number", "phoneNumber")}
                     {renderField("Address", "address")}
                     {renderField("Description", "description")}
                     {account?.isProvider && (

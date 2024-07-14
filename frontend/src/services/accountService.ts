@@ -12,10 +12,10 @@ type FieldType = {
 export const updateAccountFields = async (account: any, field: string, token: string | null, accountId: string | null, fieldValue: FieldType, setFieldValue: (value: (((prevState: FieldType) => FieldType) | FieldType)) => void) => {
     const updatedAccount = {...account, [field]: fieldValue[field]};
 
-    if (field === 'phone' && !isValidPhoneNumber(fieldValue[field])) {
+    if (field === 'phoneNumber' && !isValidPhoneNumber(fieldValue[field])) {
         toast('Invalid phone number', {type: 'error'});
         // set the value of phone back to the account phone number
-        setFieldValue(prevState => ({...prevState, [field]: account.phone}));
+        setFieldValue(prevState => ({...prevState, [field]: account.phoneNumber}));
         return;
     }
 
@@ -29,7 +29,7 @@ export const updateAccountFields = async (account: any, field: string, token: st
             return response.data;
         }
         if (token && accountId) {
-            const response = await axios.put(`/api/account/${accountId}`, updatedAccount, {
+            const response = await axios.put(`/api/account/admin/update/${accountId}`, updatedAccount, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -61,7 +61,7 @@ export const saveAddress = async (updatedAddress: {
             setAccount(response.data);
         }
         if (token && accountId) {
-            const response = await axios.put(`/api/account/${accountId}`, updatedAccount, {
+            const response = await axios.put(`/api/account/admin/update/${accountId}`, updatedAccount, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
