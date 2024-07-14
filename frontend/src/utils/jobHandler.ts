@@ -317,9 +317,9 @@ export const sendEmailNotification = async (initiatorEmail: string,
             serviceType: selectedJob.serviceType,
             startTime: selectedJob.timeslot?.start,
         }).then((res) => {
-            console.log(`Email sent to ${receiverEmail}:`, res);
+            console.log(`Email sent to ${receiverEmail} and ${initiatorEmail}:`, res);
         }).catch((err) => {
-            console.error(`Error sending email to ${receiverEmail}:`, err);
+            console.error(`Error sending email to ${receiverEmail} or ${initiatorEmail}:`, err);
         });
     } catch (error) {
         console.error("There was an error sending the email", error);

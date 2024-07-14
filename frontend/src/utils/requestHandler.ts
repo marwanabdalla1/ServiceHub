@@ -1,11 +1,11 @@
-import {JobStatus, RequestStatus} from "../models/enums";
+import { JobStatus, RequestStatus } from "../models/enums";
 
 import axios from "axios";
-import {formatDateTime} from "./dateUtils";
-import {ServiceRequest} from "../models/ServiceRequest";
-import {NavigateFunction} from "react-router-dom";
-import {sendEmailNotification} from './jobHandler'
-import {Account} from "../models/Account";
+import { formatDateTime } from "./dateUtils";
+import { ServiceRequest } from "../models/ServiceRequest";
+import { NavigateFunction } from "react-router-dom";
+import { sendEmailNotification } from './jobHandler'
+import { Account } from "../models/Account";
 
 interface RequestHandlerParams {
     selectedRequest: ServiceRequest;
@@ -25,17 +25,17 @@ interface TimeChangeHandlerParams extends RequestHandlerParams {
 
 
 export const handleAccept = async ({
-                                       selectedRequest,
-                                       serviceRequests,
-                                       setServiceRequests,
-                                       token,
-                                       setShowMediaCard
-                                   }:RequestHandlerParams) => {
+    selectedRequest,
+    serviceRequests,
+    setServiceRequests,
+    token,
+    setShowMediaCard
+}: RequestHandlerParams) => {
 
 
 
     // get data from the request (selectedRequest)
-    const {requestStatus, job, _id, requestedBy, provider, ...rest} = selectedRequest;
+    const { requestStatus, job, _id, requestedBy, provider, ...rest } = selectedRequest;
 
     const jobData = {
         status: JobStatus.open,
@@ -50,7 +50,7 @@ export const handleAccept = async ({
     // post new job
     try {
         const jobResponse = await axios.post("api/jobs/", jobData, {
-            headers: {Authorization: `Bearer ${token}`}
+            headers: { Authorization: `Bearer ${token}` }
         });
         console.log("job posted!", jobResponse);
 
@@ -64,20 +64,20 @@ export const handleAccept = async ({
             console.log("selected request id:", selectedRequest._id, updateRequestData);
 
             const updateResponse = await axios.patch(`/api/requests/${selectedRequest._id}`, updateRequestData, {
-                headers: {Authorization: `Bearer ${token}`}
+                headers: { Authorization: `Bearer ${token}` }
             });
             console.log('Request Updated:', updateResponse.data);
 
             // Update local state to reflect these changes
             const updatedServiceRequests = serviceRequests.map(req => {
                 if (req._id === selectedRequest._id) {
-                    return {...req, ...updateRequestData, job: jobResponse.data._id};
+                    return { ...req, ...updateRequestData, job: jobResponse.data._id };
                 }
                 return req;
             });
 
             console.log(updatedServiceRequests);
-            if (setServiceRequests){
+            if (setServiceRequests) {
                 setServiceRequests(updatedServiceRequests);
             }
             setShowMediaCard(false);
@@ -101,7 +101,7 @@ export const handleAccept = async ({
             // generate new notification
             try {
                 const notification = await axios.post("api/notifications/", notificationData, {
-                    headers: {Authorization: `Bearer ${token}`}
+                    headers: { Authorization: `Bearer ${token}` }
                 });
                 console.log("Notification sent!", notification);
 
@@ -119,16 +119,16 @@ export const handleAccept = async ({
 
 
 export const handleDecline = async ({
-                                 selectedRequest,
-                                 serviceRequests,
-                                 setServiceRequests,
-                                 token,
-                                 setShowMediaCard
-                             }:RequestHandlerParams) => {
+    selectedRequest,
+    serviceRequests,
+    setServiceRequests,
+    token,
+    setShowMediaCard
+}: RequestHandlerParams) => {
 
 
     // get data from the request (selectedRequest)
-    const {requestStatus, job, _id, requestedBy, provider, timeslot,  ...rest} = selectedRequest;
+    const { requestStatus, job, _id, requestedBy, provider, timeslot, ...rest } = selectedRequest;
 
     try {
 
@@ -138,7 +138,7 @@ export const handleDecline = async ({
         };
         console.log("selected request id:", selectedRequest._id, updateRequestData)
         const updateResponse = await axios.patch(`/api/requests/${selectedRequest._id}`, updateRequestData, {
-            headers: {Authorization: `Bearer ${token}`}
+            headers: { Authorization: `Bearer ${token}` }
         });
         console.log('Request Updated:', updateResponse.data);
 
@@ -146,13 +146,13 @@ export const handleDecline = async ({
         // Update local state to reflect these changes
         const updatedServiceRequests = serviceRequests.map(req => {
             if (req._id === selectedRequest._id) {
-                return {...req, ...updateRequestData};
+                return { ...req, ...updateRequestData };
             }
             return req;
         });
 
         console.log(updatedServiceRequests);
-        if (setServiceRequests){
+        if (setServiceRequests) {
             setServiceRequests(updatedServiceRequests);
         }
         setShowMediaCard(false);
@@ -175,7 +175,7 @@ export const handleDecline = async ({
     // generate new notification
     try {
         const notification = await axios.post("api/notifications/", notificationData, {
-            headers: {Authorization: `Bearer ${token}`}
+            headers: { Authorization: `Bearer ${token}` }
         });
         console.log("Notification sent!", notification);
 
@@ -189,17 +189,17 @@ export const handleDecline = async ({
 
 // handle cancel initiated by provider
 export const handleCancel = async ({
-                                selectedRequest,
-                                serviceRequests,
-                                setServiceRequests,
-                                token,
-                                account,
-                                setShowMediaCard
-                            }:RequestHandlerParams) => {
+    selectedRequest,
+    serviceRequests,
+    setServiceRequests,
+    token,
+    account,
+    setShowMediaCard
+}: RequestHandlerParams) => {
 
 
     // get data from the request (selectedRequest)
-    const {requestStatus, job, _id, requestedBy, provider, timeslot, ...rest} = selectedRequest;
+    const { requestStatus, job, _id, requestedBy, provider, timeslot, ...rest } = selectedRequest;
 
     try {
 
@@ -209,7 +209,7 @@ export const handleCancel = async ({
         };
         console.log("selected request id:", selectedRequest._id, updateRequestData)
         const updateResponse = await axios.patch(`/api/requests/${selectedRequest._id}`, updateRequestData, {
-            headers: {Authorization: `Bearer ${token}`}
+            headers: { Authorization: `Bearer ${token}` }
         });
         console.log('Request Updated:', updateResponse.data);
 
@@ -218,13 +218,13 @@ export const handleCancel = async ({
         // Update local state to reflect these changes
         const updatedServiceRequests = serviceRequests.map(req => {
             if (req._id === selectedRequest._id) {
-                return {...req, ...updateRequestData};
+                return { ...req, ...updateRequestData };
             }
             return req;
         });
 
         console.log(updatedServiceRequests);
-        if (setServiceRequests){
+        if (setServiceRequests) {
             setServiceRequests(updatedServiceRequests);
         }
         setShowMediaCard(false);
@@ -257,13 +257,13 @@ export const handleCancel = async ({
     // generate new notification
     try {
         const notificationToProvider = await axios.post("api/notifications/", notificationDataToProvider, {
-            headers: {Authorization: `Bearer ${token}`}
+            headers: { Authorization: `Bearer ${token}` }
         });
         console.log("Notification to provider sent!", notificationToProvider);
 
 
         const notificationToConsumer = await axios.post("api/notifications/", notificationDataToConsumer, {
-            headers: {Authorization: `Bearer ${token}`}
+            headers: { Authorization: `Bearer ${token}` }
         });
         console.log("Notification to consumer sent!", notificationToConsumer);
 
@@ -296,15 +296,15 @@ export const handleCancel = async ({
 };
 
 export const handleTimeChange = async ({
-                                    selectedRequest,
-                                    serviceRequests,
-                                    setServiceRequests,
-                                    token,
-                                    setShowMediaCard,
-                                    setTimeChangePopUp,
-                                    comment,
-                                    navigate
-                                }:TimeChangeHandlerParams) => {
+    selectedRequest,
+    serviceRequests,
+    setServiceRequests,
+    token,
+    setShowMediaCard,
+    setTimeChangePopUp,
+    comment,
+    navigate
+}: TimeChangeHandlerParams) => {
     setTimeChangePopUp(true);
     console.log("handle time change begin");
 
@@ -312,15 +312,14 @@ export const handleTimeChange = async ({
     console.log("request exists");
 
     // get data from the request (selectedRequest)
-    const {requestStatus, job, _id, requestedBy, provider, ...rest} = selectedRequest;
+    const { requestStatus, job, _id, requestedBy, provider, ...rest } = selectedRequest;
 
     console.log(selectedRequest)
     // Prepare notification data
     const notificationData = {
         isViewed: false,
-        content: `Please change the booking time for your service request ${selectedRequest.serviceType} originally scheduled on the ${formatDateTime(selectedRequest.timeslot?.start)}.${
-            (comment && comment!="") ? `\n Comment from the provider: ${comment}` : ''
-        }`,
+        content: `Please change the booking time for your service request ${selectedRequest.serviceType} originally scheduled on the ${formatDateTime(selectedRequest.timeslot?.start)}.${(comment && comment != "") ? `\n Comment from the provider: ${comment}` : ''
+            }`,
         serviceRequest: selectedRequest._id,
         recipient: selectedRequest.requestedBy._id,
         notificationType: 'Timeslot Change Request',
@@ -332,7 +331,7 @@ export const handleTimeChange = async ({
     // generate new notification
     try {
         const notification = await axios.post("api/notifications/", notificationData, {
-            headers: {Authorization: `Bearer ${token}`}
+            headers: { Authorization: `Bearer ${token}` }
         });
         console.log("Notification sent!", notification);
 
@@ -350,20 +349,20 @@ export const handleTimeChange = async ({
         };
         console.log("selected request id:", selectedRequest._id, updateRequestData)
         const updateResponse = await axios.patch(`/api/requests/${selectedRequest._id}`, updateRequestData, {
-            headers: {Authorization: `Bearer ${token}`}
+            headers: { Authorization: `Bearer ${token}` }
         });
         console.log('Request Updated:', updateResponse.data);
 
         // Update local state to reflect these changes
         const updatedServiceRequests = serviceRequests.map(req => {
             if (req._id === selectedRequest._id) {
-                return {...req, ...updateRequestData, timeslot: undefined};
+                return { ...req, ...updateRequestData, timeslot: undefined };
             }
             return req;
         });
 
         console.log("updates after sending timeslot change:", updatedServiceRequests);
-        if (setServiceRequests){
+        if (setServiceRequests) {
             setServiceRequests(updatedServiceRequests);
         }
         setShowMediaCard(false);

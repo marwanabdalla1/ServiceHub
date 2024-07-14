@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
-import Notification, {INotification} from '../models/notification';
+import Notification, { INotification } from '../models/notification';
 import { Types } from 'mongoose';
+import { emitNotification } from '../util/notificationsUtils';
 
 
 interface NotificationInput {
@@ -14,7 +15,7 @@ interface NotificationInput {
 // Create a new notification
 export const createNotification = async (req: Request, res: Response) => {
     try {
-        console.log("notification data:", req.body)
+        // console.log("notification data:", req.body)
         const { content, notificationType, job, review, recipient, serviceRequest } = req.body;
         const newNotification = new Notification({
             isViewed: false,
@@ -26,6 +27,8 @@ export const createNotification = async (req: Request, res: Response) => {
             recipient: new Types.ObjectId(recipient)
         });
         const savedNotification = await newNotification.save();
+        emitNotification(recipient, savedNotification); // Emit the event after saving
+
         res.status(201).json(savedNotification);
     } catch (error) {
         res.status(500).json({ message: (error as Error).message });
@@ -45,6 +48,7 @@ export async function createNotificationDirect({ content, notificationType, job,
             review: review ? new Types.ObjectId(review) : undefined,
             recipient: new Types.ObjectId(recipient)
         });
+        emitNotification(recipient, newNotification); // Emit the event after saving
         return await newNotification.save();
     } catch (error: any) {
         throw new Error(error.message);
@@ -56,9 +60,9 @@ export const getNotifications = async (req: Request, res: Response) => {
     try {
         // From the token, retrieve all notifications where the recipient is the id from the token
         const userId = (req as any).user.userId; // Assuming userId is available in the request (e.g., from authentication middleware)
-        console.log("userId: ", userId);
+        // console.log("userId: ", userId);
         const notifications = await Notification.find({ recipient: userId }).sort({ createdAt: -1 }); // Sorting by createdAt in descending order
-        console.log("notifications: ", notifications);
+        // console.log("notifications: ", notifications);
         res.status(200).json(notifications);
     } catch (error) {
         res.status(500).json({ message: (error as Error).message });
@@ -81,7 +85,7 @@ export const updateNotification = async (req: Request, res: Response) => {
     try {
         const { isViewed, content, job, review, recipient, serviceRequest } = req.body;
         console.log("Notification ID " + req.params.id);
-        
+
         // Create an update object dynamically based on the request body
         const updateFields: any = {};
         if (isViewed !== undefined) updateFields.isViewed = isViewed;
@@ -113,3 +117,6 @@ export const deleteNotification = async (req: Request, res: Response) => {
         res.status(500).json({ message: (error as Error).message });
     }
 };
+
+
+
