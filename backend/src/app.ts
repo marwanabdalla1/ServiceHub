@@ -1,6 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import http from "http";
 import account from "./models/account";
 import errorHandler from "./middleware/errorHandler";
 import logger from "./middleware/reqlogger";
@@ -23,20 +24,13 @@ import RecoveryRouter from "./routes/Recovery";
 import EmailRouter from "./routes/Email";
 import { env } from "process";
 import mongoose from "mongoose";
-import http from "http";
-import { Server } from "socket.io";
-
+import { initializeSocket } from "./socket";
 // Import the models to ensure they are registered
 import './models/serviceOffering';
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, {
-    cors: {
-        origin: "http://localhost:3000",
-        methods: ["GET", "POST"],
-    },
-});
+const io = initializeSocket(server);
 
 // Override the default required string check to allow empty strings
 mongoose.Schema.Types.String.checkRequired(v => v != null);
@@ -102,19 +96,5 @@ mongoose.connect(env.MONGO_CONNECTION_STRING || "")
         console.error("MongoDB connection error:", error);
     });
 
-// Socket.IO connection event
-io.on("connection", (socket) => {
-    console.log("a user connected");
-
-    socket.on("disconnect", () => {
-        console.log("user disconnected");
-    });
-
-    // Add your event handlers here
-    socket.on("message", (msg) => {
-        console.log("message: " + msg);
-        io.emit("message", msg); // Broadcast the message to all connected clients
-    });
-});
-
 export default app;
+export { io }; // Export io for use in other modules

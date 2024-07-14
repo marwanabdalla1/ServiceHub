@@ -4,6 +4,7 @@ import { IoNotificationsOutline } from 'react-icons/io5';
 import { Notification } from '../../models/Notification'; // Import Notification interface
 import axios from 'axios';
 import { useAuth } from "../../contexts/AuthContext"; // Import useAuth hook
+import { useSocket } from '../../contexts/SocketContext'; // Import useSocket hook
 
 interface NotificationBellProps {
   header?: string;
@@ -13,9 +14,11 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ header }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const { token } = useAuth();
+  const socket = useSocket();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const toggleDropdown = () => setIsOpen(!isOpen);
+
 
   const fetchNotifications = () => {
     if (token) {
@@ -36,6 +39,19 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ header }) => {
   useEffect(() => {
     fetchNotifications();
   }, [token]);
+
+  useEffect(() => {
+    if (socket) {
+      socket.on('notification', (notification: Notification) => {
+        console.log('Received notification:', notification); // Add this line
+        setNotifications(prevNotifications => [notification, ...prevNotifications]);
+      });
+
+      return () => {
+        socket.off('notification');
+      };
+    }
+  }, [socket]);
 
   const handleClickOutside = (event: MouseEvent) => {
     if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
