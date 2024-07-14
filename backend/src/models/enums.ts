@@ -20,7 +20,7 @@ export enum starCount {
 
 export enum JobStatus {
     completed = "completed", // 0
-    cancelled = "canceled", // 1
+    cancelled = "cancelled", // 1
     open = "open" // 2
 }
 
