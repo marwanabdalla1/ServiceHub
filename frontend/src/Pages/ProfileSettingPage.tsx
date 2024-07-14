@@ -25,7 +25,9 @@ import {toast} from "react-toastify";
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddressDialog from "../components/dialogs/AddressDialog";
 import {isValidPhoneNumber} from "../validators/AccountDataValidator";
-import {deleteProfileImage, fetchProfileImageByToken} from "../services/fetchProfileImage";
+import {deleteProfileImage, fetchProfileImageByToken, handleProfileImageUpload} from "../services/fetchProfileImage";
+import {deleteAccount, saveAddress, updateAccountFields} from "../services/accountService";
+import {deleteService} from "../services/serviceOfferingService";
 
 type EditModeType = {
     [key: string]: boolean;
@@ -49,7 +51,7 @@ function UserProfile(): React.ReactElement {
     const isPremium = userAccount?.isPremium;
     const client_reference_id = userAccount?._id;
     const [openAddressDialog, setOpenAddressDialog] = useState(false);
-
+    const navigate = useNavigate();
 
     const fetchSubscriptionData = async (clientReferenceId: string) => {
         try {
@@ -130,9 +132,6 @@ function UserProfile(): React.ReactElement {
         })();
     }, [account]);
 
-
-
-
     useEffect(() => {
         if (token) {
             fetchProfileImageByToken(token).then(image => setProfileImage(image));
@@ -157,7 +156,7 @@ function UserProfile(): React.ReactElement {
         firstName: false,
         lastName: false,
         email: false,
-        phone: false,
+        phoneNumber: false,
         address: false,
         description: false,
         service: false
@@ -168,7 +167,7 @@ function UserProfile(): React.ReactElement {
         firstName: "",
         lastName: "",
         email: "",
-        phone: "",
+        phoneNumber: "",
         address: "",
         description: "",
     });
@@ -184,63 +183,12 @@ function UserProfile(): React.ReactElement {
                 firstName: account.firstName,
                 lastName: account.lastName,
                 email: account.email,
-                phone: account.phoneNumber ? account.phoneNumber : "",
+                phoneNumber: account.phoneNumber ? account.phoneNumber : "",
                 address: concatenatedAddress,
                 description: account.description ? account.description : "",
             });
         }
     }, [account]);
-
-    const handleProfileImageUpload = (setFile: React.Dispatch<React.SetStateAction<string | null>>) => (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files ? event.target.files[0] : null;
-        if (!file) {
-            console.error('No file selected');
-            return;
-        }
-        setFile( URL.createObjectURL(file));
-        console.log("set file finished: ", file);
-        handleFileUpload(file, "profileImage").then(response => {
-            // Perform some action after the file upload is complete
-            toast('Profile image uploaded successfully', {type: 'success'})
-            console.log("file upload finished");
-        }).catch(error => {
-            toast('Error uploading profile image', {type: 'error'});
-            console.error('Error uploading profile image:', error);
-        });
-    };
-
-    const handleFileUpload = async (file: File | null, fileType: string) => {
-        if (!file) {
-            return;
-        }
-
-        console.log(`Uploading ${fileType}...`);
-        const formData = new FormData();
-        formData.append('file', file);
-
-        let url = '';
-
-        if (fileType === 'profileImage') {
-            url = '/api/file/upload/profileImage';
-        } else if (fileType === 'certificate') {
-            url = '/api/file/upload/certificate';
-        } else {
-            console.error('Invalid file type:', fileType);
-            return;
-        }
-
-        try {
-            const response = await axios.post(url, formData, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            console.log(`Status: ${response.status}`);
-            console.log(response.data);
-        } catch (error) {
-            console.error('Error uploading file:', error);
-        }
-    };
 
     const handleEditClick = (field: string) => {
         setEditMode(prevState => ({...prevState, [field]: !prevState[field]}));
@@ -255,57 +203,19 @@ function UserProfile(): React.ReactElement {
         postal: string;
         location: string;
     }) => {
-        const updatedAccount = {
-            ...account,
-            ...updatedAddress
-        };
-
-        try {
-            const response = await axios.put('/api/account', updatedAccount, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            setAccount(response.data);
-        } catch (error) {
-            console.error('Error updating account details:', error);
-        }
+        await saveAddress(updatedAddress, account, token, null, setAccount);
 
         setOpenAddressDialog(false);
     };
 
-    const handleFieldSave = async (field: string) => {
-        const updatedAccount = {...account, [field]: fieldValue[field]};
-
-        if (field === 'phone' && !isValidPhoneNumber(fieldValue[field])) {
-            toast('Invalid phone number', {type: 'error'});
-            // set the value of phone back to the account phone number
-            setFieldValue(prevState => ({...prevState, [field]: account.phoneNumber}));
-            return;
-        }
-
-        try {
-            const response = await axios.put('/api/account', updatedAccount, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            setAccount(response.data);
-        } catch (error) {
-            console.error('Error updating account details:', error);
-        }
-    };
 
     const handleKeyPress = (event: React.KeyboardEvent, field: string) => {
         if (event.key === 'Enter') {
-            handleFieldSave(field).then(() => console.log('Field saved'));
+            updateAccountFields(account, field, token, null, fieldValue, setFieldValue).then(() => console.log('Field saved'));
             handleEditClick(field);
         }
     };
 
-    const navigate = useNavigate();
 
     const handleAddServiceClick = () => {
         navigate('/addservice');
@@ -315,30 +225,10 @@ function UserProfile(): React.ReactElement {
         navigate('/addservice', {state: {service}});
     };
     const handleDeleteServiceClick = async () => {
-        if (serviceToDelete) {
+        if (serviceToDelete && token) {
             try {
-                // delete the service first
-                const serviceResponse = await axios.delete(`/api/services/delete-service/${serviceToDelete}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-    
-                if (serviceResponse.status === 200 || serviceResponse.status === 204) {
-                    // update the services state immediately after successful service deletion
-                    setServices(services.filter(service => service._id !== serviceToDelete));
-    
-                    // attempt to delete the corresponding certificate without waiting for the result
-                    axios.delete(`/api/certificate/${serviceToDelete}`, {
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        }
-                    }).catch(error => {
-                        console.error('Error deleting certificate:', error);
-                    });
-                } else {
-                    console.error('Error deleting service:', serviceResponse.status);
-                }
+                await deleteService(serviceToDelete, token, services, setServices);
+                setServices(services.filter(service => service._id !== serviceToDelete));
             } catch (error) {
                 console.error('Error deleting service:', error);
             } finally {
@@ -347,7 +237,7 @@ function UserProfile(): React.ReactElement {
             }
         }
     };
-    
+
 
     const handleOpenDialog = (serviceId: string) => {
         setServiceToDelete(serviceId);
@@ -361,12 +251,9 @@ function UserProfile(): React.ReactElement {
 
     const handleDeleteAccount = async () => {
         try {
-            const response = await axios.delete('/api/account', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
+            if (token) {
+                deleteAccount(token, null);
+            }
             navigate('/login');
         } catch (error) {
             console.error('Error deleting account:', error);
@@ -424,19 +311,20 @@ function UserProfile(): React.ReactElement {
                 </Typography>
                 <Box sx={{display: 'flex', flexDirection: 'column', gap: 3, p: 3}}>
                     <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5}}>
-                        <IconButton onClick={() => deleteProfileImage(token, setProfileImage)} size="small" sx={{alignSelf: 'flex-end'}}>
+                        <IconButton onClick={() => deleteProfileImage(token, setProfileImage)} size="small"
+                                    sx={{alignSelf: 'flex-end'}}>
                             <DeleteIcon/>
                         </IconButton>
                         <Avatar src={profileImage ? profileImage : undefined}
                                 sx={{width: 80, height: 80}}/>
                         <LightBlueFileButton text="Upload Profile Picture"
-                                             onFileChange={handleProfileImageUpload(setProfileImage)}/>
+                                             onFileChange={handleProfileImageUpload(setProfileImage, token)}/>
                     </Box>
                     {renderField("User ID", "userId", false)}
                     {renderField("First Name", "firstName", false)}
                     {renderField("Last Name", "lastName", false)}
                     {renderField("Email Address", "email", false)}
-                    {renderField("Phone Number", "phone")}
+                    {renderField("Phone Number", "phoneNumber")}
                     {renderField("Address", "address")}
                     {renderField("Description", "description")}
                     <Button onClick={logoutUser}>Logout</Button>

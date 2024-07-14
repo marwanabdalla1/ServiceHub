@@ -2,9 +2,11 @@ import React, {useEffect, useState} from 'react';
 import axios from 'axios';
 import {
     Container, Table, TableBody, TableCell, TableContainer,
-    TableHead, TableRow, Paper, Typography, TextField, Button, Grid
+    TableHead, TableRow, Paper, Typography, TextField, Button, Grid, Box
 } from '@mui/material';
-import {useAuth} from "../../contexts/AuthContext";
+import {useAuth} from "../../../contexts/AuthContext";
+import {useNavigate} from "react-router-dom";
+import {deleteAccount} from "../../../services/accountService";
 
 interface Account {
     email: string;
@@ -24,6 +26,7 @@ export default function AdminUserData(): React.ReactElement {
         accountId: ''
     });
     const {token} = useAuth();
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchUsers();
@@ -55,8 +58,26 @@ export default function AdminUserData(): React.ReactElement {
         fetchUsers();
     };
 
+    const handleDelete = async (accountId: string) => {
+        try {
+            if (token) {
+                await deleteAccount(token, accountId);
+                // Refresh the user list after deletion
+                await fetchUsers();
+            }
+
+        } catch (error) {
+            console.error('Error deleting user data', error);
+        }
+    };
+
+    const handleView = (accountId: string) => {
+        console.log('View user data:', accountId);
+        navigate('/admin/viewUserData', {state: {accountId}});
+    };
+
     return (
-        <Container component="main" maxWidth="md" sx={{mt: 4}}>
+        <Container component="main" maxWidth="lg" sx={{mt: 4}}>
             <Typography variant="h6" gutterBottom sx={{fontWeight: 'bold', fontSize: '30px', color: '#007BFF'}}>
                 User Data
             </Typography>
@@ -112,9 +133,9 @@ export default function AdminUserData(): React.ReactElement {
                             <TableCell align="center">Email</TableCell>
                             <TableCell align="center">First Name</TableCell>
                             <TableCell align="center">Last Name</TableCell>
-                            <TableCell align="center">Role</TableCell>
                             <TableCell align="center">Created At</TableCell>
                             <TableCell align="center">Account ID</TableCell>
+                            <TableCell align="center">Action</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -123,9 +144,20 @@ export default function AdminUserData(): React.ReactElement {
                                 <TableCell align="center">{user.email}</TableCell>
                                 <TableCell align="center">{user.firstName}</TableCell>
                                 <TableCell align="center">{user.lastName}</TableCell>
-                                <TableCell align="center">{user.role}</TableCell>
                                 <TableCell align="center">{new Date(user.createdOn).toLocaleDateString()}</TableCell>
                                 <TableCell align="center">{user._id}</TableCell>
+                                <TableCell align="center">
+                                    <Box textAlign="center">
+                                        <Button onClick={() => handleView(user._id)} variant="contained" color="primary"
+                                                style={{marginRight: '20px'}}>
+                                            View
+                                        </Button>
+                                        <Button onClick={() => handleDelete(user._id)} variant="contained"
+                                                color="error">
+                                            Delete
+                                        </Button>
+                                    </Box>
+                                </TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
