@@ -29,6 +29,10 @@ import {toast} from "react-toastify";
 import {useRecovery} from "../../../contexts/RecoveryContext";
 import {checkEmptyFields} from "../../../validators/GeneralValidator";
 import {isValidEmail, isValidName} from "../../../validators/AccountDataValidator";
+import {IconButton, InputAdornment} from "@mui/material";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import Visibility from "@mui/icons-material/Visibility";
+import {useState} from "react";
 
 interface UserData {
     firstName: string;
@@ -65,6 +69,12 @@ export default function SignUp() {
     const {from} = location.state || {from: {pathname: "/"}};
     const navigate = useNavigate();
     const {createAccountEmail} = useRecovery();
+
+    const [showPassword, setShowPassword] = useState(false);
+
+    const handleClickShowPassword = () => {
+        setShowPassword((prev) => !prev);
+    };
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -189,9 +199,22 @@ export default function SignUp() {
                                     fullWidth
                                     name="password"
                                     label="Password"
-                                    type="password"
+                                    type={showPassword ? "text" : "password"}
                                     id="password"
                                     autoComplete="new-password"
+                                    InputProps={{
+                                        endAdornment: (
+                                            <InputAdornment position="end">
+                                                <IconButton
+                                                    aria-label="toggle password visibility"
+                                                    onClick={handleClickShowPassword}
+                                                    edge="end"
+                                                >
+                                                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                                                </IconButton>
+                                            </InputAdornment>
+                                        ),
+                                    }}
                                 />
                             </Grid>
                             <Grid item xs={12}>
@@ -200,9 +223,22 @@ export default function SignUp() {
                                     fullWidth
                                     name="repeatPassword"
                                     label="Repeat Password"
-                                    type="password"
+                                    type={showPassword ? "text" : "password"}
                                     id="repeatPassword"
                                     autoComplete="new-password"
+                                    InputProps={{
+                                        endAdornment: (
+                                            <InputAdornment position="end">
+                                                <IconButton
+                                                    aria-label="toggle password visibility"
+                                                    onClick={handleClickShowPassword}
+                                                    edge="end"
+                                                >
+                                                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                                                </IconButton>
+                                            </InputAdornment>
+                                        ),
+                                    }}
                                 />
                             </Grid>
 

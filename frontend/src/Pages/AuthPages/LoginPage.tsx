@@ -8,7 +8,7 @@
  */
 
 import * as React from 'react';
-import {PropsWithChildren} from 'react';
+import {PropsWithChildren, useState} from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -26,6 +26,9 @@ import {blue} from "@mui/material/colors";
 import {useLocation, useNavigate} from "react-router-dom";
 import axios from "axios";
 import {useAuth} from "../../contexts/AuthContext";
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import {IconButton, InputAdornment} from "@mui/material";
 
 function Copyright(props: PropsWithChildren<{}>) {
     return (
@@ -53,6 +56,12 @@ export default function SignIn() {
     const location = useLocation();
     const { from } = location.state || { from: { pathname: "/" } };
     const { loginUser } = useAuth();
+
+    const [showPassword, setShowPassword] = useState(false);
+
+    const handleClickShowPassword = () => {
+        setShowPassword((prev) => !prev);
+    };
 
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -102,9 +111,22 @@ export default function SignIn() {
                             fullWidth
                             name="password"
                             label="Password"
-                            type="password"
+                            type={showPassword ? "text" : "password"}
                             id="password"
                             autoComplete="current-password"
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                            aria-label="toggle password visibility"
+                                            onClick={handleClickShowPassword}
+                                            edge="end"
+                                        >
+                                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                ),
+                            }}
                         />
                         <FormControlLabel
                             control={<Checkbox value="remember" color="primary" name="rememberMe"/>}
