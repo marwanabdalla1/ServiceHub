@@ -9,6 +9,7 @@ import {
     Button,
     TextField
 } from '@mui/material';
+import Typography from "@mui/material/Typography";
 
 interface ConfirmDeleteDialogProps {
     open: boolean;
@@ -40,6 +41,11 @@ const ConfirmDeleteDialog: React.FC<ConfirmDeleteDialogProps> = ({
             <DialogTitle>Confirm Deletion</DialogTitle>
             <DialogContent>
                 <DialogContentText>{message}</DialogContentText>
+                <DialogContentText>
+                    <Typography component="span" sx={{color: 'red', fontWeight: 'bold'}}>
+                        Important: This action is permanent and cannot be undone.
+                    </Typography>
+                </DialogContentText>
                 {isDeleteAccount && (
                     <Box mt={2}>
                         <DialogContentText>
