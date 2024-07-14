@@ -135,8 +135,6 @@ export default function ViewUserData(): React.ReactElement {
         }
     };
 
-    const navigate = useNavigate();
-
     const handleDeleteServiceClick = async () => {
         if (serviceToDelete && token) {
             try {
