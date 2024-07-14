@@ -98,12 +98,14 @@ function ProviderProfilePage() {
     // const provider = mockProvider;
     const {offeringId} = useParams<{ offeringId: string }>(); //use this to then make a request to the user with the id to get the user data
 
+
     const navigate = useNavigate();
 
     const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
         const fetchData = async () => {
+            setLoading(true);
             if (offeringId) {
                 try {
                     const fetchedOffering = await fetchOfferingDetails(offeringId);
@@ -138,11 +140,17 @@ function ProviderProfilePage() {
                 try {
                     const reviewResponse = await axios.get(`/api/reviews/${offeringId}`);
                     setReviews(reviewResponse.data.review);
+                    setLoading(false);
+
 
 
                 } catch (error) {
                     console.error("Failed to fetch reviews:", error);
+                    setLoading(false);
+
                 }
+            } else {
+                setLoading(false);
             }
         };
         fetchData();
@@ -205,11 +213,16 @@ function ProviderProfilePage() {
         });
 
     if (!provider || !offering) {
-        return <ErrorPage title={"404 Not Found"} message={"The offering you're looking for does not exist."} />
-        // <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
-        //     <CircularProgress />
-        //     </Box>
-
+        if(loading){
+                return (
+                    <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+                        <CircularProgress />
+                    </Box>
+                );
+        }
+        else {
+            return <ErrorPage title={"404 Not Found"} message={"The offering you're looking for does not exist."} />
+        }
     }
 
     const styles = {
@@ -245,7 +258,6 @@ function ProviderProfilePage() {
         return [country, location, postal].filter(Boolean).join(', ');
     }
 
-    // handle "book now" button
     return (
         <Container>
             <Box sx={{mt: 4}}>

@@ -64,7 +64,7 @@ function SelectTimeslot({onNext, handleCancel, bookingDetails}: SelectTimeslotPr
                 Select time
             </Typography>
 
-            <Box display="flex" alignItems="center" justifyContent="space-between" sx={{mt: 3, mb: 2}}>
+            <Box display="flex" alignItems="center" justifyContent="space-between" sx={{mt: 2, mb: 2}}>
                 <Typography variant="body2" gutterBottom marginBottom={2} style={{whiteSpace: 'pre-line'}}
                             sx={{flex: 6}}>
                     The default duration for this service

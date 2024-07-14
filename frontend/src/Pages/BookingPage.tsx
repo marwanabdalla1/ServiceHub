@@ -5,7 +5,7 @@ import StepTwo from '../components/bookingSteps/SelectTimeslotPage';
 import StepThree from '../components/bookingSteps/UpdateProfile';
 import StepFour from '../components/bookingSteps/ReviewAndConfirm';
 import {useNavigate, useParams} from 'react-router-dom';
-import {Stepper, Step, StepLabel, Button, Box, Container} from '@mui/material';
+import {Stepper, Step, StepLabel, Button, Box, Container, Grid} from '@mui/material';
 import BookingSideCard from "../components/BookingSideCard";
 
 const BookingPage = () => {
@@ -16,7 +16,8 @@ const BookingPage = () => {
         fetchAccountDetails,
         setProvider,
         fetchOfferingDetails,
-        setSelectedServiceDetails
+        setSelectedServiceDetails,
+        resetBookingDetails,
     } = useBooking();
 
     const safeStepParam = stepParam ?? 'step1';
@@ -48,8 +49,10 @@ const BookingPage = () => {
 
     // unmount resetting
     useEffect(() => {
+
         return () => {
             setStep(1);  // Reset step to the first step
+            resetBookingDetails(); //reset booking details
         };
     }, []);
 
@@ -93,10 +96,11 @@ const BookingPage = () => {
     };
 
     return (
-        <Box>
-            <Container sx={{display:"flex", mt: 4, justifyContent:"space-between" }}>
-                <Box display="flex" flexDirection="column" mt={2} width={"75%"} mb={4}>
-                        <Stepper activeStep={step - 1} alternativeLabel sx={{ mb: 2 }}>
+        <Container maxWidth="lg" sx={{mt: 4, display: 'flex'}}>
+            <Grid container spacing={8}>
+                <Grid item xs={9}>
+                    <Box display="flex" flexDirection="column" mt={2} width={"100%"} mb={4} mr={10}>
+                        <Stepper activeStep={step - 1} alternativeLabel sx={{mb: 2}}>
                             {steps.map((label, index) => (
                                 <Step key={label}>
                                     <StepLabel onClick={handleStep(index)}
@@ -112,25 +116,28 @@ const BookingPage = () => {
                                 </Step>
                             ))}
                         </Stepper>
-                    {/*<Button onClick={previousStep}>Back</Button>*/}
-                    {/*<Box sx={{mt: '5'}}>*/}
-                    {currentStep()}
-                    {/*</Box>*/}
+                        {/*<Button onClick={previousStep}>Back</Button>*/}
+                        {/*<Box sx={{mt: '5'}}>*/}
+                        {currentStep()}
+                        {/*</Box>*/}
 
-                </Box>
+                    </Box>
+                </Grid>
 
-                <Box sx={{width: 250, mt:10}}>
+
+                <Grid item xs={3} mt={10} width={"20%"}>
                     <BookingSideCard
                         provider={bookingDetails.provider}
                         timeSlot={bookingDetails.timeSlot}
                         serviceOffering={bookingDetails.serviceOffering}
                         price={bookingDetails.price}
                     />
-                </Box>
-            </Container>
+                </Grid>
+            </Grid>
+        </Container>
 
-        </Box>
-    );
+    )
+        ;
 };
 
 export default BookingPage;

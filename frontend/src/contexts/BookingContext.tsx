@@ -26,43 +26,22 @@ interface BookingContextProps {
     setTimeAndDuration: (timeslot: any) => void;
     fetchAccountDetails: (offeringId: string) => Promise<Account>;
     fetchOfferingDetails: (offeringId: string) => Promise<ServiceOffering> ; // Rename for clarity
-
+    resetBookingDetails: () => void;
 }
 
-// const defaultContext: BookingContextProps = {
-//     bookingDetails: {
-//         // service: '',
-//         startTime: null,
-//         endTime: null,
-//         location: '',
-//         price: 0,
-//         provider: null,
-//         requestedBy: null,
-//         serviceOffering: null,
-//     },
-//     setProvider: () => {},
-//     setRequestedBy: () => {},
-//     setSelectedServiceDetails: () => {},
-//     setTimeAndDuration: () => {},
-//     fetchAccountDetails: async () => ({ id: '', firstName: '', lastName: '', email: '' } as Account),
-//     fetchOfferingDetails: async () => ({ serviceOfferingId: '',
-//         serviceType: ServiceType.bikeRepair, lastUpdatedOn: new Date(), createdOn: new Date(), certificate: null, hourlyRate: 0, description: '', isCertified: false, location: '', provider: new Account('', '', '', '', 0, [], ''), baseDuration: 0, bufferTimeDuration: 0, reviews: [], reviewCount:0, rating: 0 } as ServiceOffering),
-// };
-
+const defaultBookingDetails = {
+    location: undefined,
+    price: undefined,
+    provider: undefined,
+    requestedBy: undefined,
+    serviceOffering: undefined,
+    serviceType: undefined,
+    timeSlot: undefined,
+};
 const BookingContext = createContext<BookingContextProps | undefined>(undefined);
 
 export const BookingProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [bookingDetails, setBookingDetails] = useState<BookingDetails>({
-        // service: '',
-        timeSlot: undefined,
-        location: undefined,
-        price: undefined,
-        provider: undefined,
-        requestedBy: undefined,
-        serviceOffering: undefined,
-        serviceType: undefined
-
-    });
+    const [bookingDetails, setBookingDetails] = useState<BookingDetails>(defaultBookingDetails);
 
     const setProvider = useCallback((provider: Account) => {
         setBookingDetails(prevDetails => ({ ...prevDetails, provider }));
@@ -110,6 +89,8 @@ export const BookingProvider: React.FC<{ children: ReactNode }> = ({ children })
     //     // }
     // };
 
+    const resetBookingDetails = () => setBookingDetails(defaultBookingDetails); // Reset function
+
     const fetchOfferingDetails = async (offeringId:string) => {
         try {
             const response = await axios.get(`/api/offerings/${offeringId}`);
@@ -131,6 +112,7 @@ export const BookingProvider: React.FC<{ children: ReactNode }> = ({ children })
             setTimeAndDuration,
             fetchAccountDetails,
             fetchOfferingDetails,
+            resetBookingDetails,
         }}>
             {children}
         </BookingContext.Provider>

@@ -5,6 +5,7 @@ import {Account} from "../models/Account";
 import {ServiceOffering} from "../models/ServiceOffering";
 import Avatar from "@mui/material/Avatar";
 import {defaultProfileImage, fetchProfileImageById} from "../services/fetchProfileImage";
+import {formatDateTime} from "../utils/dateUtils";
 
 interface BookingSideCardProps {
     provider?: Account;
@@ -43,20 +44,52 @@ const BookingSideCard: React.FC<BookingSideCardProps> = ({
                             </Typography>
                         </div>
                     </div>
-                    <Typography variant="body2" color="text.secondary">Location: {provider?.location}</Typography>
 
-                    {timeSlot && timeSlot.start && (
-                        <Typography variant="body2" color="text.secondary">
-                           {timeSlot.start.toLocaleString()}
-                        </Typography>
-                    )}
-                    {serviceOffering && (
-                        <Typography variant="body2"
-                                    color="text.secondary">Service provided: {serviceOffering.serviceType}</Typography>
-                    )}
-                    {price && (
-                        <Typography variant="body2" color="text.secondary">Hourly rate: €{price} per hour</Typography>
-                    )}
+                    <div style={{display: 'grid', gridTemplateColumns: 'max-content auto', gap: '0.5rem'}}>
+                        <Typography variant="body2" color="text.secondary" component="span">Location:</Typography>
+                        <Typography variant="body2" color="text.secondary"
+                                    component="span">{provider?.location}</Typography>
+
+                        {timeSlot && (
+                            <>
+                                <Typography variant="body2" color="text.secondary" component="span">Time:</Typography>
+                                <Typography variant="body2" color="text.secondary" component="span">
+                                    {formatDateTime(timeSlot.start)}
+                                </Typography>
+                            </>
+                        )}
+                        {serviceOffering && (
+                            <>
+                                <Typography variant="body2" color="text.secondary" component="span">Service
+                                    Type:</Typography>
+                                <Typography variant="body2" color="text.secondary"
+                                            component="span">{serviceOffering.serviceType}</Typography>
+                            </>
+                        )}
+                        {price && (
+                            <>
+                                <Typography variant="body2" color="text.secondary" component="span">Hourly
+                                    rate:</Typography>
+                                <Typography variant="body2" color="text.secondary" component="span">€{price} per
+                                    hour</Typography>
+                            </>
+                        )}
+                    </div>
+                    {/*<Typography variant="body2" color="text.secondary">Location: {provider?.location}</Typography>*/}
+
+                    {/*{timeSlot && timeSlot.start && (*/}
+                    {/*    <Typography variant="body2" color="text.secondary">*/}
+                    {/*        Time:*/}
+                    {/*       {formatDateTime(timeSlot.start)}*/}
+                    {/*    </Typography>*/}
+                    {/*)}*/}
+                    {/*{serviceOffering && (*/}
+                    {/*    <Typography variant="body2"*/}
+                    {/*                color="text.secondary">Service provided: {serviceOffering.serviceType}</Typography>*/}
+                    {/*)}*/}
+                    {/*{price && (*/}
+                    {/*    <Typography variant="body2" color="text.secondary">Hourly rate: €{price} per hour</Typography>*/}
+                    {/*)}*/}
                 </Box>
             </CardContent>
         </Card>
