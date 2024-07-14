@@ -105,10 +105,11 @@ function MainRoutes({search, setSearch}: { search: any, setSearch: any }) {
                 search={search}
                 setSearch={setSearch}/>}
             {showAdminNavBar && <AdminNavbar/>}
-            <div className="flex-grow">
-                <Routes>
-                    {/* Home */}
-                    <Route path="/" element={<HomePage/>}/>
+            <div className="h-screen flex flex-col" style={{paddingTop: '80px'}}>
+                <div className="flex-grow">
+                    <Routes>
+                        {/* Home */}
+                        <Route path="/" element={<HomePage/>}/>
 
                     {/* User Authentication */}
                     <Route path="/login" element={<SignInPage/>}/>
@@ -176,16 +177,17 @@ function MainRoutes({search, setSearch}: { search: any, setSearch: any }) {
                     <Route path="/admin/UserData" element={<AdminUserDataPage/>}/>
                     <Route path="/admin/viewUserData" element={<ViewUserDataPage/>}/>
 
-                    <Route path="/unauthorized" element={<ErrorPage title="Unauthorized Access"
-                                                                    message="You do not have permission to view this page."/>}/>
-                    <Route path="*" element={<ErrorPage title="404 Not Found"
-                                                        message="The page you are looking for does not exist."/>}/>
-                    {/*<Route path="*" element={<h1>Not Found</h1>}/>*/}
-                </Routes>
-            </div>
-            <div>
-                <Divider variant="middle" style={{backgroundColor: 'white', height: '50px'}}/>
-                <Footer/>
+                        <Route path="/unauthorized" element={<ErrorPage title="Unauthorized Access"
+                                                                        message="You do not have permission to view this page."/>}/>
+                        <Route path="*" element={<ErrorPage title="404 Not Found"
+                                                            message="The page you are looking for does not exist."/>}/>
+                        {/*<Route path="*" element={<h1>Not Found</h1>}/>*/}
+                    </Routes>
+                </div>
+                <div>
+                    <Divider variant="middle" style={{backgroundColor: 'white', height: '50px'}}/>
+                    <Footer/>
+                </div>
             </div>
         </div>
     );
