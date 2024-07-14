@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Box, Typography, Card, CardContent, TextField, Button, Grid, CircularProgress } from '@mui/material';
+import { Container, Box, Typography, Card, CardContent, TextField, Button, Grid, CircularProgress, Stepper, Step, StepLabel, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
-import { Formik, Field, Form, ErrorMessage } from 'formik';
+import { Formik, Field, Form, ErrorMessage, FieldProps } from 'formik';
 import * as Yup from 'yup';
+import { GERMAN_CITIES_SUPPORT, GERMAN_POSTAL_REGEX, PHONE_NUMBER_REGEX } from "../shared/Constants";
 
 interface UserDetails {
     address: string;
     postal: string;
     location: string;
-    country: string;
     phoneNumber: string;
     [key: string]: string | number;
 }
@@ -31,14 +31,14 @@ function UpdateSProfile() {
 
     const validationSchema = Yup.object({
         address: Yup.string().required('Address is required'),
-        postal: Yup.string().matches(/^\d+$/, 'Postal code must be numeric').required('Postal code is required'),
+        postal: Yup.string().matches(GERMAN_POSTAL_REGEX, 'Postal code is invalid').required('Postal code is required'),
         location: Yup.string().required('Location is required'),
-        country: Yup.string().required('Country is required'),
-        phoneNumber: Yup.string().matches(/^\d+$/, 'Phone number must be numeric').required('Phone number is required')
+        phoneNumber: Yup.string().matches(PHONE_NUMBER_REGEX, 'Phone number is invalid').required('Phone number is required')
     });
 
     const handleSaveProfile = async (values: UserDetails) => {
         const apiEndpoint = '/api/account';
+        console.log('values:', values);
         try {
             const response = await axios.put(apiEndpoint, values, {
                 headers: { 'Authorization': `Bearer ${token}` },
@@ -83,6 +83,19 @@ function UpdateSProfile() {
                     <Typography variant="h4" gutterBottom>
                         Please confirm your contact data
                     </Typography>
+
+                    <Stepper activeStep={0} alternativeLabel sx={{ mb: 2 }}>
+                        <Step>
+                            <StepLabel>Check Profile</StepLabel>
+                        </Step>
+                        <Step disabled>
+                            <StepLabel>Add Service</StepLabel>
+                        </Step>
+                        <Step disabled>
+                            <StepLabel>Add Availability</StepLabel>
+                        </Step>
+                    </Stepper>
+
                     <Card>
                         <CardContent>
                             <Typography variant="h6" gutterBottom>
@@ -94,7 +107,6 @@ function UpdateSProfile() {
                                         address: account.address || '',
                                         postal: account.postal || '',
                                         location: account.location || '',
-                                        country: account.country || '',
                                         phoneNumber: account.phoneNumber || ''
                                     }}
                                     validationSchema={validationSchema}
@@ -126,26 +138,22 @@ function UpdateSProfile() {
                                                     />
                                                 </Grid>
                                                 <Grid item xs={3}>
-                                                    <Field
-                                                        name="location"
-                                                        as={TextField}
-                                                        label="City"
-                                                        fullWidth
-                                                        variant="outlined"
-                                                        helperText={<ErrorMessage name="location" />}
-                                                        error={Boolean(ErrorMessage.name === "location")}
-                                                    />
-                                                </Grid>
-                                                <Grid item xs={3}>
-                                                    <Field
-                                                        name="country"
-                                                        as={TextField}
-                                                        label="Country"
-                                                        fullWidth
-                                                        variant="outlined"
-                                                        helperText={<ErrorMessage name="country" />}
-                                                        error={Boolean(ErrorMessage.name === "country")}
-                                                    />
+                                                    <Field name="location">
+                                                        {({ field }: FieldProps) => (
+                                                            <FormControl fullWidth variant="outlined">
+                                                                <InputLabel>City</InputLabel>
+                                                                <Select
+                                                                    {...field}
+                                                                    label="City"
+                                                                >
+                                                                    {Object.values(GERMAN_CITIES_SUPPORT).map((city) => (
+                                                                        <MenuItem key={city} value={city}>{city}</MenuItem>
+                                                                    ))}
+                                                                </Select>
+                                                            </FormControl>
+                                                        )}
+                                                    </Field>
+                                                    <ErrorMessage name="location" component="div" />
                                                 </Grid>
                                                 <Grid item xs={12}>
                                                     <Field

@@ -7,8 +7,8 @@ import {ServiceOffering} from "./ServiceOffering";
 export class Job {
   _id: string;
   serviceType: ServiceType; //
-  appointmentStartTime: Date;
-  appointmentEndTime: Date | undefined;
+  appointmentStartTime?: Date;
+  appointmentEndTime?: Date | undefined;
 
   // dateOfService: Date; //not needed!
   serviceFee: string;
@@ -24,8 +24,15 @@ export class Job {
   request: ServiceRequest | undefined;
   serviceOffering: ServiceOffering | undefined;
 
-  constructor(jobId: string, serviceType: ServiceType, appointmentStartTime: Date, appointmentEndTime: Date, serviceFee: string, status: JobStatus,
-    description: string, provider: Account, receiver:Account, providerImage: string, rating: number, timeslot: Timeslot, request: ServiceRequest, serviceOffering: ServiceOffering | undefined) {
+  updatedAt?: Date;
+  createdAt?: Date;
+
+
+
+    constructor(jobId: string, serviceType: ServiceType, appointmentStartTime: Date, appointmentEndTime: Date, serviceFee: string, status: JobStatus,
+    description: string, provider: Account, receiver:Account, providerImage: string, rating: number, timeslot: Timeslot, request: ServiceRequest, serviceOffering: ServiceOffering | undefined,
+              updatedAt: Date|undefined, createdAt: Date|undefined,
+) {
     this._id = jobId;
     this.serviceType = serviceType;
     // this.appointmentStartTime = new Date(dateOfService.getFullYear() + "-" + dateOfService.getMonth() + "-" + dateOfService.getDay()
@@ -43,5 +50,8 @@ export class Job {
     this.timeslot = timeslot;
     this.request = request;
     this.serviceOffering = serviceOffering;
-  }
+    this.updatedAt = updatedAt;
+    this.createdAt = createdAt
+
+    }
 }

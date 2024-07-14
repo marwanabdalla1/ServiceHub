@@ -24,7 +24,6 @@ export interface IServiceRequest extends Document {
     requestedBy: Types.ObjectId; // Reference to an Account document
     // rating: number;
     // timeslot: Types.ObjectId;
-    profileImageUrl: string;
 }
 
 const ServiceRequestSchema: Schema = new Schema({
@@ -43,7 +42,6 @@ const ServiceRequestSchema: Schema = new Schema({
     requestedBy: {type: Schema.Types.ObjectId, ref: 'Account', required: true},
     // timeslot: {type: Schema.Types.ObjectId, ref: 'Timeslot', required: false},
     // rating: {type: Number, required: true}, //todo: is this needed? rating should only be tied with job and not request
-    profileImageUrl: {type: String, required: true},
 }, {
     timestamps: true // automatically generates created and last updated timestamps
 });

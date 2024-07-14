@@ -1,8 +1,11 @@
 import {Request, Response, NextFunction} from 'express';
 import ServiceOffering from "../models/serviceOffering";
 import Account from '../models/account';
-import {Types} from 'mongoose';
-import {ServiceType} from '../models/enums'; // Assuming this is where your enum is defined
+import mongoose, {Types} from 'mongoose';
+import {JobStatus, RequestStatus, ServiceType} from '../models/enums'; // Assuming this is where your enum is defined
+import serviceRequest from '../models/serviceRequest';
+import review from '../models/review';
+import job from '../models/job';
 
 
 export const addService = async (req: Request, res: Response, next: NextFunction) => {
@@ -37,6 +40,16 @@ export const addService = async (req: Request, res: Response, next: NextFunction
             return res.status(400).send('Invalid service type');
         }
 
+        // Check if the user already provides this service
+        const existingService = await ServiceOffering.findOne({
+            provider: userId,
+            serviceType: serviceType
+        });
+
+        if (existingService) {
+            return res.status(400).send('You already provide this service');
+        }
+
         // Create a new ServiceOffering object
         const newServiceOffering = new ServiceOffering({
             serviceType: serviceType,
@@ -60,7 +73,6 @@ export const addService = async (req: Request, res: Response, next: NextFunction
         if (!account.isProvider) {
             account.isProvider = true;
         }
-
         // Add the new service offering to the account's serviceOfferings array
         account.serviceOfferings.push(savedServiceOffering._id as Types.ObjectId);
         await account.save();
@@ -72,6 +84,7 @@ export const addService = async (req: Request, res: Response, next: NextFunction
         res.status(500).send('Internal Server Error');
     }
 }
+
 
 export const editService = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -104,12 +117,6 @@ export const editService = async (req: Request, res: Response, next: NextFunctio
         // Validate if the service belongs to the user
         if (!serviceOffering.provider.equals(userId)) {
             return res.status(403).send('Unauthorized to edit this service offering');
-        }
-
-        // Map the selected service title to the enum value
-        const serviceType = Object.values(ServiceType).find(type => type === selectedService.title);
-        if (!serviceType) {
-            return res.status(400).send('Invalid service type');
         }
 
         // Update the ServiceOffering object
@@ -152,27 +159,45 @@ export const deleteService = async (req: Request, res: Response, next: NextFunct
             return res.status(403).send('Unauthorized to delete this service offering');
         }
 
-        // Delete the service offering from the database
-        await serviceOffering.deleteOne();
+        await review.deleteMany({ serviceOffering: new mongoose.Types.ObjectId(serviceId) });
 
-        // Remove the service offering ID from the user's account
-        const account = await Account.findById(userId);
-        if (!account) {
-            return res.status(404).send('Provider account not found');
-        }
-
-        const serviceOfferingIdStr = serviceId.toString();
-
-        // Manually remove the service offering ID from the array
-        account.serviceOfferings = account.serviceOfferings.filter(
-            (id) => id.toString() !== serviceOfferingIdStr
+        await serviceRequest.updateMany(
+            { provider: new mongoose.Types.ObjectId(userId) },
+            { $set: { serviceOffering: null }, requestStatus: RequestStatus.cancelled }
         );
 
-        await account.save();
+        await job.updateMany(
+            { provider: new mongoose.Types.ObjectId(userId) },
+            { $set: { serviceOffering: null }, status: JobStatus.cancelled }
+        );
 
-        res.status(200).send('Service offering deleted successfully');
+        // Delete the service offering from the database
+        const deleteResult = await serviceOffering.deleteOne();
+        if (deleteResult.deletedCount === 1) {
+            // Remove the service offering ID from the user's account
+            const account = await Account.findById(userId);
+            if (!account) {
+                return res.status(404).send('Provider account not found');
+            }
+
+            const serviceOfferingIdStr = serviceId.toString();
+            // Manually remove the service offering ID from the array
+            account.serviceOfferings = account.serviceOfferings.filter(
+                (id) => id.toString() !== serviceOfferingIdStr
+            );
+
+            // Check if the account has no more service offerings
+            if (account.serviceOfferings.length === 0) {
+                account.isProvider = false; // Set isProvider to false if there are no more service offerings
+            }
+
+            await account.save();
+            return res.status(200).send('Service offering deleted successfully');
+        } else {
+            return res.status(500).send('Failed to delete service offering');
+        }
     } catch (err) {
         console.error('Error deleting service:', err);
-        res.status(500).send('Internal Server Error');
+        return res.status(500).send('Internal Server Error');
     }
-}
+};

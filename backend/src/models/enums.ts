@@ -19,15 +19,15 @@ export enum starCount {
 }
 
 export enum JobStatus {
-    completed, // 0
-    cancelled, // 1
-    open, // 2
+    completed = "completed", // 0
+    cancelled = "canceled", // 1
+    open = "open" // 2
 }
 
 export enum ResponseStatus {
-    accept, // 0
-    decline, // 1
-    proposeNewTime // 2
+    accept = "accepted",
+    decline = "declined",
+    proposeNewTime = "new time proposed"
 }
 
 export enum RequestStatus {
@@ -56,6 +56,9 @@ export enum NotificationType {
     newJob = "New Job", // 1
     JobStatusChanged = "Job Status Changed", // 2
     RequestStatusChanged = "Request Status Changed", // 3
-    newReview = "New Review", // 4
-    timeRequestChanged = "Time Request Changed", // 5
+    newReview = "New Review", //
+    timeRequestChanged = "Request Time Has Changed", // 5
+    timeslotChangeRequest = "Timeslot Change Request", // 5
+    updatedReview = "Updated Review", // 4
+
 }

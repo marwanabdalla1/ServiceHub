@@ -2,7 +2,8 @@ import React, {useState, useEffect} from 'react';
 import {Calendar, dateFnsLocalizer, SlotInfo} from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './calendarStyles.css';
-import {format, startOfWeek, parseISO, getDay, startOfDay, endOfDay} from 'date-fns';
+import { NavigateAction, ToolbarProps } from 'react-big-calendar';
+import {format, startOfWeek,endOfWeek, parseISO, getDay, getYear, startOfDay, endOfDay} from 'date-fns';
 import {enUS} from '@mui/material/locale';
 import {
     Dialog,
@@ -39,6 +40,7 @@ const localizer = dateFnsLocalizer({
     parse: parseISO,
     startOfWeek: () => startOfWeek(new Date(), {weekStartsOn: 1}),
     getDay,
+    getYear,
     locales,
 });
 
@@ -93,8 +95,15 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
 
     console.log(token);
     useEffect(() => {
-        fetchEvents(new Date(), new Date());
-    }, [token]);
+        const now = new Date();
+        const start = startOfWeek(now, { weekStartsOn: 1 }); // Assumes week starts on Monday
+        const end = endOfWeek(now, { weekStartsOn: 1 }); // Adjust according to the end of the week
+        fetchEvents(start, end)
+    }, [token]); // Dependency array ensures this runs only when fetchedEvents changes
+
+    useEffect(() => {
+        console.log("Updated fetched events:", fetchedEvents);
+    }, [fetchedEvents]);
 
 
     const handleSelect = async ({start, end}: SlotInfo) => {
@@ -226,10 +235,13 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
             try {
                 // Construct the URL for the PATCH request
                 // const url = `/api/events/${selectedTimeSlot.id}/fixed`; // Assuming `id` is how you reference events
+                console.log("selected Timeslot:", selectedTimeSlot)
 
                 const updatedTimeSlot = {
                     ...selectedTimeSlot,
-                    isFixed: true
+                    isFixed: true,
+
+                    createdById: account?._id
                 };
 
 
@@ -270,10 +282,12 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
 
     const fetchEvents = async (start: Date, end: Date) => {
         try {
+            console.log("start and end in fetchEvents frontend:",start.toISOString(), end.toISOString())
             const response = await axios.get('/api/timeslots', {
                 headers: {'Authorization': `Bearer ${token}`},
                 params: {start: start.toISOString(), end: end.toISOString()}
             });
+            console.log("fetchEvents frontend start and end:", start, end)
             const allEvents = response.data.map((event: any) => ({
                 ...event,
                 start: new Date(event.start),
@@ -286,8 +300,12 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
             const editableEvents = allEvents.filter((event: TimeSlot) => !event.isBooked);
             // setBookedEvents(bookedEvents);
             // setAvailability(editableEvents);
+            console.log("fetched before", fetchedEvents)
+
             setFetchedEvents(allEvents)
-            console.log("fetched", fetchedEvents)
+            console.log("all events", allEvents)
+            console.log("fetched after", fetchedEvents)
+
         } catch (error) {
             console.error("Error fetching timeslots:", error);
         }
@@ -298,25 +316,33 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
         if (Array.isArray(range)) {
             const start = startOfDay(range[0]);
             const end = endOfDay(range[range.length - 1]);
+            console.log("end", end)
 
             const lastDate = new Date(Math.max(.../*availability*/fetchedEvents.map(slot => slot.end.getTime())));
-            if (end > lastDate) {
-                axios.post('/api/timeslots/extend', {
-                    start: lastDate,
-                    end: moment(lastDate).add(6, 'months').toDate(),
-                }, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                }).then(() => {
+            fetchEvents(start, end)
 
-                    fetchEvents(start, end)
-                }).catch(error => {
-                    console.error("Error extending fixed slots:", error);
-                });
-            } else {
-                fetchEvents(start, end)
-            }
+            console.log("fetched events after range change,", fetchedEvents)
+
+            // if (end > lastDate) {
+            //     console.log("need to extend calendar, here is frontend")
+            axios.post('/api/timeslots/extend', {
+                // start: lastDate,
+                start: start,
+                end: end,
+                // end: moment(lastDate).add(6, 'months').toDate(),
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            }).then(() => {
+                // no need to fetch again i guess
+                // fetchEvents(start, end)
+            }).catch(error => {
+                console.error("Error extending fixed slots:", error);
+            });
+            // } else {
+            //     fetchEvents(start, end)
+            // }
         }
     };
 
@@ -394,6 +420,61 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
     const scrollToTime = new Date();
     scrollToTime.setHours(9, 0, 0, 0);
 
+
+    // const CustomToolbar = ({ label, onNavigate, onView }: ToolbarProps<TimeSlot>) => {
+    //     const currentYear = new Date().getFullYear();
+    //
+    //     return (
+    //         <div className="rbc-toolbar">
+    //   <span className="rbc-btn-group">
+    //     <button type="button" onClick={() => onNavigate(NavigateAction.PREVIOUS)}>Back</button>
+    //     <button type="button" onClick={() => onNavigate(NavigateAction.TODAY)}>Today</button>
+    //     <button type="button" onClick={() => onNavigate(NavigateAction.NEXT)}>Next</button>
+    //   </span>
+    //             <span className="rbc-toolbar-label">{label} - {currentYear}</span>
+    //             <span className="rbc-btn-group">
+    //     <button type="button" onClick={() => onView('week')}>Week</button>
+    //     <button type="button" onClick={() => onView('month')}>Month</button>
+    //   </span>
+    //         </div>
+    //     );
+    // };
+
+
+    let formats = {
+        dateFormat: 'dd',
+
+        // dayFormat: (date: Date, culture: any, localizer: any) =>
+        //     localizer.format(date, 'DDD', culture),
+
+        // dayFormat: (date: Date, culture: string,) =>
+        //     localizer.format(date, 'DDD', culture),
+        //
+        // dayRangeHeaderFormat: ({ start, end }:{start: Date, end:Date}, culture:any) =>
+        //     `${localizer.format(start, 'MMM dd', culture)} — ${localizer.format(end, 'MMM dd, yyyy', culture)}`, // Format range as "Oct 01 — Oct 07, 2022".
+
+        // weekRangeHeaderFormat: (date:Date, culture: any) =>
+        //     localizer.format(date, 'MMMM yyyy', culture), // Full month and year, e.g., "October 2022".
+        //
+        // monthHeaderFormat: (date:Date, culture:any) =>
+        //     localizer.format(date, 'MMMM yyyy', culture), // Full month and year, e.g., "October 2022".
+        //
+        // yearHeaderFormat: (date:Date, culture:any) =>
+        //     localizer.format(date, 'yyyy', culture) // Year only, e.g., "2022".
+
+        dayRangeHeaderFormat: ({ start, end }:{start: Date, end:Date}, culture:any) =>
+            `${localizer.format(start, 'MMM dd', culture)} — ${localizer.format(end, 'MMM dd, yyyy', culture)}`, // Short format for week range "Oct 01 — Oct 07"
+
+    }
+
+
+
+    const handleDrillDown = (event: any) => {
+        // Prevent any drill down action.
+        return;
+    };
+
+
     return (
         <div>
             <Calendar
@@ -406,8 +487,10 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
                 startAccessor={getStartAccessor}
                 endAccessor={getEndAccessor}
                 style={{height: 520}}
+                formats = {formats}
                 // onEventDrop={handleEventDrop}
                 // onEventResize={handleEventResize}
+                onDrillDown={handleDrillDown}
                 selectable
                 onSelectSlot={handleSelect}
                 onSelectEvent={handleSelectTimeSlot}
@@ -415,6 +498,11 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
                 eventPropGetter={eventPropGetter}
                 // backgroundEvents={bookedEvents}
                 className="bg-black-300" // Apply Tailwind class here
+                // components={{
+                //     week: {
+                //         header: MyCustomWeekDateHandler,
+                //     },
+                // }}
                 // components={{
                 //     event: ({ event }) => <EventTooltip event={event} />
                 // }}
@@ -460,6 +548,7 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
                     <Button onClick={() => setActionDialogOpen(false)}>Close</Button>
                     {/* Include Edit button logic here if needed */}
 
+                    {/*todo: make */}
                     <Button onClick={handleFixWeekly}>Repeat Weekly</Button>
                     <Button onClick={() => {
                         if (selectedTimeSlot?.isFixed) {

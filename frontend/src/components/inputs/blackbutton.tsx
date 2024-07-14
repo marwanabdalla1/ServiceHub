@@ -6,6 +6,7 @@ export interface ButtonProps {
     className?: string;
     onClick: () => void;
     sx?: any;
+    style?: React.CSSProperties;
     disabled?: boolean;  // Add disabled property
 }
 
@@ -13,10 +14,10 @@ export const StyledButton = styled('button')(({ sx }) => ({
     ...sx
 }));
 
-function BlackButton({ text, className = '', onClick, sx, disabled }: ButtonProps) {
+function BlackButton({ text, className = '', onClick, sx = {}, style, disabled }: ButtonProps) {
     return (
         <StyledButton
-        className={`bg-customBlack text-white font-semibold text-xs rounded-full shadow hover:bg-gray-500 max-h-8 whitespace-nowrap `}
+        className={`bg-customBlack text-white font-semibold text-xs rounded-full shadow hover:bg-gray-500 whitespace-nowrap `}
         onClick={onClick}
         sx={{
             ...sx,
@@ -24,9 +25,13 @@ function BlackButton({ text, className = '', onClick, sx, disabled }: ButtonProp
             alignItems: 'center',
             justifyContent: 'center',
             textDecoration: 'none', // Ensure no underline
+            minWidth: '42px',
+            minHeight: '25px',
         }}
+            style={style}
             disabled={disabled}
         >
+            
             {text}
         </StyledButton>
     );

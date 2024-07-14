@@ -1,13 +1,20 @@
 import {Account} from "../models/Account";
+import * as React from "react";
 import {createContext, useEffect, useState} from "react";
 import {useLocation, useNavigate} from "react-router-dom";
-import * as React from "react";
 import axios, {AxiosResponse} from 'axios';
 import {toast} from "react-toastify";
 import {jwtDecode} from 'jwt-decode';
 
 interface DecodedToken {
     exp: number;
+}
+
+interface UserData {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
 }
 
 /**
@@ -30,7 +37,7 @@ const isTokenExpired = (token: string): boolean => {
 type AccountContextType = {
     token: string | null;
     account: Account | null;
-    registerUser: (event: React.FormEvent<HTMLFormElement>) => Promise<void>;
+    registerUser: (formData: UserData) => Promise<void>;
     loginUser: (event: React.FormEvent<HTMLFormElement>) => Promise<void>;
     logoutUser: () => void;
     isLoggedIn: () => boolean;
@@ -100,18 +107,9 @@ export const AccountProvider = ({children}: Props) => {
         setAccount(response.data);
     }
 
-    const registerUser = async (event: React.FormEvent<HTMLFormElement>,) => {
-        event.preventDefault();
-        const data = new FormData(event.currentTarget);
-        const newaccount = {
-            firstName: data.get('firstName'),
-            lastName: data.get('lastName'),
-            email: data.get('email'),
-            password: data.get('password'),
-        };
-
+    const registerUser = async (formData: UserData) => {
         try {
-            const response = await axios.post('/api/auth/signup', newaccount);
+            const response = await axios.post('/api/auth/signup', formData);
             if (response) {
                 handleResponse(response);
                 toast.success('User registered successfully');
@@ -174,12 +172,6 @@ export const AccountProvider = ({children}: Props) => {
         // Clear the token and account state
         setToken(null);
         setAccount(null);
-
-        if (isAdmin()) {
-            toast('Admin logged out successfully');
-        } else {
-            toast('User logged out successfully');
-        }
 
         // Navigate the user back to the login page
         navigate('/login');

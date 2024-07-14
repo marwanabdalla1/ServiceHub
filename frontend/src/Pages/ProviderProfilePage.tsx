@@ -21,12 +21,13 @@ import {Account, Account as ServiceProvider} from '../models/Account';
 import {DaysOfWeek, ServiceType, JobStatus, ResponseStatus, RequestStatus} from '../models/enums';
 import {styled} from '@mui/system';
 import SearchIcon from '@mui/icons-material/Search';
+import ReviewsIcon from '@mui/icons-material/Reviews';
 import PinDropIcon from '@mui/icons-material/PinDrop';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
-import Breadcrumb from "../components/Breadcrumb";
+import DescriptionIcon from '@mui/icons-material/Description';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import LightBlueButton from "../components/inputs/BlueButton";
 import {ServiceOffering} from '../models/ServiceOffering';
 import {Link, useParams, useNavigate} from 'react-router-dom';
@@ -38,6 +39,9 @@ import {useAuth} from "../contexts/AuthContext";
 import {response} from "express";
 import * as url from "node:url";
 import StarIcon from '@mui/icons-material/Star';
+import {defaultProfileImage, fetchProfileImageById, fetchReviewerProfileImages} from "../services/fetchProfileImage";
+import CircularProgress from "@mui/material/CircularProgress";
+import ErrorPage from "./ErrorPage";
 
 // !todo s
 // 1. link reviews
@@ -59,7 +63,8 @@ const formatDate = (date: Date) => {
     return format(date, 'dd MMM yyyy, HH:mm');
 };
 
-interface Review {
+// TODO: should we use the review model instead of creating a new one?
+export interface Review {
     _id: string;
     reviewer: {
         _id: string;
@@ -87,28 +92,20 @@ function ProviderProfilePage() {
     const [filterStars, setFilterStars] = useState<number | null>(null);
 
     const [nextAvailability, setNextAvailability] = useState<any>(null);
-    const [profileImage, setProfileImage] = useState<File | null>(null);
+    const [profileImage, setProfileImage] = useState<string | null>(null);
     const [reviewerProfileImages, setReviewerProfileImages] = useState<{ [key: string]: string }>({});
 
     // const provider = mockProvider;
     const {offeringId} = useParams<{ offeringId: string }>(); //use this to then make a request to the user with the id to get the user data
 
+
     const navigate = useNavigate();
 
-    const fetchProfileImage = async (_id: string) => {
-        try {
-            // Fetch profile image
-            const profileImageResponse = await axios.get(`/api/file/profileImage/${_id}`, {
-                responseType: 'blob'
-            });
-            setProfileImage(profileImageResponse.data);
-        } catch (error) {
-            console.error('Error fetching profile data:', error);
-        }
-    };
+    const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
         const fetchData = async () => {
+            setLoading(true);
             if (offeringId) {
                 try {
                     const fetchedOffering = await fetchOfferingDetails(offeringId);
@@ -131,7 +128,8 @@ function ProviderProfilePage() {
                 try {
                     const fetchedProvider = await fetchAccountDetails(offeringId);
                     setProvider(fetchedProvider);
-                    fetchProfileImage(fetchedProvider._id).then(() => {
+                    fetchProfileImageById(fetchedProvider._id).then(image => {
+                        setProfileImage(image);
                         console.log("profile image fetched");
                     });
 
@@ -142,42 +140,29 @@ function ProviderProfilePage() {
                 try {
                     const reviewResponse = await axios.get(`/api/reviews/${offeringId}`);
                     setReviews(reviewResponse.data.review);
+                    setLoading(false);
+
 
 
                 } catch (error) {
                     console.error("Failed to fetch reviews:", error);
+                    setLoading(false);
+
                 }
+            } else {
+                setLoading(false);
             }
         };
         fetchData();
     }, [offeringId]);
 
 
-    // Define the new function to fetch reviewer profile images
-    const fetchReviewerProfileImages = async (reviews: Review[]) => {
-        const newProfileImages: { [key: string]: string } = {};
-
-        await Promise.all(reviews.map(async (review) => {
-            console.log("current review: ", review);
-            try {
-                const profileImageResponse = await axios.get(`/api/file/profileImage/${review.reviewer._id}`, {
-                    responseType: 'blob'
-                });
-                if (profileImageResponse.status === 200) {
-                    newProfileImages[review.reviewer._id] = URL.createObjectURL(profileImageResponse.data);
-                }
-            } catch (error) {
-                console.error('Error fetching profile image:', error);
-            }
-        }));
-
-        setReviewerProfileImages(newProfileImages);
-    };
-
 // Use the useEffect hook to call the new function when reviews change
     useEffect(() => {
         if (reviews.length > 0) {
-            fetchReviewerProfileImages(reviews).then(r => { console.log("reviewer profile images fetched") });
+            fetchReviewerProfileImages(reviews).then(images => {
+                setReviewerProfileImages(images);
+            });
         }
     }, [reviews]);
 
@@ -228,7 +213,16 @@ function ProviderProfilePage() {
         });
 
     if (!provider || !offering) {
-        return <div>Loading...</div>; // You can replace this with a more sophisticated loading indicator if desired
+        if(loading){
+                return (
+                    <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+                        <CircularProgress />
+                    </Box>
+                );
+        }
+        else {
+            return <ErrorPage title={"404 Not Found"} message={"The offering you're looking for does not exist."} />
+        }
     }
 
     const styles = {
@@ -259,92 +253,99 @@ function ProviderProfilePage() {
         },
     };
 
+    function formatAddress(country: any, location: any, postal: any) {
+        // Filter out undefined or null values and join with a comma
+        return [country, location, postal].filter(Boolean).join(', ');
+    }
 
-    // handle "book now" button
     return (
         <Container>
             <Box sx={{mt: 4}}>
-                <Breadcrumb paths={[
-                    // todo: change breadcrumb!
-                    {label: 'Home', href: '/'},
-                    {label: 'Munich', href: '/munich'},
-                    {label: 'Bike Repair', href: '/munich/bike-repair'},
-                    {label: `${provider.firstName} ${provider.lastName}`}
-                ]}/>
                 <Grid container spacing={4} sx={{mt: 2}}>
                     <Grid item xs={3}>
                         <Avatar
                             variant="square"
                             sx={{width: '100%', height: 200}}
-                            src={profileImage ? URL.createObjectURL(profileImage) : undefined}
+                            src={profileImage ? profileImage : defaultProfileImage}
                         />
                     </Grid>
                     <Grid item xs={9}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                <Box sx={{ position: 'relative' }}>
+                        <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+                            <Box sx={{display: 'flex', alignItems: 'center'}}>
+                                <Box sx={{position: 'relative'}}>
                                     <Typography variant="h4" gutterBottom>
                                         {provider.firstName} {provider.lastName}
                                     </Typography>
                                     {provider.isPremium && (
                                         <Box sx={styles.premiumContainer}>
                                             <Typography variant="body2" sx={styles.premiumText}>Premium</Typography>
-                                            <StarIcon sx={styles.starIcon} />
+                                            <StarIcon sx={styles.starIcon}/>
                                         </Box>
                                     )}
                                 </Box>
                             </Box>
                             <LightBlueButton
-                                className='px-3 py-2 rounded'
-                                text='Book Now'
+                                className='px-3 py-2 rounded text-lg'
+                                text='BOOK NOW'
                                 onClick={handleBookNow}
                             />
                         </Box>
 
-                        <Box sx={{display: 'flex', alignItems: 'center', mt: 2, justifyContent: 'space-between'}}>
+                        <Box sx={{display: 'flex', alignItems: 'flex-end', mt: 2, justifyContent: 'space-between'}}>
                             <Box sx={{display: 'flex', alignItems: 'center'}}>
-                                {totalReviews > 0 ? (
-                                    <>
-                                        <Typography variant="h5" sx={{mr: 1}}>{offering.rating.toFixed(2)}</Typography>
-                                        <Typography variant="body2" sx={{ml: 1}}>
-                                            ({offering.reviewCount} reviews)
-                                        </Typography>
-                                    </>
-                                ) : (
-                                    <Typography variant="body2" sx={{ml: 1}}>
-                                        (0 reviews)
-                                    </Typography>
-                                )}
-                            </Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                <Typography variant="body2" color="text.secondary">
+                                <Typography variant="h6" >
                                     {offering.serviceType}
                                 </Typography>
                                 {offering.isCertified && (
-                                    <Typography variant="body2" style={styles.label}>
+                                    <Typography variant="body1" style={styles.label}>
                                         Licensed
                                     </Typography>
                                 )}
                             </Box>
-                            <Typography variant="body2" gutterBottom>
-                                {`${provider.country}, ${provider.location}, ${provider.postal}`}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                                Next
-                                Availability: {nextAvailability ? formatDate(new Date(nextAvailability.start)) : 'No available times'}
-                                {/*//todo: modify availability!*/}
+
+                            {/*kinda redundant here*/}
+                            {/*/!*<Box sx={{display: 'flex', alignItems: 'center'}}>*!/*/}
+                            {/*    {totalReviews > 0 ? (*/}
+                            {/*        <>*/}
+
+                            {/*            <Typography variant="body1" sx={{mr: 0}} gutterBottom>*/}
+                            {/*                {offering.rating.toFixed(2)}*/}
+                            {/*                 ({offering.reviewCount} reviews)*/}
+
+                            {/*            </Typography>*/}
+                            {/*        </>*/}
+                            {/*    ) : (*/}
+                            {/*        <Typography variant="body1" sx={{ml: 1}} color="text.secondary" gutterBottom>*/}
+                            {/*            (0 reviews)*/}
+                            {/*        </Typography>*/}
+                            {/*    )}*/}
+                            {/*/!*</Box>*!/*/}
+
+                            <Box sx={{display: 'flex', flexDirection: 'row', alignItems:'center'}}>
+                                <PinDropIcon sx={{mr: 1}}></PinDropIcon>
+                                <Typography variant="body1" gutterBottom>
+                                    {formatAddress(provider.country, provider.location, provider.postal)}
+                                </Typography>
+                            </Box>
+
+                            <Box sx={{display: 'flex', flexDirection: 'row', alignItems:'center'}}>
+
+                            <Typography variant="body1" gutterBottom>
+                                <CalendarMonthIcon sx={{mr: 1}}></CalendarMonthIcon>
+                                Next Availability: {nextAvailability ? formatDate(new Date(nextAvailability.start)) : 'No available times'}
                                 {/*{provider.availability}  */}
                             </Typography>
+                            </Box>
                         </Box>
 
                         <Divider sx={{mt: 2}}/>
 
                         <Box sx={{display: 'flex', alignItems: 'flex-start', mt: 2, justifyContent: 'space-between'}}>
                             <Box sx={{flex: '1 1 45%', display: 'flex', flexDirection: 'row'}}>
-                                <PinDropIcon sx={{mt: 2, mr: 1}}></PinDropIcon>
+                                <DescriptionIcon sx={{mt: 2, mr: 1}}></DescriptionIcon>
                                 <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 2}}>
                                     <Typography variant="body2" color="text.secondary">
-                                        {offering.description}
+                                        {offering.description ? offering.description : "Welcome to my service page."}
                                     </Typography>
                                 </Box>
                             </Box>
@@ -374,10 +375,10 @@ function ProviderProfilePage() {
                             <Box sx={{flex: '1 1 30%', display: 'flex', flexDirection: 'row'}}>
                                 <AccountBalanceWalletIcon sx={{mb: 1, mt: 2, mr: 1}}/>
                                 <Box sx={{alignItems: 'center', mt: 2}}>
-                                    <Typography variant="body2">
+                                    <Typography variant="body2" color="text.secondary">
                                         Service Fee: €{offering.hourlyRate}/hour
                                     </Typography>
-                                    <Typography variant="body2">
+                                    <Typography variant="body2" color="text.secondary">
                                         Payment methods: {offering.acceptedPaymentMethods}{/*todo: add this to */}
                                     </Typography>
                                 </Box>
@@ -438,6 +439,45 @@ function ProviderProfilePage() {
 
 
                     </Grid>
+                    {totalReviews<=0 &&(
+                        <Box sx={{ maxWidth: 800, margin: 'auto', padding: 2 }}>
+                            {/* Engaging Graphic */}
+                            {/*<Box sx={{ textAlign: 'center', marginBottom: 2 }}>*/}
+                            {/*    <img src="/assets/moving-service-graphic.svg" alt="Moving Service" style={{ maxWidth: '100%' }} />*/}
+                            {/*</Box>*/}
+
+
+                            {/* Invitation to Review */}
+
+
+                                <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+
+
+                                    <ReviewsIcon sx={{
+                                        mr: 5,
+                                        color: 'white',
+                                        backgroundColor: '#93c5fd',
+                                        borderRadius: '50%', // Makes the background a circle
+                                        p: 2, //padding
+                                        fontSize: '5rem' //big icon
+
+                                    }} />
+                                    <Box sx={{ display: 'flex', flexDirection: 'column',  textAlign: 'left' }}>
+                                    <Typography variant='h6' sx={{mb: 2}}>
+                                        There are no reviews yet.
+                                    </Typography>
+                                    <Typography variant="body2" marginBottom={2} sx={{ whiteSpace: 'pre-line' }}>
+                                            Book an appointment now with {provider.firstName} and be the first to leave a review!
+                                        </Typography>
+                                        <Typography variant="body2" marginBottom={2} sx={{ whiteSpace: 'pre-line' }}>
+                                            Already had an appointment with {provider.firstName}? Share your experience to help others make an informed decision!
+                                        </Typography>
+                                    </Box>
+                                </Box>
+                        </Box>
+                    )
+
+                    }
                     {totalReviews > 0 && (
                         <Grid item xs={9}>
 
@@ -497,14 +537,13 @@ function ProviderProfilePage() {
 
                                 <Divider sx={{mb: 2}}/>
 
-                                {/*todo: update the reviews part once the review controllers etc. are done!*/}
 
                                 {reviews ? filteredReviews.map((review) => (
                                     <Card key={review._id} sx={{mb: 2}}>
                                         <CardContent>
                                             <Box sx={{display: 'flex', alignItems: 'center', mb: 2}}>
                                                 <Avatar
-                                                    src={reviewerProfileImages[review.reviewer._id] || "../../public/images/profiles/default-profile-image.png"}
+                                                    src={reviewerProfileImages[review.reviewer._id] || defaultProfileImage}
                                                     sx={{mr: 2}}
                                                     alt={`${review.reviewer.firstName} ${review.reviewer.lastName}`}
                                                 />

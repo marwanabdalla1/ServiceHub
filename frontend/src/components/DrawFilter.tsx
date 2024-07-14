@@ -32,10 +32,11 @@ import SpaIcon from '@mui/icons-material/Spa';
 import BuildIcon from '@mui/icons-material/Build';
 import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
 import Box from '@mui/material/Box';
+import {GERMAN_CITIES_SUPPORT} from "../shared/Constants";
 
-const germanCities = [
-  'Berlin', 'Munich', 'Hamburg', 'Cologne', 'Frankfurt', 'Stuttgart', 'Düsseldorf', 'Dortmund', 'Essen', 'Leipzig'
-];
+// const germanCities = [
+//   'Berlin', 'Munich', 'Hamburg', 'Cologne', 'Frankfurt', 'Stuttgart', 'Düsseldorf', 'Dortmund', 'Essen', 'Leipzig'
+// ];
 
 interface DrawerFilterProps {
   openDrawer: boolean;
@@ -149,7 +150,7 @@ export const DrawerFilter: React.FC<DrawerFilterProps> = ({
                     icon: <DirectionsBikeIcon />,
                   },
                   {
-                    name: 'Moving',
+                    name: 'Moving Services',
                     icon: <LocalShippingIcon />,
                   },
                   {
@@ -165,15 +166,15 @@ export const DrawerFilter: React.FC<DrawerFilterProps> = ({
                     icon: <PetsIcon />,
                   },
                   {
-                    name: 'Landscaping',
+                    name: 'Landscaping Services',
                     icon: <SpaIcon />,
                   },
                   {
-                    name: 'Remodeling',
+                    name: 'Home Remodeling',
                     icon: <BuildIcon />,
                   },
                   {
-                    name: 'Cleaning',
+                    name: 'House Cleaning',
                     icon: <CleaningServicesIcon />,
                   },
                 ].map((item) => (
@@ -276,7 +277,7 @@ export const DrawerFilter: React.FC<DrawerFilterProps> = ({
               <MenuItem disabled value="">
                 <em>Select City</em>
               </MenuItem>
-              {germanCities.map((city) => (
+              {Object.values(GERMAN_CITIES_SUPPORT).map((city) => (
                 <MenuItem key={city} value={city}>
                   {city}
                 </MenuItem>

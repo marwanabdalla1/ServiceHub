@@ -6,6 +6,7 @@ import {loadStripe} from '@stripe/stripe-js';
 import axios from 'axios';
 import {useAuth} from '../contexts/AuthContext';
 import {Feedback} from '../models/Feedback';
+import {defaultProfileImage, fetchFeedbackProfileImages} from "../services/fetchProfileImage";
 
 const stripePromise = loadStripe('pk_test_51NEdzDChuUsrK8kGX1Wcu8TazsmDPprhV212alFOg78GS9W3FW8JLv1S6FyJnirCaj4f5UevhfUetfDSxIvATSHp003QYXNJYT');
 
@@ -30,32 +31,12 @@ const BecomeProPage: React.FC = () => {
         fetchReviews();
     }, [token]);
 
-    // Define the new function to fetch reviewer profile images
-    const fetchFeedbackProfileImages = async (feedbacks: Feedback[]) => {
-        const newProfileImages: { [key: string]: string } = {};
-
-        await Promise.all(feedbacks.map(async (feedback) => {
-            console.log("current feedback: ", feedback);
-            try {
-                const profileImageResponse = await axios.get(`/api/file/profileImage/${feedback.givenBy._id}`, {
-                    responseType: 'blob'
-                });
-                if (profileImageResponse.status === 200) {
-                    newProfileImages[feedback.givenBy._id] = URL.createObjectURL(profileImageResponse.data);
-                }
-            } catch (error) {
-                console.error('Error fetching profile image:', error);
-            }
-        }));
-
-        setFeedbackProfileImages(newProfileImages);
-    };
 
 // Use the useEffect hook to call the new function when reviews change
     useEffect(() => {
         if (feedbacks.length > 0) {
-            fetchFeedbackProfileImages(feedbacks).then(r => {
-                console.log("reviewer profile images fetched")
+            fetchFeedbackProfileImages(feedbacks).then(images => {
+                setFeedbackProfileImages(images);
             });
         }
     }, [feedbacks]);
@@ -88,16 +69,34 @@ const BecomeProPage: React.FC = () => {
 
     return (
         <div className='flex flex-col items-center justify-center mt-4'>
-            <div className="w-3/4 flex flex-col rounded md:flex-row items-center bg-customGreen pl-8">
-                <div className="text-left">
-                    <h1 className="text-4xl font-bold mb-4">ServiceHub: Connecting You to the Best, for All Your
-                        Needs!</h1>
-                    <BlackButton className="py-2" text="Join Now" onClick={handleJoinNow}/>
-                </div>
-                <div className="md:mt-0 mr-0">
-                    <img src="/images/handshake.png" alt="Handshake" className="w-full"/>
-                </div>
+        <div className="w-3/4 flex flex-col rounded md:flex-row items-center bg-customGreen pl-8">
+        <div className="text-left">
+        <h1 className="text-5xl font-bold mb-4 flex-grow" style ={{ marginTop: '16px' }} >Take your craft to</h1>
+        <h1 className="text-5xl font-bold mb-4">the next level</h1>
+        <div className="flex items-center mb-4">
+            <div className="flex flex-col items-center mr-4">
+                <h3 className="text-2xl font-bold">400+</h3>
+                <h3>Testimonials</h3>
             </div>
+            <div className="border-l-2 border-gray-900 h-12 mx-4"></div>
+            <div className="flex flex-col items-center">
+                <h3 className="text-2xl font-bold">200+</h3>
+                <h3>Pro Customers</h3>
+            </div>
+        </div>
+    <Typography style={{ marginRight: '10px' }}>
+    Boost your business with a Pro Membership! Increase your visibility as our Pro Membership places you at the 
+    top of search results. Join now with a monthly subscription and make it easier for clients to find you first!
+    </Typography>
+
+        <BlackButton style={{ padding: '18px 18px', fontSize: '16px', marginTop: '16px', marginBottom: '16px' }} text="Join Now" onClick={handleJoinNow} />
+    </div>
+    <div className="md:mt-0 mr-0" >
+        <img src="/images/handshake.png" alt="Handshake" className="w-full h-full object-cover"/>
+    </div>
+</div>
+
+
             {/* Review Section */}
             <div className="w-3/4 mt-8">
                 <h2 className="text-3xl font-bold mb-4">What Our Pro Members Say</h2>
@@ -107,7 +106,7 @@ const BecomeProPage: React.FC = () => {
                             <CardContent>
                                 <Box sx={{display: 'flex', alignItems: 'center', mb: 2}}>
                                     <Avatar
-                                        src={feedbackProfileImages[feedback.givenBy._id] || "../../../public/images/profiles/default-profile-image.png"}
+                                        src={feedbackProfileImages[feedback.givenBy._id] || defaultProfileImage}
                                         sx={{mr: 2}}
                                         alt={feedback.title}
                                     />

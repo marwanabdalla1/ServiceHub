@@ -4,10 +4,14 @@ import Rating from '@mui/material/Rating';
 import { useParams } from 'react-router-dom';
 import {Job} from "../models/Job";
 import {useAuth} from "../contexts/AuthContext";
-import {useLocation, useNavigate} from "react-router-dom";
 import axios from "axios";
 import {Review} from "../models/Review";
 import { Account } from '../models/Account';
+import {defaultProfileImage, fetchProfileImageById} from "../services/fetchProfileImage";
+
+import useAlert from "../hooks/useAlert";
+import AlertCustomized from "../components/AlertCustomized";
+
 
 const ReviewPage: React.FC = () => {
     const [review, setReview] = React.useState<Review|null>(null); // Holds the existing review data
@@ -16,13 +20,15 @@ const ReviewPage: React.FC = () => {
     const [rating, setRating] = React.useState<number | null>(0);
     const [reviewText, setReviewText] = React.useState(''); // State to hold the review text
     const [isEditing, setIsEditing] = React.useState(false);  // Tracks if we are editing an existing review
-    const navigate = useNavigate();
 
+    const {alert, triggerAlert, closeAlert} = useAlert(5000);
+
+    const [profileImage, setProfileImage] = React.useState<string | null>(null);
     const {token, account} = useAuth();
 
     const { jobId } = useParams();
 
-    
+
 
     useEffect(() => {
         // This useEffect will always run, but the internal logic runs only under certain conditions.
@@ -39,10 +45,13 @@ const ReviewPage: React.FC = () => {
 
                 // Determine reviewee based on job data and current account
                 let revieweeId;
-                if (account?._id === jobData.provider) {
-                    revieweeId = jobData.receiver;
-                } else if (account?._id === jobData.receiver) {
-                    revieweeId = jobData.provider;
+                if (account?._id === jobData.provider._id) {
+                    console.log("is provider")
+                    console.log(jobData.receiver._id)
+                    revieweeId = jobData.receiver._id;
+                } else if (account?._id === jobData.receiver._id) {
+                    console.log("is consumer")
+                    revieweeId = jobData.provider_id;
                 } else {
                     throw new Error("Current user should not have access to this review!");
                 }
@@ -73,22 +82,23 @@ const ReviewPage: React.FC = () => {
     }, [jobId, token, account]); // Ensure dependencies are correctly listed for reactivity
 
 
+    // fetch profile image
+    useEffect(() => {
+        if (reviewee) {
+            fetchProfileImageById(reviewee._id).then((image) => {
+                setProfileImage(image);
+            });
+        }
+    }, [reviewee]);
+
     if (!jobId) {
         return <Typography variant="h6">No job selected for review.</Typography>;
     }
 
-    const handleRatingChange = (event: React.SyntheticEvent, newValue: number | null) => {
-        setRating(newValue);
-    };
-
-    const handleReviewTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setReviewText(event.target.value);
-    };
-
     const handleSubmit = async () => {
 
         if (!token) {
-            alert('You are not logged in.');
+            triggerAlert('Error', 'You are not logged in.', 'error');
             return;
         }
 
@@ -113,11 +123,11 @@ const ReviewPage: React.FC = () => {
             await axios[method](url, reviewData, {
                 headers: {Authorization: `Bearer ${token}`}
             });
-            alert(`Review ${review ? 'updated' : 'submitted'} successfully!`);
-            navigate('/jobs/offeredServices');
+            const reviewString = (`Review ${review ? 'updated' : 'submitted'} successfully!`);
+            triggerAlert(reviewString, '', 'success', 3000, 'dialog', 'center', `/jobs/${jobId}`)
         } catch (error) {
             console.error('Failed to submit review:', error);
-            alert('Failed to submit review.');
+            triggerAlert('Failed to submit review.', 'An error occured. Please try again later', 'error', 5000, 'dialog', 'center', `/customer-review/${jobId}`);
         }
     };
 
@@ -131,19 +141,29 @@ const ReviewPage: React.FC = () => {
             await axios.delete(`/api/reviews/${review?._id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            alert('Review deleted successfully!');
-            navigate('/jobs/offeredServices');  // Redirect or update local state
+            triggerAlert('Review deleted successfully!', '', 'success', 3000, 'dialog', 'center', `/jobs/${jobId}`);
+
+            // alert('Review deleted successfully!');
+            // navigate('/jobs/offeredServices');  // Redirect or update local state
         } catch (error) {
             console.error('Failed to delete review:', error);
-            alert('Failed to delete review.');
+            // alert('Failed to delete review.');
+            triggerAlert('Failed to delete review.', 'Please try again later', 'error', 5000);
+
         }
     };
 
+    // @ts-ignore
     return (
-        
+
         <Container>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-                <Box sx={{ width: '65%' }}>
+            <div>
+                {/*<button onClick={handleAction}>Do Something</button>*/}
+                <AlertCustomized alert={alert} closeAlert={closeAlert}/>
+            </div>
+
+            <Box sx={{display: 'flex', justifyContent: 'space-between', mt: 4}}>
+                <Box sx={{width: '65%'}}>
                     <CardContent sx={{display: 'flex', alignItems: 'center', mb: 2}}>
                         <Avatar
                             sx={{
@@ -153,13 +173,13 @@ const ReviewPage: React.FC = () => {
                             }}
 
                             /*todo: also need to include their profile when GET (in controller)*/
-                            // src={job?.provider.profileImageUrl}
+                            src={job?.provider ? profileImage || undefined : defaultProfileImage}
                         />
                         <Box>
                             <Typography
                                 variant="h6">{reviewee?.firstName} {reviewee?.lastName}</Typography>
                             <Typography variant="body2" color="text.secondary">
-                                {job?.serviceType}, {new Date(job ? job.appointmentStartTime: new Date()).toLocaleString()}
+                                {job?.serviceType}, {new Date(job?.timeslot?.start || new Date()).toLocaleString()}
                             </Typography>
                         </Box>
                     </CardContent>
@@ -171,7 +191,7 @@ const ReviewPage: React.FC = () => {
                             <Card>
                                 <CardContent>
                                     <Typography variant="body1">{reviewText}</Typography>
-                                    <Rating name="read-only" value={rating} readOnly />
+                                    <Rating name="read-only" value={rating} readOnly/>
                                 </CardContent>
                                 <CardContent>
                                     <Button onClick={handleEdit} variant="outlined" color="primary">
@@ -214,9 +234,9 @@ const ReviewPage: React.FC = () => {
                             </Card>
                         </>
                     )}
-                    
+
                     {/*todo: replace with actual email*/}
-                    <Typography variant="body2" sx={{ mt: 2, textAlign: 'center' }}>
+                    <Typography variant="body2" sx={{mt: 2, textAlign: 'center'}}>
                         Something wrong? <MuiLink href="mailto:support@example.com" underline="hover">
                         Contact us
                     </MuiLink>

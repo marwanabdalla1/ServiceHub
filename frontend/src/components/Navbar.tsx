@@ -63,7 +63,6 @@ const Navbar: React.FC<NavbarProps> = ({ toggleDrawer, onChange, onSearch, searc
     const navigate = useNavigate();
     const location = useLocation();
 
-
     const isPremium = account?.isPremium || false;
     const isProvider = account?.isProvider || false;
     //console.log("token: " + token + '\n' + "isProvider: " + isProvider + '\n' + "isPremium: " + isPremium );
@@ -95,7 +94,6 @@ const Navbar: React.FC<NavbarProps> = ({ toggleDrawer, onChange, onSearch, searc
         setProfileAnchorEl(null);
     };
 
-
     const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(event.target.value);
     };
@@ -106,9 +104,9 @@ const Navbar: React.FC<NavbarProps> = ({ toggleDrawer, onChange, onSearch, searc
 
     return (
         <div style={{
-            position: 'fixed', // fixed on top
+            position: 'fixed', 
             top: 0,
-            width: '100%',     // takes the full width
+            width: '100%',     
             zIndex: 1100,
         }}>
             <div className="bg-blue-300 shadow-md h-20">
@@ -148,46 +146,46 @@ const Navbar: React.FC<NavbarProps> = ({ toggleDrawer, onChange, onSearch, searc
                             isPremium={isPremium}
                         />
 
-                        {
-                            isLoggedIn() ? (
+                    {
+                        isLoggedIn() ? (
+                            <div className="flex items-center">
+                                <RequestListButton className="h-6 w-6" onClick={handleMenuOpen}/>
                                 <div className="flex items-center">
-                                    <RequestListButton className="h-6 w-6" onClick={handleMenuOpen} />
-                                    <div className="flex items-center">
-                                        <NotificationBell header="Notifications" />
-                                    </div>
+                                    <NotificationBell header="Notifications"/>
                                 </div>
-                            ) : (<div></div>)}
-                        <div onClick={handleProfileMenuOpen}>
-                            <CgProfile className="h-6 w-6" />
-                        </div>
-                        <Menu
-                            anchorEl={profileAnchorEl}
-                            open={Boolean(profileAnchorEl)}
-                            onClose={handleProfileMenuClose}
-                            anchorOrigin={{
-                                vertical: 'bottom',
-                                horizontal: 'center',
-                            }}
-                            transformOrigin={{
-                                vertical: 'top',
-                                horizontal: 'center',
-                            }}
-                        >
-                            {isLoggedIn() ? [
-                                <MenuItem key="profile" component={Link} to="/setprofile"
-                                    onClick={handleProfileMenuClose}>Profile</MenuItem>,
-                                <MenuItem key="logout" onClick={logoutUser}>Logout</MenuItem>
-                            ] : (
-                                <MenuItem component={Link} to="/login" onClick={handleProfileMenuClose}>Login</MenuItem>
-                            )}
-                        </Menu>
-                        <div className="h-6 w-0.5 bg-gray-800"></div>
-                        {/*<IoSettingsOutline className="h-6 w-6"/>*/}
-                        <Link to="/faq" className="h-6 w-6" style={{ outline: 'none' }}>
-                            <BsQuestionCircle className="h-6 w-6" style={{ color: 'black' }} />
-                        </Link>
+                            </div>
+                        ) : (<div></div>)}
+                    <div onClick={handleProfileMenuOpen}>
+                        <CgProfile className="h-6 w-6"/>
                     </div>
+                    <Menu
+                        anchorEl={profileAnchorEl}
+                        open={Boolean(profileAnchorEl)}
+                        onClose={handleProfileMenuClose}
+                        anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'center',
+                        }}
+                        transformOrigin={{
+                            vertical: 'top',
+                            horizontal: 'center',
+                        }}
+                    >
+                        {isLoggedIn() ? [
+                            <MenuItem key="profile" component={Link} to="/setprofile" onClick={handleProfileMenuClose}>Profile</MenuItem>,
+                            <MenuItem key="logout" onClick={logoutUser}>Logout</MenuItem>
+                        ] : [
+                            <MenuItem component={Link} to="/login" onClick={handleProfileMenuClose}>Login</MenuItem>,
+                            <MenuItem component={Link} to="/signup" onClick={handleProfileMenuClose}>Sign Up</MenuItem>
+                        ]}
+                    </Menu>
+                    <div className="h-6 w-0.5 bg-gray-800"></div>
+                    {/*<IoSettingsOutline className="h-6 w-6"/>*/}
+                    <Link to="/faq" className="h-6 w-6" style={{outline: 'none'}}>
+                        <BsQuestionCircle className="h-6 w-6" style={{color: 'black'}}/>
+                    </Link>
                 </div>
+            </div>
 
                 <Menu
                     anchorEl={anchorEl}
@@ -213,8 +211,7 @@ const Navbar: React.FC<NavbarProps> = ({ toggleDrawer, onChange, onSearch, searc
                 </Menu>
             </div>
         </div>
-    )
-        ;
+    );
 };
 
 export default Navbar;

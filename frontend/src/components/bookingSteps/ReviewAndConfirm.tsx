@@ -13,13 +13,15 @@ import {
 } from '@mui/material';
 import {useBooking, BookingDetails} from '../../contexts/BookingContext';
 import {useNavigate} from "react-router-dom";
-import axios from "axios";
+import axios, {AxiosError} from "axios";
 import {RequestStatus} from "../../models/enums";
 import {useAuth} from "../../contexts/AuthContext";
 import {Timeslot} from "../../models/Timeslot";
 import {bookTimeSlot, BookingError} from '../../services/timeslotService';
 import useAlert from "../../hooks/useAlert";
-import AlertCustomized from "../../components/AlertCustomized";
+import AlertCustomized from "../AlertCustomized";
+import {formatDateTime} from "../../utils/dateUtils";
+import * as mongoose from "mongoose";
 
 
 interface ReviewAndConfirmProps {
@@ -86,141 +88,122 @@ function ReviewAndConfirm({bookingDetails, handleCancel}: ReviewAndConfirmProps)
         }
     }
 
-    const bookTimeSlot = (timeSlot: any): Promise<any> => {
-        return new Promise((resolve, reject) => {
-            console.log("bookTimeSlot:", timeSlot)
-            axios.post('/api/timeslots/book', timeSlot, {
-                headers: {'Authorization': `Bearer ${token}`}
-            })
-                .then(response => {
-                    console.log("timeslot booked successfully", response.data);
-                    resolve(response.data);  // Resolve the promise with the response data
-                })
-                .catch(error => {
-                    console.error("Error booking timeslot:", error);
-                    if (error.response) {
-                        // Check specific status codes or error messages
-                        if (error.response.status === 409) { // Assuming 409 means conflict, e.g., timeslot not available
-                            reject(new BookingError("Timeslot is no longer available", 409));
-                        } else {
-                            reject(new BookingError("An error occurred while booking the timeslot", error.response.status));
-                        }
-                    } else {
-                        reject(new Error("Network or other error"));
-                    }
-                });
-        });
-    };
+
 
 
     const handleConfirmBooking = async () => {
 
-        const apiEndpoint = '/api/requests'
 
-        const requestData = {
-            requestStatus: RequestStatus.pending, // Set default or transformed values
-            serviceType: bookingDetails.serviceType,
-            timeSlot: bookingDetails.timeSlot, //this includes transit time
-            appointmentStartTime: bookingDetails.timeSlot?.start,
-            appointmentEndTime: bookingDetails.timeSlot?.end,
-            // uploads: [], //bookingDetails.uploads? || [],
-            comment: comment || " ",
-            serviceFee: bookingDetails.price, // Assuming the frontend uses 'fee' and backend expects 'serviceFee'
-            serviceOffering: bookingDetails.serviceOffering?._id, // Adjust field names as needed
-            job: undefined,
-            provider: bookingDetails.provider?._id,
-            requestedBy: bookingDetails.requestedBy?._id,
-            // requestedBy: "666eda4dda888fe359668b63",
-            // rating:  0, // Set default if not provided //no rating for the request, only for jobs
-            profileImageUrl: "URL placeholder "
-        };
+            const apiEndpoint = '/api/requests'
 
-        if (bookingDetails.provider?._id === bookingDetails.requestedBy?._id) {
-            // Trigger the error dialog
-            triggerAlert("Error", "You cannot book from your own service! \n Redirecting back to homepage...", "error", 5000, "dialog", "center", "/");
-            return;
-        }
-
-        console.log((bookingDetails))
-        console.log(requestData)
-
-
-        try {
-            // step 1: post the request
-            const response = await axios.post(apiEndpoint, requestData, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            const requestId = response.data._id;
-            setRequestId(requestId);
-            console.log('Booking confirmed:', response.data);
-
-            const timeSlotWithRequest = {
-                ...bookingDetails.timeSlot,
-                // title: bookingDetails.timeSlot?.title,
-                requestId: requestId,
+            const requestData = {
+                requestStatus: RequestStatus.pending, // Set default or transformed values
+                serviceType: bookingDetails.serviceType,
+                timeSlot: bookingDetails.timeSlot, //this includes transit time
+                appointmentStartTime: bookingDetails.timeSlot?.start,
+                appointmentEndTime: bookingDetails.timeSlot?.end,
+                // uploads: [], //bookingDetails.uploads? || [],
+                comment: comment || " ",
+                serviceFee: bookingDetails.price, // Assuming the frontend uses 'fee' and backend expects 'serviceFee'
+                serviceOffering: bookingDetails.serviceOffering?._id, // Adjust field names as needed
+                job: undefined,
+                provider: bookingDetails.provider?._id,
+                requestedBy: bookingDetails.requestedBy?._id,
+                // requestedBy: "666eda4dda888fe359668b63",
+                // rating:  0, // Set default if not provided //no rating for the request, only for jobs
             };
 
-            // try {
-            // step 2: post the timeslot into timeslot table
-            const timeslotResponse = await bookTimeSlot(timeSlotWithRequest);
-            console.log("Timeslot booked successfully", timeslotResponse);
-
-            // step 3: update the request -> not needed anymore because we dont save timeslot in request!
-            // try {
-            //     const updatedRequestData = { timeslot: timeslotResponse._id };
-            //     await axios.patch(`/api/requests/${requestId}`, updatedRequestData, {
-            //         headers: {
-            //             'Authorization': `Bearer ${token}`
-            //         }
-            //     });
-            //     console.log('Request updated with timeslot ID:', timeslotResponse._id);
-            // } catch (error) {
-            //     console.error('Error updating request with timeslot ID:', error);
-            //     // Handle the error (e.g., log it, show a message, etc.)
-            //     // This error does not affect the overall booking confirmation
-            // }
-
-
-            // navigate('/confirmation'); // Navigate to a confirmation page or show a confirmation message
-            navigate(`/confirmation/${requestId}/booking`); // Navigate to a confirmation page or show a confirmation message
-
-            //     if booking timeslot fails, then roll back the request
-        } catch (error: any) {
-            console.error('Error confirming booking:', error);
-
-            if (error instanceof BookingError && error.code === 409) {
-                // await axios.delete(`/api/requests/${requestId}`, {
-                //     headers: {'Authorization': `Bearer ${token}`}
-                // });
-                // console.error('Rolled back the created request due to timeslot booking failure.');
-                // alert('Unfortunately, the selected timeslot is no longer available. Please select another time.');
-
-                setAlertMessage('Unfortunately, the selected timeslot is no longer available. Please select another time.');
-                setAlertSeverity('error');
-                setShowAlert(true);
-                setCountdown(5);
-            } else {
-                // alert('An error occurred while confirming your booking. Please try again.');
-
-                setAlertMessage('An error occurred while confirming your booking. Please try again.');
-                setAlertSeverity('error');
-                setShowAlert(true);
-
-                setCountdown(5);
+            if (bookingDetails.provider?._id === bookingDetails.requestedBy?._id) {
+                // Trigger the error dialog
+                triggerAlert("Error", "You cannot book from your own service! \n Redirecting back to homepage...", "error", 5000, "dialog", "center", "/");
+                return;
             }
-            // Error handling
+
+            console.log((bookingDetails))
+            console.log(requestData)
+
+
+            try {
+                // step 1: post the request
+                const response = await axios.post(apiEndpoint, requestData, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const requestId = response.data._id;
+                setRequestId(requestId);
+                console.log()
+                console.log('Booking confirmed:', response.data);
+
+
+                // not needed, now all handled in backend
+                // const timeSlotWithRequest = {
+                //     ...bookingDetails.timeSlot,
+                //     // title: bookingDetails.timeSlot?.title,
+                //     requestId: requestId,
+                // };
+
+                // try {
+                // step 2: post the timeslot into timeslot table
+                // todo: comment out later
+                // const timeslotResponse = await bookTimeSlot(timeSlotWithRequest, token);
+                // console.log("Timeslot booked successfully", timeslotResponse);
+                //
+                // // // step 3: send notification to provider
+                // const notificationContent = `You have a new service request for ${requestData.serviceType} at ${formatDateTime(requestData.timeSlot?.start)}.`;
+                //
+                // const notificationData = {
+                //     isViewed: false,
+                //     content: notificationContent,
+                //     notificationType: "New Request",
+                //     serviceRequest: requestId,
+                //     recipient: requestData.provider
+                // };
+                // // generate new notification
+                // try {
+                //     const notification = await axios.post("api/notifications/", notificationData, {
+                //         headers: {Authorization: `Bearer ${token}`}
+                //     });
+                //     console.log("Notification sent!", notification);
+                //
+                // } catch (notificationError) {
+                //     console.error('Error sending notification:', notificationError);
+                // }
+
+                // navigate('/confirmation'); // Navigate to a confirmation page or show a confirmation message
+                navigate(`/confirmation/${requestId}/booking`); // Navigate to a confirmation page or show a confirmation message
+
+
+                //     if booking timeslot fails, then roll back the request
+            } catch (error: any) {
+                console.error('Error confirming booking:', error);
+
+                if (error.code === 409 || error.response?.status === 409) {
+                    setAlertMessage('Unfortunately, the selected timeslot is no longer available. Please select another time.');
+                    setAlertSeverity('error');
+                    setShowAlert(true);
+                    setCountdown(5);
+                    // try {
+                    //     if (requestId) {
+                    //         console.log(requestId)
+                    //         await axios.delete(`/api/requests/${requestId}`, {
+                    //             headers: {'Authorization': `Bearer ${token}`}
+                    //         });
+                    //     }
+                    // } catch (error: any) {
+                    //     console.log(error)
+                    // }
+                } else {
+                    // alert('An error occurred while confirming your booking. Please try again.');
+                    setAlertMessage('An error occurred while confirming your booking. Please try again.');
+                    setAlertSeverity('error');
+                    setShowAlert(true);
+                    setCountdown(5);
+                }
+            }
+
         }
-
-
-        // } catch (error) {
-        //     console.error('Error confirming booking:', error);
-        //     alert('Failed to confirm booking. Please retry.'); // General error handling
-        //     navigate(`/offerings/${bookingDetails.serviceOffering?._id}`);
-        // }
-
-    };
+    ;
 
     // Handle booking confirmation logic
     const handleAlertClose = () => {
@@ -328,5 +311,6 @@ function ReviewAndConfirm({bookingDetails, handleCancel}: ReviewAndConfirmProps)
 
         </>);
 }
+
 
 export default ReviewAndConfirm;

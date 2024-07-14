@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {BrowserRouter, Routes, Route, useLocation, Navigate} from "react-router-dom";
 import FilterPage from './Pages/FilterPage';
 import SignInPage from './Pages/AuthPages/LoginPage';
-import SignUpPage from './Pages/AuthPages/SignUpPage';
+import SignUpPage from './Pages/AuthPages/SignUpPages/SignUpPage';
 import NavigationBar from './components/Navbar';
 import AdminNavbar from "./components/adminComponents/AdminNavbar";
 import HomePage from './Pages/HomePage';
@@ -14,12 +14,13 @@ import {BookingProvider} from "./contexts/BookingContext";
 
 import axios from "axios";
 import {AccountProvider} from "./contexts/AuthContext";
-import BookingPage from "./Pages/bookingSteps/BookingPage";
-import ConfirmationPage from "./Pages/bookingSteps/ConfirmationPage";
+import BookingPage from "./Pages/BookingPage";
+import ConfirmationPage from "./components/bookingSteps/ConfirmationPage";
 import FAQPage from "./Pages/FAQPage";
 import BecomeProPage from './Pages/BecomePro';
 import ResetPasswordPage from "./Pages/AuthPages/ForgetPasswordPages/ResetPasswordPage";
 import OTPPage from "./Pages/AuthPages/ForgetPasswordPages/OTPPage";
+import OTPSignUpPage from "./Pages/AuthPages/SignUpPages/OTPSignUpPage";
 import ForgetPasswordPage from "./Pages/AuthPages/ForgetPasswordPages/ForgetPasswordPage";
 import ResetPasswordSuccessPage from "./Pages/AuthPages/ForgetPasswordPages/ResetPasswordSuccessPage";
 
@@ -31,16 +32,15 @@ import VerifyCertificatePage from "./Pages/AdminPanel/VerifyCertificatePage";
 import AdminUserDataPage from "./Pages/AdminPanel/AdminUserDataPage";
 import AdminHomePage from "./Pages/AdminPanel/AdminHomePage";
 import ErrorPage from "./Pages/ErrorPage";
-import CombinedIncomingPage from "./Pages/TablePages/CombinedIncomingPage";
 import Footer from './components/Footer';
 import {Divider} from '@mui/material';
 
 import UpdateSProfile from './components/UpdateSProfile';
 import AddServicePage from './Pages/AddServicePage';
-import OfferedServicesTable from "./Pages/TablePages/OfferedServicesTable";
-import IncomingRequestsTable from "./Pages/TablePages/IncomingRequestsTable";
-import RequestHistoryTable from "./Pages/TablePages/RequestHistoryTable";
-import ReceivedServiceTable from "./Pages/TablePages/ReceivedServiceTable";
+import OfferedServicesTable from "./Pages/TablePages/OfferedServicesPage";
+import IncomingRequestsTable from "./Pages/TablePages/IncomingRequestsPage";
+import RequestHistoryTable from "./Pages/TablePages/OutgoingRequestsPage";
+import ReceivedServiceTable from "./Pages/TablePages/ReceivedServicePage";
 import JobDetailsPage from "./Pages/JobDetailsPage";
 import RequestDetailsPage from "./Pages/RequestDetailsPage";
 import CombinedOutgoingPage from "./Pages/TablePages/CombinedOutgoingPage";
@@ -55,7 +55,7 @@ function App() {
     }, []);
 
     return (
-        <div>
+        <div className="h-screen flex flex-col">
             <ToastContainer
                 position="top-right"
                 autoClose={3000}
@@ -96,7 +96,7 @@ function MainRoutes({search, setSearch}: { search: any, setSearch: any }) {
     const showAdminNavBar = location.pathname.includes("/admin");
     return (
         <div className="h-screen flex flex-col" style={{paddingTop: '80px'}}>
-            <div>
+            <div className="h-screen flex flex-col">
                 {showNavBar && !showAdminNavBar && <NavigationBar
                     toggleDrawer={() => {
                     }}
@@ -107,13 +107,15 @@ function MainRoutes({search, setSearch}: { search: any, setSearch: any }) {
                     search={search}
                     setSearch={setSearch}/>}
                 {showAdminNavBar && <AdminNavbar/>}
+                <div className="flex-grow">
                 <Routes>
                     {/* Home */}
                     <Route path="/" element={<HomePage/>}/>
 
-                    {/* User Authentication */}
-                    <Route path="/login" element={<SignInPage/>}/>
-                    <Route path="/signup" element={<SignUpPage/>}/>
+                {/* User Authentication */}
+                <Route path="/login" element={<SignInPage/>}/>
+                <Route path="/signup" element={<SignUpPage/>}/>
+                <Route path="/signup/otp" element={<OTPSignUpPage/>}/>
 
                     {/* User Profile */}
                     <Route path="/setprofile" element={<ProfileSettingPage/>}/>
@@ -185,6 +187,7 @@ function MainRoutes({search, setSearch}: { search: any, setSearch: any }) {
             <div>
                 <Divider variant="middle" style={{backgroundColor: 'white', height: '50px'}}/>
                 <Footer/>
+            </div>
             </div>
         </div>
     );

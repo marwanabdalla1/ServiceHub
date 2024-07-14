@@ -30,7 +30,7 @@ export default function MediaCard({ offering, profileImageUrl, loading }: MediaC
         ) : (
           <CardMedia
             sx={{ height: 280 }}
-            image={profileImageUrl ? profileImageUrl : provider.profileImageUrl}
+            image={profileImageUrl ? profileImageUrl : provider.profileImageId}
             title="Service Image"
           />
         )}
@@ -39,7 +39,7 @@ export default function MediaCard({ offering, profileImageUrl, loading }: MediaC
             <Typography gutterBottom variant="h5" component="div">
               {provider.firstName} {provider.lastName}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="h6" color="text.secondary">
               {offering.serviceType}
             </Typography>
 
@@ -49,7 +49,7 @@ export default function MediaCard({ offering, profileImageUrl, loading }: MediaC
               </Typography>
               <div className='flex space-x-1 items-center'>
                 <Typography variant="body2" color="text.secondary">
-                  {offering.rating}
+                  {offering.rating === 0? 0 : offering.rating.toFixed(2)}
                 </Typography>
                 <GoStarFill className='text-yellow-500' />
               </div>

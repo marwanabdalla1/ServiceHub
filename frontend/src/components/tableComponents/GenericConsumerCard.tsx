@@ -1,5 +1,5 @@
 // GenericServiceCard.js
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
@@ -14,8 +14,10 @@ import {JobStatus, RequestStatus} from "../../models/enums";
 import OpenInFullIcon from "@mui/icons-material/OpenInFull";
 import CloseFullscreenIcon from '@mui/icons-material/CloseFullscreen';
 import CloseIcon from "@mui/icons-material/Close";
-import {redirect, useNavigate} from "react-router-dom";
+import {Link as RouterLink, redirect, useNavigate} from "react-router-dom";
 import {formatDateTime} from "../../utils/dateUtils";
+import { defaultProfileImage, fetchProfileImageById } from '../../services/fetchProfileImage';
+import Link from "@mui/material/Link";
 
 
 type Item = ServiceRequest | Job;
@@ -65,14 +67,22 @@ const GenericConsumerCard: React.FC<GenericConsumerCardProps> = ({
 
     const {account, token, isProvider} = useAuth();
     const [isInDetailPage, setIsInDetailPage] = useState(inDetailPage); // Example initial state
-
     const navigate = useNavigate();
+    const [profileImage, setProfileImage] = useState<string | null>(null);
 
     const handleProposeNewTime = (request: ServiceRequest) => {
         navigate(`/change-booking-time/${request._id}`); // Navigate to the calendar to select a new Timeslot
     }
 
     // todo: check account is correct consumer otherwise not authorized?
+
+    useEffect(() => {
+        if (provider) {
+            fetchProfileImageById(provider._id).then((image) => {
+                setProfileImage(image);
+            });
+        }
+    }, [provider]);
 
     const renderActions = () => {
         const buttons = [];
@@ -87,12 +97,12 @@ const GenericConsumerCard: React.FC<GenericConsumerCardProps> = ({
                 //                               sx={{marginRight: "1rem"}}/>);
             } else if (actions.cancelRequest && ["pending", "accepted", "action needed from requestor"].includes(item.requestStatus)) {
                 buttons.push(<BlackButton text="Cancel Request" onClick={() => actions.cancelRequest?.(item)}
-                                          sx={{marginRight: "1rem"}}/>);
+                                          sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
 
             }
             if (item.requestStatus === "action needed from requestor") {
                 buttons.push(<BlackButton text="Action Needed: Change Time" onClick={() => handleProposeNewTime(item)}
-                                          sx={{marginRight: "1rem"}}/>);
+                                          sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
             }
 
         } else {
@@ -100,13 +110,13 @@ const GenericConsumerCard: React.FC<GenericConsumerCardProps> = ({
             if (actions.cancelJob && item.status === "open") {
                 buttons.push(
                     <BlackButton text="Cancel Job" onClick={() => actions.cancelJob?.(item)}
-                                 sx={{marginRight: "1rem"}}/>);
+                                 sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
 
             }
             if (actions.review && item.status === "completed") {
                 buttons.push(
                     <BlackButton text="Review" onClick={() => actions.review?.(item)}
-                                 sx={{marginRight: "1rem"}}/>);
+                                 sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
             }
         }
         return buttons;
@@ -160,8 +170,8 @@ const GenericConsumerCard: React.FC<GenericConsumerCardProps> = ({
 
             <CardContent>
                 <div style={{display: 'flex', alignItems: 'center', marginBottom: '1rem'}}>
-                    {/*todo: profile image!*/}
-                    <Avatar alt={provider?.firstName + " " + receiver?.lastName} src={provider?.profileImageUrl}
+                    <Avatar alt={provider?.firstName + " " + provider?.lastName}
+                            src={provider ? profileImage || undefined : defaultProfileImage}
                             sx={{width: 100, height: 100, marginRight: '0.5rem'}}/>
                     <div style={{marginRight: '1rem', textAlign: 'left'}}>
                         <Typography variant="h6">
@@ -177,29 +187,73 @@ const GenericConsumerCard: React.FC<GenericConsumerCardProps> = ({
                 <Typography variant="body2" marginBottom={2}>
                     {isJob(item) ? "Job ID" : "Request ID"}: {item._id}
                 </Typography>
-                <Typography variant="body2">
-                    Service Type: {item.serviceType}
-                </Typography>
-                <Typography variant="body2">
-                    Appointment Start Time: {formatDateTime(item.timeslot?.start)}
-                </Typography>
-                <Typography variant="body2">
-                    Appointment End Time: {formatDateTime(item.timeslot?.end)}
-                </Typography>
-                <Typography variant="body2" sx={{marginBottom: '2rem'}}>
-                    Service Fee: €{item.serviceFee} per hour
-                </Typography>
-                <Typography variant="body2" sx={{marginBottom: '1rem'}}>
-                    Status: {generalStatus}
-                </Typography>
-                <Divider sx={{marginBottom: '1rem'}}/>
-                <Typography variant="body2" sx={{marginBottom: '1rem'}}>
-                    Description: {item.comment}
-                </Typography>
-                {renderActions()}
+
+                <div style={{display: 'grid', gridTemplateColumns: 'max-content auto', gap: '0.5rem'}}>
+
+                    <Typography variant="body2" color="text.secondary"  component="span">Service Type:</Typography>
+                    <Typography variant="body2" component="span">
+                        {item.serviceOffering ? (
+                            <Link
+                                component={RouterLink}
+                                to={`/offerings/${item.serviceOffering}`}
+                                underline="hover"
+                                sx={{color: 'inherit', textDecoration: 'none'}}
+                            >
+                                {item.serviceType}
+                            </Link>
+                        ) : (
+                            item.serviceType
+                        )}
+                    </Typography>
+
+                    <Typography variant="body2" color="text.secondary" component="span">
+                        Appointment Start Time:
+                    </Typography>
+                    <Typography variant="body2" component="span">
+                        {formatDateTime(item.timeslot?.start)}
+                    </Typography>
+
+                    <Typography variant="body2" color="text.secondary" component="span">
+                        Appointment End Time:
+                    </Typography>
+                    <Typography variant="body2" component="span">
+                        {formatDateTime(item.timeslot?.end)}
+                    </Typography>
+
+
+                    <Typography variant="body2" color="text.secondary" sx={{marginBottom: '1rem'}} component="span">
+                        Service Fee:
+                    </Typography>
+                    <Typography variant="body2" component="span" sx={{marginBottom: '1rem'}}>
+                        €{item.serviceFee} per hour
+                    </Typography>
+
+                    <Typography variant="body2" color="text.secondary" sx={{marginBottom: '1rem'}} component="span">
+                        Status:
+                    </Typography>
+                    <Typography variant="body2" sx={{marginBottom: '1rem'}} component='span'>
+                        {generalStatus}
+                    </Typography>
+
+                    <Typography variant="body2" color="text.secondary" sx={{marginBottom: '1rem'}} component="span">
+                        Description:
+                    </Typography>
+                    <Typography variant="body2" sx={{marginBottom: '1rem'}} component='span'>
+                        {item.comment}
+                    </Typography>
+
+                </div>
+                <div style={{display: 'flex', flexWrap: 'nowrap', overflowX: 'auto'}}>
+
+                        {renderActions()}
+                    </div>
+
+                    <Typography variant="body2" color="textSecondary" sx={{marginTop: 2, fontSize: '0.7rem'}}>
+                        Last Updated: {formatDateTime(item.updatedAt)}
+                    </Typography>
             </CardContent>
         </Card>
-    );
+);
 };
 
 export default GenericConsumerCard;

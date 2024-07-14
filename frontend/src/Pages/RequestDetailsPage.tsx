@@ -1,8 +1,8 @@
 // src/components/JobDetailsPage.tsx
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {useLocation, useNavigate, useParams} from 'react-router-dom';
 import axios from 'axios';
-import { Job } from '../models/Job';
+import {Job} from '../models/Job';
 import {
     Container,
     Typography,
@@ -12,9 +12,9 @@ import {
     TextField,
     DialogActions,
     Button,
-    Dialog
+    Dialog, CircularProgress
 } from '@mui/material';
-import { useAuth } from '../contexts/AuthContext';
+import {useAuth} from '../contexts/AuthContext';
 import {Review} from "../models/Review"; // Assuming you have a component to list reviews
 import GenericProviderCard from "../components/tableComponents/GenericProviderCard";
 import GenericConsumerCard from "../components/tableComponents/GenericConsumerCard";
@@ -23,20 +23,23 @@ import {ServiceRequest} from "../models/ServiceRequest";
 import useAlert from "../hooks/useAlert";
 import AlertCustomized from "../components/AlertCustomized";
 
+import useErrorHandler from '../hooks/useErrorHandler';
+import ErrorPage from "./ErrorPage";
+
 // Define the props interface
-interface RequestDetailsPageProps {
-    // role: string;
-}
+interface RequestDetailsPageProps {}
 
 type Item = ServiceRequest | Job;
 
 
 // tood: modify this
-const RequestDetailsPage: React.FC<RequestDetailsPageProps>  = () => {
-    const { requestId } = useParams<{ requestId: string }>();
+const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
+    const {requestId} = useParams<{ requestId: string }>();
     const [request, setRequest] = useState<ServiceRequest | null>(null);
-    const { token, account } = useAuth();
+    const {token, account} = useAuth();
     const [reviews, setReviews] = useState<Review[]>([]);
+
+    const {error, setError, handleError} = useErrorHandler();
 
     const [role, setRole] = useState<string | undefined>(undefined)
 
@@ -44,7 +47,9 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps>  = () => {
     const [timeChangePopUp, setTimeChangePopUp] = useState(false);
     const [comment, setComment] = useState('');
 
-    const { alert, triggerAlert, closeAlert } = useAlert(100000);
+    const [loading, setLoading] = useState(true);
+
+    const {alert, triggerAlert, closeAlert} = useAlert(3000);
 
 
     const navigate = useNavigate();
@@ -54,29 +59,42 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps>  = () => {
 
 
     useEffect(() => {
+        setLoading(true);
         const fetchRequest = async () => {
             try {
 
                 const response = await axios.get<ServiceRequest>(`/api/requests/${requestId}`, {
-                    headers: { Authorization: `Bearer ${token}` },
+                    headers: {Authorization: `Bearer ${token}`},
                 });
-                setRequest(response.data);
 
+                console.log("request data,", response.data)
+
+                setRequest(response.data);
+                setLoading(false);
+                //
+
+                console.log(response)
+                if (!response) {
+                    setError({title:'404 Not Found', message:'The request you\'re looking for cannot be found.'});
+                    return;
+                }
 
                 // // Fetch reviews for the request
                 // const reviewsResponse = await axios.get<Review[]>(`/api/reviews/job/${requestId}`, {
                 //     headers: { Authorization: `Bearer ${token}` },
                 // });
                 // setReviews(reviewsResponse.data);
-            } catch (error) {
-                console.error('Failed to fetch request details:', error);
+            } catch (err: any) {
+                setLoading(false)
+                console.error('Failed to fetch request details:', err);
+                handleError(err)
             }
         };
 
         if (requestId) {
             fetchRequest();
         }
-    }, [requestId, token]);
+    }, [requestId, token, account]);
 
     useEffect(() => {
         // Adjust paths based on role
@@ -107,13 +125,31 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps>  = () => {
 
     }, [request, account, token]);
 
-    if (!request) {
-        return <Typography align={"center"}>Loading...</Typography>;
+    // unmount
+    useEffect(() => {
+        return () => {
+            setError(null);
+        };
+    }, []);
+
+    if (error) {
+        console.log("youre in iferror", error)
+        return <ErrorPage title={error.title} message={error.message}/>
     }
 
-    // Determine if the user is provider or consumer
-    const isProvider = account?._id === request.provider._id;
-    const isConsumer = account?._id === request.requestedBy._id;
+    if (!request) {
+        if (loading) {
+            return (
+                <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+                    <CircularProgress />
+                </Box>
+            )
+        } else {
+            console.log("error")
+            return <ErrorPage title={"404 Not Found"} message={'The request you\'re looking for cannot be found.'}/>
+        }
+    }
+
 
 
     // Authorization check
@@ -131,12 +167,16 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps>  = () => {
 
 
         handleCancel({
-            selectedRequest:request,
+            selectedRequest: request,
             serviceRequests: [],
             setServiceRequests: null,
-            token:token,
-            setShowMediaCard: () => {},
+            token: token,
+            setShowMediaCard: () => {
+            },
         });
+
+        window.location.reload();
+
     };
 
     const onDecline = () => {
@@ -145,12 +185,16 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps>  = () => {
             return;
         }
         handleDecline({
-            selectedRequest:request,
+            selectedRequest: request,
             serviceRequests: [],
             setServiceRequests: null,
-            token:token,
-            setShowMediaCard: () => {},
+            token: token,
+            setShowMediaCard: () => {
+            },
         });
+
+        window.location.reload();
+
     };
 
     const onAccept = () => {
@@ -159,12 +203,16 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps>  = () => {
             return;
         }
         handleAccept({
-            selectedRequest:request,
+            selectedRequest: request,
             serviceRequests: [],
             setServiceRequests: null,
-            token:token,
-            setShowMediaCard: () => {},
+            token: token,
+            setShowMediaCard: () => {
+            },
         });
+        window.location.reload();
+
+
     };
 
     const onTimeChange = () => {
@@ -173,29 +221,31 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps>  = () => {
             return;
         }
         handleTimeChange({
-            selectedRequest:request,
+            selectedRequest: request,
             serviceRequests: [],
             setServiceRequests: null,
-            token:token,
-            setShowMediaCard: () => {},
+            token: token,
+            setShowMediaCard: () => {
+            },
             comment,
             setTimeChangePopUp,
             navigate
         });
+
+        window.location.reload();
     };
-
-
 
 
     const providerProps = {
         item: request,
-        provider: request.provider,
-        receiver: request.requestedBy,
-        onClose: () => {},
+        provider: request?.provider,
+        receiver: request?.requestedBy,
+        onClose: () => {
+        },
         inDetailPage: true,
         redirectPath: redirectPath,
 
-        actions:{
+        actions: {
             accept: onAccept,
             cancelRequest: onCancel,
             decline: onDecline,
@@ -205,27 +255,30 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps>  = () => {
 
     const consumerProps = {
         item: request,
-        provider: request.provider,
-        receiver: request.requestedBy,
-        onClose: () => {},
+        provider: request?.provider,
+        receiver: request?.requestedBy,
+        onClose: () => {
+        },
         inDetailPage: true,
         redirectPath: redirectPath,
-        actions:{
+        actions: {
             cancelRequest: onCancel,
         }
     };
 
 
-
     const CardComponent = role === "provider" ? GenericProviderCard : GenericConsumerCard;
     const cardProps = role === "provider" ? providerProps : consumerProps;
 
+    // @ts-ignore
+    // @ts-ignore
     return (
         <Container>
             <div>
                 {/*<button onClick={handleAction}>Do Something</button>*/}
                 <AlertCustomized alert={alert} closeAlert={closeAlert}/>
             </div>
+
 
             <Dialog open={timeChangePopUp} onClose={() => setTimeChangePopUp(false)}>
                 <DialogTitle>Request Time Slot Update</DialogTitle>
@@ -253,7 +306,7 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps>  = () => {
 
             <Box sx={{mt: 4}}>
                 <Typography variant="h4" gutterBottom>
-                    {request.serviceType} Request Details
+                    {request?.serviceType} Request Details
                 </Typography>
                 <CardComponent {...cardProps} />
 

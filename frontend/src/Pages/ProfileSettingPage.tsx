@@ -13,7 +13,8 @@ import {
     DialogContent,
     DialogContentText,
     DialogTitle,
-    IconButton
+    IconButton,
+    Grid
 } from '@mui/material';
 import BlueButton from "../components/inputs/BlueButton";
 import LightBlueFileButton from "../components/inputs/BlueUploadButton";
@@ -22,6 +23,9 @@ import {useAuth} from "../contexts/AuthContext";
 import axios from "axios";
 import {toast} from "react-toastify";
 import DeleteIcon from '@mui/icons-material/Delete';
+import AddressDialog from "../components/dialogs/AddressDialog";
+import {isValidPhoneNumber} from "../validators/AccountDataValidator";
+import {deleteProfileImage, fetchProfileImageByToken} from "../services/fetchProfileImage";
 
 type EditModeType = {
     [key: string]: boolean;
@@ -38,12 +42,14 @@ function UserProfile(): React.ReactElement {
     const [services, setServices] = useState<any[]>([]);
     const [openDialog, setOpenDialog] = useState(false);
     const [serviceToDelete, setServiceToDelete] = useState<string | null>(null);
-    const [profileImage, setProfileImage] = useState<File | null>(null);
+    const [profileImage, setProfileImage] = useState<string | null>(null);
     const [subscriptions, setSubscriptions] = useState<any[]>([]);
     const {account: userAccount} = useAuth();
     const isProvider = userAccount?.isProvider;
     const isPremium = userAccount?.isPremium;
     const client_reference_id = userAccount?._id;
+    const [openAddressDialog, setOpenAddressDialog] = useState(false);
+
 
     const fetchSubscriptionData = async (clientReferenceId: string) => {
         try {
@@ -124,26 +130,14 @@ function UserProfile(): React.ReactElement {
         })();
     }, [account]);
 
-    const fetchProfileData = async () => {
-        try {
-            // Fetch profile image
-            const profileImageResponse = await axios.get(`/api/file/profileImage`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                responseType: 'blob'
-            });
 
-            setProfileImage(profileImageResponse.data);
 
-        } catch (error) {
-            console.error('Error fetching profile data:', error);
-        }
-    };
 
     useEffect(() => {
-        fetchProfileData().then(r => console.log('Profile data fetched'));
-    }, []);
+        if (token) {
+            fetchProfileImageByToken(token).then(image => setProfileImage(image));
+        }
+    }, [token]);
 
     useEffect(() => {
         axios.get('/api/offerings/myoffering', {
@@ -181,21 +175,29 @@ function UserProfile(): React.ReactElement {
 
     useEffect(() => {
         if (account) {
+            const {address, postal, location} = account;
+            const concatenatedAddress = [address, postal, location]
+                .filter(field => field !== null && field !== undefined && field.trim() !== "")
+                .join(", ");
             setFieldValue({
                 userId: account._id,
                 firstName: account.firstName,
                 lastName: account.lastName,
                 email: account.email,
-                phone: account.phone ? account.phone : "",
-                address: account.address ? account.address : "",
+                phone: account.phoneNumber ? account.phoneNumber : "",
+                address: concatenatedAddress,
                 description: account.description ? account.description : "",
             });
         }
     }, [account]);
 
-    const handleProfileImageUpload = (setFile: React.Dispatch<React.SetStateAction<File | null>>) => (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleProfileImageUpload = (setFile: React.Dispatch<React.SetStateAction<string | null>>) => (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files ? event.target.files[0] : null;
-        setFile(file);
+        if (!file) {
+            console.error('No file selected');
+            return;
+        }
+        setFile( URL.createObjectURL(file));
         console.log("set file finished: ", file);
         handleFileUpload(file, "profileImage").then(response => {
             // Perform some action after the file upload is complete
@@ -205,16 +207,6 @@ function UserProfile(): React.ReactElement {
             toast('Error uploading profile image', {type: 'error'});
             console.error('Error uploading profile image:', error);
         });
-    };
-
-    const handleProfileImageDelete = async () => {
-        await axios.delete(`/api/file/profileImage/`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-        // set the image to the default profile image
-        setProfileImage(null);
     };
 
     const handleFileUpload = async (file: File | null, fileType: string) => {
@@ -258,8 +250,40 @@ function UserProfile(): React.ReactElement {
         setFieldValue(prevState => ({...prevState, [field]: newValue}));
     };
 
+    const handleSaveAddress = async (updatedAddress: {
+        address: string;
+        postal: string;
+        location: string;
+    }) => {
+        const updatedAccount = {
+            ...account,
+            ...updatedAddress
+        };
+
+        try {
+            const response = await axios.put('/api/account', updatedAccount, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            setAccount(response.data);
+        } catch (error) {
+            console.error('Error updating account details:', error);
+        }
+
+        setOpenAddressDialog(false);
+    };
+
     const handleFieldSave = async (field: string) => {
         const updatedAccount = {...account, [field]: fieldValue[field]};
+
+        if (field === 'phone' && !isValidPhoneNumber(fieldValue[field])) {
+            toast('Invalid phone number', {type: 'error'});
+            // set the value of phone back to the account phone number
+            setFieldValue(prevState => ({...prevState, [field]: account.phoneNumber}));
+            return;
+        }
 
         try {
             const response = await axios.put('/api/account', updatedAccount, {
@@ -290,25 +314,31 @@ function UserProfile(): React.ReactElement {
     const handleEditServiceClick = (service: any) => {
         navigate('/addservice', {state: {service}});
     };
-
     const handleDeleteServiceClick = async () => {
         if (serviceToDelete) {
             try {
-                // delete the corresponding certificate
-                await axios.delete(`/api/certificate/${serviceToDelete}`, {
+                // delete the service first
+                const serviceResponse = await axios.delete(`/api/services/delete-service/${serviceToDelete}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
                 });
-
-                // delete the service
-                const response = await axios.delete(`/api/services/delete-service/${serviceToDelete}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                setServices(services.filter(service => service._id !== serviceToDelete));
+    
+                if (serviceResponse.status === 200 || serviceResponse.status === 204) {
+                    // update the services state immediately after successful service deletion
+                    setServices(services.filter(service => service._id !== serviceToDelete));
+    
+                    // attempt to delete the corresponding certificate without waiting for the result
+                    axios.delete(`/api/certificate/${serviceToDelete}`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    }).catch(error => {
+                        console.error('Error deleting certificate:', error);
+                    });
+                } else {
+                    console.error('Error deleting service:', serviceResponse.status);
+                }
             } catch (error) {
                 console.error('Error deleting service:', error);
             } finally {
@@ -317,6 +347,7 @@ function UserProfile(): React.ReactElement {
             }
         }
     };
+    
 
     const handleOpenDialog = (serviceId: string) => {
         setServiceToDelete(serviceId);
@@ -346,7 +377,18 @@ function UserProfile(): React.ReactElement {
         navigate('/select-availability');
     };
 
-    const renderField = (label: string, field: string) => {
+    const renderField = (label: string, field: string, isEditable: boolean = true) => {
+        if (field === 'address') {
+            return (
+                <Box sx={{display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 0}}>
+                    <Typography variant="body1" sx={{fontWeight: 'bold'}}>{label}:</Typography>
+                    <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                        <Typography variant="body1">{fieldValue[field]}</Typography>
+                        <Button onClick={() => setOpenAddressDialog(true)}>Edit</Button>
+                    </Box>
+                </Box>
+            );
+        }
         return (
             <Box sx={{display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 0}}>
                 <Typography variant="body1" sx={{fontWeight: 'bold'}}>{label}:</Typography>
@@ -362,7 +404,9 @@ function UserProfile(): React.ReactElement {
                             onKeyPress={(e) => handleKeyPress(e, field)}
                         />
                     )}
-                    {field !== 'userId' && <Button onClick={() => handleEditClick(field)}>Edit</Button>}
+                    {isEditable && (
+                        <Button onClick={() => handleEditClick(field)}>Edit</Button>
+                    )}
                 </Box>
             </Box>
         );
@@ -380,18 +424,18 @@ function UserProfile(): React.ReactElement {
                 </Typography>
                 <Box sx={{display: 'flex', flexDirection: 'column', gap: 3, p: 3}}>
                     <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5}}>
-                        <IconButton onClick={handleProfileImageDelete} size="small" sx={{alignSelf: 'flex-end'}}>
+                        <IconButton onClick={() => deleteProfileImage(token, setProfileImage)} size="small" sx={{alignSelf: 'flex-end'}}>
                             <DeleteIcon/>
                         </IconButton>
-                        <Avatar src={profileImage ? URL.createObjectURL(profileImage) : undefined}
+                        <Avatar src={profileImage ? profileImage : undefined}
                                 sx={{width: 80, height: 80}}/>
                         <LightBlueFileButton text="Upload Profile Picture"
                                              onFileChange={handleProfileImageUpload(setProfileImage)}/>
                     </Box>
-                    {renderField("User ID", "userId")}
-                    {renderField("First Name", "firstName")}
-                    {renderField("Last Name", "lastName")}
-                    {renderField("Email Address", "email")}
+                    {renderField("User ID", "userId", false)}
+                    {renderField("First Name", "firstName", false)}
+                    {renderField("Last Name", "lastName", false)}
+                    {renderField("Email Address", "email", false)}
                     {renderField("Phone Number", "phone")}
                     {renderField("Address", "address")}
                     {renderField("Description", "description")}
@@ -409,24 +453,48 @@ function UserProfile(): React.ReactElement {
                                 justifyContent: 'space-between',
                                 gap: 0
                             }}>
-                                <Typography variant="body1" sx={{fontWeight: 'bold'}}>Provided Services:</Typography>
+                                <Typography variant="h6" sx={{fontWeight: 'bold'}}>Provided Services:</Typography>
+                                {/*<Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 3 }}>*/}
+                                {/*    <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Provided Services:</Typography>*/}
+                                {/*    <BlueButton text="Add Service" onClick={handleAddServiceClick} />*/}
+                                {/*</Box>*/}
                                 <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
                                     {services.length > 0 ? (
                                         services.map(service => (
-                                            <Box key={service._id}
-                                                 sx={{display: 'flex', alignItems: 'center', gap: 1, my: 1}}>
-                                                <Typography variant="body1">{service.serviceType}</Typography>
-                                                <Button onClick={() => handleEditServiceClick(service)}>Edit</Button>
-                                                <Button onClick={() => handleOpenDialog(service._id)}
-                                                        sx={{color: 'red'}}>Delete</Button>
-                                            </Box>
+                                            <Grid container alignItems="center" spacing={2} key={service._id}>
+                                                <Grid item xs>
+                                                    <Box sx={{display: 'flex', alignItems: 'center'}}>
+                                                        <Typography variant="body1">{service.serviceType}</Typography>
+                                                        {service.isCertified && (
+                                                            <Typography variant="body2" sx={{
+                                                                color: '#388e3c', // Color for "Licensed"
+                                                                fontWeight: 'bold',
+                                                                marginLeft: '10px',
+                                                                fontSize: '1rem', // Adjust the font size to match the service type
+                                                            }}>
+                                                                [Licensed]
+                                                            </Typography>
+                                                        )}
+                                                    </Box>
+                                                </Grid>
+                                                <Grid item>
+                                                    <Button
+                                                        onClick={() => handleEditServiceClick(service)}>Edit</Button>
+                                                </Grid>
+                                                <Grid item>
+                                                    <Button onClick={() => handleOpenDialog(service._id)}
+                                                            sx={{color: 'red'}}>Delete</Button>
+                                                </Grid>
+                                            </Grid>
+
                                         ))
                                     ) : (
                                         <Typography variant="body1">No services provided</Typography>
                                     )}
                                 </Box>
-                                <BlueButton text="Add Service" onClick={handleAddServiceClick}
-                                            sx={{alignSelf: 'flex-start', width: 'auto', padding: '5px 10px'}}/>
+                                <Box sx={{display: 'flex', justifyContent: 'flex-end', mt: 3}}>
+                                    <BlueButton text="Add Service" onClick={handleAddServiceClick}/>
+                                </Box>
                             </Box>
                         </>
                     )}
@@ -436,8 +504,6 @@ function UserProfile(): React.ReactElement {
                         {subscriptions.length > 0 ? (
                             subscriptions.map((subscription) => (
                                 <Box key={subscription.id} sx={{display: 'flex', flexDirection: 'column', mt: 2}}>
-                                    <Typography variant="body1"><strong>Subscription ID:</strong> {subscription.id}
-                                    </Typography>
                                     <Typography variant="body1"><strong>Status:</strong> {subscription.status}
                                     </Typography>
                                     <Typography variant="body1"><strong>Expiration
@@ -457,8 +523,8 @@ function UserProfile(): React.ReactElement {
                             text="View My Schedule"
                             onClick={handleViewScheduleClick}
                             sx={{
-                                backgroundColor: '#ADD8E6',
-                                color: 'white',
+                                backgroundColor: '#93c5fd',
+                                color: 'black',
                                 mt: 2
                             }}
                         />
@@ -469,6 +535,17 @@ function UserProfile(): React.ReactElement {
                         Account</Button>
                 </Box>
             </Paper>
+            <AddressDialog
+                open={openAddressDialog}
+                onClose={() => setOpenAddressDialog(false)}
+                onSave={handleSaveAddress}
+                initialAddress={{
+                    address: account?.address || '',
+                    postal: account?.postal || '',
+                    location: account?.location || ''
+                }}
+            />
+
             <Dialog open={openDialog} onClose={handleCloseDialog}>
                 <DialogTitle>{"Confirm Delete"}</DialogTitle>
                 <DialogContent>
