@@ -11,12 +11,15 @@ import {defaultProfileImage, fetchProfileImageById} from "../services/fetchProfi
 
 import useAlert from "../hooks/useAlert";
 import AlertCustomized from "../components/AlertCustomized";
+import { formatDateTime } from '../utils/dateUtils';
 
 
 const ReviewPage: React.FC = () => {
     const [review, setReview] = React.useState<Review|null>(null); // Holds the existing review data
     const [job, setJob] = React.useState<Job|null>(null);
-    const [reviewee, setReviewee] = React.useState<Account|null>(null);
+    
+    const [reviewRecipient, setReviewRecipient] = React.useState<Account|null>(null);
+
     const [rating, setRating] = React.useState<number | null>(0);
     const [reviewText, setReviewText] = React.useState(''); // State to hold the review text
     const [isEditing, setIsEditing] = React.useState(false);  // Tracks if we are editing an existing review
@@ -43,24 +46,23 @@ const ReviewPage: React.FC = () => {
                 const jobData = jobResponse.data;
                 setJob(jobData);
 
+                console.log("jobdata", jobData)
                 // Determine reviewee based on job data and current account
                 let revieweeId;
+                
                 if (account?._id === jobData.provider._id) {
                     console.log("is provider")
                     console.log(jobData.receiver._id)
                     revieweeId = jobData.receiver._id;
+                    setReviewRecipient(jobData.receiver);
                 } else if (account?._id === jobData.receiver._id) {
                     console.log("is consumer")
                     revieweeId = jobData.provider_id;
+                    setReviewRecipient(jobData.provider);
+
                 } else {
                     throw new Error("Current user should not have access to this review!");
                 }
-
-                // Fetch reviewee data
-                const revieweeResponse = await axios.get(`/api/account/${revieweeId}`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                setReviewee(revieweeResponse.data);
 
                 // Fetch review data
                 const reviewResponse = await axios.get(`/api/reviews/by-jobs/${jobId}`, {
@@ -84,12 +86,12 @@ const ReviewPage: React.FC = () => {
 
     // fetch profile image
     useEffect(() => {
-        if (reviewee) {
-            fetchProfileImageById(reviewee._id).then((image) => {
+        if (reviewRecipient) {
+            fetchProfileImageById(reviewRecipient._id).then((image) => {
                 setProfileImage(image);
             });
         }
-    }, [reviewee]);
+    }, [reviewRecipient]);
 
     if (!jobId) {
         return <Typography variant="h6">No job selected for review.</Typography>;
@@ -113,10 +115,10 @@ const ReviewPage: React.FC = () => {
             content: reviewText,
             serviceOffering: job?.serviceOffering,
             reviewer: account?._id,
-            recipient: job?.provider, //todo: also make it possible for provider to review
+            recipient: reviewRecipient?._id,
         };
 
-        console.log(reviewData)
+        console.log("review data", reviewData)
 
         // POST request to your backend
         try {
@@ -177,16 +179,16 @@ const ReviewPage: React.FC = () => {
                         />
                         <Box>
                             <Typography
-                                variant="h6">{reviewee?.firstName} {reviewee?.lastName}</Typography>
+                                variant="h6">{reviewRecipient?.firstName} {reviewRecipient?.lastName}</Typography>
                             <Typography variant="body2" color="text.secondary">
-                                {job?.serviceType}, {new Date(job?.timeslot?.start || new Date()).toLocaleString()}
+                                {job?.serviceType}, {formatDateTime(job?.timeslot?.start || new Date()) || formatDateTime(new Date())}
                             </Typography>
                         </Box>
                     </CardContent>
                     {review && !isEditing ? (
                         <>
                             <Typography variant="h5" gutterBottom>
-                                Review for {reviewee?.firstName}
+                                Review for {reviewRecipient?.firstName}
                             </Typography>
                             <Card>
                                 <CardContent>
@@ -194,7 +196,7 @@ const ReviewPage: React.FC = () => {
                                     <Rating name="read-only" value={rating} readOnly/>
                                 </CardContent>
                                 <CardContent>
-                                    <Button onClick={handleEdit} variant="outlined" color="primary">
+                                    <Button onClick={handleEdit} variant="outlined" color="primary" sx={{mr: 3}}>
                                         Edit
                                     </Button>
                                     <Button onClick={handleDelete} variant="outlined" color="secondary">
@@ -206,7 +208,7 @@ const ReviewPage: React.FC = () => {
                     ) : (
                         <>
                             <Typography variant="h5" gutterBottom>
-                                {review ? 'Edit your review' : 'Write a review'} for {reviewee?.firstName}
+                                {review ? 'Edit your review' : 'Write a review'} for {reviewRecipient?.firstName}
                             </Typography>
                             <Card>
 

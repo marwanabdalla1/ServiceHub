@@ -135,6 +135,7 @@ export const updateReview: RequestHandler = async (req, res) => {
         const updates = {
             rating: rating,
             content: content || '',
+            ...req.body
         }
         const updatedReview = await Review.findByIdAndUpdate(reviewId, { $set: updates }, { new: true });
         console.log("updated Review", updatedReview)

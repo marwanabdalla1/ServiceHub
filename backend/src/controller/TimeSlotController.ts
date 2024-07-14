@@ -756,6 +756,9 @@ export async function cancelTimeslotWithRequestId(requestId: string): Promise<{ 
 // Update a timeslot with a job ID based on request ID
 export async function updateTimeslotWithRequestId(requestId: string, jobId: string): Promise<{ success: boolean, message: string, timeslot?: any }> {
     try {
+
+        console.log(`Received requestId: ${requestId}, jobId: ${jobId}`);
+
         const foundTimeslot = await findTimeslotByRequestId(requestId);
         if (!foundTimeslot) {
             console.log(`No timeslot found with requestId: ${requestId}`);
@@ -763,8 +766,10 @@ export async function updateTimeslotWithRequestId(requestId: string, jobId: stri
         }
 
         foundTimeslot.jobId = new Types.ObjectId(jobId);
+        console.log(`Found timeslot before update:`, foundTimeslot);
 
         const updatedTimeslot = await foundTimeslot.save();
+        console.log(`Updated timeslot:`, updatedTimeslot);
         return { success: true, timeslot: updatedTimeslot, message: "Timeslot updated successfully with the job" };
     } catch (error) {
         console.error("Error updating timeslot:", error);

@@ -7,7 +7,7 @@ import { NotificationType, RequestStatus } from "../models/enums";
 import {
     bookTimeslot,
     bookTimeslotDirect,
-    cancelTimeslotWithRequestId
+    cancelTimeslotWithRequestId, updateTimeslotWithRequestId
 } from "./TimeSlotController"; // Importing functions to handle timeslot operations
 import mongoose from 'mongoose';
 import { sortBookingItems } from "../util/requestAndJobUtils";
@@ -160,17 +160,22 @@ export const updateServiceRequest: RequestHandler = async (req: Request, res: Re
     }
 
     try {
-        const requiresCancellation = [RequestStatus.declined, "declined", RequestStatus.cancelled, RequestStatus.requestorActionNeeded].includes(updates.requestStatus);
-        console.log("requires cancellation: ", RequestStatus.requestorActionNeeded)
+        const requiresCancellation = [RequestStatus.declined, "declined", RequestStatus.cancelled, RequestStatus.requesterActionNeeded].includes(updates.requestStatus);
+        console.log("requires cancellation: ", RequestStatus.requesterActionNeeded)
         if (requiresCancellation) {
             const cancellationResult = await cancelTimeslotWithRequestId(requestId);
             console.log(cancellationResult.message);
         }
 
         console.log("cancellation done", requestId)
-
         const updatedRequest = await ServiceRequest.findByIdAndUpdate(requestId, updates, { new: true, upsert: true, strict: true });
 
+        // updates the timeslot
+        if (updates.requestStatus.toString() === "accepted"){
+            console.log("need to handle accept ")
+            const updatedtimeslot = await updateTimeslotWithRequestId(requestId, updates.job)
+            console.log("updated timeslot with job:", updatedtimeslot)
+        }
         res.status(200).json(updatedRequest);
 
     } catch (error) {

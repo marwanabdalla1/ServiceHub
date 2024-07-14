@@ -92,10 +92,12 @@ export default function OfferedServicesTable() {
 
     const handleChangeServiceType = (event: any) => {
         setServiceTypeFilter(event.target.value);
+        setPage(0);
     };
 
     const handleChangeStatus = (event: any) => {
         setStatusFilter(event.target.value);
+        setPage(0);
     };
 
     const onComplete = () => {

@@ -63,6 +63,11 @@ function GenericTable({data, count, page, setPage, rowsPerPage, setRowsPerPage, 
                         <TableRow>
                             <TableCell>Type</TableCell>
                             <TableCell>Status</TableCell>
+                            <Tooltip title="If you don't see the status, this means that the other party has deleted their account." placement="top">
+                                <IconButton>
+                                    <InfoIcon />
+                                </IconButton>
+                            </Tooltip>
                             <TableCell>Appointment Time
                                 <Tooltip title="Invalid appointment time occurs when the request is cancelled, declined or when the provider has required the time to be changed." placement="top">
                                     <IconButton>
