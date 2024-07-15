@@ -146,8 +146,8 @@ function AddServicePage() {
 
     const isHourlyRateValid = (value: string) => {
         const rate = Number(value);
-        if (rate < 15 || rate > 80) {
-            toast.error("Hourly Rate must be between 15 and 80 euros.");
+        if (rate < 5 || rate > 500) {
+            toast.error("Hourly Rate must be between 5 and 500 euros.");
             return false;
         }
         return true;
@@ -287,7 +287,7 @@ function AddServicePage() {
                                 }}
                             />
                             <Typography variant="caption" color="textSecondary" style={{ marginLeft: '10px' }}>
-                                (Range: 15 to 80 euros)
+                                {/* (Range: 15 to 80 euros) */}
                             </Typography>
                         </Box>
                         <Box mb={4}>

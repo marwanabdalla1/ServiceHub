@@ -24,7 +24,7 @@ function FilterPage() {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [filterState, setFilterState] = useState<FilterState>({
         type: '',
-        priceRange: [0, 60],
+        priceRange: [0, 9999],
         locations: [],
         isLicensed: undefined,
     });
