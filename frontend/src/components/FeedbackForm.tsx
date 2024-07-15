@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Box, MenuItem, Select, FormControl, InputLabel } from '@mui/material';
 import { useAuth } from "../contexts/AuthContext";
 import axios from "axios";
+import useAlert from "../hooks/useAlert";
+import AlertCustomized from "./AlertCustomized";
 
 const categories = [
     'Premium Upgrade',
@@ -18,6 +20,7 @@ const FeedbackForm: React.FC = () => {
     const [rating, setRating] = useState('');
     const [title, setTitle] = useState('');
     const { account, token } = useAuth();
+    const {alert, triggerAlert, closeAlert} = useAlert(5000);
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -29,7 +32,7 @@ const FeedbackForm: React.FC = () => {
 
     const handleSendFeedback = async () => {
         if (!title || !feedback || !category) {
-            alert("Please fill all required fields");
+            triggerAlert("Please fill all required fields", "", "error", 3000, "dialog", "center", "");
             return;
         }
 
@@ -46,7 +49,7 @@ const FeedbackForm: React.FC = () => {
             });
 
             console.log(response);
-            alert(`Thanks for your feedback!`);
+            triggerAlert('Thanks for your feedback!', '', 'success', 3000, 'dialog', 'center', '');
             // Reset the form fields
             setOpen(false);
             setTitle('');
@@ -60,7 +63,11 @@ const FeedbackForm: React.FC = () => {
 
     return (
         <>
-            <Button variant="outlined" onClick={handleClickOpen} sx={{ mt: 2 }}>
+            <div>
+                {/*<button onClick={handleAction}>Do Something</button>*/}
+                <AlertCustomized alert={alert} closeAlert={closeAlert}/>
+            </div>
+            <Button variant="outlined" onClick={handleClickOpen} sx={{mt: 2}}>
                 Provide Feedback
             </Button>
             <Dialog
@@ -71,7 +78,7 @@ const FeedbackForm: React.FC = () => {
             >
                 <DialogTitle>Feedback on your experience</DialogTitle>
                 <DialogContent>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
                         <TextField
                             label="Title"
                             fullWidth
@@ -100,7 +107,7 @@ const FeedbackForm: React.FC = () => {
                             variant="outlined"
                             value={rating}
                             onChange={(e) => setRating(e.target.value)}
-                            inputProps={{ min: 1, max: 5 }}
+                            inputProps={{min: 1, max: 5}}
                         />
                         <TextField
                             id="feedback"
