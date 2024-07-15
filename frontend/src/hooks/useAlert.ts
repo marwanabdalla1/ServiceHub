@@ -32,10 +32,15 @@ function useAlert(defaultDuration: number | null) {
             clearTimeout(timeoutId); // Clear the timeout if the alert is manually closed
             setTimeoutId(null);
         }
-        if (alert.redirectUrl) {
-            navigate(alert.redirectUrl); // Navigate when alert is closed if redirectUrl is provided
-        }
+
         setAlert(prev => ({ ...prev, open: false }));
+
+
+        if (alert.redirectUrl) {
+            // Using window.location to navigate and refresh
+            window.location.href = alert.redirectUrl;
+        }
+
     }, [timeoutId]);
 
     const triggerAlert = useCallback((title: string, message: string, severity: AlertColor = 'info', duration: number = durationTimeout, type: string = 'dialog', position: string = 'center', redirectUrl?:string) => {

@@ -124,6 +124,36 @@ export const findExistingReview: RequestHandler = async (req, res) => {
     }
 }
 
+export const findAllReviewsToJob: RequestHandler = async (req, res) => {
+    const user = (req as any).user;
+    const { jobId } = req.params;
+    console.log("job id for finding request: ", jobId)
+    const userId = user.userId; // Assuming you're using some authentication middleware
+
+    try {
+        const reviews = await Review.find({
+            job: jobId,
+            $or:
+                [
+                    { reviewer: userId },
+                    { recipient: userId }
+                ]
+        });
+        if (reviews) {
+            return res.json({ success: true, reviews: reviews });
+        } else {
+            // return res.json({ success: false, review: []});
+            return res.status(404).json({ message: 'No reviews found for this job ID' });
+
+        }
+    } catch (error) {
+        console.error('Server error while fetching review:', error);
+
+        res.status(500).json({ success: false, message: "Server error", error });
+    }
+}
+
+
 // edit review
 // --> it should show "last edited at"
 export const updateReview: RequestHandler = async (req, res) => {

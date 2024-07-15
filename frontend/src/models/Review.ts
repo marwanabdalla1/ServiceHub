@@ -6,7 +6,9 @@ export class Review {
     _id: string;
     rating: starCount;
     content: String;
-    createdOn: Date;
+    createdAt: Date;
+    updatedAt: Date;
+
 
     // foreign keys
     recipient: Account;
@@ -14,13 +16,14 @@ export class Review {
     service: ServiceOffering;
 
 
-    constructor(reviewId: string, rating: starCount, content: String, createdOn: Date, recipient: Account, reviewer: Account,
+    constructor(reviewId: string, rating: starCount, content: String, createdAt: Date, updatedAt: Date, recipient: Account, reviewer: Account,
         service: ServiceOffering) {
         this._id = reviewId;
         this.rating = rating;
         this.content = content;
-        this.createdOn = createdOn;
+        this.createdAt = createdAt;
         this.recipient = recipient;
+        this.updatedAt = updatedAt
         this.reviewer = reviewer;
         this.service = service;
     }

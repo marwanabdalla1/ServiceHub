@@ -1,252 +1,310 @@
-import React, {useEffect} from 'react';
-import {Container, Box, Typography, Card, CardContent, Avatar, Button, TextField, Link as MuiLink} from '@mui/material';
-import Rating from '@mui/material/Rating';
-import { useParams } from 'react-router-dom';
-import {Job} from "../models/Job";
-import {useAuth} from "../contexts/AuthContext";
-import axios from "axios";
-import {Review} from "../models/Review";
-import { Account } from '../models/Account';
-import {defaultProfileImage, fetchProfileImageById} from "../services/fetchProfileImage";
-
+// src/components/JobDetailsPage.tsx
+import React, {useEffect, useRef, useState} from 'react';
+import {useLocation, useNavigate, useParams} from 'react-router-dom';
+import axios from 'axios';
+import {Job} from '../models/Job';
+import {Container, Typography, Box, CircularProgress, Button, CardContent, Link} from '@mui/material';
+import {useAuth} from '../contexts/AuthContext';
+import {Review} from "../models/Review"; // Assuming you have a component to list reviews
 import useAlert from "../hooks/useAlert";
 import AlertCustomized from "../components/AlertCustomized";
-import { formatDateTime } from '../utils/dateUtils';
+import useErrorHandler from "../hooks/useErrorHandler";
+import ErrorPage from "./ErrorPage";
+import ReviewCard from "../components/ReviewCard";
+import BlackButton from "../components/inputs/blackbutton";
+import {Account} from "../models/Account";
+import {formatDateTime} from '../utils/dateUtils';
 
 
+// tood: modify this
 const ReviewPage: React.FC = () => {
-    const [review, setReview] = React.useState<Review|null>(null); // Holds the existing review data
-    const [job, setJob] = React.useState<Job|null>(null);
-    
-    const [reviewRecipient, setReviewRecipient] = React.useState<Account|null>(null);
+        const {jobId} = useParams<{ jobId: string }>();
+        const [job, setJob] = useState<Job | null>(null);
+        const {token, account} = useAuth();
+        const [reviews, setReviews] = useState<Review[]>([]);
 
-    const [rating, setRating] = React.useState<number | null>(0);
-    const [reviewText, setReviewText] = React.useState(''); // State to hold the review text
-    const [isEditing, setIsEditing] = React.useState(false);  // Tracks if we are editing an existing review
+        const [myReview, setMyReview] = useState<Review | undefined>(undefined);
+        const [otherReview, setOtherReview] = useState<Review | undefined>(undefined);
 
-    const {alert, triggerAlert, closeAlert} = useAlert(5000);
+        const [otherParty, setOtherParty] = React.useState<Account | null>(null);
 
-    const [profileImage, setProfileImage] = React.useState<string | null>(null);
-    const {token, account} = useAuth();
+        const {error, setError, handleError} = useErrorHandler();
 
-    const { jobId } = useParams();
+        const [role, setRole] = useState<string | undefined>(undefined)
+        const location = useLocation();
+        const [redirectPath, setRedirectPath] = useState(() => location.state?.redirectPath || undefined);
+        const [loading, setLoading] = useState(true);
+
+        const {alert, triggerAlert, closeAlert} = useAlert(100000);
+
+        // ref for review sections
+        const reviewsRef = useRef<HTMLDivElement>(null);
 
 
+        const [showNewReview, setShowNewReview] = useState(false);
 
-    useEffect(() => {
-        // This useEffect will always run, but the internal logic runs only under certain conditions.
-        const fetchJobAndReviewee = async () => {
-            if (!jobId || !token) return;
+        const navigate = useNavigate();
 
-            try {
-                // Fetch job data
-                const jobResponse = await axios.get(`/api/jobs/${jobId}`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                const jobData = jobResponse.data;
-                setJob(jobData);
 
-                console.log("jobdata", jobData)
-                // Determine reviewee based on job data and current account
-                let revieweeId;
-                
-                if (account?._id === jobData.provider._id) {
-                    console.log("is provider")
-                    console.log(jobData.receiver._id)
-                    revieweeId = jobData.receiver._id;
-                    setReviewRecipient(jobData.receiver);
-                } else if (account?._id === jobData.receiver._id) {
-                    console.log("is consumer")
-                    revieweeId = jobData.provider_id;
-                    setReviewRecipient(jobData.provider);
+        useEffect(() => {
+            setLoading(true);
 
-                } else {
-                    throw new Error("Current user should not have access to this review!");
+            const fetchJob = async () => {
+                try {
+
+                    const response = await axios.get<Job>(`/api/jobs/${jobId}`, {
+                        headers: {Authorization: `Bearer ${token}`},
+                    });
+                    console.log("job data with timeslot,", response.data)
+                    const jobData = response.data;
+                    setJob(jobData);
+
+                    console.log(response)
+                    if (!response) {
+                        setError({title: '404 Not Found', message: 'The job you\'re looking for cannot be found.'});
+                        return;
+                    }
+
+                    // Fetch all reviews for the job
+                    try {
+                        const reviewsResponse = await axios.get(`/api/reviews/by-jobs-all/${jobId}`, {
+                            headers: {Authorization: `Bearer ${token}`},
+                        });
+
+                        console.log("Full response:", reviewsResponse);
+                        console.log("Data field:", reviewsResponse.data);
+                        console.log("Reviews array:", reviewsResponse.data.reviews);
+
+                        const responseData = reviewsResponse.data
+                        console.log("reviews response", reviewsResponse)
+
+                        if (reviewsResponse.data) {
+                            console.log("success")
+                            console.log("setting reviews", reviewsResponse.data.reviews)
+                            setReviews(reviewsResponse.data.reviews);
+                            console.log(reviews)
+
+                            // Finding my review and other's review
+                            const revFromMe = reviewsResponse.data.reviews.find((r: Review) => r.reviewer.toString() === account?._id.toString());
+                            console.log("rev from me:", revFromMe)
+                            if (revFromMe) {
+                                setMyReview(revFromMe)
+                            }
+                            const revFromOther = reviewsResponse.data.reviews.find((r: Review) => r.recipient.toString() === account?._id.toString());
+                            console.log("rev from other:", revFromOther)
+                            if (revFromOther) {
+                                setOtherReview(revFromOther)
+                            }
+
+                            console.log("My review: ", myReview);
+                            console.log("Other review:", otherReview);
+                            setLoading(false);
+                        } else {
+                            console.log('No reviews found');
+                            setReviews([]);
+                        }
+
+                    } catch (error) {
+                        console.log("error in setting review", error)
+                        setLoading(false);
+                        setReviews([]);
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch job details:', error);
+                    setLoading(false);
+                    handleError(error)
+
+
                 }
 
-                // Fetch review data
-                const reviewResponse = await axios.get(`/api/reviews/by-jobs/${jobId}`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                if (reviewResponse.data.success) {
-                    setReview(reviewResponse.data.review);
-                    setRating(reviewResponse.data.review.rating);
-                    setReviewText(reviewResponse.data.review.content);
-                } else {
-                    console.log("No review found, possible first-time review setup.");
-                }
-            } catch (error) {
-                console.error('Error fetching data:', error);
+                console.log("reviews here:", reviews)
+            };
+
+            if (jobId) {
+                fetchJob();
             }
+        }, [jobId, token, account]);
+
+
+        useEffect(() => {
+            // Adjust paths based on role
+            if (job) {
+                const isProvider = account?._id.toString() === job.provider._id.toString();
+                const isConsumer = account?._id.toString() === job.receiver._id.toString();
+
+                const pathIncludesIncoming = location.pathname.includes("incoming");
+                const pathIncludesOutgoing = location.pathname.includes("outgoing");
+
+                if ((pathIncludesIncoming && !isProvider) || (pathIncludesOutgoing && !isConsumer)) {
+                    navigate("/unauthorized");
+                } else if (isProvider) {
+                    setRole("Provider");
+                    setOtherParty(job.receiver);
+                    if (!redirectPath) {
+                        setRedirectPath('/incoming/jobs');
+                    }
+                } else if (isConsumer) {
+                    setRole("Receiver");
+                    setOtherParty(job.provider);
+                    if (!redirectPath) {
+                        setRedirectPath('/outgoing/jobs');
+                    }
+                } else {
+                    // If neither, navigate to unauthorized
+                    navigate("/unauthorized");
+                }
+            }
+        }, [job, account, token])
+
+        // unmount
+        // useEffect(() => {
+        //     return () => {
+        //         setError(null);
+        //     };
+        // }, []);
+
+        useEffect(() => {
+
+            return () => {
+                // Cleanup logic
+                // setJob(null);
+                // setReviews([]);
+                // setMyReview(undefined);
+                // setOtherReview(undefined);
+                // setRole(undefined);
+                // setOtherParty(null)
+                setError(null)
+            };
+        }, []);
+
+        if (!job) {
+            if (loading) {
+                return (
+                    <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+                        <CircularProgress/>
+                    </Box>
+                )
+            } else {
+                console.log("error")
+                return <ErrorPage title={"404 Not Found"} message={'The job you\'re looking for cannot be found.'}/>
+            }
+        }
+
+
+        if (error) {
+            console.log("youre in iferror", error)
+            return <ErrorPage title={error.title} message={error.message}/>
+        }
+
+        const handleToggleNewReview = () => {
+            setShowNewReview(!showNewReview); // Toggle visibility of the review card
         };
 
-        fetchJobAndReviewee();
-    }, [jobId, token, account]); // Ensure dependencies are correctly listed for reactivity
+
+        // @ts-ignore
+        return (
+            <Container>
+                <div>
+                    {/*<button onClick={handleAction}>Do Something</button>*/}
+                    <AlertCustomized alert={alert} closeAlert={closeAlert}/>
+                </div>
 
 
-    // fetch profile image
-    useEffect(() => {
-        if (reviewRecipient) {
-            fetchProfileImageById(reviewRecipient._id).then((image) => {
-                setProfileImage(image);
-            });
-        }
-    }, [reviewRecipient]);
+                <Box sx={{mt: 4}}>
+                    <Box ref={reviewsRef} sx={{mt: 4}}>
+                        <Typography variant="h4">Reviews</Typography>
 
-    if (!jobId) {
-        return <Typography variant="h6">No job selected for review.</Typography>;
-    }
+                        <CardContent>
+                            <Typography variant="h6" sx={{mt: 2}}>Job Details</Typography>
+                            {/*<Typography variant="body1" sx={{mt: 1}} to={`jobs/${job._id}`}>Job ID: {job._id}</Typography>*/}
+                            <Link href={`/jobs/${job._id}`} sx={{ textDecoration: 'none', color: 'inherit' }}>
+                                <Typography variant="body1" sx={{ mt: 1 }}>
+                                    Job ID: {job._id}
+                                </Typography>
+                            </Link>
+                            <Typography variant="body1" sx={{mt: 1}}>Your role: {role}</Typography>
+                            {job && job.timeslot && (
+                                <>
+                                    <Typography variant="body2" color={"secondary"} sx={{mt: 1}}>Start
+                                        Time: {formatDateTime(job?.timeslot?.start)}</Typography>
+                                    <Typography variant="body2" color={"secondary"} sx={{mt: 1}}>End
+                                        Time: {formatDateTime(job?.timeslot?.end)}
+                                    </Typography>
+                                </>
+                            )}
+                        </CardContent>
 
-    const handleSubmit = async () => {
+                        <Box sx={{display: 'flex', justifyContent: 'space-between', width: '100%'}}>
+                            {/*<ReviewList reviews={reviews} /> /!* Render reviews *!/*/}
+                            {otherReview ? (
+                                <Box sx={{width: '45%', p: 1}}>
+                                    <Typography variant="h6" sx={{mt: 3}}>Review from {otherParty?.firstName} to
+                                        you</Typography>
+                                    <ReviewCard
+                                        review={otherReview}
+                                        job={job}
+                                        reviewer={otherParty}
+                                        recipient={account}
+                                        onReviewUpdated={() => {
+                                        }}
+                                    />
+                                </Box>
+                            ) : (<Typography variant="h6" sx={{mb: 2, mt: 3}}>{otherParty?.firstName} hasn't written a review
+                                yet.</Typography>)
+                            }
 
-        if (!token) {
-            triggerAlert('Error', 'You are not logged in.', 'error');
-            return;
-        }
+                            {myReview ? (
+                                <Box sx={{width: '45%', p: 1}}>
+                                    <Typography variant="h6" sx={{mt: 3}}>Your review
+                                        to {otherParty?.firstName}:</Typography>
+                                    <ReviewCard
+                                        review={myReview}
+                                        job={job}
+                                        reviewer={account}
+                                        recipient={otherParty}
+                                        onReviewUpdated={() => {
+                                        }}
+                                    />
+                                </Box>
+                            ) : (
+                                showNewReview ? (
+                                    <Box sx={{width: '45%', p: 1}}>
 
-        // check if this is posting a new review or updating
-        const method = review ? 'patch' : 'post';
-        const url = review ? `/api/reviews/${review._id}` : '/api/reviews';
+                                        <ReviewCard
+                                            job={job}
+                                            reviewer={account}
+                                            recipient={otherParty}
+                                            onReviewUpdated={() => {
+                                                setShowNewReview(false);
+                                            }}
+                                            setEdit={true}
+                                        />
+                                    </Box>
+                                ) : (
+                                    <Box sx={{
+                                        width: '45%',
+                                        p: 1,
+                                        mt: 5,
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center'
+                                    }}>
+                                        <BlackButton
+                                            text={`Write a review to ${otherParty?.firstName}`}
+                                            onClick={handleToggleNewReview}
+                                            sx={{marginRight: "1rem", fontSize: '14px', padding: "0.5rem 0.5rem"}}
+                                        />
+                                    </Box>
+                                )
+                            )}
 
-
-        const reviewData = {
-            jobId: jobId,
-            rating: rating,
-            content: reviewText,
-            serviceOffering: job?.serviceOffering,
-            reviewer: account?._id,
-            recipient: reviewRecipient?._id,
-        };
-
-        console.log("review data", reviewData)
-
-        // POST request to your backend
-        try {
-            await axios[method](url, reviewData, {
-                headers: {Authorization: `Bearer ${token}`}
-            });
-            const reviewString = (`Review ${review ? 'updated' : 'submitted'} successfully!`);
-            triggerAlert(reviewString, '', 'success', 3000, 'dialog', 'center', `/jobs/${jobId}`)
-        } catch (error) {
-            console.error('Failed to submit review:', error);
-            triggerAlert('Failed to submit review.', 'An error occured. Please try again later', 'error', 5000, 'dialog', 'center', `/customer-review/${jobId}`);
-        }
-    };
-
-    const handleEdit = () => {
-        setIsEditing(true);  // Set editing to true to render the editable form
-    };
-
-
-    const handleDelete = async () => {
-        try {
-            await axios.delete(`/api/reviews/${review?._id}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            triggerAlert('Review deleted successfully!', '', 'success', 3000, 'dialog', 'center', `/jobs/${jobId}`);
-
-            // alert('Review deleted successfully!');
-            // navigate('/jobs/offeredServices');  // Redirect or update local state
-        } catch (error) {
-            console.error('Failed to delete review:', error);
-            // alert('Failed to delete review.');
-            triggerAlert('Failed to delete review.', 'Please try again later', 'error', 5000);
-
-        }
-    };
-
-    // @ts-ignore
-    return (
-
-        <Container>
-            <div>
-                {/*<button onClick={handleAction}>Do Something</button>*/}
-                <AlertCustomized alert={alert} closeAlert={closeAlert}/>
-            </div>
-
-            <Box sx={{display: 'flex', justifyContent: 'space-between', mt: 4}}>
-                <Box sx={{width: '65%'}}>
-                    <CardContent sx={{display: 'flex', alignItems: 'center', mb: 2}}>
-                        <Avatar
-                            sx={{
-                                width: 56,
-                                height: 56,
-                                mr: 2
-                            }}
-
-                            /*todo: also need to include their profile when GET (in controller)*/
-                            src={job?.provider ? profileImage || undefined : defaultProfileImage}
-                        />
-                        <Box>
-                            <Typography
-                                variant="h6">{reviewRecipient?.firstName} {reviewRecipient?.lastName}</Typography>
-                            <Typography variant="body2" color="text.secondary">
-                                {job?.serviceType}, {formatDateTime(job?.timeslot?.start || new Date()) || formatDateTime(new Date())}
-                            </Typography>
                         </Box>
-                    </CardContent>
-                    {review && !isEditing ? (
-                        <>
-                            <Typography variant="h5" gutterBottom>
-                                Review for {reviewRecipient?.firstName}
-                            </Typography>
-                            <Card>
-                                <CardContent>
-                                    <Typography variant="body1">{reviewText}</Typography>
-                                    <Rating name="read-only" value={rating} readOnly/>
-                                </CardContent>
-                                <CardContent>
-                                    <Button onClick={handleEdit} variant="outlined" color="primary" sx={{mr: 3}}>
-                                        Edit
-                                    </Button>
-                                    <Button onClick={handleDelete} variant="outlined" color="secondary">
-                                        Delete
-                                    </Button>
-                                </CardContent>
-                            </Card>
-                        </>
-                    ) : (
-                        <>
-                            <Typography variant="h5" gutterBottom>
-                                {review ? 'Edit your review' : 'Write a review'} for {reviewRecipient?.firstName}
-                            </Typography>
-                            <Card>
-
-                                <CardContent>
-                                    <Rating
-                                        name="service-rating"
-                                        value={rating}
-                                        onChange={(event, newValue) => setRating(newValue)}
-                                        size="large"
-                                    />
-                                    <TextField
-                                        fullWidth
-                                        multiline
-                                        rows={4}
-                                        variant="outlined"
-                                        value={reviewText}
-                                        onChange={(e) => setReviewText(e.target.value)}
-                                    />
-                                </CardContent>
-                                <CardContent>
-                                    <Button onClick={handleSubmit} variant="contained" color="primary">
-                                        {review ? 'Update Review' : 'Submit Review'}
-                                    </Button>
-                                </CardContent>
-                            </Card>
-                        </>
-                    )}
-
-                    {/*todo: replace with actual email*/}
-                    <Typography variant="body2" sx={{mt: 2, textAlign: 'center'}}>
-                        Something wrong? <MuiLink href="mailto:support@example.com" underline="hover">
-                        Contact us
-                    </MuiLink>
-                    </Typography>
+                    </Box>
                 </Box>
-            </Box>
-        </Container>
-    );
-};
+            </Container>
+        )
+            ;
+    }
+;
 
 export default ReviewPage;

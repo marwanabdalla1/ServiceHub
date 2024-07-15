@@ -1,5 +1,5 @@
 // src/components/JobDetailsPage.tsx
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {useLocation, useNavigate, useParams} from 'react-router-dom';
 import axios from 'axios';
 import {Job} from '../models/Job';
@@ -14,6 +14,9 @@ import useAlert from "../hooks/useAlert";
 import AlertCustomized from "../components/AlertCustomized";
 import useErrorHandler from "../hooks/useErrorHandler";
 import ErrorPage from "./ErrorPage";
+import ReviewCard from "../components/ReviewCard";
+import BlackButton from "../components/inputs/blackbutton";
+import {Account} from "../models/Account";
 
 // Define the props interface
 interface JobDetailsPageProps {
@@ -30,6 +33,11 @@ const JobDetailsPage: React.FC<JobDetailsPageProps> = () => {
         const {token, account} = useAuth();
         const [reviews, setReviews] = useState<Review[]>([]);
 
+        const [myReview, setMyReview] = useState<Review | undefined>(undefined);
+        const [otherReview, setOtherReview] = useState<Review | undefined>(undefined);
+
+        const [otherParty, setOtherParty] = React.useState<Account | null>(null);
+
         const {error, setError, handleError} = useErrorHandler();
 
         const [role, setRole] = useState<string | undefined>(undefined)
@@ -39,6 +47,11 @@ const JobDetailsPage: React.FC<JobDetailsPageProps> = () => {
 
         const {alert, triggerAlert, closeAlert} = useAlert(100000);
 
+        // ref for review sections
+        const reviewsRef = useRef<HTMLDivElement>(null);
+
+
+        const [showNewReview, setShowNewReview] = useState(false);
 
         const navigate = useNavigate();
 
@@ -53,8 +66,8 @@ const JobDetailsPage: React.FC<JobDetailsPageProps> = () => {
                         headers: {Authorization: `Bearer ${token}`},
                     });
                     console.log("job data with timeslot,", response.data)
-                    setJob(response.data);
-                    setLoading(false);
+                    const jobData = response.data;
+                    setJob(jobData);
 
                     console.log(response)
                     if (!response) {
@@ -62,21 +75,48 @@ const JobDetailsPage: React.FC<JobDetailsPageProps> = () => {
                         return;
                     }
 
-                    // Fetch reviews for the job
+                    // Fetch all reviews for the job
                     try {
-                        const reviewsResponse = await axios.get<Review[]>(`/api/reviews/by-jobs/${jobId}`, {
+                        const reviewsResponse = await axios.get(`/api/reviews/by-jobs-all/${jobId}`, {
                             headers: {Authorization: `Bearer ${token}`},
                         });
 
+                        console.log("Full response:", reviewsResponse);
+                        console.log("Data field:", reviewsResponse.data);
+                        console.log("Reviews array:", reviewsResponse.data.reviews);
+
+                        const responseData = reviewsResponse.data
                         console.log("reviews response", reviewsResponse)
 
-                        if (!reviewsResponse) {
+                        if (reviewsResponse.data) {
+                            console.log("success")
+                            console.log("setting reviews", reviewsResponse.data.reviews)
+                            setReviews(reviewsResponse.data.reviews);
+                            console.log(reviews)
+
+                            // Finding my review and other's review
+                            const revFromMe = reviewsResponse.data.reviews.find((r: Review) => r.reviewer.toString() === account?._id.toString());
+                            console.log("rev from me:", revFromMe)
+                            if (revFromMe) {
+                                setMyReview(revFromMe)
+                            }
+                            const revFromOther = reviewsResponse.data.reviews.find((r: Review) => r.recipient.toString() === account?._id.toString());
+                            console.log("rev from other:", revFromOther)
+                            if (revFromOther) {
+                                setOtherReview(revFromOther)
+                            }
+
+                            console.log("My review: ", myReview);
+                            console.log("Other review:", otherReview);
+                            setLoading(false);
+                        } else {
                             console.log('No reviews found');
                             setReviews([]);
-                        } else {
-                            setReviews(reviewsResponse.data);
                         }
+
                     } catch (error) {
+                        console.log("error in setting review", error)
+                        setLoading(false);
                         setReviews([]);
                     }
                 } catch (error) {
@@ -86,19 +126,21 @@ const JobDetailsPage: React.FC<JobDetailsPageProps> = () => {
 
 
                 }
+
+                console.log("reviews here:", reviews)
             };
 
             if (jobId) {
                 fetchJob();
             }
-        }, [jobId, token]);
+        }, [jobId, token, account]);
 
 
         useEffect(() => {
             // Adjust paths based on role
             if (job) {
-                const isProvider = account?._id === job.provider._id;
-                const isConsumer = account?._id === job.receiver._id;
+                const isProvider = account?._id.toString() === job.provider._id.toString();
+                const isConsumer = account?._id.toString() === job.receiver._id.toString();
 
                 const pathIncludesIncoming = location.pathname.includes("incoming");
                 const pathIncludesOutgoing = location.pathname.includes("outgoing");
@@ -107,11 +149,13 @@ const JobDetailsPage: React.FC<JobDetailsPageProps> = () => {
                     navigate("/unauthorized");
                 } else if (isProvider) {
                     setRole("provider");
+                    setOtherParty(job.receiver);
                     if (!redirectPath) {
                         setRedirectPath('/incoming/jobs');
                     }
                 } else if (isConsumer) {
                     setRole("consumer");
+                    setOtherParty(job.provider);
                     if (!redirectPath) {
                         setRedirectPath('/outgoing/jobs');
                     }
@@ -123,9 +167,23 @@ const JobDetailsPage: React.FC<JobDetailsPageProps> = () => {
         }, [job, account, token])
 
         // unmount
+        // useEffect(() => {
+        //     return () => {
+        //         setError(null);
+        //     };
+        // }, []);
+
         useEffect(() => {
+
             return () => {
-                setError(null);
+                // Cleanup logic
+                // setJob(null);
+                // setReviews([]);
+                // setMyReview(undefined);
+                // setOtherReview(undefined);
+                // setRole(undefined);
+                // setOtherParty(null)
+                setError(null)
             };
         }, []);
 
@@ -153,6 +211,9 @@ const JobDetailsPage: React.FC<JobDetailsPageProps> = () => {
             return <ErrorPage title={error.title} message={error.message}/>
         }
 
+        const handleToggleNewReview = () => {
+            setShowNewReview(!showNewReview); // Toggle visibility of the review card
+        };
 
         const onCancel = async () => {
             if (!job) {
@@ -226,8 +287,10 @@ const JobDetailsPage: React.FC<JobDetailsPageProps> = () => {
 
         };
 
+        // todo: change this
         const handleReview = (job: Item) => {
-            navigate(`/customer_review/${job._id}`);
+            // navigate(`/customer_review/${job._id}`);
+            reviewsRef.current?.scrollIntoView({ behavior: 'smooth' });
         };
 
 
@@ -264,6 +327,7 @@ const JobDetailsPage: React.FC<JobDetailsPageProps> = () => {
         };
 
 
+
         const CardComponent = role === "provider" ? GenericProviderCard : GenericConsumerCard;
         const cardProps = role === "provider" ? providerProps : consumerProps;
 
@@ -291,10 +355,64 @@ const JobDetailsPage: React.FC<JobDetailsPageProps> = () => {
                     {/*    onClose={handleCancel}*/}
                     {/*    // showExpandIcon={false} // Disable the expand icon for the details page*/}
                     {/*/>*/}
-                    <Box sx={{mt: 4}}>
-                        <Typography variant="h5">Reviews</Typography>
+                    <Box ref={reviewsRef} sx={{ mt: 4 }}>
+                    <Typography variant="h4" >Reviews</Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
                         {/*<ReviewList reviews={reviews} /> /!* Render reviews *!/*/}
+                        {otherReview ? (
+                            <Box sx={{ width: '45%', p: 1 }}>
+                                <Typography variant="h6" sx={{mt: 3}}>Review from {otherParty?.firstName} to you</Typography>
+                                <ReviewCard
+                                    review={otherReview}
+                                    job={job}
+                                    reviewer={otherParty}
+                                    recipient={account}
+                                    onReviewUpdated={() => {
+                                    }}
+                                />
+                            </Box>
+                        ) : (<Typography variant="h6" sx={{mb: 2, mt:3}}>{otherParty?.firstName} hasn't written a review
+                            yet.</Typography>)
+                        }
+
+                        {myReview ? (
+                            <Box sx={{ width: '45%', p: 1 }}>
+                                <Typography variant="h6" sx={{mt: 3}}>Your review to {otherParty?.firstName}:</Typography>
+                                <ReviewCard
+                                    review={myReview}
+                                    job={job}
+                                    reviewer={account}
+                                    recipient={otherParty}
+                                    onReviewUpdated={() => {}}
+                                />
+                            </Box>
+                        ) : (
+                            showNewReview ? (
+                                <Box sx={{ width: '45%', p: 1 }}>
+
+                                <ReviewCard
+                                    job={job}
+                                    reviewer={account}
+                                    recipient={otherParty}
+                                    onReviewUpdated={() => {
+                                        setShowNewReview(false);
+                                    }}
+                                    setEdit={true}
+                                />
+                                </Box>
+                            ) : (
+                                <Box sx={{ width: '45%', p: 1, mt: 5, display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                                <BlackButton
+                                    text={`Write a review to ${otherParty?.firstName}`}
+                                    onClick={handleToggleNewReview}
+                                    sx={{ marginRight: "1rem" , fontSize:'14px', padding: "0.5rem 0.5rem"}}
+                                />
+                                </Box>
+                            )
+                        )}
+
                     </Box>
+                </Box>
                 </Box>
             </Container>
         );
