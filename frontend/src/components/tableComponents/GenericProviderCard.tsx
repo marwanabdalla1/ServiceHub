@@ -201,8 +201,18 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
                             <Typography variant="h6">
                                 {isJob(item) ? "Job Detail" : "Request Detail"}
                             </Typography>
-                            <Typography variant="body2" color="textSecondary" style={{marginBottom: '0.5rem'}}>
+                            <Typography variant="body1" color="textPrimary">
                                 Receiver: {receiver?.firstName + " " + receiver?.lastName}
+                            </Typography>
+                            <Typography variant="body2" color="textSecondary" >
+                                Email: <a href={`mailto:${receiver?.email}`} style={{ color: 'inherit', textDecoration: 'none' }}>{receiver?.email}</a>
+                            </Typography>
+                            <Typography variant="body2" color="textSecondary" style={{marginBottom: '0.5rem'}}>
+                                {receiver?.phoneNumber ? (
+                                    <a href={`tel:${receiver.phoneNumber}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+                                        Number: {receiver.phoneNumber}
+                                    </a>
+                                ) : ""}
                             </Typography>
                         </div>
                     </div>

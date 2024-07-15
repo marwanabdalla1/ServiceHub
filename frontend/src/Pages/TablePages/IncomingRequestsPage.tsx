@@ -47,7 +47,7 @@ export default function IncomingRequestTable() {
     const [timeChangePopUp, setTimeChangePopUp] = useState(false);
     const navigate = useNavigate();
     const [dialogOpen, setDialogOpen] = React.useState(false);
-    const { alert, triggerAlert, closeAlert } = useAlert(10000000);
+    const {alert, triggerAlert, closeAlert} = useAlert(10000000);
 
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -77,7 +77,7 @@ export default function IncomingRequestTable() {
                     console.log(params)
 
                     const response = await axios.get(`/api/requests/provider/${account._id}?${params.toString()}`, {
-                        headers: { Authorization: `Bearer ${token}` }
+                        headers: {Authorization: `Bearer ${token}`}
                     });
 
                     console.log("fetched service requests,", response)
@@ -179,9 +179,13 @@ export default function IncomingRequestTable() {
     };
 
     return (
-        <div style={{display: 'flex'}}>
-            <div style={{flex: 1, padding: '10px'}}>
-            <AlertCustomized alert={alert} closeAlert={closeAlert} />
+        // <div style={{display: 'flex'}}>
+        //     <div style={{flex: 1, padding: '10px'}}>
+        <div style={{display: 'flex', flexDirection: 'row', width: '100%', position: 'relative'}}>
+            {/*<div style={{flexGrow: showMediaCard ? 1 : 1, transition: 'flex-grow 0.3s', padding: '10px'}}>*/}
+            <div style={{flex: showMediaCard ? '3 1 auto' : '1 1 0%', marginRight: showMediaCard ? '30%' : '5%' }}>
+
+                <AlertCustomized alert={alert} closeAlert={closeAlert}/>
 
                 <Box sx={{minWidth: 275, margin: 2}}>
                     <Box>
@@ -196,7 +200,7 @@ export default function IncomingRequestTable() {
                     </Box>
 
                     <Box sx={{display: 'flex', marginBottom: 2}}>
-                        <FormControl style={{ width: 300, marginRight:5}}>
+                        <FormControl style={{width: 300, marginRight: 5}}>
                             <InputLabel id="service-type-label">Filter Service Type</InputLabel>
                             <Select
                                 labelId="service-type-label"
@@ -213,7 +217,7 @@ export default function IncomingRequestTable() {
                             </Select>
                         </FormControl>
 
-                        <FormControl style={{ width: 300 }}>
+                        <FormControl style={{width: 300}}>
                             <InputLabel id="service-type-label">Request Status</InputLabel>
                             <Select
                                 labelId="request-status-label"
@@ -239,9 +243,9 @@ export default function IncomingRequestTable() {
                                         You don't have any incoming
                                         request
                                         {statusFilter === 'All Requests' || statusFilter === '' ? '' : (
-                                        <span> with status <span
-                                            style={{fontStyle: 'italic'}}>{statusFilter.toLowerCase()}</span></span>
-                                    )}
+                                            <span> with status <span
+                                                style={{fontStyle: 'italic'}}>{statusFilter.toLowerCase()}</span></span>
+                                        )}
                                         {serviceTypeFilter === 'ALL' || serviceTypeFilter === '' ? '' : (
                                             <span> for service type <span
                                                 style={{fontStyle: 'italic'}}>{serviceTypeFilter.toLowerCase()}</span></span>
@@ -260,57 +264,69 @@ export default function IncomingRequestTable() {
                                 )}
                             </Box>
                         </Box>
-                        {/*<Dialog open={timeChangePopUp} onClose={handleTimeChange}>*/}
-                        {/*    <DialogTitle>Time Slot Update Requested</DialogTitle>*/}
-                        {/*    <DialogContent>*/}
-                        {/*        The consumer will be alerted of the need to select a new TimeSlot.*/}
-                        {/*        Please update your availabilities accordingly.*/}
-                        {/*    </DialogContent>*/}
-                        {/*    <DialogActions>*/}
-                        {/*        <Button onClick={handleTimeChange}>Notify Requester</Button>*/}
-                        {/*    </DialogActions>*/}
-                        {/*</Dialog>*/}
-                        <Dialog open={timeChangePopUp} onClose={() => setTimeChangePopUp(false)}>
-                            <DialogTitle>Request Time Slot Update</DialogTitle>
-                            <DialogContent>
-                                In case you're not available anymore or think the service will take a longer time,
-                                please let the requester know in the comment.
-                                <TextField
-                                    fullWidth
-                                    multiline
-                                    minRows={3}
-                                    maxRows={5}
-                                    value={comment}
-                                    onChange={(e) => setComment(e.target.value)}
-                                    label="Comment"
-                                    variant="outlined"
-                                    placeholder="Please provide additional details or preferred time."
-                                />
-                                The consumer will be alerted of the need to select a new timeslot.
-                                Please update your availabilities accordingly.
-                            </DialogContent>
-                            <DialogActions>
-                                <Button onClick={onTimeChange}>Notify Requester and Update My Availability</Button>
-                            </DialogActions>
-                        </Dialog>
-                        {showMediaCard && selectedRequest && (
-                            <div style={{position: 'relative', flexShrink: 0, width: 400, marginLeft: 2}}>
-                                <GenericProviderCard item={selectedRequest}
-                                                     onClose={() => setShowMediaCard(false)}
-                                                     provider={selectedRequest.provider}
-                                                     receiver={selectedRequest.requestedBy}
-                                                     inDetailPage={false}
-                                                     actions={{
-                                                         accept: onAccept,
-                                                         decline: onDecline,
-                                                         cancelRequest: onCancel,
-                                                         changeTime: () => setTimeChangePopUp(true)
-                                                     }}/>
-                            </div>
-                        )}
                     </Box>
                 </Box>
             </div>
+            {/*<Dialog open={timeChangePopUp} onClose={handleTimeChange}>*/}
+            {/*    <DialogTitle>Time Slot Update Requested</DialogTitle>*/}
+            {/*    <DialogContent>*/}
+            {/*        The consumer will be alerted of the need to select a new TimeSlot.*/}
+            {/*        Please update your availabilities accordingly.*/}
+            {/*    </DialogContent>*/}
+            {/*    <DialogActions>*/}
+            {/*        <Button onClick={handleTimeChange}>Notify Requester</Button>*/}
+            {/*    </DialogActions>*/}
+            {/*</Dialog>*/}
+            <Dialog open={timeChangePopUp} onClose={() => setTimeChangePopUp(false)}>
+                <DialogTitle>Request Time Slot Update</DialogTitle>
+                <DialogContent>
+                    In case you're not available anymore or think the service will take a longer time,
+                    please let the requester know in the comment.
+                    <TextField
+                        fullWidth
+                        multiline
+                        minRows={3}
+                        maxRows={5}
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                        label="Comment"
+                        variant="outlined"
+                        placeholder="Please provide additional details or preferred time."
+                    />
+                    The consumer will be alerted of the need to select a new timeslot.
+                    Please update your availabilities accordingly.
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={onTimeChange}>Notify Requester and Update My Availability</Button>
+                </DialogActions>
+            </Dialog>
+            {showMediaCard && selectedRequest && (
+                // <div style={{position: 'sticky', flexShrink: 0, width: 400, marginLeft: 'auto'}}>
+                <div style={{
+                    width: '25%',
+                    flex: '1 0 25%',
+                    position: 'fixed',
+                    top: '20%',
+                    right: '2%',
+                    height: '80vh',
+                    overflowY: 'auto',
+                    padding: '5px',
+                    boxSizing: 'border-box'
+                }}>
+                    <GenericProviderCard item={selectedRequest}
+                                         onClose={() => setShowMediaCard(false)}
+                                         provider={selectedRequest.provider}
+                                         receiver={selectedRequest.requestedBy}
+                                         inDetailPage={false}
+                                         actions={{
+                                             accept: onAccept,
+                                             decline: onDecline,
+                                             cancelRequest: onCancel,
+                                             changeTime: () => setTimeChangePopUp(true)
+                                         }}/>
+                </div>
+            )}
+
             <Dialog open={dialogOpen} onClose={handleDialogClose}>
                 <DialogTitle>Service Receiver Not Available</DialogTitle>
                 <DialogContent>

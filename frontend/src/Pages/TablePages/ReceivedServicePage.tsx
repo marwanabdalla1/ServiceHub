@@ -11,22 +11,33 @@ import Typography from '@mui/material/Typography';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
 import Link from '@mui/material/Link';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
-import { Job } from '../../models/Job';
-import { RequestStatus, ServiceType, JobStatus } from '../../models/enums';
+import {Job} from '../../models/Job';
+import {RequestStatus, ServiceType, JobStatus} from '../../models/enums';
 
 import GenericTableRow from '../../components/tableComponents/GenericTableRow';
 import GenericConsumerCard from "../../components/tableComponents/GenericConsumerCard";
-import { handleCancel } from "../../utils/jobHandler";
+import {handleCancel} from "../../utils/jobHandler";
 
-import { useAuth } from "../../contexts/AuthContext";
-import { useEffect, useState } from "react";
+import {useAuth} from "../../contexts/AuthContext";
+import {useEffect, useState} from "react";
 import axios from "axios";
-import { useNavigate } from 'react-router-dom';
-import { now } from 'moment';
-import { formatDateTime } from '../../utils/dateUtils';
-import { ServiceRequest } from "../../models/ServiceRequest";
+import {useNavigate} from 'react-router-dom';
+import {now} from 'moment';
+import {formatDateTime} from '../../utils/dateUtils';
+import {ServiceRequest} from "../../models/ServiceRequest";
 import GenericProviderCard from "../../components/tableComponents/GenericProviderCard";
-import { Button, FormControl, InputLabel, MenuItem, Select, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from "@mui/material";
+import {
+    Button,
+    FormControl,
+    InputLabel,
+    MenuItem,
+    Select,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogContentText,
+    DialogActions
+} from "@mui/material";
 import GenericTable from "../../components/tableComponents/GenericTable";
 
 type Item = ServiceRequest | Job;
@@ -36,7 +47,7 @@ export default function ReceivedServiceTable() {
     const [selectedJob, setSelectedJob] = React.useState<Job | null>(null);
     const [jobs, setJobs] = React.useState<Job[]>([]);
     const [dialogOpen, setDialogOpen] = React.useState(false);
-    const { token, account } = useAuth();
+    const {token, account} = useAuth();
     const navigate = useNavigate();
 
     const [total, setTotal] = useState(0);
@@ -63,7 +74,7 @@ export default function ReceivedServiceTable() {
                     }
 
                     const response = await axios.get(`/api/jobs/requester/${account._id}?${params.toString()}`, {
-                        headers: { Authorization: `Bearer ${token}` }
+                        headers: {Authorization: `Bearer ${token}`}
                     });
 
                     setJobs(response.data.data);
@@ -121,19 +132,19 @@ export default function ReceivedServiceTable() {
     };
 
     return (
-        <div style={{ display: 'flex' }}>
-            <div style={{ flex: 1, padding: '20px' }}>
-                <Box sx={{ minWidth: 275, margin: 2 }}>
+        <div style={{display: 'flex', flexDirection: 'row', width: '100%', position: 'relative'}}>
+            <div style={{flex: showMediaCard ? '3 1 auto' : '1 1 0%', marginRight: showMediaCard ? '30%' : '5%'}}>
+                <Box sx={{minWidth: 275, margin: 2}}>
                     <Box>
-                        <Typography variant="h6" component="div" sx={{ marginBottom: '16px' }}>
+                        <Typography variant="h6" component="div" sx={{marginBottom: '16px'}}>
                             Services (Jobs) Received
                         </Typography>
-                        <Typography variant="body2" component="div" sx={{ marginBottom: '16px' }}>
+                        <Typography variant="body2" component="div" sx={{marginBottom: '16px'}}>
                             Here are all the services you've received from a provider.
                         </Typography>
                     </Box>
-                    <Box sx={{ display: 'flex', marginBottom: 2 }}>
-                        <FormControl style={{ width: 300, marginRight: 5 }}>
+                    <Box sx={{display: 'flex', marginBottom: 2}}>
+                        <FormControl style={{width: 300, marginRight: 5}}>
                             <InputLabel id="service-type-label">Filter Service Type</InputLabel>
                             <Select
                                 labelId="service-type-label"
@@ -150,7 +161,7 @@ export default function ReceivedServiceTable() {
                             </Select>
                         </FormControl>
 
-                        <FormControl style={{ width: 300 }}>
+                        <FormControl style={{width: 300}}>
                             <InputLabel id="service-type-label">Request Status</InputLabel>
                             <Select
                                 labelId="request-status-label"
@@ -167,49 +178,62 @@ export default function ReceivedServiceTable() {
                         </FormControl>
                     </Box>
 
-                    <Box style={{ display: 'flex' }}>
-                        <Box sx={{ flexGrow: 1, marginRight: 2 }}>
+                    <Box style={{display: 'flex'}}>
+                        <Box sx={{flexGrow: 1, marginRight: 2}}>
                             <Box>
                                 {jobs.length === 0 ? (
                                     <Typography variant="body1">
-                                        You haven't booked any job{statusFilter === 'All Jobs' || statusFilter === '' ? '' : (
-                                            <span> with status <span style={{ fontStyle: 'italic' }}>{statusFilter.toLowerCase()}</span></span>
-                                        )}
+                                        You haven't booked any
+                                        job{statusFilter === 'All Jobs' || statusFilter === '' ? '' : (
+                                        <span> with status <span
+                                            style={{fontStyle: 'italic'}}>{statusFilter.toLowerCase()}</span></span>
+                                    )}
                                         {serviceTypeFilter === 'ALL' || serviceTypeFilter === '' ? '' : (
                                             <span> for service type <span
-                                                style={{ fontStyle: 'italic' }}>{serviceTypeFilter.toLowerCase()}</span></span>
+                                                style={{fontStyle: 'italic'}}>{serviceTypeFilter.toLowerCase()}</span></span>
                                         )} yet.
                                     </Typography>
                                 ) : (
                                     <GenericTable data={jobs}
-                                        count={total}
-                                        page={page}
-                                        setPage={setPage}
-                                        rowsPerPage={rowsPerPage}
-                                        setRowsPerPage={setRowsPerPage}
-                                        setShowMediaCard={setShowMediaCard}
-                                        onViewDetails={handleToggleMediaCard} />
+                                                  count={total}
+                                                  page={page}
+                                                  setPage={setPage}
+                                                  rowsPerPage={rowsPerPage}
+                                                  setRowsPerPage={setRowsPerPage}
+                                                  setShowMediaCard={setShowMediaCard}
+                                                  onViewDetails={handleToggleMediaCard}/>
 
                                 )}
                             </Box>
                         </Box>
-                        {showMediaCard && selectedJob && (
-                            <div style={{ position: 'relative', flexShrink: 0, width: 400, marginLeft: 2 }}>
-                                <GenericConsumerCard item={selectedJob}
-                                    provider={selectedJob.provider}
-                                    receiver={selectedJob.receiver}
-                                    onClose={() => setShowMediaCard(false)}
-                                    inDetailPage={false}
-                                    actions={{
-                                        cancelJob: onCancel,
-                                        review: () => handleReview(selectedJob),
-                                    }}
-                                />
-                            </div>
-                        )}
                     </Box>
                 </Box>
             </div>
+            {showMediaCard && selectedJob && (
+                <div style={{
+                    width: '25%',
+                    flex: '1 0 25%',
+                    position: 'fixed',
+                    top: '20%',
+                    right: '2%',
+                    height: '80vh',
+                    overflowY: 'auto',
+                    padding: '5px',
+                    boxSizing: 'border-box'
+                }}>
+                    <GenericConsumerCard item={selectedJob}
+                                         provider={selectedJob.provider}
+                                         receiver={selectedJob.receiver}
+                                         onClose={() => setShowMediaCard(false)}
+                                         inDetailPage={false}
+                                         actions={{
+                                             cancelJob: onCancel,
+                                             review: () => handleReview(selectedJob),
+                                         }}
+                    />
+                </div>
+            )}
+
 
             <Dialog open={dialogOpen} onClose={handleDialogClose}>
                 <DialogTitle>Service Provider Not Available</DialogTitle>

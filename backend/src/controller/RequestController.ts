@@ -213,8 +213,8 @@ export const getServiceRequestsByProvider: RequestHandler = async (req, res) => 
 
         const serviceRequests = await ServiceRequest.find(query)
             .populate([
-                { path: 'requestedBy', select: 'firstName lastName email profileImageId' },
-                { path: 'provider', select: 'firstName lastName email profileImageId' }
+                { path: 'requestedBy', select: 'firstName lastName email profileImageId phoneNumber' },
+                { path: 'provider', select: 'firstName lastName email profileImageId phoneNumber' }
             ])
             .exec();
 
@@ -273,8 +273,8 @@ export const getServiceRequestsByRequester: RequestHandler = async (req, res) =>
 
         const serviceRequests = await ServiceRequest.find(query)
             .populate([
-                { path: 'requestedBy', select: 'firstName lastName email profileImageId' },
-                { path: 'provider', select: 'firstName lastName email profileImageId' }
+                { path: 'requestedBy', select: 'firstName lastName email profileImageId phoneNumber' },
+                { path: 'provider', select: 'firstName lastName email profileImageId phoneNumber' }
             ])
             .exec();
 
@@ -358,8 +358,8 @@ export const getRequestById: RequestHandler = async (req, res) => {
         }
 
         const serviceRequest = await ServiceRequest.findById(requestId).populate([
-            { path: 'requestedBy', select: 'firstName lastName email profileImageId' },
-            { path: 'provider', select: 'firstName lastName email profileImageId' }
+            { path: 'requestedBy', select: 'firstName lastName email profileImageId phoneNumber' },
+            { path: 'provider', select: 'firstName lastName email profileImageId phoneNumber' }
         ]).exec();
 
         console.log(serviceRequest)

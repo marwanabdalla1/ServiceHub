@@ -2,9 +2,6 @@ import {RequestHandler} from 'express';
 import moment from 'moment';
 import Timeslot, {ITimeslot} from '../models/timeslot';
 import mongoose, {ClientSession, Types} from "mongoose";
-import {JobStatus, RequestStatus} from "../models/enums";
-import ServiceRequest from "../models/serviceRequest";
-import Job from "../models/job";
 
 // Custom error class for Timeslot-related errors
 class TimeslotError extends Error {
