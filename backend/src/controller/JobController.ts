@@ -133,13 +133,13 @@ export const getJobsByProvider: RequestHandler = async (req, res) => {
         }
 
 
-        const { serviceType, requestStatus, page = 1, limit = 10 } = req.query;
+        const { serviceType, status, page = 1, limit = 10 } = req.query;
 
         let query:Query = { provider: providerId };
 
         // Adding filters based on query parameters
-        if (requestStatus) {
-            query.status = requestStatus;
+        if (status) {
+            query.status = status;
         }
         if (serviceType) {
             query.serviceType = serviceType;
@@ -201,7 +201,7 @@ export const getJobsByRequester: RequestHandler = async (req, res) => {
         }
 
         // Fetch all jobs where the 'receiver' field matches 'requesterId'
-        const jobs = await Job.find({ receiver: requesterId }).populate([
+        const jobs = await Job.find(query).populate([
             { path: 'receiver', select: 'firstName lastName email profileImageId phoneNumber' }, // todo: also include profile pic
             { path: 'provider', select: 'firstName lastName email profileImageId phoneNumber' },
         ])

@@ -189,6 +189,7 @@ export default function RequestHistoryTable() {
                                                   setRowsPerPage={setRowsPerPage}
                                                   setShowMediaCard={setShowMediaCard}
                                                   onViewDetails={handleToggleMediaCard}
+                                                  isProvider={false}
                                     />
 
                                 )}

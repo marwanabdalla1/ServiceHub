@@ -70,7 +70,7 @@ export default function OfferedServicesTable() {
                         limit: rowsPerPage.toString(),
                     });
                     if (statusFilter !== 'All Jobs') {
-                        params.append('requestStatus', statusFilter.toLowerCase());
+                        params.append('status', statusFilter.toLowerCase());
                     }
                     if (serviceTypeFilter !== 'ALL') {
                         params.append('serviceType', serviceTypeFilter);
@@ -83,7 +83,7 @@ export default function OfferedServicesTable() {
                     setJobs(response.data.data);
                     setTotal(response.data.total);
                 } catch (error) {
-                    console.error('Failed to fetch service requests:', error);
+                    console.error('Failed to fetch service jobs:', error);
                     setJobs([]);
                 }
             };
@@ -113,7 +113,7 @@ export default function OfferedServicesTable() {
 
     const onComplete = () => {
         if (!selectedJob) {
-            console.error('No request selected');
+            console.error('No job selected');
             return;
         }
         handleComplete({
@@ -128,7 +128,7 @@ export default function OfferedServicesTable() {
 
     const onRevoke = () => {
         if (!selectedJob) {
-            console.error('No request selected');
+            console.error('No job selected');
             return;
         }
         handleRevoke({
@@ -142,7 +142,7 @@ export default function OfferedServicesTable() {
 
     const onCancel = () => {
         if (!selectedJob) {
-            console.error('No request selected');
+            console.error('No job selected');
             return;
         }
         handleCancel({
@@ -170,7 +170,7 @@ export default function OfferedServicesTable() {
                             Offered Services (Jobs)
                         </Typography>
                         <Typography variant="body2" component="div" sx={{marginBottom: '16px'}}>
-                            Here are all the service bookings you have accepted as a provider.
+                            When you accept a request, it automatically turns into a job.
                         </Typography>
                     </Box>
                     <Box sx={{display: 'flex', marginBottom: 2}}>
@@ -192,12 +192,12 @@ export default function OfferedServicesTable() {
                         </FormControl>
 
                         <FormControl style={{width: 300}}>
-                            <InputLabel id="service-type-label">Request Status</InputLabel>
+                            <InputLabel id="job-status-label">Job Status</InputLabel>
                             <Select
-                                labelId="request-status-label"
-                                id="request-status-select"
+                                labelId="job-status-label"
+                                id="job-status-select"
                                 value={statusFilter}
-                                label="Request Status"
+                                label="Job Status"
                                 onChange={handleChangeStatus}
                                 fullWidth
                             >
@@ -231,7 +231,8 @@ export default function OfferedServicesTable() {
                                                   rowsPerPage={rowsPerPage}
                                                   setRowsPerPage={setRowsPerPage}
                                                   setShowMediaCard={setShowMediaCard}
-                                                  onViewDetails={handleToggleMediaCard}/>
+                                                  onViewDetails={handleToggleMediaCard}
+                                                  isProvider={true}/>
 
                                 )}
                             </Box>
