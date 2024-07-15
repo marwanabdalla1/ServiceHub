@@ -212,7 +212,7 @@ const ReviewPage: React.FC = () => {
 
                 <Box sx={{mt: 4}}>
                     <Box ref={reviewsRef} sx={{mt: 4}}>
-                        <Typography variant="h4">Reviews for Completed</Typography>
+                        <Typography variant="h4">Reviews for Completed Job</Typography>
 
                         <CardContent>
                             <Typography variant="h6" sx={{mt: 2}}>Job Details</Typography>
