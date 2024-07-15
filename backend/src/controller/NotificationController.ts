@@ -48,8 +48,8 @@ export async function createNotificationDirect({ content, notificationType, job,
             review: review ? new Types.ObjectId(review) : undefined,
             recipient: new Types.ObjectId(recipient)
         });
-        emitNotification(recipient, newNotification); // Emit the event after saving
-        return await newNotification.save();
+        const savedNotification = await newNotification.save();
+        emitNotification(recipient, savedNotification); // Emit the event after saving
     } catch (error: any) {
         throw new Error(error.message);
     }
