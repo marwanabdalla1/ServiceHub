@@ -13,6 +13,7 @@ import GenericTableRow from "./GenericTableRow";
 import {Job} from "../../models/Job";
 import {ServiceRequest} from "../../models/ServiceRequest";
 import InfoIcon from '@mui/icons-material/Info';
+import {useAuth} from "../../contexts/AuthContext";
 
 
 type Item = ServiceRequest | Job;
@@ -26,6 +27,7 @@ interface GenericTableProps {
     setRowsPerPage: (rowsPerPage: number) => void; // setter for rows per page
     setShowMediaCard: (show: boolean) => void;
     onViewDetails: (item: Item | ServiceRequest | Job | null) => void;
+    isProvider: boolean;
 
 }
 
@@ -38,10 +40,12 @@ function GenericTable({
                           rowsPerPage,
                           setRowsPerPage,
                           setShowMediaCard,
-                          onViewDetails
+                          onViewDetails,
+                          isProvider
                       }: GenericTableProps) {
     const [selectedItem, setSelectedItem] = React.useState<ServiceRequest | Job | null>(null);
     const [selectedItems, setSelectedItems] = React.useState<Item[]>([]);
+    const {token, account} = useAuth();
 
 
     const handleChangePage = (
@@ -70,6 +74,9 @@ function GenericTable({
                             <TableCell>Type</TableCell>
                             <TableCell>Status
                             </TableCell>
+                            <TableCell>
+                                {isProvider? "Requester/Receiver" : "Provider"}
+                            </TableCell>
                             <TableCell>Appointment Time
                                 <Tooltip
                                     title="Invalid appointment time occurs when the request is cancelled, declined or when the provider has required the time to be changed."
@@ -92,7 +99,9 @@ function GenericTable({
                     </TableHead>
                     <TableBody>
                         {data.map((row) => (
-                            <GenericTableRow key={row._id} item={row} onViewDetails={onViewDetails}/>
+                            <GenericTableRow key={row._id} item={row}
+                                             isProvider={isProvider}
+                                             onViewDetails={onViewDetails}/>
                         ))}
                     </TableBody>
                 </Table>

@@ -11,10 +11,11 @@ type Item = ServiceRequest | Job;
 
 interface GenericRowProps {
     item: Item;
+    isProvider: boolean;
     onViewDetails: (item: Item | ServiceRequest | Job | null) => void;
 }
 
-const GenericRow: React.FC<GenericRowProps> = ({ item, onViewDetails }) => {
+const GenericRow: React.FC<GenericRowProps> = ({ item, isProvider, onViewDetails }) => {
     // todo: might need to reformat depending on the thing
     const formatDateTime = (date: any) => {
         if (!(date instanceof Date)) date = new Date(date);
@@ -32,11 +33,33 @@ const GenericRow: React.FC<GenericRowProps> = ({ item, onViewDetails }) => {
 
     const displayedTime = item.timeslot ? formatDateTime(item.timeslot.end) : formatDateTime(item.appointmentEndTime) + " (invalid)"
 
+    const displayInfo = () => {
+        if (isProvider) {
+            // Use type guard to check if it's a Job
+            if ('receiver' in item && item.receiver) {
+                return `${item.receiver.firstName} ${item.receiver.lastName}`;
+            }
+            // Use type guard to check if it's a ServiceRequest
+            else if ('requestedBy' in item && item.requestedBy) {
+                return `${item.requestedBy.firstName} ${item.requestedBy.lastName}`;
+            } else{
+                return "Account Deleted"
+            }
+        }
+        // Default to showing provider info if available
+        if ('provider' in item && item.provider) {
+            return `${item.provider.firstName} ${item.provider.lastName}`;
+        }
+        return 'Account Deleted';
+    };
+
+
 
     return (
         <TableRow>
             <TableCell>{item.serviceType}</TableCell>
             <TableCell>{status}</TableCell>
+            <TableCell>{displayInfo()}</TableCell>
             <TableCell>{displayedTime}</TableCell>
             <TableCell>
                 <BlackButton text="View" onClick={() => onViewDetails(item)} />

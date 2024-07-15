@@ -183,7 +183,7 @@ export default function IncomingRequestTable() {
         //     <div style={{flex: 1, padding: '10px'}}>
         <div style={{display: 'flex', flexDirection: 'row', width: '100%', position: 'relative'}}>
             {/*<div style={{flexGrow: showMediaCard ? 1 : 1, transition: 'flex-grow 0.3s', padding: '10px'}}>*/}
-            <div style={{flex: showMediaCard ? '3 1 auto' : '1 1 0%', marginRight: showMediaCard ? '30%' : '5%' }}>
+            <div style={{flex: showMediaCard ? '3 1 auto' : '1 1 0%', marginRight: showMediaCard ? '30%' : '5%'}}>
 
                 <AlertCustomized alert={alert} closeAlert={closeAlert}/>
 
@@ -259,6 +259,7 @@ export default function IncomingRequestTable() {
                                                   setRowsPerPage={setRowsPerPage}
                                                   setShowMediaCard={setShowMediaCard}
                                                   onViewDetails={handleToggleMediaCard}
+                                                  isProvider={true}
                                     />
 
                                 )}

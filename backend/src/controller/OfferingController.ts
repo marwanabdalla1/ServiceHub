@@ -108,6 +108,7 @@ const filterOfferings = (offerings: any[], filters: any) => {
             const searchRegex = new RegExp(searchTerm, 'i');
             matchesSearch = searchRegex.test(offering.provider?.firstName) ||
                 searchRegex.test(offering.provider?.lastName) ||
+                searchRegex.test(`${offering.provider?.firstName} ${offering.provider?.lastName}`) ||
                 searchRegex.test(offering.provider?.location) ||
                 searchRegex.test(offering.serviceType);
         }

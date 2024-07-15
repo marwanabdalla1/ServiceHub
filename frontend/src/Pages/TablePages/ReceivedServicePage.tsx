@@ -66,8 +66,8 @@ export default function ReceivedServiceTable() {
                         page: (page + 1).toString(),
                         limit: rowsPerPage.toString(),
                     });
-                    if (statusFilter !== 'All Requests') {
-                        params.append('requestStatus', statusFilter.toLowerCase());
+                    if (statusFilter !== 'All Jobs') {
+                        params.append('status', statusFilter.toLowerCase());
                     }
                     if (serviceTypeFilter !== 'ALL') {
                         params.append('serviceType', serviceTypeFilter);
@@ -80,7 +80,7 @@ export default function ReceivedServiceTable() {
                     setJobs(response.data.data);
                     setTotal(response.data.total);
                 } catch (error) {
-                    console.error('Failed to fetch service requests:', error);
+                    console.error('Failed to fetch jobs:', error);
                     setJobs([]);
                 }
             };
@@ -140,7 +140,7 @@ export default function ReceivedServiceTable() {
                             Services (Jobs) Received
                         </Typography>
                         <Typography variant="body2" component="div" sx={{marginBottom: '16px'}}>
-                            Here are all the services you've received from a provider.
+                            When the provider accepts a request, it is automatically turned into a job. Here are all the services (jobs) you've received.
                         </Typography>
                     </Box>
                     <Box sx={{display: 'flex', marginBottom: 2}}>
@@ -162,12 +162,12 @@ export default function ReceivedServiceTable() {
                         </FormControl>
 
                         <FormControl style={{width: 300}}>
-                            <InputLabel id="service-type-label">Request Status</InputLabel>
+                            <InputLabel id="job-status-label">Job Status</InputLabel>
                             <Select
-                                labelId="request-status-label"
-                                id="request-status-select"
+                                labelId="job-status-label"
+                                id="job-status-select"
                                 value={statusFilter}
-                                label="Request Status"
+                                label="Job Status"
                                 onChange={handleChangeStatus}
                                 fullWidth
                             >
@@ -201,7 +201,8 @@ export default function ReceivedServiceTable() {
                                                   rowsPerPage={rowsPerPage}
                                                   setRowsPerPage={setRowsPerPage}
                                                   setShowMediaCard={setShowMediaCard}
-                                                  onViewDetails={handleToggleMediaCard}/>
+                                                  onViewDetails={handleToggleMediaCard}
+                                    isProvider={false}/>
 
                                 )}
                             </Box>
