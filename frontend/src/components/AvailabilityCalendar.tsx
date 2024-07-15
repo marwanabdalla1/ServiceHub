@@ -255,6 +255,12 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
 
                 // fetchEvents();
 
+                const newFetchedEvents = fetchedEvents.map(event =>
+                    event._id === selectedTimeSlot._id ? { ...event, isFixed: true } : event
+                );
+
+                setFetchedEvents(newFetchedEvents);
+
                 // setFetchedEvents([...fetchedEvents, response.data])
 
                 // Close any open dialogs or UI elements

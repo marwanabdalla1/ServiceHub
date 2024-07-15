@@ -180,8 +180,18 @@ const GenericConsumerCard: React.FC<GenericConsumerCardProps> = ({
                         <Typography variant="h6">
                             {isJob(item) ? "Job Detail" : "Request Detail"}
                         </Typography>
-                        <Typography variant="body2" color="textSecondary" style={{marginBottom: '0.5rem'}}>
+                        <Typography variant="body1" color="textPrimary" style={{marginBottom: '0.5rem'}}>
                             Provider: {provider?.firstName + " " + provider?.lastName}
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary" >
+                            Email: <a href={`mailto:${provider?.email}`} style={{ color: 'inherit', textDecoration: 'none' }}>{provider?.email}</a>
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary" style={{marginBottom: '0.5rem'}}>
+                            {provider?.phoneNumber ? (
+                                <a href={`tel:${provider.phoneNumber}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+                                    Number: {provider.phoneNumber}
+                                </a>
+                            ) : ""}
                         </Typography>
                     </div>
                 </div>
