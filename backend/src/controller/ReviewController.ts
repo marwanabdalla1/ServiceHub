@@ -27,13 +27,16 @@ export const submitReview: RequestHandler = async (req, res) => {
         if (!jobDetails) {
             return res.status(404).json({ error: "Job not found." });
         }
+        console.log("job details:", jobDetails)
 
         // Check if the user is the client or the provider of the job
         const isClient = jobDetails.receiver._id.toString() === user.userId;
         const isProvider = jobDetails.provider._id.toString() === user.userId;
+
         if (!isClient && !isProvider) {
             return res.status(403).json({ error: "You must be the provider or have used the service to review it." });
         }
+
 
         // make sure you can't give review to yourself!
         if (user.userId === recipient){
@@ -46,11 +49,8 @@ export const submitReview: RequestHandler = async (req, res) => {
             return res.status(400).json({ error: "A review for this job already exists." });
         }
 
-        // Additional checks can be made here,
-
         const reviewData = {
             reviewer: user.userId,
-            // reviewer : req.body.reviewer,
             content: req.body.content || '',
             rating: req.body.rating,
             recipient: req.body.recipient,
@@ -75,9 +75,11 @@ export const submitReview: RequestHandler = async (req, res) => {
         }
 
 
-
         // push notification to receiver
-        const notificationContent = `A new review has been added to the job ${savedReview.job}.`;
+        let notificationContent = `A new review has been added to the job ${jobId}.`;
+        // if (otherParty) {
+        //     notificationContent = `A new review from ${otherParty.firstName} ${otherParty.lastName} has been added to the job ${jobId}.`;
+        // }
         const newNotification = new Notification({
             isViewed: false,
             content: notificationContent,
@@ -283,7 +285,6 @@ export const getAllReviewsByOffering: RequestHandler = async (req, res) => {
     // const user = (req as any).user;
     const { offeringId } = req.params;
     console.log("offering id for finding reviews: ", offeringId)
-    // const userId = user.userId; // Assuming you're using some authentication middleware
 
     try {
         // Find the service offering to get its provider

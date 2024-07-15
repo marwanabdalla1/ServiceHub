@@ -212,7 +212,7 @@ const ReviewPage: React.FC = () => {
 
                 <Box sx={{mt: 4}}>
                     <Box ref={reviewsRef} sx={{mt: 4}}>
-                        <Typography variant="h4">Reviews</Typography>
+                        <Typography variant="h4">Reviews for Completed</Typography>
 
                         <CardContent>
                             <Typography variant="h6" sx={{mt: 2}}>Job Details</Typography>
@@ -225,9 +225,9 @@ const ReviewPage: React.FC = () => {
                             <Typography variant="body1" sx={{mt: 1}}>Your role: {role}</Typography>
                             {job && job.timeslot && (
                                 <>
-                                    <Typography variant="body2" color={"secondary"} sx={{mt: 1}}>Start
+                                    <Typography variant="body2" color={"text.secondary"} sx={{mt: 1}}>Start
                                         Time: {formatDateTime(job?.timeslot?.start)}</Typography>
-                                    <Typography variant="body2" color={"secondary"} sx={{mt: 1}}>End
+                                    <Typography variant="body2" color={"text.secondary"}>End
                                         Time: {formatDateTime(job?.timeslot?.end)}
                                     </Typography>
                                 </>

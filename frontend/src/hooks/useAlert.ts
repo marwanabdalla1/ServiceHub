@@ -37,8 +37,11 @@ function useAlert(defaultDuration: number | null) {
 
 
         if (alert.redirectUrl) {
-            // Using window.location to navigate and refresh
-            window.location.href = alert.redirectUrl;
+            if (window.location.pathname === alert.redirectUrl) {
+                window.location.reload();
+            } else {
+                navigate(alert.redirectUrl);
+            }
         }
 
     }, [timeoutId]);

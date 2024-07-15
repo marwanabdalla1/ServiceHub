@@ -1,5 +1,16 @@
 import React, {useEffect} from 'react';
-import {Card, CardContent, Typography, Button, Rating, Avatar, TextField, Box} from '@mui/material';
+import {
+    Card,
+    CardContent,
+    Typography,
+    Button,
+    Rating,
+    Avatar,
+    TextField,
+    Box,
+    Dialog,
+    DialogTitle, DialogContent, DialogContentText, DialogActions
+} from '@mui/material';
 import {Review} from '../models/Review';
 import {Account} from "../models/Account";
 import axios from "axios";
@@ -34,6 +45,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
     const {alert, triggerAlert, closeAlert} = useAlert(5000);
     const [profileImage, setProfileImage] = React.useState<string | null>(null);
 
+    const [openDialog, setOpenDialog] = React.useState(false);
 
     // fetch profile image
     useEffect(() => {
@@ -43,6 +55,14 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
             });
         }
     }, [reviewer]);
+
+    const handleDialogOpen = () => {
+        setOpenDialog(true);
+    };
+
+    const handleDialogClose = () => {
+        setOpenDialog(false);
+    };
 
 
     const isReviewer = account && account?._id.toString() === reviewer?._id.toString();
@@ -110,9 +130,6 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
             });
             triggerAlert('Review deleted successfully!', '', 'success', 3000, 'dialog', 'center', window.location.pathname.toString());
 
-            setTimeout(() => {
-                window.location.reload();
-            }, 3100); // Delay reloading to allow alert to display
             // alert('Review deleted successfully!');
             // navigate('/jobs/offeredServices');  // Redirect or update local state
         } catch (error) {
@@ -120,9 +137,8 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
             // alert('Failed to delete review.');
             triggerAlert('Failed to delete review.', 'Please try again later', 'error', 5000);
 
-        } finally{
-            window.location.reload()
-
+        } finally {
+            handleDialogClose(); // Close the dialog
         }
     };
 
@@ -133,6 +149,28 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
                 {/*<button onClick={handleAction}>Do Something</button>*/}
                 <AlertCustomized alert={alert} closeAlert={closeAlert}/>
             </div>
+
+            <Dialog
+                open={openDialog}
+                onClose={handleDialogClose}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">{"Confirm Delete"}</DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="alert-dialog-description">
+                        Are you sure you want to delete this review? This action cannot be undone.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleDialogClose} color="primary">
+                        Cancel
+                    </Button>
+                    <Button onClick={handleDelete} color="primary" autoFocus>
+                        Delete
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
             {isReviewer && isEditing ? (
                 <>
@@ -147,6 +185,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
                         <TextField
                             fullWidth
                             multiline
+                            placeholder={"Optional review text"}
                             rows={4}
                             variant="outlined"
                             value={reviewText}
@@ -154,7 +193,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
                         />
                     </CardContent>
                     <CardContent>
-                        <Button onClick={handleSubmit} variant="contained" color="primary" sx={{mr: 2}}>
+                        <Button onClick={handleSubmit} disabled={rating === 0} variant="contained" color="primary" sx={{mr: 2}}>
                             {review ? 'Update Review' : 'Submit Review'}
                         </Button>
                         <Button onClick={handleCancel} variant="outlined" color="primary">Cancel</Button>
@@ -177,9 +216,6 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
                             <Box>
                                 <Typography
                                     variant="h6">{reviewer?.firstName} {reviewer?.lastName}</Typography>
-                                {/*<Typography variant="body2" color="text.secondary">*/}
-                                {/*    {job?.serviceType}, {formatDateTime(job?.timeslot?.start || new Date()) || formatDateTime(new Date())}*/}
-                                {/*</Typography>*/}
                                 <Typography variant="body2" color="text.secondary">
                                     Reviewed on {formatDateTime(review?.updatedAt)}
                                 </Typography>
@@ -194,7 +230,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
                             <Button onClick={handleEdit} variant="outlined" color="primary" sx={{mr: 3}}>
                                 Edit
                             </Button>
-                            <Button onClick={handleDelete} variant="outlined" color="secondary">
+                            <Button onClick={handleDialogOpen} variant="outlined" color={"error"}>
                                 Delete
                             </Button>
                         </CardContent>
