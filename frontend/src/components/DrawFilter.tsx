@@ -245,13 +245,13 @@ export const DrawerFilter: React.FC<DrawerFilterProps> = ({
               value={localFilterState.priceRange}
               onChange={handlePriceChange}
               valueLabelDisplay="auto"
-              min={15}
-              max={60}
+              min={10}
+              max={100}
               step={1}
               marks={[
-                { value: 15, label: '$15' },
-                { value: 37.5, label: '$37.5' },
-                { value: 60, label: '$60' }
+                { value: 10, label: '$10' },
+                { value: 55, label: '$55' },
+                { value: 100, label: '$100' }
               ]}
             />
           </FormControl>
@@ -299,7 +299,7 @@ export const DrawerFilter: React.FC<DrawerFilterProps> = ({
             onClick={() => {
               setLocalFilterState({
                 type: '',
-                priceRange: [15, 60],
+                priceRange: [15, 9999],
                 locations: [],
                 isLicensed: undefined,
               });

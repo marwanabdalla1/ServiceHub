@@ -87,26 +87,26 @@ function ReviewAndConfirm({bookingDetails, handleCancel}: ReviewAndConfirmProps)
             this.code = code; // Custom property to store specific error codes
         }
     }
-    
+
     const sendEmailNotification = async (email: string,
-        name: string,
-        serviceType: ServiceType | undefined,
-        startTime: Date) => {
-try {
-    await axios.post('/api/email/requestConfirmation', {
-            email: email,
-            name: name,
-            serviceType: serviceType,
-            startTime: startTime,
-        }).then((res) => {
-            console.log(`Email sent to ${email}:`, res);
-        }).catch((err) => {
-            console.error(`Error sending email to ${email}:`, err);
-        });
-    } catch (error) {
-        console.error("There was an error sending the email", error);
-    }
-};
+                                         name: string,
+                                         serviceType: ServiceType | undefined,
+                                         startTime: Date) => {
+        try {
+            await axios.post('/api/email/requestConfirmation', {
+                email: email,
+                name: name,
+                serviceType: serviceType,
+                startTime: startTime,
+            }).then((res) => {
+                console.log(`Email sent to ${email}:`, res);
+            }).catch((err) => {
+                console.error(`Error sending email to ${email}:`, err);
+            });
+        } catch (error) {
+            console.error("There was an error sending the email", error);
+        }
+    };
     const handleConfirmBooking = async () => {
 
 
@@ -151,9 +151,9 @@ try {
                 console.log()
                 console.log('Booking confirmed:', response.data);
 
-                sendEmailNotification(bookingDetails.requestedBy?.email ? bookingDetails.requestedBy?.email : "", 
-                                        bookingDetails.requestedBy?.firstName ? bookingDetails.requestedBy?.firstName : "", 
-                                        bookingDetails.serviceType, bookingDetails.timeSlot?.start ? bookingDetails.timeSlot?.start : new Date());
+                sendEmailNotification(bookingDetails.requestedBy?.email ? bookingDetails.requestedBy?.email : "",
+                    bookingDetails.requestedBy?.firstName ? bookingDetails.requestedBy?.firstName : "",
+                    bookingDetails.serviceType, bookingDetails.timeSlot?.start ? bookingDetails.timeSlot?.start : new Date());
 
 
                 // not needed, now all handled in backend

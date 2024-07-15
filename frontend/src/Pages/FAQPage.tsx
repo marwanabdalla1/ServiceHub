@@ -13,6 +13,7 @@ const FAQPage = () => {
         { question: "What payment methods are available?", answer: "Every provider can indicate which payment methods the prefer. The available options are cash, PayPal and bank transfer." },
         { question: "Which services can be offered on Service Hub?", answer: "The service that are currently available on Service Hub are: petsitting, babysitting, bike repair, cleaning, moving, tutoring, landscaping, and remodeling." },
         { question: "What does the 'licensed' tag next to a service offering mean?", answer: "The 'licensed' tag indicates that the provider has an official certification, enhancing their qualifications for the service they offer." },
+        { question: "Why can't I find my city?", answer: "We currently offer services only in specific cities within Germany. If your city does not appear in the filter options, it means we do not provide services in that location at this time." },
     ];
 
     return (

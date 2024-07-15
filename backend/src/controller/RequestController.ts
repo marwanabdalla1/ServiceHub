@@ -22,7 +22,7 @@ import { formatDateTime } from "../../../frontend/src/utils/dateUtils";
  * @returns {boolean} - Returns true if any required property is missing, otherwise false
  */
 function errorHandler(req: Request, res: Response, requiredProperties: string[]) {
-    for (let property of requiredProperties) {
+    for (const property of requiredProperties) {
         if (!req.body[property]) {
             res.status(400).json({
                 error: "Bad Request",
@@ -79,7 +79,7 @@ export const createServiceRequest: RequestHandler = async (req: Request, res: Re
         const { timeSlot, ...requestBody } = req.body;
 
         console.log("request body: " + requestBody)
-        let newServiceRequest = await ServiceRequest.create(requestBody);
+        const newServiceRequest = await ServiceRequest.create(requestBody);
 
         if (!newServiceRequest._id) {
             return res.status(400).send({ message: "Failed to create service request." });
@@ -201,7 +201,7 @@ export const getServiceRequestsByProvider: RequestHandler = async (req, res) => 
 
         console.log("queries", req.query)
 
-        let query: Query = { provider: providerId, requestStatus: { $ne: 'accepted' }  };
+        const query: Query = { provider: providerId, requestStatus: { $ne: 'accepted' }  };
 
         // Adding filters based on query parameters
         if (requestStatus) {
@@ -261,7 +261,7 @@ export const getServiceRequestsByRequester: RequestHandler = async (req, res) =>
 
         console.log("queries", req.query)
 
-        let query: Query = { requestedBy: requesterId, requestStatus: { $ne: 'accepted' }  };
+        const query: Query = { requestedBy: requesterId, requestStatus: { $ne: 'accepted' }  };
 
         // Adding filters based on query parameters
         if (requestStatus) {

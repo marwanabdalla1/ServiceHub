@@ -17,19 +17,6 @@ import {toast} from "react-toastify";
 import {useAuth} from "../../../contexts/AuthContext";
 import {User} from "../../../models/Account";
 
-function Copyright(props: PropsWithChildren<{}>) {
-    return (
-        <Typography variant="body2" color="text.secondary" align="center" {...props}>
-            {'Copyright © '}
-            <Link color="inherit" href="https://mui.com/">
-                Service Hub
-            </Link>{' '}
-            {new Date().getFullYear()}
-            {'.'}
-        </Typography>
-    );
-}
-
 const defaultTheme = createTheme({
     palette: {
         primary: {
@@ -162,9 +149,6 @@ export default function EmailVerification() {
                             </Link>
                         </Grid>
                     </Grid>
-                </Box>
-                <Box sx={{mt: 8, mb: 4}}>
-                    <Copyright/>
                 </Box>
             </Container>
         </ThemeProvider>
