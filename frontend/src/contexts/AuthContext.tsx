@@ -94,7 +94,7 @@ export const AccountProvider = ({children}: Props) => {
                 });
         }
 
-    }, [token]);
+    }, [token, account]);
 
     function handleResponse(response: AxiosResponse<any>) {
         localStorage.setItem('token', response?.data.token);
