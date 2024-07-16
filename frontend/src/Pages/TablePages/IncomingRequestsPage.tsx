@@ -8,15 +8,13 @@ import {
     DialogContentText,
     Box,
     TextField,
-    Select,
-    FormControl, InputLabel, MenuItem
+
 } from '@mui/material';
 
 import {Link} from 'react-router-dom'
 import Typography from '@mui/material/Typography';
 import {ServiceRequest} from '../../models/ServiceRequest';
 import GenericProviderCard from '../../components/tableComponents/GenericProviderCard'
-import {ServiceType} from '../../models/enums'
 import {useEffect} from "react";
 import {useAuth} from "../../contexts/AuthContext";
 import axios from "axios";
@@ -52,9 +50,10 @@ export default function IncomingRequestTable() {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
 
-    const statusOptions = ['All Requests', 'Pending', 'Action Needed from Requester', 'Cancelled', 'Declined']; //exclude accepted
-    const [statusFilter, setStatusFilter] = useState('All Requests');
-    const [serviceTypeFilter, setServiceTypeFilter] = useState("ALL");
+    const statusOptions = ['All Statuses', 'Pending', 'Action Needed from Requester', 'Cancelled', 'Declined']; //exclude accepted
+    const [statusFilter, setStatusFilter] = useState(['All Statuses']);
+    const [serviceTypeFilter, setServiceTypeFilter] = useState(["All Types"]);
+
 
     useEffect(() => {
         console.log(token)
@@ -66,12 +65,20 @@ export default function IncomingRequestTable() {
                         page: (page + 1).toString(), // API is zero-indexed, React state is zero-indexed
                         limit: rowsPerPage.toString(),
                     });
-                    if (statusFilter !== 'All Requests') {
-                        params.append('requestStatus', statusFilter.toLowerCase());
+
+
+                    if (statusFilter.length > 0 && !statusFilter.includes('All Statuses')) {
+                        statusFilter.forEach(type => {
+                            params.append('requestStatus', type.toLowerCase());
+                        });
                     }
 
-                    if (serviceTypeFilter !== 'ALL') {
-                        params.append('serviceType', serviceTypeFilter); // Ensure this matches the actual enum/case used in your database
+
+                    // Handling multiple service type filters
+                    if (serviceTypeFilter.length > 0 && !serviceTypeFilter.includes('All Types')) {
+                        serviceTypeFilter.forEach(type => {
+                            params.append('serviceType', type);
+                        });
                     }
 
                     console.log(params)
@@ -93,18 +100,13 @@ export default function IncomingRequestTable() {
         }
     }, [token, account, page, rowsPerPage, statusFilter, serviceTypeFilter]);
 
-    const handleChangeServiceType = (event: any) => {
-        setServiceTypeFilter(event.target.value);
-        setPage(0);
-    };
-
-    const handleChangeStatus = (event: any) => {
-        setStatusFilter(event.target.value);
-        setPage(0);
-    };
-
 
     const handleToggleMediaCard = (req: ServiceRequest | Item | null) => {
+        console.log("Request:", req);
+        console.log("showMediaCard now", showMediaCard);
+
+        console.log("showMediaCard will be set to:", req !== null);
+
         if (req && (req as ServiceRequest).requestedBy === null) {
             setDialogOpen(true);
             return;
@@ -183,13 +185,12 @@ export default function IncomingRequestTable() {
         //     <div style={{flex: 1, padding: '10px'}}>
         <div style={{display: 'flex', flexDirection: 'row', width: '100%', position: 'relative'}}>
             {/*<div style={{flexGrow: showMediaCard ? 1 : 1, transition: 'flex-grow 0.3s', padding: '10px'}}>*/}
-            <div style={{flex: showMediaCard ? '3 1 auto' : '1 1 0%', marginRight: showMediaCard ? '30%' : '5%'}}>
+            {/*<div >*/}
 
                 <AlertCustomized alert={alert} closeAlert={closeAlert}/>
 
-                <Box sx={{minWidth: 275, margin: 2}}>
+                <Box sx={{minWidth: 275, margin: 2, width: '100%'}}>
                     <Box>
-
                         <Typography variant="h6" component="div" sx={{marginBottom: '10px'}}>
                             Incoming Requests
                         </Typography>
@@ -199,85 +200,29 @@ export default function IncomingRequestTable() {
                         </Typography>
                     </Box>
 
-                    <Box sx={{display: 'flex', marginBottom: 2}}>
-                        <FormControl style={{width: 300, marginRight: 5}}>
-                            <InputLabel id="service-type-label">Filter Service Type</InputLabel>
-                            <Select
-                                labelId="service-type-label"
-                                id="service-type-select"
-                                value={serviceTypeFilter}
-                                label="Filter Service Type"
-                                onChange={handleChangeServiceType}
-                                fullWidth
-                            >
-                                <MenuItem value="ALL">All</MenuItem>
-                                {Object.values(ServiceType).map(type => (
-                                    <MenuItem key={type} value={type}>{type}</MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
+                    <Box style={{flex: showMediaCard ? '3 1 auto' : '1 1 0%', marginRight: showMediaCard ? '30%' : '5%'}}>
+                        <GenericTable data={serviceRequests}
+                                      count={total}
+                                      page={page}
+                                      setPage={setPage}
+                                      rowsPerPage={rowsPerPage}
+                                      setRowsPerPage={setRowsPerPage}
+                                      setShowMediaCard={setShowMediaCard}
+                                      onViewDetails={handleToggleMediaCard}
+                                      isProvider={true}
+                                      statusOptions={statusOptions}
+                                      statusFilter={statusFilter}
+                                      setStatusFilter={setStatusFilter}
+                                      serviceTypeFilter={serviceTypeFilter}
+                                      setServiceTypeFilter={setServiceTypeFilter}
+                        />
 
-                        <FormControl style={{width: 300}}>
-                            <InputLabel id="service-type-label">Request Status</InputLabel>
-                            <Select
-                                labelId="request-status-label"
-                                id="request-status-select"
-                                value={statusFilter}
-                                label="Request Status"
-                                onChange={handleChangeStatus}
-                                fullWidth
-                            >
-                                {Object.values(statusOptions).map(type => (
-                                    <MenuItem key={type} value={type}>{type}</MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
 
-                    </Box>
-
-                    <Box style={{display: 'flex'}}>
-                        <Box sx={{flexGrow: 1, marginRight: 2}}>
-                            <Box>
-                                {serviceRequests.length === 0 ? (
-                                    <Typography variant="body1">
-                                        You don't have any incoming
-                                        request
-                                        {statusFilter === 'All Requests' || statusFilter === '' ? '' : (
-                                            <span> with status <span
-                                                style={{fontStyle: 'italic'}}>{statusFilter.toLowerCase()}</span></span>
-                                        )}
-                                        {serviceTypeFilter === 'ALL' || serviceTypeFilter === '' ? '' : (
-                                            <span> for service type <span
-                                                style={{fontStyle: 'italic'}}>{serviceTypeFilter.toLowerCase()}</span></span>
-                                        )}.
-                                    </Typography>) : (
-                                    <GenericTable data={serviceRequests}
-                                                  count={total}
-                                                  page={page}
-                                                  setPage={setPage}
-                                                  rowsPerPage={rowsPerPage}
-                                                  setRowsPerPage={setRowsPerPage}
-                                                  setShowMediaCard={setShowMediaCard}
-                                                  onViewDetails={handleToggleMediaCard}
-                                                  isProvider={true}
-                                    />
-
-                                )}
-                            </Box>
-                        </Box>
                     </Box>
                 </Box>
-            </div>
-            {/*<Dialog open={timeChangePopUp} onClose={handleTimeChange}>*/}
-            {/*    <DialogTitle>Time Slot Update Requested</DialogTitle>*/}
-            {/*    <DialogContent>*/}
-            {/*        The consumer will be alerted of the need to select a new TimeSlot.*/}
-            {/*        Please update your availabilities accordingly.*/}
-            {/*    </DialogContent>*/}
-            {/*    <DialogActions>*/}
-            {/*        <Button onClick={handleTimeChange}>Notify Requester</Button>*/}
-            {/*    </DialogActions>*/}
-            {/*</Dialog>*/}
+            {/*</div>*/}
+
+
             <Dialog open={timeChangePopUp} onClose={() => setTimeChangePopUp(false)}>
                 <DialogTitle>Request Time Slot Update</DialogTitle>
                 <DialogContent>
@@ -308,7 +253,7 @@ export default function IncomingRequestTable() {
                     flex: '1 0 25%',
                     position: 'fixed',
                     top: '20%',
-                    right: '2%',
+                    right: '1%',
                     height: '80vh',
                     overflowY: 'auto',
                     padding: '5px',

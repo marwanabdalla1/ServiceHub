@@ -1,20 +1,10 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-import Typography from '@mui/material/Typography';
-import Breadcrumbs from '@mui/material/Breadcrumbs';
-import Link from '@mui/material/Link';
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
-import {Job} from '../../models/Job';
-import {RequestStatus, ServiceType, JobStatus} from '../../models/enums';
 
-import GenericTableRow from '../../components/tableComponents/GenericTableRow';
+import Typography from '@mui/material/Typography';
+
+import {Job} from '../../models/Job';
+
 import GenericConsumerCard from "../../components/tableComponents/GenericConsumerCard";
 import {handleCancel} from "../../utils/jobHandler";
 
@@ -28,10 +18,6 @@ import {ServiceRequest} from "../../models/ServiceRequest";
 import GenericProviderCard from "../../components/tableComponents/GenericProviderCard";
 import {
     Button,
-    FormControl,
-    InputLabel,
-    MenuItem,
-    Select,
     Dialog,
     DialogTitle,
     DialogContent,
@@ -54,9 +40,9 @@ export default function ReceivedServiceTable() {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
 
-    const statusOptions = ['All Jobs', 'Open', 'Completed', 'Cancelled'];
-    const [statusFilter, setStatusFilter] = useState('All Jobs');
-    const [serviceTypeFilter, setServiceTypeFilter] = useState("ALL");
+    const statusOptions = ['All Statuses', 'Open', 'Completed', 'Cancelled'];
+    const [statusFilter, setStatusFilter] = useState(['All Statuses']);
+    const [serviceTypeFilter, setServiceTypeFilter] = useState(["All Types"]);
 
     useEffect(() => {
         if (token && account) {
@@ -66,13 +52,19 @@ export default function ReceivedServiceTable() {
                         page: (page + 1).toString(),
                         limit: rowsPerPage.toString(),
                     });
-                    if (statusFilter !== 'All Jobs') {
-                        params.append('status', statusFilter.toLowerCase());
-                    }
-                    if (serviceTypeFilter !== 'ALL') {
-                        params.append('serviceType', serviceTypeFilter);
+                    if (statusFilter.length > 0 && !statusFilter.includes('All Statuses')) {
+                        statusFilter.forEach(type => {
+                            params.append('status', type.toLowerCase());
+                        });
                     }
 
+
+                    // Handling multiple service type filters
+                    if (serviceTypeFilter.length > 0 && !serviceTypeFilter.includes('All Types')) {
+                        serviceTypeFilter.forEach(type => {
+                            params.append('serviceType', type);
+                        });
+                    }
                     const response = await axios.get(`/api/jobs/requester/${account._id}?${params.toString()}`, {
                         headers: {Authorization: `Bearer ${token}`}
                     });
@@ -98,15 +90,6 @@ export default function ReceivedServiceTable() {
         setShowMediaCard(job !== null);
     };
 
-    const handleChangeServiceType = (event: any) => {
-        setServiceTypeFilter(event.target.value);
-        setPage(0);
-    };
-
-    const handleChangeStatus = (event: any) => {
-        setStatusFilter(event.target.value);
-        setPage(0);
-    };
 
     const onCancel = () => {
         if (!selectedJob) {
@@ -133,83 +116,37 @@ export default function ReceivedServiceTable() {
 
     return (
         <div style={{display: 'flex', flexDirection: 'row', width: '100%', position: 'relative'}}>
-            <div style={{flex: showMediaCard ? '3 1 auto' : '1 1 0%', marginRight: showMediaCard ? '30%' : '5%'}}>
-                <Box sx={{minWidth: 275, margin: 2}}>
+            <Box sx={{minWidth: 275, margin: 2, width: '100%'}}>
                     <Box>
                         <Typography variant="h6" component="div" sx={{marginBottom: '16px'}}>
                             Services (Jobs) Received
                         </Typography>
                         <Typography variant="body2" component="div" sx={{marginBottom: '16px'}}>
-                            When the provider accepts a request, it is automatically turned into a job. Here are all the services (jobs) you've received.
+                            When the provider accepts a request, it is automatically turned into a job. Here are all the
+                            services (jobs) you've received.
                         </Typography>
                     </Box>
-                    <Box sx={{display: 'flex', marginBottom: 2}}>
-                        <FormControl style={{width: 300, marginRight: 5}}>
-                            <InputLabel id="service-type-label">Filter Service Type</InputLabel>
-                            <Select
-                                labelId="service-type-label"
-                                id="service-type-select"
-                                value={serviceTypeFilter}
-                                label="Filter Service Type"
-                                onChange={handleChangeServiceType}
-                                fullWidth
-                            >
-                                <MenuItem value="ALL">All</MenuItem>
-                                {Object.values(ServiceType).map(type => (
-                                    <MenuItem key={type} value={type}>{type}</MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
 
-                        <FormControl style={{width: 300}}>
-                            <InputLabel id="job-status-label">Job Status</InputLabel>
-                            <Select
-                                labelId="job-status-label"
-                                id="job-status-select"
-                                value={statusFilter}
-                                label="Job Status"
-                                onChange={handleChangeStatus}
-                                fullWidth
-                            >
-                                {Object.values(statusOptions).map(type => (
-                                    <MenuItem key={type} value={type}>{type}</MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
-                    </Box>
+                    <Box style={{flex: showMediaCard ? '3 1 auto' : '1 1 0%', marginRight: showMediaCard ? '30%' : '5%'}}>
 
-                    <Box style={{display: 'flex'}}>
-                        <Box sx={{flexGrow: 1, marginRight: 2}}>
-                            <Box>
-                                {jobs.length === 0 ? (
-                                    <Typography variant="body1">
-                                        You haven't booked any
-                                        job{statusFilter === 'All Jobs' || statusFilter === '' ? '' : (
-                                        <span> with status <span
-                                            style={{fontStyle: 'italic'}}>{statusFilter.toLowerCase()}</span></span>
-                                    )}
-                                        {serviceTypeFilter === 'ALL' || serviceTypeFilter === '' ? '' : (
-                                            <span> for service type <span
-                                                style={{fontStyle: 'italic'}}>{serviceTypeFilter.toLowerCase()}</span></span>
-                                        )} yet.
-                                    </Typography>
-                                ) : (
-                                    <GenericTable data={jobs}
-                                                  count={total}
-                                                  page={page}
-                                                  setPage={setPage}
-                                                  rowsPerPage={rowsPerPage}
-                                                  setRowsPerPage={setRowsPerPage}
-                                                  setShowMediaCard={setShowMediaCard}
-                                                  onViewDetails={handleToggleMediaCard}
-                                    isProvider={false}/>
+                        <GenericTable data={jobs}
+                                      count={total}
+                                      page={page}
+                                      setPage={setPage}
+                                      rowsPerPage={rowsPerPage}
+                                      setRowsPerPage={setRowsPerPage}
+                                      setShowMediaCard={setShowMediaCard}
+                                      onViewDetails={handleToggleMediaCard}
+                                      statusOptions={statusOptions}
+                                      statusFilter={statusFilter}
+                                      setStatusFilter={setStatusFilter}
+                                      serviceTypeFilter={serviceTypeFilter}
+                                      setServiceTypeFilter={setServiceTypeFilter}
+                                      isProvider={false}/>
 
-                                )}
-                            </Box>
-                        </Box>
+
                     </Box>
                 </Box>
-            </div>
             {showMediaCard && selectedJob && (
                 <div style={{
                     width: '25%',

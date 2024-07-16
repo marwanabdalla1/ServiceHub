@@ -37,7 +37,7 @@ function CombinedServicePage() {
 
         // <Container sx={{ p: 0, m: 1 }}>
         <div  style={{display: 'flex', width: '100%'}}>
-                <Box sx={{width: '180px', position: 'sticky', flexShrink: 0, height:'100vh', overflowY:'hidden', borderRight: 0, borderColor: 'divider', paddingTop: 3, paddingLeft: 2}}>
+                <Box sx={{width: '15%', minWidth: '100px', position: 'fixed', flexShrink: 0.5, height:'100vh', overflowY:'hidden', borderRight: 0, borderColor: 'divider', paddingTop: 3, paddingLeft: 2}}>
                     <Tabs
                         orientation="vertical"
                         // variant="scrollable"
@@ -58,6 +58,7 @@ function CombinedServicePage() {
                 <Box sx={{
                     flex: 1,
                     p: 1,
+                    ml: '15%',
                     overflowY: 'hidden', //for independent vertical scrolling
                 }}>
                     <Outlet/>

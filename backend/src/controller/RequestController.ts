@@ -205,10 +205,20 @@ export const getServiceRequestsByProvider: RequestHandler = async (req, res) => 
 
         // Adding filters based on query parameters
         if (requestStatus) {
-            query.requestStatus = requestStatus;
+            // query.requestStatus = requestStatus;
+            if (Array.isArray(requestStatus)) {
+                query.requestStatus = { $in: requestStatus };
+            } else {
+                query.requestStatus = requestStatus;
+            }
         }
         if (serviceType) {
-            query.serviceType = serviceType;
+            // query.serviceType = serviceType;
+            if (Array.isArray(serviceType)) {
+                query.serviceType = { $in: serviceType };
+            } else {
+                query.serviceType = serviceType;
+            }
         }
 
         const serviceRequests = await ServiceRequest.find(query)
