@@ -10,8 +10,12 @@ import {
     Divider,
     IconButton,
     Grid,
-    Tooltip, Card, CardContent
+    Tooltip, Card, CardContent,
+    Link
 } from '@mui/material';
+
+import { Link as RouterLink } from 'react-router-dom';
+
 import BlueButton from "../components/inputs/BlueButton";
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
@@ -428,18 +432,12 @@ function UserProfile(): React.ReactElement {
 
 
     return (
-        <Container sx={{
-            display: 'flex',
-            mt: 4,
-            maxWidth: '100%',
-            margin: '10px',
-            padding:'10px',
+        <Container sx={{display: 'flex', mt: 4, minWidth: '90%', maxWidth: '100%', margin: '10px', padding:'10px',
             // minWidth: '90%',
             borderRadius: 0,
             alignItems: 'flex-start',/*backgroundColor: '#f5f5f5', borderRadius: '20px'*/
             flexDirection: 'row',
-            justifyContent: 'space-between'
-        }}>
+            justifyContent: 'space-between'}}>
             <List sx={{width: '200px', maxWidth: '20%', mr: '2%', ml:'2%', mt: 5, position: 'fixed'}}>
                 <ListItem>
                     <ListItemButton selected={activeSection === 'profile'}
@@ -486,10 +484,10 @@ function UserProfile(): React.ReactElement {
                 </ListItem>
             </List>
 
-            <Box component="main" sx={{flex: '1 1 100%', ml: '23%', minWidth: '70%', maxWidth: '80%', overflowY: 'auto'}}>
+            <Box component="main" sx={{flex: '1 1 100%', ml: '23%', minWidth: '60%', maxWidth: '75%', mr:"18%",  overflowY: 'auto'}}>
 
                 {/*public profile section*/}
-                <Paper ref={profileRef} sx={{p: 3, elevation: 0}}>
+                <Paper ref={profileRef} sx={{p: 3, elevation: 0, width: '100%'}}>
                     <Box>
                         <Box sx={{
                             display: 'flex', flexDirection: 'row', alignItems: 'center',
@@ -800,7 +798,7 @@ function UserProfile(): React.ReactElement {
                             </Typography>
                         </Box>
                         <Typography variant="body2" color="text.secondary">
-                            Check out the FAQ page or contact us.
+                            Check out the <RouterLink to="/faq" style={{color: 'inherit' }}> FAQ page</RouterLink> or <Link href="mailto:servicehub.seba22@gmail.com" style={{color: 'inherit' }}>contact us</Link>.
                         </Typography>
                     </CardContent>
                 </Card>
