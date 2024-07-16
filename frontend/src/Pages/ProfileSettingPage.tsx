@@ -432,7 +432,7 @@ function UserProfile(): React.ReactElement {
 
 
     return (
-        <Container sx={{display: 'flex', mt: 4, minWidth: '90%', maxWidth: '100%', margin: '10px', padding:'10px',
+        <Container sx={{display: 'flex', mt: 4, minWidth: '85%', maxWidth: '95%', margin: '10px', padding:'10px',
             // minWidth: '90%',
             borderRadius: 0,
             alignItems: 'flex-start',/*backgroundColor: '#f5f5f5', borderRadius: '20px'*/
@@ -484,7 +484,7 @@ function UserProfile(): React.ReactElement {
                 </ListItem>
             </List>
 
-            <Box component="main" sx={{flex: '1 1 100%', ml: '23%', minWidth: '60%', maxWidth: '75%', mr:"18%",  overflowY: 'auto'}}>
+            <Box component="main" sx={{flex: '1 1 100%', ml: '20%', minWidth: '70%', maxWidth: '75%', mr:"18%",  overflowY: 'auto'}}>
 
                 {/*public profile section*/}
                 <Paper ref={profileRef} sx={{p: 3, elevation: 0, width: '100%'}}>
@@ -730,7 +730,7 @@ function UserProfile(): React.ReactElement {
                         </Box>) : (
                         <>
                             <Typography variant="h6" sx={{}}>You are not a provider yet.</Typography>
-                            <Box sx={{display: 'flex', justifyContent: 'flex-end', mt: 3}}>
+                            <Box sx={{display: 'flex', justifyContent: 'flex-start', mt: 2}}>
                                 <BlueButton text="Click here to add your first offering"
                                             onClick={handleAddServiceClick}/>
                             </Box>
@@ -784,7 +784,7 @@ function UserProfile(): React.ReactElement {
                     mt: 10,
                     position: 'fixed',
                     top: 80,
-                    right: '2%',
+                    right: '3%',
                     width: '15%',
                     // zIndex: 1000,
                     border: '1px solid #ccc',
