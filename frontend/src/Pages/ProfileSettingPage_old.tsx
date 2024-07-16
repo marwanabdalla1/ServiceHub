@@ -8,6 +8,11 @@ import {
     Paper,
     Avatar,
     Divider,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
     IconButton,
     Grid
 } from '@mui/material';
@@ -29,10 +34,6 @@ import {
 import {deleteAccount, saveAddress, updateAccountFields} from "../services/accountService";
 import {deleteService} from "../services/serviceOfferingService";
 import ConfirmDeleteDialog from "../components/dialogs/ConfirmDeleteDialog";
-import {formatDateTime} from "../utils/dateUtils";
-import ListItem from "@mui/joy/ListItem";
-import List from "@mui/joy/List";
-import {ListItemButton} from "@mui/joy";
 
 type EditModeType = {
     [key: string]: boolean;
@@ -59,12 +60,6 @@ function UserProfile(): React.ReactElement {
     const [openServiceDeleteDialog, setOpenServiceDeleteDialog] = useState(false);
     const [openDeleteAccountDialog, setOpenDeleteAccountDialog] = useState(false);
     const navigate = useNavigate();
-
-    // for navigation
-    const [selectedSection, setSelectedSection] = useState('profile');
-    const profileRef = useRef<HTMLDivElement>(null);
-    const serviceProviderRef = useRef<HTMLDivElement>(null);
-
 
     const fetchSubscriptionData = async (clientReferenceId: string) => {
         try {
@@ -203,14 +198,6 @@ function UserProfile(): React.ReactElement {
         }
     }, [account]);
 
-    // unmount
-    // useEffect(() => {
-    //     return () => {
-    //         setSelectedSection("profile")
-    //         window.scrollTo(0, 0);
-    //     }
-    // }, []);
-
     const handleEditClick = (field: string) => {
         setEditMode(prevState => ({...prevState, [field]: !prevState[field]}));
     };
@@ -348,127 +335,64 @@ function UserProfile(): React.ReactElement {
     };
 
     const getFormattedDate = (timestamp: number) => {
-        return formatDateTime(new Date(timestamp * 1000));
-    };
-
-    const handleNavigation = (section: string) => {
-        setSelectedSection(section);
-        switch (section) {
-            case 'profile':
-                window.scrollTo(0, 0);
-                // profileRef.current?.scrollIntoView({behavior: 'smooth', block:'start'});
-                break;
-            case 'serviceProvider':
-                serviceProviderRef.current?.scrollIntoView({behavior: 'smooth'});
-                break;
-            // case 'subscription':
-            //     subscriptionRef.current?.scrollIntoView({ behavior: 'smooth' });
-            //     break;
-            default:
-                window.scrollTo(0, 0);
-                break;
-        }
+        return new Date(timestamp * 1000).toLocaleDateString();
     };
 
     return (
-        <Container maxWidth="lg" sx={{mt: 4, /*backgroundColor: '#f5f5f5', borderRadius: '20px'*/}}>
-            <List sx={{width: '200px', mr: 2, mt: 10, position: 'fixed'}}>
-                <ListItem>
-                    <ListItemButton selected={selectedSection === 'profile'}
-                                    onClick={() => handleNavigation('profile')}>
-                        <Typography variant="body2">Public Profile</Typography>
-                    </ListItemButton>
-                </ListItem>
-                <ListItem>
-                    <ListItemButton selected={selectedSection === 'serviceProvider'}
-                                    onClick={() => handleNavigation('serviceProvider')}>
-                        <Typography variant="body2">Service Provider Settings</Typography>
-                    </ListItemButton>
-                </ListItem>
-            </List>
-
-            <Box component="main" sx={{flexGrow: 1, ml: '250px', overflowY: 'auto'}}>
-
-                {/*public profile section*/}
-                <Paper ref={profileRef} sx={{p: 3, elevation: 0}}>
-                    <Box>
-                        <Typography variant="h6" gutterBottom
-                                    sx={{fontWeight: 'bold', fontSize: '24px', color: '#64B5F6'}}>
-                            Public Profile
-                        </Typography>
-                        <Divider orientation="horizontal" sx={{
-                            mt: -1,
-                            borderBottomWidth: 3,
-                            backgroundColor: '#64B5F6',
-                            borderColor: "#64B5F6"
-                        }}/>
+        <Container component="main" maxWidth="md" sx={{mt: 4, backgroundColor: '#f5f5f5', borderRadius: '20px'}}>
+            <Paper variant="outlined" sx={{p: 3, borderRadius: '20px'}}>
+                <Typography variant="h6" gutterBottom sx={{fontWeight: 'bold', fontSize: '24px', color: '#007BFF'}}>
+                    Public Profile
+                </Typography>
+                <Box sx={{display: 'flex', flexDirection: 'column', gap: 3, p: 3}}>
+                    <Box sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: 0.5,
+                        position: 'relative'
+                    }}>
+                        {defaultProfileImage !== profileImage && (
+                            <IconButton
+                                onClick={() => deleteProfileImage(token, setProfileImage)}
+                                size="small"
+                                sx={{
+                                    position: 'absolute',
+                                    top: 5,
+                                    right: 305,
+                                    transform: 'translate(50%, -50%)',
+                                    backgroundColor: 'white',
+                                    border: '1px solid #ccc',
+                                    padding: '2px',
+                                    '&:hover': {
+                                        backgroundColor: 'red',
+                                        color: 'white',
+                                    },
+                                }}
+                            >
+                                <DeleteIcon sx={{fontSize: 16}}/>
+                            </IconButton>
+                        )}
+                        <Avatar src={profileImage ? profileImage : undefined}
+                                sx={{width: 80, height: 80}}/>
+                        <LightBlueFileButton text="Upload Profile Picture"
+                                             onFileChange={handleProfileImageUpload(setProfileImage, token)}/>
                     </Box>
-
-                    <Box sx={{display: 'flex', flexDirection: 'column', gap: 3, p: 3}}>
-                        <Box sx={{
-                            display: 'flex',
-                            flexDirection: 'row',
-                            justifyContent: 'flex-start',
-                            allignItems: 'center',
-                            gap: 0.5,
-                            position: 'relative'
-                        }}>
-                            {defaultProfileImage !== profileImage && (
-                                <IconButton
-                                    onClick={() => deleteProfileImage(token, setProfileImage)}
-                                    size="medium"
-                                    sx={{
-                                        position: 'absolute',
-                                        top: 5,
-                                        right: 305,
-                                        transform: 'translate(50%, -50%)',
-                                        backgroundColor: 'white',
-                                        border: '1px solid #ccc',
-                                        padding: '2px',
-                                        '&:hover': {
-                                            backgroundColor: 'red',
-                                            color: 'white',
-                                        },
-                                    }}
-                                >
-                                    <DeleteIcon sx={{fontSize: 16}}/>
-                                </IconButton>
-                            )}
-                            <Avatar src={profileImage ? profileImage : undefined}
-                                    sx={{width: 80, height: 80}}/>
-                            <LightBlueFileButton text="Upload Profile Picture"
-                                                 sx={{mt: 2}}
-                                                 onFileChange={handleProfileImageUpload(setProfileImage, token)}/>
-                        </Box>
-                        {renderField("User ID", "userId", false)}
-                        {renderField("First Name", "firstName", false)}
-                        {renderField("Last Name", "lastName", false)}
-                        {renderField("Email Address", "email", false)}
-                        {renderField("Phone Number", "phoneNumber")}
-                        {renderField("Address", "address")}
-                        {renderField("Description", "description")}
-                        <Button onClick={logoutUser}>Logout</Button>
-                    </Box>
-                </Paper>
-
-                {/*service provider section*/}
-                <Paper ref={serviceProviderRef} sx={{p: 3, elevation: 0}}>
-                    <Box>
-                        <Typography variant="h6" gutterBottom
-                                    sx={{fontWeight: 'bold', fontSize: '24px', color: '#64B5F6'}}>
-                            Service Provider Settings
-                        </Typography>
-                        <Divider orientation="horizontal" sx={{
-                            mt: -1,
-                            borderBottomWidth: 3,
-                            backgroundColor: '#64B5F6',
-                            borderColor: "#64B5F6"
-                        }}/>
-                    </Box>
-                    {isProvider ? (
-
-                        <Box sx={{display: 'flex', flexDirection: 'column', gap: 3, p: 3}}>
-
+                    {renderField("User ID", "userId", false)}
+                    {renderField("First Name", "firstName", false)}
+                    {renderField("Last Name", "lastName", false)}
+                    {renderField("Email Address", "email", false)}
+                    {renderField("Phone Number", "phoneNumber")}
+                    {renderField("Address", "address")}
+                    {renderField("Description", "description")}
+                    <Button onClick={logoutUser}>Logout</Button>
+                    {isProvider && (
+                        <>
+                            <Divider sx={{my: 2}}/>
+                            <Typography variant="h6" gutterBottom component="div"
+                                        sx={{fontWeight: 'bold', fontSize: '24px', color: '#007BFF'}}>
+                                Service Provider Settings
+                            </Typography>
                             <Box sx={{
                                 display: 'flex',
                                 flexDirection: 'column',
@@ -476,14 +400,17 @@ function UserProfile(): React.ReactElement {
                                 gap: 0
                             }}>
                                 <Typography variant="h6" sx={{fontWeight: 'bold'}}>Provided Services:</Typography>
+                                {/*<Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 3 }}>*/}
+                                {/*    <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Provided Services:</Typography>*/}
+                                {/*    <BlueButton text="Add Service" onClick={handleAddServiceClick} />*/}
+                                {/*</Box>*/}
                                 <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
                                     {services.length > 0 ? (
                                         services.map(service => (
                                             <Grid container alignItems="center" spacing={2} key={service._id}>
                                                 <Grid item xs>
                                                     <Box sx={{display: 'flex', alignItems: 'center'}}>
-                                                        <Typography
-                                                            variant="body1">{service.serviceType}</Typography>
+                                                        <Typography variant="body1">{service.serviceType}</Typography>
                                                         {service.isCertified && (
                                                             <Typography variant="body2" sx={{
                                                                 color: '#388e3c', // Color for "Licensed"
@@ -501,9 +428,8 @@ function UserProfile(): React.ReactElement {
                                                         onClick={() => handleEditServiceClick(service)}>Edit</Button>
                                                 </Grid>
                                                 <Grid item>
-                                                    <Button
-                                                        onClick={() => handleServiceDeleteOpenDialog(service._id)}
-                                                        sx={{color: 'red'}}>Delete</Button>
+                                                    <Button onClick={() => handleServiceDeleteOpenDialog(service._id)}
+                                                            sx={{color: 'red'}}>Delete</Button>
                                                 </Grid>
                                             </Grid>
 
@@ -516,52 +442,29 @@ function UserProfile(): React.ReactElement {
                                     <BlueButton text="Add Service" onClick={handleAddServiceClick}/>
                                 </Box>
                             </Box>
-
-                            <Box sx={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                justifyContent: 'space-between',
-                                gap: 0
-                            }}>
-                                <Typography variant="h6" sx={{fontWeight: 'bold'}}>Subscription
-                                    Information:</Typography>
-                                {subscriptions.length > 0 ? (
-                                    subscriptions.map((subscription) => (
-                                        <Box key={subscription.id}
-                                             sx={{display: 'flex', flexDirection: 'column', mt: 2}}>
-                                            <Typography
-                                                variant="body1"><strong>Status:</strong> {subscription.status}
-                                            </Typography>
-                                            <Typography variant="body1"><strong>Expiration
-                                                Date:</strong> {getFormattedDate(subscription.current_period_end)}
-                                            </Typography>
-                                            {subscription.status !== 'canceled' && (
-                                                <Button onClick={() => cancelSubscription(subscription.id)}
-                                                        sx={{mt: 1, color: 'red'}}>Cancel Subscription</Button>
-                                            )}
-                                        </Box>
-                                    ))
-                                ) : (
-                                    <Typography variant="body1">No active subscriptions</Typography>
-                                )}
-                            </Box>
-                        </Box>) : (
-                        <>
-                            <Typography variant="h6" sx={{}}>You are not a provider yet.</Typography>
-                            <Box sx={{display: 'flex', justifyContent: 'flex-end', mt: 3}}>
-                                <BlueButton text="Click here to add your first offering"
-                                            onClick={handleAddServiceClick}/>
-                            </Box>
                         </>
-                    )
-                    }
+                    )}
 
-
-                </Paper>
-
-
-                {
-                    isProvider ? (
+                    <Box sx={{mt: 3}}>
+                        <Typography variant="h6" sx={{fontWeight: 'bold'}}>Subscription Information:</Typography>
+                        {subscriptions.length > 0 ? (
+                            subscriptions.map((subscription) => (
+                                <Box key={subscription.id} sx={{display: 'flex', flexDirection: 'column', mt: 2}}>
+                                    <Typography variant="body1"><strong>Status:</strong> {subscription.status}
+                                    </Typography>
+                                    <Typography variant="body1"><strong>Expiration
+                                        Date:</strong> {getFormattedDate(subscription.current_period_end)}</Typography>
+                                    {subscription.status !== 'canceled' && (
+                                        <Button onClick={() => cancelSubscription(subscription.id)}
+                                                sx={{mt: 1, color: 'red'}}>Cancel Subscription</Button>
+                                    )}
+                                </Box>
+                            ))
+                        ) : (
+                            <Typography variant="body1">No active subscriptions</Typography>
+                        )}
+                    </Box>
+                    {isProvider ? (
                         <BlueButton
                             text="View My Work Schedule"
                             onClick={handleViewScheduleClick}
@@ -573,17 +476,12 @@ function UserProfile(): React.ReactElement {
                         />
                     ) : (
                         <div></div>
-                    )
-                }
-                <Button onClick={handleDeleteAccountOpenDialog}
-                        sx={{backgroundColor: 'red', color: 'white', mt: 2}}>
-                    Delete Account
-                </Button>
-
-            </Box>
-
-            {/*todo: potential FAQ card*/
-            }
+                    )}
+                    <Button onClick={handleDeleteAccountOpenDialog} sx={{backgroundColor: 'red', color: 'white', mt: 2}}>
+                        Delete Account
+                    </Button>
+                </Box>
+            </Paper>
             <AddressDialog
                 open={openAddressDialog}
                 onClose={() => setOpenAddressDialog(false)}
@@ -611,8 +509,7 @@ function UserProfile(): React.ReactElement {
                 isDeleteAccount={true}
             />
         </Container>
-    )
-        ;
+    );
 }
 
 export default UserProfile;

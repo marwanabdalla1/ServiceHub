@@ -290,7 +290,7 @@ const JobDetailsPage: React.FC<JobDetailsPageProps> = () => {
         // todo: change this
         const handleReview = (job: Item) => {
             // navigate(`/customer_review/${job._id}`);
-            reviewsRef.current?.scrollIntoView({ behavior: 'smooth' });
+            reviewsRef.current?.scrollIntoView({behavior: 'smooth'});
         };
 
 
@@ -327,7 +327,6 @@ const JobDetailsPage: React.FC<JobDetailsPageProps> = () => {
         };
 
 
-
         const CardComponent = role === "provider" ? GenericProviderCard : GenericConsumerCard;
         const cardProps = role === "provider" ? providerProps : consumerProps;
 
@@ -355,64 +354,77 @@ const JobDetailsPage: React.FC<JobDetailsPageProps> = () => {
                     {/*    onClose={handleCancel}*/}
                     {/*    // showExpandIcon={false} // Disable the expand icon for the details page*/}
                     {/*/>*/}
-                    <Box ref={reviewsRef} sx={{ mt: 4 }}>
-                    <Typography variant="h4" >Reviews</Typography>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-                        {/*<ReviewList reviews={reviews} /> /!* Render reviews *!/*/}
-                        {otherReview ? (
-                            <Box sx={{ width: '45%', p: 1 }}>
-                                <Typography variant="h6" sx={{mt: 3}}>Review from {otherParty?.firstName} to you</Typography>
-                                <ReviewCard
-                                    review={otherReview}
-                                    job={job}
-                                    reviewer={otherParty}
-                                    recipient={account}
-                                    onReviewUpdated={() => {
-                                    }}
-                                />
+
+                    {job.status.toString() === "completed" &&
+                        <Box ref={reviewsRef} sx={{mt: 4}}>
+                            <Typography variant="h4">Reviews</Typography>
+                            <Box sx={{display: 'flex', justifyContent: 'space-between', width: '100%'}}>
+                                {/*<ReviewList reviews={reviews} /> /!* Render reviews *!/*/}
+                                {otherReview ? (
+                                    <Box sx={{width: '45%', p: 1}}>
+                                        <Typography variant="h6" sx={{mt: 3}}>Review from {otherParty?.firstName} to
+                                            you</Typography>
+                                        <ReviewCard
+                                            review={otherReview}
+                                            job={job}
+                                            reviewer={otherParty}
+                                            recipient={account}
+                                            onReviewUpdated={() => {
+                                            }}
+                                        />
+                                    </Box>
+                                ) : (<Typography variant="h6" sx={{mb: 2, mt: 3}}>{otherParty?.firstName} hasn't written a
+                                    review
+                                    yet.</Typography>)
+                                }
+
+                                {myReview ? (
+                                    <Box sx={{width: '45%', p: 1}}>
+                                        <Typography variant="h6" sx={{mt: 3}}>Your review
+                                            to {otherParty?.firstName}:</Typography>
+                                        <ReviewCard
+                                            review={myReview}
+                                            job={job}
+                                            reviewer={account}
+                                            recipient={otherParty}
+                                            onReviewUpdated={() => {
+                                            }}
+                                        />
+                                    </Box>
+                                ) : (
+                                    showNewReview ? (
+                                        <Box sx={{width: '45%', p: 1}}>
+
+                                            <ReviewCard
+                                                job={job}
+                                                reviewer={account}
+                                                recipient={otherParty}
+                                                onReviewUpdated={() => {
+                                                    setShowNewReview(false);
+                                                }}
+                                                setEdit={true}
+                                            />
+                                        </Box>
+                                    ) : (
+                                        <Box sx={{
+                                            width: '45%',
+                                            p: 1,
+                                            mt: 5,
+                                            display: 'flex',
+                                            justifyContent: 'center',
+                                            alignItems: 'center'
+                                        }}>
+                                            <BlackButton
+                                                text={`Write a review to ${otherParty?.firstName}`}
+                                                onClick={handleToggleNewReview}
+                                                sx={{marginRight: "1rem", fontSize: '14px', padding: "0.5rem 0.5rem"}}
+                                            />
+                                        </Box>
+                                    )
+                                )}
+
                             </Box>
-                        ) : (<Typography variant="h6" sx={{mb: 2, mt:3}}>{otherParty?.firstName} hasn't written a review
-                            yet.</Typography>)
-                        }
-
-                        {myReview ? (
-                            <Box sx={{ width: '45%', p: 1 }}>
-                                <Typography variant="h6" sx={{mt: 3}}>Your review to {otherParty?.firstName}:</Typography>
-                                <ReviewCard
-                                    review={myReview}
-                                    job={job}
-                                    reviewer={account}
-                                    recipient={otherParty}
-                                    onReviewUpdated={() => {}}
-                                />
-                            </Box>
-                        ) : (
-                            showNewReview ? (
-                                <Box sx={{ width: '45%', p: 1 }}>
-
-                                <ReviewCard
-                                    job={job}
-                                    reviewer={account}
-                                    recipient={otherParty}
-                                    onReviewUpdated={() => {
-                                        setShowNewReview(false);
-                                    }}
-                                    setEdit={true}
-                                />
-                                </Box>
-                            ) : (
-                                <Box sx={{ width: '45%', p: 1, mt: 5, display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-                                <BlackButton
-                                    text={`Write a review to ${otherParty?.firstName}`}
-                                    onClick={handleToggleNewReview}
-                                    sx={{ marginRight: "1rem" , fontSize:'14px', padding: "0.5rem 0.5rem"}}
-                                />
-                                </Box>
-                            )
-                        )}
-
-                    </Box>
-                </Box>
+                        </Box>}
                 </Box>
             </Container>
         );
