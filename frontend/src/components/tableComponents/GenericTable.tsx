@@ -72,6 +72,7 @@ function GenericTable({
         } else {
             setStatusFilter(typeof value === 'string' ? value.split(',') : value);
         }
+        setShowMediaCard(false)
         setPage(0);
     };
 
@@ -92,7 +93,8 @@ function GenericTable({
         } else {
             setServiceTypeFilter(typeof value === 'string' ? value.split(',') : value)
         }
-        ;
+
+        setShowMediaCard(false)
         setPage(0);
     };
 
