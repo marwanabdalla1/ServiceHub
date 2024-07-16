@@ -1,17 +1,23 @@
-# Use a base Node.js image
-FROM node:20.13.1
+# Use an official Node.js runtime as a parent image
+FROM node:16
 
-# Set the working directory inside the container
-WORKDIR /app
+# Set the working directory
+WORKDIR /usr/src/app
 
-# Copy the rest of the application code to the container
-COPY . .
+# Copy package.json and package-lock.json
+COPY package*.json ./
 
-# Install npm packages
+# Install dependencies
 RUN npm install
 
-# Expose the port that the server will listen on
+# Copy the rest of the application code
+COPY . .
+
+# Rebuild bcrypt for the correct architecture
+RUN npm rebuild bcrypt --build-from-source
+
+# Expose the port the app runs on
 EXPOSE 8080
 
-# Start the Express server
+# Command to run the application
 CMD ["npm", "start"]

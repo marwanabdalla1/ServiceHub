@@ -11,7 +11,7 @@ import {
 } from "./TimeSlotController"; // Importing functions to handle timeslot operations
 import mongoose from 'mongoose';
 import { sortBookingItems } from "../util/requestAndJobUtils";
-import { formatDateTime } from "../../../frontend/src/utils/dateUtils";
+import { formatDateTime } from "../util/dateUtils";
 
 
 /**
