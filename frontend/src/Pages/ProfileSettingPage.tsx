@@ -390,7 +390,7 @@ function UserProfile(): React.ReactElement {
             <Box component="main" sx={{flexGrow: 1, ml: '250px', overflowY: 'auto'}}>
 
                 {/*public profile section*/}
-                <Paper ref={profileRef} sx={{p: 3, elevation: 0 }}>
+                <Paper ref={profileRef} sx={{p: 3, elevation: 0}}>
                     <Box>
                         <Typography variant="h6" gutterBottom
                                     sx={{fontWeight: 'bold', fontSize: '24px', color: '#64B5F6'}}>
@@ -452,20 +452,21 @@ function UserProfile(): React.ReactElement {
                 </Paper>
 
                 {/*service provider section*/}
-                {isProvider && (
-                    <Paper ref={serviceProviderRef} sx={{p: 3, elevation: 0 }}>
-                        <Box>
-                            <Typography variant="h6" gutterBottom
-                                        sx={{fontWeight: 'bold', fontSize: '24px', color: '#64B5F6'}}>
-                                Service Provider Settings
-                            </Typography>
-                            <Divider orientation="horizontal" sx={{
-                                mt: -1,
-                                borderBottomWidth: 3,
-                                backgroundColor: '#64B5F6',
-                                borderColor: "#64B5F6"
-                            }}/>
-                        </Box>
+                <Paper ref={serviceProviderRef} sx={{p: 3, elevation: 0}}>
+                    <Box>
+                        <Typography variant="h6" gutterBottom
+                                    sx={{fontWeight: 'bold', fontSize: '24px', color: '#64B5F6'}}>
+                            Service Provider Settings
+                        </Typography>
+                        <Divider orientation="horizontal" sx={{
+                            mt: -1,
+                            borderBottomWidth: 3,
+                            backgroundColor: '#64B5F6',
+                            borderColor: "#64B5F6"
+                        }}/>
+                    </Box>
+                    {isProvider ? (
+
                         <Box sx={{display: 'flex', flexDirection: 'column', gap: 3, p: 3}}>
 
                             <Box sx={{
@@ -475,10 +476,6 @@ function UserProfile(): React.ReactElement {
                                 gap: 0
                             }}>
                                 <Typography variant="h6" sx={{fontWeight: 'bold'}}>Provided Services:</Typography>
-                                {/*<Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 3 }}>*/}
-                                {/*    <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Provided Services:</Typography>*/}
-                                {/*    <BlueButton text="Add Service" onClick={handleAddServiceClick} />*/}
-                                {/*</Box>*/}
                                 <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
                                     {services.length > 0 ? (
                                         services.map(service => (
@@ -519,43 +516,65 @@ function UserProfile(): React.ReactElement {
                                     <BlueButton text="Add Service" onClick={handleAddServiceClick}/>
                                 </Box>
                             </Box>
-                        </Box>
-                    </Paper>)
-                }
 
-                <Box sx={{mt: 3}}>
-                    <Typography variant="h6" sx={{fontWeight: 'bold'}}>Subscription Information:</Typography>
-                    {subscriptions.length > 0 ? (
-                        subscriptions.map((subscription) => (
-                            <Box key={subscription.id} sx={{display: 'flex', flexDirection: 'column', mt: 2}}>
-                                <Typography variant="body1"><strong>Status:</strong> {subscription.status}
-                                </Typography>
-                                <Typography variant="body1"><strong>Expiration
-                                    Date:</strong> {getFormattedDate(subscription.current_period_end)}
-                                </Typography>
-                                {subscription.status !== 'canceled' && (
-                                    <Button onClick={() => cancelSubscription(subscription.id)}
-                                            sx={{mt: 1, color: 'red'}}>Cancel Subscription</Button>
+                            <Box sx={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'space-between',
+                                gap: 0
+                            }}>
+                                <Typography variant="h6" sx={{fontWeight: 'bold'}}>Subscription
+                                    Information:</Typography>
+                                {subscriptions.length > 0 ? (
+                                    subscriptions.map((subscription) => (
+                                        <Box key={subscription.id}
+                                             sx={{display: 'flex', flexDirection: 'column', mt: 2}}>
+                                            <Typography
+                                                variant="body1"><strong>Status:</strong> {subscription.status}
+                                            </Typography>
+                                            <Typography variant="body1"><strong>Expiration
+                                                Date:</strong> {getFormattedDate(subscription.current_period_end)}
+                                            </Typography>
+                                            {subscription.status !== 'canceled' && (
+                                                <Button onClick={() => cancelSubscription(subscription.id)}
+                                                        sx={{mt: 1, color: 'red'}}>Cancel Subscription</Button>
+                                            )}
+                                        </Box>
+                                    ))
+                                ) : (
+                                    <Typography variant="body1">No active subscriptions</Typography>
                                 )}
                             </Box>
-                        ))
+                        </Box>) : (
+                        <>
+                            <Typography variant="h6" sx={{}}>You are not a provider yet.</Typography>
+                            <Box sx={{display: 'flex', justifyContent: 'flex-end', mt: 3}}>
+                                <BlueButton text="Click here to add your first offering"
+                                            onClick={handleAddServiceClick}/>
+                            </Box>
+                        </>
+                    )
+                    }
+
+
+                </Paper>
+
+
+                {
+                    isProvider ? (
+                        <BlueButton
+                            text="View My Work Schedule"
+                            onClick={handleViewScheduleClick}
+                            sx={{
+                                backgroundColor: '#93c5fd',
+                                color: 'black',
+                                mt: 2
+                            }}
+                        />
                     ) : (
-                        <Typography variant="body1">No active subscriptions</Typography>
-                    )}
-                </Box>
-                {isProvider ? (
-                    <BlueButton
-                        text="View My Work Schedule"
-                        onClick={handleViewScheduleClick}
-                        sx={{
-                            backgroundColor: '#93c5fd',
-                            color: 'black',
-                            mt: 2
-                        }}
-                    />
-                ) : (
-                    <div></div>
-                )}
+                        <div></div>
+                    )
+                }
                 <Button onClick={handleDeleteAccountOpenDialog}
                         sx={{backgroundColor: 'red', color: 'white', mt: 2}}>
                     Delete Account
@@ -563,7 +582,8 @@ function UserProfile(): React.ReactElement {
 
             </Box>
 
-            {/*todo: potential FAQ card*/}
+            {/*todo: potential FAQ card*/
+            }
             <AddressDialog
                 open={openAddressDialog}
                 onClose={() => setOpenAddressDialog(false)}
@@ -591,7 +611,8 @@ function UserProfile(): React.ReactElement {
                 isDeleteAccount={true}
             />
         </Container>
-    );
+    )
+        ;
 }
 
 export default UserProfile;
