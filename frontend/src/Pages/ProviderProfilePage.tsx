@@ -227,9 +227,9 @@ function ProviderProfilePage() {
     };
 
     // Helper function to format address
-    function formatAddress(country: any, location: any, postal: any) {
+    function formatAddress(location: any, postal: any) {
         // Filter out undefined or null values and join with a comma
-        return [country, location, postal].filter(Boolean).join(', ');
+        return ["German", location, postal].filter(Boolean).join(', ');
     }
 
     return (
@@ -282,7 +282,7 @@ function ProviderProfilePage() {
                             <Box sx={{display: 'flex', flexDirection: 'row', alignItems:'center'}}>
                                 <PinDropIcon sx={{mr: 1}}></PinDropIcon>
                                 <Typography variant="body1" gutterBottom>
-                                    {formatAddress(provider.country, provider.location, provider.postal)}
+                                    {formatAddress(provider.location, provider.postal)}
                                 </Typography>
                             </Box>
 

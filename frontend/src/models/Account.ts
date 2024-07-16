@@ -16,7 +16,6 @@ export class Account {
     description?: string;
     location?: string;
     postal?: string;
-    country?: string;
     isProvider?: boolean;
     isPremium?: boolean;
     isAdmin?:boolean;
@@ -38,7 +37,6 @@ export class Account {
         updatedAt?: Date,
         description?: string,
         location?: string,
-        country?:string,
         postal?: string,
         isProvider?: boolean,
         isPremium?: boolean,
@@ -57,7 +55,6 @@ export class Account {
         this.profileImageId = profileImageId;
         this.description = description;
         this.location = location;
-        this.country = country;
         this.postal = postal;
         this.isProvider = isProvider;
         this.isPremium = isPremium;
