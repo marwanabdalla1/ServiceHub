@@ -107,7 +107,7 @@ export default function ReceivedServiceTable() {
     };
 
     const handleReview = (job: Item) => {
-        navigate(`/customer_review/${job._id}`);
+        navigate(`/jobs/${job._id}`);
     };
 
     const handleDialogClose = () => {

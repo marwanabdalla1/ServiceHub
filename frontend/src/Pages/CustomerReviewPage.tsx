@@ -277,7 +277,7 @@ const ReviewPage: React.FC = () => {
                                             onReviewUpdated={() => {
                                                 setShowNewReview(false);
                                             }}
-                                            setEdit={true}
+                                            isEditing={true}
                                         />
                                     </Box>
                                 ) : (
