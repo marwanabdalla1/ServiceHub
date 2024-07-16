@@ -9,9 +9,17 @@ import {
     Avatar,
     Divider,
     IconButton,
-    Grid
+    Grid,
+    Tooltip, Card, CardContent,
+    Link
 } from '@mui/material';
+
+import { Link as RouterLink } from 'react-router-dom';
+
 import BlueButton from "../components/inputs/BlueButton";
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+
 import LightBlueFileButton from "../components/inputs/BlueUploadButton";
 import {useNavigate} from 'react-router-dom';
 import {useAuth} from "../contexts/AuthContext";
@@ -19,6 +27,8 @@ import axios from "axios";
 import {toast} from "react-toastify";
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddressDialog from "../components/dialogs/AddressDialog";
+import FileUploadIcon from '@mui/icons-material/FileUpload';
+import LogoutIcon from '@mui/icons-material/Logout';
 import {isValidPhoneNumber} from "../validators/AccountDataValidator";
 import {
     defaultProfileImage,
@@ -33,6 +43,7 @@ import {formatDateTime} from "../utils/dateUtils";
 import ListItem from "@mui/joy/ListItem";
 import List from "@mui/joy/List";
 import {ListItemButton} from "@mui/joy";
+import LightBlueButton from "../components/inputs/BlueButton";
 
 type EditModeType = {
     [key: string]: boolean;
@@ -61,9 +72,12 @@ function UserProfile(): React.ReactElement {
     const navigate = useNavigate();
 
     // for navigation
-    const [selectedSection, setSelectedSection] = useState('profile');
+    // const [selectedSection, setSelectedSection] = useState('profile');
+    const [activeSection, setActiveSection] = useState("profile");
+
     const profileRef = useRef<HTMLDivElement>(null);
     const serviceProviderRef = useRef<HTMLDivElement>(null);
+    const dangerZoneRef = useRef<HTMLDivElement>(null);
 
 
     const fetchSubscriptionData = async (clientReferenceId: string) => {
@@ -202,6 +216,41 @@ function UserProfile(): React.ReactElement {
             });
         }
     }, [account]);
+
+    // scroll listener
+    useEffect(() => {
+        const handleScroll = () => {
+
+            if (!profileRef.current || !serviceProviderRef.current || !dangerZoneRef.current) {
+                return;
+            }
+
+            const breakpoint = window.innerHeight * 0.4;
+            const smallSectionBreakpoint = window.innerHeight * 0.1;  // for danger zone
+
+
+            const profileRect = profileRef.current.getBoundingClientRect();
+            const serviceProviderRect = serviceProviderRef.current.getBoundingClientRect();
+            const dangerZoneRect = dangerZoneRef.current.getBoundingClientRect();
+
+            console.log("danger zone:", dangerZoneRect.top, dangerZoneRect.bottom, "small breakpoint:", smallSectionBreakpoint, "big breakpoint:", breakpoint)
+
+            if (dangerZoneRect.top < breakpoint * 1.5) {
+                setActiveSection('dangerZone');
+            } else if (profileRect.top <= breakpoint && profileRect.bottom > breakpoint) {
+                setActiveSection('profile');
+            } else if (serviceProviderRect.top <= breakpoint && serviceProviderRect.bottom > breakpoint) {
+                setActiveSection('serviceProvider');
+            }
+
+        };
+
+        window.addEventListener('scroll', handleScroll);
+
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+        };
+    }, []);
 
     // unmount
     // useEffect(() => {
@@ -351,94 +400,218 @@ function UserProfile(): React.ReactElement {
         return formatDateTime(new Date(timestamp * 1000));
     };
 
+
     const handleNavigation = (section: string) => {
-        setSelectedSection(section);
+        setActiveSection(section);
+        let elementRef;
         switch (section) {
             case 'profile':
-                window.scrollTo(0, 0);
-                // profileRef.current?.scrollIntoView({behavior: 'smooth', block:'start'});
+                elementRef = profileRef;
                 break;
             case 'serviceProvider':
-                serviceProviderRef.current?.scrollIntoView({behavior: 'smooth'});
+                elementRef = serviceProviderRef;
                 break;
-            // case 'subscription':
-            //     subscriptionRef.current?.scrollIntoView({ behavior: 'smooth' });
-            //     break;
+            case 'dangerZone':
+                elementRef = dangerZoneRef;
+                break;
             default:
-                window.scrollTo(0, 0);
-                break;
+                window.scrollTo({top: 0, behavior: 'smooth'});
+                return;
+        }
+
+        if (elementRef && elementRef.current) {
+            const navbarHeight = 180;
+            const elementTop = elementRef.current.getBoundingClientRect().top + window.scrollY - navbarHeight;
+
+            window.scrollTo({
+                top: elementTop,
+                behavior: 'smooth'
+            });
         }
     };
 
+
     return (
-        <Container maxWidth="lg" sx={{mt: 4, /*backgroundColor: '#f5f5f5', borderRadius: '20px'*/}}>
-            <List sx={{width: '200px', mr: 2, mt: 10, position: 'fixed'}}>
+        <Container sx={{display: 'flex', mt: 4, minWidth: '85%', maxWidth: '95%', margin: '10px', padding:'10px',
+            // minWidth: '90%',
+            borderRadius: 0,
+            alignItems: 'flex-start',/*backgroundColor: '#f5f5f5', borderRadius: '20px'*/
+            flexDirection: 'row',
+            justifyContent: 'space-between'}}>
+            <List sx={{width: '200px', maxWidth: '20%', mr: '2%', ml:'2%', mt: 5, position: 'fixed'}}>
                 <ListItem>
-                    <ListItemButton selected={selectedSection === 'profile'}
-                                    onClick={() => handleNavigation('profile')}>
+                    <ListItemButton selected={activeSection === 'profile'}
+                                    onClick={() => handleNavigation('profile')}
+                                    sx={{
+                                        color: activeSection === 'profile' ? '#64B5F6' : 'black',
+                                        backgroundColor: 'transparent !important',
+                                        '&:hover': {
+                                            backgroundColor: 'transparent',
+                                        }
+                                    }}
+                    >
                         <Typography variant="body2">Public Profile</Typography>
                     </ListItemButton>
                 </ListItem>
                 <ListItem>
-                    <ListItemButton selected={selectedSection === 'serviceProvider'}
-                                    onClick={() => handleNavigation('serviceProvider')}>
+                    <ListItemButton selected={activeSection === 'serviceProvider'}
+                                    onClick={() => handleNavigation('serviceProvider')}
+                                    sx={{
+                                        color: activeSection === 'serviceProvider' ? '#64B5F6' : 'black', // Highlight color when active
+                                        backgroundColor: 'transparent !important',
+                                        '&:hover': {
+                                            backgroundColor: 'transparent', // Ensures no background color change on hover
+                                        }
+                                    }}
+
+                    >
                         <Typography variant="body2">Service Provider Settings</Typography>
+                    </ListItemButton>
+                </ListItem>
+                <ListItem>
+                    <ListItemButton selected={activeSection === 'dangerZone'}
+                                    onClick={() => handleNavigation('dangerZone')}
+                                    sx={{
+                                        color: activeSection === 'dangerZone' ? '#f01e2c' : 'black', // Highlight color when active
+                                        backgroundColor: 'transparent !important',
+                                        '&:hover': {
+                                            backgroundColor: 'transparent', // Ensures no background color change on hover
+                                        }
+                                    }}
+                    >
+                        <Typography variant="body2">Danger Zone</Typography>
                     </ListItemButton>
                 </ListItem>
             </List>
 
-            <Box component="main" sx={{flexGrow: 1, ml: '250px', overflowY: 'auto'}}>
+            <Box component="main" sx={{flex: '1 1 100%', ml: '20%', minWidth: '70%', maxWidth: '75%', mr:"18%",  overflowY: 'auto'}}>
 
                 {/*public profile section*/}
-                <Paper ref={profileRef} sx={{p: 3, elevation: 0}}>
+                <Paper ref={profileRef} sx={{p: 3, elevation: 0, width: '100%'}}>
                     <Box>
-                        <Typography variant="h6" gutterBottom
-                                    sx={{fontWeight: 'bold', fontSize: '24px', color: '#64B5F6'}}>
-                            Public Profile
-                        </Typography>
+                        <Box sx={{
+                            display: 'flex', flexDirection: 'row', alignItems: 'center',
+                            justifyContent: 'space-between', width: '100%'
+                        }}>
+                            <Typography variant="h6" gutterBottom
+                                        sx={{fontWeight: 'bold', fontSize: '24px', color: 'black'}}>
+                                Public Profile
+                            </Typography>
+
+                            <Tooltip title="Logout" placement={'top'}>
+                                <IconButton
+                                    sx={{
+                                        color: '#64B5F6',
+                                        backgroundColor: 'white',
+                                        '&:hover': {
+                                            backgroundColor: '#64B5F6',
+                                            color: 'white'
+                                        },
+                                        // border: '2px solid #64B5F6',
+                                        borderRadius: '50%',
+                                        // padding: '0px'
+                                    }}
+                                >
+                                    <LogoutIcon sx={{strokeWidth: 10}}/>
+                                </IconButton>
+                            </Tooltip>
+                            {/*<Button onClick={logoutUser}>Logout</Button>*/}
+                        </Box>
                         <Divider orientation="horizontal" sx={{
-                            mt: -1,
+                            mt: 0,
                             borderBottomWidth: 3,
-                            backgroundColor: '#64B5F6',
-                            borderColor: "#64B5F6"
+                            backgroundColor: 'black',
+                            borderColor: "black"
                         }}/>
                     </Box>
 
-                    <Box sx={{display: 'flex', flexDirection: 'column', gap: 3, p: 3}}>
+                    <Box sx={{display: 'flex', flexDirection: 'column', gap: 3, p: 3, justifyContent: "space-between"}}>
+
                         <Box sx={{
                             display: 'flex',
                             flexDirection: 'row',
-                            justifyContent: 'flex-start',
-                            allignItems: 'center',
-                            gap: 0.5,
-                            position: 'relative'
+                            alignItems: 'center',
+                            gap: 2,
+                            width: '100%'
                         }}>
-                            {defaultProfileImage !== profileImage && (
-                                <IconButton
-                                    onClick={() => deleteProfileImage(token, setProfileImage)}
-                                    size="medium"
-                                    sx={{
-                                        position: 'absolute',
-                                        top: 5,
-                                        right: 305,
-                                        transform: 'translate(50%, -50%)',
-                                        backgroundColor: 'white',
-                                        border: '1px solid #ccc',
-                                        padding: '2px',
-                                        '&:hover': {
-                                            backgroundColor: 'red',
-                                            color: 'white',
-                                        },
-                                    }}
-                                >
-                                    <DeleteIcon sx={{fontSize: 16}}/>
-                                </IconButton>
-                            )}
                             <Avatar src={profileImage ? profileImage : undefined}
                                     sx={{width: 80, height: 80}}/>
-                            <LightBlueFileButton text="Upload Profile Picture"
-                                                 sx={{mt: 2}}
-                                                 onFileChange={handleProfileImageUpload(setProfileImage, token)}/>
+
+                            <Box sx={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'space-around',
+                                alignItems: 'flex-start',
+                                height: '100%',
+                            }}>
+                                {/*<LightBlueFileButton text="Upload Picture"*/}
+                                {/*                     sx={{mb: 2, color: 'black', backgroundColor: "white", border: "2px solid black"}}*/}
+                                {/*                     onFileChange={handleProfileImageUpload(setProfileImage, token)}/>*/}
+
+                                <Button
+                                    onClick={() => handleProfileImageUpload(setProfileImage, token)}
+                                    variant="outlined"
+                                    size="small"
+                                    startIcon={<FileUploadIcon/>}
+                                    sx={{
+                                        mb: 1,
+                                        color: 'black',
+                                        borderColor: 'black',
+                                        '&:hover': {
+                                            backgroundColor: 'black',
+                                            color: 'white',
+                                            borderColor: 'black'
+                                        },
+                                        textTransform: 'none',
+                                        borderRadius: '20px'
+                                    }}
+                                >
+                                    Upload Picture
+                                </Button>
+
+                                {defaultProfileImage !== profileImage && (
+                                    <Button
+                                        onClick={() => deleteProfileImage(token, setProfileImage)}
+                                        variant="outlined"
+                                        size="small"
+                                        startIcon={<DeleteIcon/>}
+                                        sx={{
+                                            color: '#f01e2c',
+                                            borderColor: '#f01e2c',
+                                            '&:hover': {
+                                                backgroundColor: '#f01e2c',
+                                                color: 'white',
+                                                borderColor: '#f01e2c'
+                                            },
+                                            textTransform: 'none',
+                                            borderRadius: '20px'
+                                        }}
+                                    >
+                                        Delete Picture
+                                    </Button>
+
+
+                                )}
+
+
+                            </Box>
+
+                            {/*    availability schedule*/}
+                            {isProvider &&
+                                <Box sx={{marginLeft: 'auto', display: 'flex', alignItems: 'center'}}>
+                                    <LightBlueButton icon={<CalendarMonthIcon style={{marginRight: 2}}/>}
+                                                     text={"View My Schedule"}
+                                                     sx={{
+                                                         padding: '8px 8px', backgroundColor: '#93c5fd',
+                                                         display: 'flex', // Use flexbox for centering
+                                                         alignItems: 'center',
+                                                         justifyContent: 'center',
+                                                         textDecoration: 'none', // Ensure no underline
+                                                         minWidth: '42px',
+                                                         minHeight: '25px'
+                                                     }}
+                                                     onClick={handleViewScheduleClick}></LightBlueButton>
+                                </Box>}
                         </Box>
                         {renderField("User ID", "userId", false)}
                         {renderField("First Name", "firstName", false)}
@@ -447,7 +620,6 @@ function UserProfile(): React.ReactElement {
                         {renderField("Phone Number", "phoneNumber")}
                         {renderField("Address", "address")}
                         {renderField("Description", "description")}
-                        <Button onClick={logoutUser}>Logout</Button>
                     </Box>
                 </Paper>
 
@@ -455,16 +627,17 @@ function UserProfile(): React.ReactElement {
                 <Paper ref={serviceProviderRef} sx={{p: 3, elevation: 0}}>
                     <Box>
                         <Typography variant="h6" gutterBottom
-                                    sx={{fontWeight: 'bold', fontSize: '24px', color: '#64B5F6'}}>
+                                    sx={{fontWeight: 'bold', fontSize: '24px', color: 'black'}}>
                             Service Provider Settings
                         </Typography>
                         <Divider orientation="horizontal" sx={{
                             mt: -1,
                             borderBottomWidth: 3,
-                            backgroundColor: '#64B5F6',
-                            borderColor: "#64B5F6"
+                            backgroundColor: 'black',
+                            borderColor: "black"
                         }}/>
                     </Box>
+
                     {isProvider ? (
 
                         <Box sx={{display: 'flex', flexDirection: 'column', gap: 3, p: 3}}>
@@ -512,8 +685,9 @@ function UserProfile(): React.ReactElement {
                                         <Typography variant="body1">No services provided</Typography>
                                     )}
                                 </Box>
-                                <Box sx={{display: 'flex', justifyContent: 'flex-end', mt: 3}}>
-                                    <BlueButton text="Add Service" onClick={handleAddServiceClick}/>
+                                <Box sx={{display: 'flex', justifyContent: 'flex-end', mt: 2, mb: 4}}>
+                                    <BlueButton text="Add A Service" sx={{backgroundColor: '#93c5fd'}}
+                                                onClick={handleAddServiceClick}/>
                                 </Box>
                             </Box>
 
@@ -527,18 +701,26 @@ function UserProfile(): React.ReactElement {
                                     Information:</Typography>
                                 {subscriptions.length > 0 ? (
                                     subscriptions.map((subscription) => (
-                                        <Box key={subscription.id}
-                                             sx={{display: 'flex', flexDirection: 'column', mt: 2}}>
-                                            <Typography
-                                                variant="body1"><strong>Status:</strong> {subscription.status}
-                                            </Typography>
-                                            <Typography variant="body1"><strong>Expiration
-                                                Date:</strong> {getFormattedDate(subscription.current_period_end)}
-                                            </Typography>
-                                            {subscription.status !== 'canceled' && (
-                                                <Button onClick={() => cancelSubscription(subscription.id)}
-                                                        sx={{mt: 1, color: 'red'}}>Cancel Subscription</Button>
-                                            )}
+                                        <Box sx={{
+                                            display: 'flex',
+                                            flexDirection: 'row',
+                                            justifyContent: 'space-between'
+                                        }}>
+                                            <Box key={subscription.id}
+                                                 sx={{display: 'flex', flexDirection: 'column', mt: 2}}>
+                                                <Typography
+                                                    variant="body1"><strong>Status:</strong> {subscription.status}
+                                                </Typography>
+                                                <Typography variant="body1"><strong>Expiration
+                                                    Date:</strong> {getFormattedDate(subscription.current_period_end)}
+                                                </Typography>
+                                            </Box>
+                                            {
+                                                subscription.status !== 'canceled' && (
+                                                    <Button onClick={() => cancelSubscription(subscription.id)}
+                                                            sx={{mt: 1, color: 'red'}}>Cancel Subscription</Button>
+                                                )
+                                            }
                                         </Box>
                                     ))
                                 ) : (
@@ -548,7 +730,7 @@ function UserProfile(): React.ReactElement {
                         </Box>) : (
                         <>
                             <Typography variant="h6" sx={{}}>You are not a provider yet.</Typography>
-                            <Box sx={{display: 'flex', justifyContent: 'flex-end', mt: 3}}>
+                            <Box sx={{display: 'flex', justifyContent: 'flex-start', mt: 2}}>
                                 <BlueButton text="Click here to add your first offering"
                                             onClick={handleAddServiceClick}/>
                             </Box>
@@ -559,31 +741,69 @@ function UserProfile(): React.ReactElement {
 
                 </Paper>
 
+                <Paper ref={dangerZoneRef} sx={{p: 3, elevation: 0}}>
+                    <Box>
+                        <Typography variant="h6" gutterBottom
+                                    sx={{fontWeight: 'bold', fontSize: '24px', color: '#f01e2c'}}>
+                            Danger Zone
+                        </Typography>
+                        <Divider orientation="horizontal" sx={{
+                            mt: -1,
+                            borderBottomWidth: 3,
+                            backgroundColor: 'black',
+                            borderColor: "black"
+                        }}/>
+                    </Box>
 
-                {
-                    isProvider ? (
-                        <BlueButton
-                            text="View My Work Schedule"
-                            onClick={handleViewScheduleClick}
+                    <Typography sx={{mt: 2}}>
+                        <strong>Heads Up!</strong> Deleting your account is permanent and cannot be reversed. Please be
+                        certrain before you proceed.
+                    </Typography>
+
+                    <Button onClick={handleDeleteAccountOpenDialog}
                             sx={{
-                                backgroundColor: '#93c5fd',
-                                color: 'black',
-                                mt: 2
-                            }}
-                        />
-                    ) : (
-                        <div></div>
-                    )
-                }
-                <Button onClick={handleDeleteAccountOpenDialog}
-                        sx={{backgroundColor: 'red', color: 'white', mt: 2}}>
-                    Delete Account
-                </Button>
+                                backgroundColor: '#f01e2c', color: 'white',
+                                '&:hover': {
+                                    backgroundColor: '#b71c1c',
+                                },
+                                fontWeight: 'bold',
+                                mt: 2, mb: 10, width: '30%', borderRadius: '20px'
+                            }}>
+                        Delete Account
+                    </Button>
+                </Paper>
 
             </Box>
 
-            {/*todo: potential FAQ card*/
-            }
+
+            {/*faq card*/}
+            {/*<Box>*/}
+                <Card sx={{
+                    // width: '200px',
+                    maxWidth: '15%',
+                    mt: 10,
+                    position: 'fixed',
+                    top: 80,
+                    right: '3%',
+                    width: '15%',
+                    // zIndex: 1000,
+                    border: '1px solid #ccc',
+                    boxShadow: 2
+                }}>
+                    <CardContent>
+                        <Box sx={{display: 'flex', alignItems: 'center', marginBottom: 1}}>
+                            <HelpOutlineIcon sx={{marginRight: 1, color: 'black', fontSize: '2rem'}}/>
+                            <Typography variant="h6" component="div">
+                                Need help?
+                            </Typography>
+                        </Box>
+                        <Typography variant="body2" color="text.secondary">
+                            Check out the <RouterLink to="/faq" style={{color: 'inherit' }}> FAQ page</RouterLink> or <Link href="mailto:servicehub.seba22@gmail.com" style={{color: 'inherit' }}>contact us</Link>.
+                        </Typography>
+                    </CardContent>
+                </Card>
+            {/*</Box>*/}
+
             <AddressDialog
                 open={openAddressDialog}
                 onClose={() => setOpenAddressDialog(false)}

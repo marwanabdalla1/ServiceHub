@@ -207,7 +207,7 @@ export default function OfferedServicesTable() {
                                          actions={{
                                              complete: onComplete,
                                              cancelJob: onCancel,
-                                             review: () => navigate(`/customer_review/${selectedJob._id}`),
+                                             review: () => navigate(`/jobs/${selectedJob._id}`),
                                              revoke: onRevoke
                                          }}
                     />

@@ -50,6 +50,8 @@ const JobDetailsPage: React.FC<JobDetailsPageProps> = () => {
         // ref for review sections
         const reviewsRef = useRef<HTMLDivElement>(null);
 
+        const [isEditing, setIsEditing] = useState(false);
+
 
         const [showNewReview, setShowNewReview] = useState(false);
 
@@ -287,10 +289,15 @@ const JobDetailsPage: React.FC<JobDetailsPageProps> = () => {
 
         };
 
-        // todo: change this
         const handleReview = (job: Item) => {
-            // navigate(`/customer_review/${job._id}`);
             reviewsRef.current?.scrollIntoView({behavior: 'smooth'});
+
+            if (!myReview) {
+                setShowNewReview(!showNewReview);
+            } else {
+                setIsEditing(!isEditing);
+            }
+
         };
 
 
@@ -389,6 +396,8 @@ const JobDetailsPage: React.FC<JobDetailsPageProps> = () => {
                                             recipient={otherParty}
                                             onReviewUpdated={() => {
                                             }}
+                                            isEditing={isEditing}
+                                            setIsEditing={setIsEditing}
                                         />
                                     </Box>
                                 ) : (
@@ -402,7 +411,7 @@ const JobDetailsPage: React.FC<JobDetailsPageProps> = () => {
                                                 onReviewUpdated={() => {
                                                     setShowNewReview(false);
                                                 }}
-                                                setEdit={true}
+                                                isEditing={true}
                                             />
                                         </Box>
                                     ) : (

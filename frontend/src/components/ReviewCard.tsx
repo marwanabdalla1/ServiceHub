@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
     Card,
     CardContent,
@@ -27,7 +27,8 @@ interface ReviewCardProps {
     reviewer: Account | null;
     recipient: Account | null;
     onReviewUpdated: () => void; // Callback to refresh reviews on the job details page
-    setEdit?: boolean
+    isEditing?: boolean;
+    setIsEditing?: (value: boolean) => void;
 }
 
 const ReviewCard: React.FC<ReviewCardProps> = ({
@@ -36,11 +37,17 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
                                                    reviewer,
                                                    recipient,
                                                    onReviewUpdated,
-                                                   setEdit
+                                                   isEditing: externalIsEditing,
+                                                   setIsEditing: externalSetIsEditing,
                                                }) => {
     const [rating, setRating] = React.useState<number | null>(review?.rating || 0);
     const [reviewText, setReviewText] = React.useState(review?.content || '');
-    const [isEditing, setIsEditing] = React.useState(setEdit || false);  // Tracks if we are editing an existing review
+
+    const [localIsEditing, localSetIsEditing] = useState(false);
+
+    const isEditing = externalIsEditing !== undefined ? externalIsEditing : localIsEditing;
+    const setIsEditing = externalSetIsEditing || localSetIsEditing;
+
     const {token, account} = useAuth();
     const {alert, triggerAlert, closeAlert} = useAlert(5000);
     const [profileImage, setProfileImage] = React.useState<string | null>(null);
@@ -117,7 +124,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
         setIsEditing(false);
         console.log("location:", window.location)
         if (!review) {
-        //
+            //
             onReviewUpdated()
         }
     };
@@ -193,7 +200,8 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
                         />
                     </CardContent>
                     <CardContent>
-                        <Button onClick={handleSubmit} disabled={rating === 0} variant="contained" color="primary" sx={{mr: 2}}>
+                        <Button onClick={handleSubmit} disabled={rating === 0} variant="contained" color="primary"
+                                sx={{mr: 2}}>
                             {review ? 'Update Review' : 'Submit Review'}
                         </Button>
                         <Button onClick={handleCancel} variant="outlined" color="primary">Cancel</Button>
