@@ -1,14 +1,36 @@
-version: '4'
+version: '3.8'
+
 services:
-  backend:
-    build:
-      context: backend
-    container_name: backend
-    ports:
-      - "8080:8080"
   frontend:
     build:
       context: ./frontend
-    container_name: frontend_ts
+      dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "3000:80"
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - MONGO_CONNECTION_STRING=mongodb+srv://christinayan2001:4tF5iYHRfsKxcqeZ@seba22.rvcgfu0.mongodb.net/ServiceHub?retryWrites=true&w=majority&appName=SEBA22
+      - PORT=8080
+      - ACCESS_TOKEN_SECRET=1ad3e26481f247b9085db084a3f86d96ce6b77d3b564bdcc730f3b99d710a288fec0d5b9055116b7657abb3b93626cc2657a9e6e5876894002fc4a3f0166aa5a
+      - MY_EMAIL=servicehub.seba22@gmail.com
+      - MY_PASSWORD=qremehjzkdazcqwy
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:4.4
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
