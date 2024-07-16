@@ -14,10 +14,6 @@ import GenericConsumerCard from "../../components/tableComponents/GenericConsume
 import {Job} from "../../models/Job";
 import {
     Button,
-    FormControl,
-    InputLabel,
-    MenuItem,
-    Select,
     Dialog,
     DialogTitle,
     DialogContent,
@@ -25,7 +21,6 @@ import {
     DialogActions
 } from "@mui/material";
 import GenericTable from "../../components/tableComponents/GenericTable";
-import {ServiceType} from "../../models/enums";
 
 type Item = ServiceRequest | Job;
 
@@ -40,10 +35,9 @@ export default function RequestHistoryTable() {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
 
-    const statusOptions = ['All Requests', 'Pending', 'Action Needed from Requester', 'Cancelled', 'Declined']; //accepted ones excluded
-    const [statusFilter, setStatusFilter] = useState('All Requests');
-
-    const [serviceTypeFilter, setServiceTypeFilter] = useState("ALL");
+    const statusOptions = ['All Statuses', 'Pending', 'Action Needed from Requester', 'Cancelled', 'Declined']; //exclude accepted
+    const [statusFilter, setStatusFilter] = useState(['All Statuses']);
+    const [serviceTypeFilter, setServiceTypeFilter] = useState(["All Types"]);
 
     useEffect(() => {
         console.log(token)
@@ -54,11 +48,18 @@ export default function RequestHistoryTable() {
                         page: (page + 1).toString(),
                         limit: rowsPerPage.toString(),
                     });
-                    if (statusFilter !== 'All Requests') {
-                        params.append('requestStatus', statusFilter.toLowerCase());
+
+                    if (statusFilter.length > 0 && !statusFilter.includes('All Statuses')) {
+                        statusFilter.forEach(type => {
+                            params.append('requestStatus', type.toLowerCase());
+                        });
                     }
-                    if (serviceTypeFilter !== 'ALL') {
-                        params.append('serviceType', serviceTypeFilter);
+
+                    // Handling multiple service type filters
+                    if (serviceTypeFilter.length > 0 && !serviceTypeFilter.includes('All Types')) {
+                        serviceTypeFilter.forEach(type => {
+                            params.append('serviceType', type);
+                        });
                     }
 
                     const response = await axios.get(`/api/requests/requester/${account._id}?${params.toString()}`, {
@@ -78,24 +79,18 @@ export default function RequestHistoryTable() {
     }, [account, token, page, rowsPerPage, statusFilter, serviceTypeFilter]);
 
     const handleToggleMediaCard = (req: Item | null) => {
+        console.log("toggle media card", showMediaCard)
         if (req && ((req as ServiceRequest).provider === null || (req as ServiceRequest).serviceOffering === null)) {
             setDialogOpen(true);
             return;
         }
         setSelectedRequest(req as ServiceRequest);
         setShowMediaCard(req !== null);
-    };
-
-    const handleChangeServiceType = (event: any) => {
-        setServiceTypeFilter(event.target.value);
-        setPage(0);
+        console.log("toggle media card after", showMediaCard)
 
     };
 
-    const handleChangeStatus = (event: any) => {
-        setStatusFilter(event.target.value);
-        setPage(0);
-    };
+
 
     const onCancel = () => {
         if (!selectedRequest) {
@@ -118,8 +113,7 @@ export default function RequestHistoryTable() {
 
     return (
         <div style={{display: 'flex', flexDirection: 'row', width: '100%', position: 'relative'}}>
-            <div style={{flex: showMediaCard ? '3 1 auto' : '1 1 0%', marginRight: showMediaCard ? '30%' : '5%'}}>
-                <Box sx={{minWidth: 275, margin: 2}}>
+            <Box sx={{minWidth: 275, margin: 2, width: '100%'}}>
                     <Box>
                         <Typography variant="h6" component="div" sx={{marginBottom: '10px'}}>
                             My Outgoing Requests
@@ -129,75 +123,27 @@ export default function RequestHistoryTable() {
                             <Routerlink to="/outgoing/jobs"> jobs</Routerlink> and are not shown here.
                         </Typography>
                     </Box>
-                    <Box sx={{display: 'flex', marginBottom: 2}}>
-                        <FormControl style={{width: 300, marginRight: 5}}>
-                            <InputLabel id="service-type-label">Filter Service Type</InputLabel>
-                            <Select
-                                labelId="service-type-label"
-                                id="service-type-select"
-                                value={serviceTypeFilter}
-                                label="Filter Service Type"
-                                onChange={handleChangeServiceType}
-                                fullWidth
-                            >
-                                <MenuItem value="ALL">All</MenuItem>
-                                {Object.values(ServiceType).map(type => (
-                                    <MenuItem key={type} value={type}>{type}</MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
 
-                        <FormControl style={{width: 300}}>
-                            <InputLabel id="service-type-label">Request Status</InputLabel>
-                            <Select
-                                labelId="request-status-label"
-                                id="request-status-select"
-                                value={statusFilter}
-                                label="Request Status"
-                                onChange={handleChangeStatus}
-                                fullWidth
-                            >
-                                {Object.values(statusOptions).map(type => (
-                                    <MenuItem key={type} value={type}>{type}</MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
-                    </Box>
+                    <Box style={{flex: showMediaCard ? '3 1 auto' : '1 1 0%', marginRight: showMediaCard ? '30%' : '5%'}}>
+                        <GenericTable data={serviceRequests}
+                                      count={total}
+                                      page={page}
+                                      setPage={setPage}
+                                      rowsPerPage={rowsPerPage}
+                                      setRowsPerPage={setRowsPerPage}
+                                      setShowMediaCard={setShowMediaCard}
+                                      onViewDetails={handleToggleMediaCard}
+                                      isProvider={false}
+                                      statusOptions={statusOptions}
+                                      statusFilter={statusFilter}
+                                      setStatusFilter={setStatusFilter}
+                                      serviceTypeFilter={serviceTypeFilter}
+                                      setServiceTypeFilter={setServiceTypeFilter}
+                        />
 
-                    <Box style={{display: 'flex'}}>
-                        <Box sx={{flexGrow: 1, marginRight: 2}}>
-                            <Box>
-                                {serviceRequests.length === 0 ? (
-                                    <Typography variant="body1">
-                                        You don't have any
-                                        requests{statusFilter === 'All Requests' || statusFilter === '' ? '' : (
-                                        <span> with status <span
-                                            style={{fontStyle: 'italic'}}>{statusFilter.toLowerCase()}</span></span>
-                                    )}
-                                        {serviceTypeFilter === 'ALL' || serviceTypeFilter === '' ? '' : (
-                                            <span> for service type <span
-                                                style={{fontStyle: 'italic'}}>{serviceTypeFilter.toLowerCase()}</span></span>
-                                        )}
-                                        yet.
-                                    </Typography>
-                                ) : (
-                                    <GenericTable data={serviceRequests}
-                                                  count={total}
-                                                  page={page}
-                                                  setPage={setPage}
-                                                  rowsPerPage={rowsPerPage}
-                                                  setRowsPerPage={setRowsPerPage}
-                                                  setShowMediaCard={setShowMediaCard}
-                                                  onViewDetails={handleToggleMediaCard}
-                                                  isProvider={false}
-                                    />
 
-                                )}
-                            </Box>
-                        </Box>
                     </Box>
                 </Box>
-            </div>
             {showMediaCard && selectedRequest && (
                 <div style={{
                     width: '25%',
@@ -211,14 +157,14 @@ export default function RequestHistoryTable() {
                     boxSizing: 'border-box'
                 }}>
                     <GenericConsumerCard item={selectedRequest}
-                                        provider={selectedRequest.provider}
-                                        receiver={selectedRequest.requestedBy}
-                                        onClose={() => setShowMediaCard(false)}
-                                        inDetailPage={false}
-                                        actions={{
-                                            cancelRequest: onCancel,
-                                        }}
-                />
+                                         provider={selectedRequest.provider}
+                                         receiver={selectedRequest.requestedBy}
+                                         onClose={() => setShowMediaCard(false)}
+                                         inDetailPage={false}
+                                         actions={{
+                                             cancelRequest: onCancel,
+                                         }}
+                    />
                 </div>
             )}
 

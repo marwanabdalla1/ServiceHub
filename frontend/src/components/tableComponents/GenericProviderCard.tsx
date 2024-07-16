@@ -207,13 +207,14 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
                             <Typography variant="body2" color="textSecondary" >
                                 Email: <a href={`mailto:${receiver?.email}`} style={{ color: 'inherit', textDecoration: 'none' }}>{receiver?.email}</a>
                             </Typography>
-                            <Typography variant="body2" color="textSecondary" style={{marginBottom: '0.5rem'}}>
+                            <Typography variant="body2" color="textSecondary">
                                 {receiver?.phoneNumber ? (
                                     <a href={`tel:${receiver.phoneNumber}`} style={{ color: 'inherit', textDecoration: 'none' }}>
-                                        Number: {receiver.phoneNumber}
+                                        Phone: {receiver.phoneNumber}
                                     </a>
                                 ) : ""}
                             </Typography>
+
                         </div>
                     </div>
 
@@ -237,6 +238,14 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
                             ) : (
                                 item.serviceType
                             )}
+                        </Typography>
+
+
+                        <Typography variant="body2" color="text.secondary" component="span">
+                            Address:
+                        </Typography>
+                        <Typography variant="body2" component="span">
+                            {receiver?.address}, {receiver?.postal} {receiver?.location}
                         </Typography>
 
                         <Typography variant="body2" color="text.secondary" component="span">

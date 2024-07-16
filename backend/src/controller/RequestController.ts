@@ -205,16 +205,26 @@ export const getServiceRequestsByProvider: RequestHandler = async (req, res) => 
 
         // Adding filters based on query parameters
         if (requestStatus) {
-            query.requestStatus = requestStatus;
+            // query.requestStatus = requestStatus;
+            if (Array.isArray(requestStatus)) {
+                query.requestStatus = { $in: requestStatus };
+            } else {
+                query.requestStatus = requestStatus;
+            }
         }
         if (serviceType) {
-            query.serviceType = serviceType;
+            // query.serviceType = serviceType;
+            if (Array.isArray(serviceType)) {
+                query.serviceType = { $in: serviceType };
+            } else {
+                query.serviceType = serviceType;
+            }
         }
 
         const serviceRequests = await ServiceRequest.find(query)
             .populate([
-                { path: 'requestedBy', select: 'firstName lastName email profileImageId phoneNumber' },
-                { path: 'provider', select: 'firstName lastName email profileImageId phoneNumber' }
+                { path: 'requestedBy', select: 'firstName lastName email profileImageId phoneNumber address location postal country' },
+                { path: 'provider', select: 'firstName lastName email profileImageId phoneNumber address location postal country' }
             ])
             .exec();
 
@@ -273,8 +283,8 @@ export const getServiceRequestsByRequester: RequestHandler = async (req, res) =>
 
         const serviceRequests = await ServiceRequest.find(query)
             .populate([
-                { path: 'requestedBy', select: 'firstName lastName email profileImageId phoneNumber' },
-                { path: 'provider', select: 'firstName lastName email profileImageId phoneNumber' }
+                { path: 'requestedBy', select: 'firstName lastName email profileImageId phoneNumber address location postal country' },
+                { path: 'provider', select: 'firstName lastName email profileImageId phoneNumber address location postal country' }
             ])
             .exec();
 
@@ -358,8 +368,8 @@ export const getRequestById: RequestHandler = async (req, res) => {
         }
 
         const serviceRequest = await ServiceRequest.findById(requestId).populate([
-            { path: 'requestedBy', select: 'firstName lastName email profileImageId phoneNumber' },
-            { path: 'provider', select: 'firstName lastName email profileImageId phoneNumber' }
+            { path: 'requestedBy', select: 'firstName lastName email profileImageId phoneNumber address location postal country' },
+            { path: 'provider', select: 'firstName lastName email profileImageId phoneNumber address location postal country' }
         ]).exec();
 
         console.log(serviceRequest)
