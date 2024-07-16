@@ -1,5 +1,5 @@
 # Use an official Node.js runtime as a parent image
-FROM node:20.10.0
+FROM node:16
 
 # Set the working directory
 WORKDIR /usr/src/app
@@ -12,6 +12,9 @@ RUN npm install
 
 # Copy the rest of the application code
 COPY . .
+
+# Rebuild bcrypt for the correct architecture
+RUN npm rebuild bcrypt --build-from-source
 
 # Expose the port the app runs on
 EXPOSE 8080
