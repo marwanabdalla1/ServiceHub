@@ -2,6 +2,7 @@ import {RequestHandler} from 'express';
 import moment from 'moment';
 import Timeslot, {ITimeslot} from '../models/timeslot';
 import mongoose, {ClientSession, Types} from "mongoose";
+import {ObjectId} from "mongodb";
 
 // Custom error class for Timeslot-related errors
 class TimeslotError extends Error {
@@ -619,16 +620,25 @@ export const bookTimeslotDirect = async (timeslotData: any, sessionPassed?: Clie
             throw new TimeslotError("Timeslot is no longer available.", 409);
         }
 
+        console.log("Overlapping slots to process:",  overlappingSlots.length, overlappingSlots,
+            overlappingSlots.map(slot => slot._id));
+
         // Check availability
         let available = false;
-        const merged = mergeTimeslots(overlappingSlots);
 
+        const copiedSlots = overlappingSlots.map(slot => slot.toObject());
+
+        const merged = mergeTimeslots(copiedSlots);
+
+        // if the booking time is covered by an available slot, the provider is available
         for (const slot of merged) {
             if (slot.start <= new Date(transitStart) && slot.end >= new Date(transitEnd)) {
+                console.log("slot info in merged:", slot)
                 available = true;
                 break;
             }
         }
+
 
         if (!available) {
             throw new TimeslotError("Timeslot is no longer available.", 409);
@@ -650,13 +660,23 @@ export const bookTimeslotDirect = async (timeslotData: any, sessionPassed?: Clie
         // Save the new timeslot
         await newTimeslot.save({ session });
 
+        console.log("the timeslot data:", timeslotData)
         // Adjust timeslots based on the booked time
         for (const slot of overlappingSlots) {
-            if (moment(new Date(slot.start)).isSame(moment(new Date(transitStart))) && moment(new Date(slot.end)).isSame(moment(new Date(transitEnd)))) {
-                await Timeslot.findByIdAndDelete(slot._id, { session });
-            } else if (moment(new Date(slot.start)).isBefore(moment(new Date(transitStart))) &&
+            console.log("processing slot of overlappingSlots...")
+            // if the booked slot entirely covers an existing availability, delete the existing available slot
+            if (moment(new Date(slot.start)).isSameOrAfter(moment(new Date(transitStart))) && moment(new Date(slot.end)).isSameOrBefore(moment(new Date(transitEnd)))) {
+                console.log("exact match found!", slot)
+                const exactMatchResponse = await Timeslot.findByIdAndDelete(slot._id, { session });
+                console.log("deleted the exact match:", exactMatchResponse)
+
+            }
+            // if the existing availability covers the entirety of the booking slot, cut the exiting one
+            else if (moment(new Date(slot.start)).isBefore(moment(new Date(transitStart))) &&
                 moment(new Date(slot.end)).isAfter(moment(new Date(transitEnd)))) {
-                await Timeslot.create([{
+
+                console.log("entirely covers match found!", slot)
+                const createdSeparated = await Timeslot.create([{
                     start: slot.start,
                     end: transitStart,
                     title: "available",
@@ -671,14 +691,23 @@ export const bookTimeslotDirect = async (timeslotData: any, sessionPassed?: Clie
                     createdById: slot.createdById,
                     isBooked: false
                 }], { session });
-                await Timeslot.findByIdAndDelete(slot._id, { session });
-            } else {
+                console.log("separated ones for entirely covers:", createdSeparated)
+                const deletion = await Timeslot.findByIdAndDelete(slot._id, { session });
+                console.log("deleted one of the matches:", deletion)
+
+            }
+            // if the existing availability is partially covered by the booking slot, adjust its start and end
+            else {
                 if (moment(new Date(slot.end)).isAfter(moment(new Date(transitEnd)))) {
                     slot.start = transitEnd;
+                    console.log("partial cover match found 1!", slot)
+
                 } else if (moment(new Date(slot.start)).isBefore(moment(new Date(transitStart)))) {
+                    console.log("partial cover match found 2!", slot)
                     slot.end = transitStart;
                 }
-                await slot.save({ session });
+                const finalCheck = await slot.save({ session });
+                console.log("final check", finalCheck)
             }
         }
 
