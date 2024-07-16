@@ -157,6 +157,7 @@ function GenericTable({
                         onOpen={handleStatusOpen}
                         onClose={() => setStatusOpen(false)}
                         onChange={handleChangeStatus}
+                        renderValue={(selected) => selected.join(', ')}
                         fullWidth
                     >
                         <MenuItem value="All Statuses">All Statuses (reset filter)</MenuItem>
