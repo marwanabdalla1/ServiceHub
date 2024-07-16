@@ -1,6 +1,6 @@
 import express from 'express';
 import {
-    deleteReview,
+    deleteReview, findAllReviewsToJob,
     findExistingReview,
     getAllReviewsByOffering,
     submitReview,
@@ -15,6 +15,8 @@ const router = express.Router();
 router.post('/', authenticate, submitReview); //todo: if auth is implemented first in app, no need to have it again
 
 router.get('/by-jobs/:jobId', authenticate, findExistingReview);
+router.get('/by-jobs-all/:jobId', authenticate, findAllReviewsToJob);
+
 
 router.patch('/:reviewId', authenticate, updateReview);
 
