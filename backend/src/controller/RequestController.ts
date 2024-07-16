@@ -223,8 +223,8 @@ export const getServiceRequestsByProvider: RequestHandler = async (req, res) => 
 
         const serviceRequests = await ServiceRequest.find(query)
             .populate([
-                { path: 'requestedBy', select: 'firstName lastName email profileImageId phoneNumber' },
-                { path: 'provider', select: 'firstName lastName email profileImageId phoneNumber' }
+                { path: 'requestedBy', select: 'firstName lastName email profileImageId phoneNumber address location postal country' },
+                { path: 'provider', select: 'firstName lastName email profileImageId phoneNumber address location postal country' }
             ])
             .exec();
 
@@ -283,8 +283,8 @@ export const getServiceRequestsByRequester: RequestHandler = async (req, res) =>
 
         const serviceRequests = await ServiceRequest.find(query)
             .populate([
-                { path: 'requestedBy', select: 'firstName lastName email profileImageId phoneNumber' },
-                { path: 'provider', select: 'firstName lastName email profileImageId phoneNumber' }
+                { path: 'requestedBy', select: 'firstName lastName email profileImageId phoneNumber address location postal country' },
+                { path: 'provider', select: 'firstName lastName email profileImageId phoneNumber address location postal country' }
             ])
             .exec();
 
@@ -368,8 +368,8 @@ export const getRequestById: RequestHandler = async (req, res) => {
         }
 
         const serviceRequest = await ServiceRequest.findById(requestId).populate([
-            { path: 'requestedBy', select: 'firstName lastName email profileImageId phoneNumber' },
-            { path: 'provider', select: 'firstName lastName email profileImageId phoneNumber' }
+            { path: 'requestedBy', select: 'firstName lastName email profileImageId phoneNumber address location postal country' },
+            { path: 'provider', select: 'firstName lastName email profileImageId phoneNumber address location postal country' }
         ]).exec();
 
         console.log(serviceRequest)

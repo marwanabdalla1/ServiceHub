@@ -321,11 +321,20 @@ function ReviewAndConfirm({bookingDetails, handleCancel}: ReviewAndConfirmProps)
                         />
                     </CardContent>
                 </Card>
-                <Box sx={{display: 'flex', justifyContent: 'flex-end', mt: 2}}>
-                    <Button variant="contained" color="primary" onClick={handleConfirmBooking} sx={{mr: 2}}>
+                <Box sx={{display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mt: 2}}>
+
+                    <Typography variant="body2" color="text-secondary" sx={{maxWidth: "50%",
+                        fontSize: '0.75rem',
+                        textAlign: 'right',
+                        mr: 2
+                        }}>
+                        By confirming the booking, you consent to share your contact details (email, phone number, and address) with the provider to enable the carrying out of the service.
+                    </Typography>
+                    <Button variant="contained" color="primary" onClick={handleConfirmBooking} sx={{whiteSpace: 'nowrap', mr: 2, minHeight: 'auto',
+                        maxHeight: 40,}}>
                         Confirm Booking
                     </Button>
-                    <Button variant="outlined" onClick={handleCancel}>Cancel </Button>
+                    <Button variant="outlined" onClick={handleCancel} sx={{whiteSpace: 'nowrap', maxHeight: 40}}>Cancel </Button>
                 </Box>
             </>
 

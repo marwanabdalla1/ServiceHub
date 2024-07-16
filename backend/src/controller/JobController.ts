@@ -147,8 +147,8 @@ export const getJobsByProvider: RequestHandler = async (req, res) => {
         // Fetch all jobs where the 'provider' field matches 'providerId'
         const jobs = await Job.find(query)
             .populate([
-                { path: 'receiver', select: 'firstName lastName email profileImageId phoneNumber' },
-                { path: 'provider', select: 'firstName lastName email profileImageId phoneNumber' },
+                { path: 'receiver', select: 'firstName lastName email profileImageId phoneNumber address location postal country' },
+                { path: 'provider', select: 'firstName lastName email profileImageId phoneNumber address location postal country' },
             ])
             .exec();
 
@@ -202,8 +202,8 @@ export const getJobsByRequester: RequestHandler = async (req, res) => {
 
         // Fetch all jobs where the 'receiver' field matches 'requesterId'
         const jobs = await Job.find(query).populate([
-            { path: 'receiver', select: 'firstName lastName email profileImageId phoneNumber' }, // todo: also include profile pic
-            { path: 'provider', select: 'firstName lastName email profileImageId phoneNumber' },
+            { path: 'receiver', select: 'firstName lastName email profileImageId phoneNumber address location postal country' },
+            { path: 'provider', select: 'firstName lastName email profileImageId phoneNumber address location postal country' },
         ])
             .exec();
 
@@ -284,8 +284,8 @@ export const getJobById: RequestHandler = async (req, res) => {
     try {
         // Fetch the job where the '_id' field matches 'jobId'
         const job = await Job.findById(jobId).populate([
-            { path: 'receiver', select: 'firstName lastName email profileImageId phoneNumber' }, // todo: also include profile pic
-            { path: 'provider', select: 'firstName lastName email profileImageId phoneNumber' }]).exec();
+            { path: 'receiver', select: 'firstName lastName email profileImageId phoneNumber address location postal country' },
+            { path: 'provider', select: 'firstName lastName email profileImageId phoneNumber address location postal country' }]).exec();
 
         if (!job) {
             return res.status(404).json({ message: "No job found for this ID." });
