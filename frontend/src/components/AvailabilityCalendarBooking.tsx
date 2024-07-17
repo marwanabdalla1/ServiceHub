@@ -11,19 +11,16 @@ import {
     DialogContent,
     DialogTitle,
     Box,
-    Alert,
-    LinearProgress,
-    AlertTitle
+
 } from '@mui/material';
 import axios from 'axios';
-import moment from 'moment';
 import {useAuth} from '../contexts/AuthContext';
 import {BookingDetails, useBooking} from '../contexts/BookingContext';
 import {ServiceType} from "../models/enums";
 import {Timeslot} from "../models/Timeslot";
 import {bookTimeSlot, BookingError, changeTimeSlot} from '../services/timeslotService';
-import {useNavigate} from "react-router-dom";
-import useAlert from '../hooks/useAlert'; // Adjust the path as necessary
+import useAlert from '../hooks/useAlert';
+import AlertCustomized from "./AlertCustomized"; // Adjust the path as necessary
 
 
 const locales = {
@@ -92,14 +89,6 @@ function AvailabilityCalendarBooking({
     const [nextAvailable, setNextAvailable] = useState<Date | undefined>(undefined);
 
 
-    const navigate = useNavigate();
-
-
-    // const [previewSlot, setPreviewSlot] = useState<Date | null>(null);
-    // const [previewStart, setPreviewStart] = useState<Date | null>(null);
-    // const [previewEnd, setPreviewEnd] = useState<Date| null>(null);
-
-
     const findNextAvailableSlot = (events: any[]) => {
         const now = new Date();
         const futureEvents = events.filter(event => new Date(event.start) > now);
@@ -163,89 +152,15 @@ function AvailabilityCalendarBooking({
         }
     }, [nextAvailable]);
 
-
-    // const providerId = "6670176384da135b691a27bd"
     console.log(bookingDetails);
-    // useEffect(() => {
-    //     axios.get(`/api/timeslots/${providerId}`, {
-    //         headers: {
-    //             'Authorization': `Bearer ${token}`
-    //         },
-    //         params: {transitTime:defaultTransitTime}
-    //     }).then(response => {
-    //         console.log("getting availability data from provider...", response.data)
-    //         // const events = response.data.map((event: any) => ({
-    //         //     ...event,
-    //         //     start: new Date(event.start),
-    //         //     end: new Date(event.end),
-    //         //     title: "Available",
-    //         //     isBooked: event.isBooked,
-    //         // }));
-    //         // setAvailability(events);
-    //         const events = response.data.filter((event: any) => { //filter those that are longer than the default duration
-    //             const startTime = new Date(event.start);
-    //             const endTime = new Date(event.end);
-    //             const durationInMinutes = (endTime.getTime() - startTime.getTime()) / 60000;
-    //             console.log(startTime, endTime, "duration in min:", durationInMinutes, defaultSlotDuration);
-    //             return durationInMinutes > 0 && durationInMinutes > defaultSlotDuration;
-    //         }).map((event: any) => ({
-    //             ...event,
-    //             start: new Date(event.start),
-    //             end: new Date(event.end),
-    //             title: "Available",
-    //             isBooked: event.isBooked,
-    //         }));
-    //         setAvailability(events);
-    //     }).catch(error => {
-    //         console.error("Error fetching timeslots:", error);
-    //     });
-    // }, [token]);
 
-    // const saveAvailability = () => {
-    //     console.log('Submitted token' + token)
-    //     axios.post('/api/timeslots', {
-    //         events: availability
-    //     }, {
-    //         headers: {
-    //             'Authorization': `Bearer ${token}`
-    //         }
-    //     }).then(response => {
-    //         const { insertedEvents } = response.data;
-    //         const savedEvents = insertedEvents.map((event: any) => ({
-    //             ...event,
-    //             start: new Date(event.start),
-    //             end: new Date(event.end)
-    //         }));
-    //         setAvailability(savedEvents);
-    //     }).catch(error => {
-    //         console.error("Error saving availability:", error);
-    //     });
-    // };
-
-    // const handleSelect = ({ start, end }: SlotInfo) => {
-    //     const newTimeSlot: TimeSlot = { start, end, title: Servicetype, isFixed: false, isBooked: false, createdById: '' };
-    //     const isClashing = availability.some(TimeSlot =>
-    //         (newTimeSlot.start < TimeSlot.end && newTimeSlot.end > TimeSlot.start)
-    //     );
-    //
-    //     if (isClashing) {
-    //         setClashDialogOpen(true);
-    //     } else {
-    //         let adjustedEnd = end;
-    //         if (end.getTime() - start.getTime() < defaultSlotDuration * 60000) {
-    //             adjustedEnd = new Date(start.getTime() + defaultSlotDuration * 60000);
-    //         }
-    //
-    //         const adjustedTimeSlot: TimeSlot = { start: start, end: adjustedEnd, title: Servicetype, isFixed: false, isBooked: false, createdById: '' };
-    //         setAvailability([...availability, adjustedTimeSlot]);
-    //     }
-    // };
 
     const handleNavigate = (date: Date) => {
-        if (isBefore(date, new Date())) {
-            console.log('Cannot go back past today');
-            return; // Prevent navigation to past dates
-        }
+        // todo: uncomment!
+        // if (isBefore(date, new Date())) {
+        //     console.log('Cannot go back past today');
+        //     return; // Prevent navigation to past dates
+        // }
         if (isAfter(date, maxDate)) {
             console.log('Cannot navigate beyond 3 months');
             return; // Prevent navigation beyond 3 months
@@ -266,11 +181,12 @@ function AvailabilityCalendarBooking({
             const startTime = new Date(start);
             let endTime = new Date(end);
 
-            if (startTime < now) {
-                setClashDialogOpen({open: true, message: "Cannot book a time in the past, please select another time."})
-                resetSelection()
-                return;
-            }
+            // todo: uncomment!!
+            // if (startTime < now) {
+            //     setClashDialogOpen({open: true, message: "Cannot book a time in the past, please select another time."})
+            //     resetSelection()
+            //     return;
+            // }
 
 
             // Calculate the difference in minutes
@@ -286,8 +202,6 @@ function AvailabilityCalendarBooking({
             const transitEnd = new Date(endTime.getTime() + defaultTransitTime * 60000);
 
 
-            // setSelectedTimeSlot(transitTimeSlot)
-
             // Check if the original selected time is fully within an unbooked slot
             const isWithinAvailableSlot = availability.filter(slot =>
                 !slot.isBooked &&
@@ -295,26 +209,8 @@ function AvailabilityCalendarBooking({
                 endTime <= new Date(slot.end)
             );
 
-
-            // // Gather all unbooked slots that overlap with the selected time
-            // const overlappingSlots = availability.filter(slot =>
-            //     !slot.isBooked &&
-            //     adjustedEnd >= new Date(slot.start) &&
-            //     adjustedStart <= new Date(slot.end)
-            // );
-            //
             // // Check if the combined range of these slots covers the entire requested period
             if (isWithinAvailableSlot.length > 0) {
-                // const newTimeSlot = {
-                //     start: startTime,
-                //     end: endTime,
-                //     transitStart: transitStart,
-                //     transitEnd: transitEnd,
-                //     title: `${Servicetype}`,
-                //     isFixed: false,
-                //     isBooked: true,
-                //     createdById: providerId,
-                // };
 
                 const newTimeSlot = new Timeslot(
                     `${Servicetype}`,
@@ -338,37 +234,6 @@ function AvailabilityCalendarBooking({
                 });
             }
 
-            // const transitTimeSlot = {
-            //     start: adjustedStart,
-            //     end: adjustedEnd,
-            //     title: `${Servicetype} (including transit)`,
-            //     isFixed: false,
-            //     isBooked: true,
-            //     createdById: providerId
-            // };
-            // setSelectedTimeSlotWithTransit(transitTimeSlot);
-
-
-            // // Check if there's at least one unbooked slot that can fully contain the selected time slot
-            // const isWithinAvailableSlot = availability.some(slot =>
-            //     !slot.isBooked &&
-            //     adjustedStart >= new Date(slot.start) &&
-            //     adjustedEnd <= new Date(slot.end)
-            // );
-
-            // const isAvailable = availability.every(slot => {
-            //     // Check if the slot is booked or the requested time overlaps with booked slots
-            //     return slot.isBooked === false && (adjustedEnd <= new Date(slot.start) || adjustedStart >= new Date(slot.end));
-            // });
-            //
-            // if (!isAvailable) {
-            //     setClashDialogOpen(true);
-            // } else {
-            //     const newTimeSlot: TimeSlot = { start: adjustedStart, end: adjustedEnd, title: Servicetype, isFixed: false, isBooked: true, createdById: '' };
-            //     setSelectedTimeSlot(newTimeSlot);
-            //     // Here you might call a function to update the backend
-            //     bookTimeSlot(newTimeSlot);
-            // }
         } catch (error: any) {
             console.log(error)
             return;
@@ -387,18 +252,6 @@ function AvailabilityCalendarBooking({
             console.error("no transit time included!")
         }
 
-        // Adjust times for transit time before sending to the server
-        // const start = new Date(selectedTimeSlot.start.getTime() - defaultTransitTime * 60000);
-        // const end = new Date(selectedTimeSlot.end.getTime() + defaultTransitTime * 60000);
-        //
-        // const timeSlotWithTransit = new Timeslot (selectedTimeSlot.title, start, end, false, true, undefined, selectedTimeSlot.createdById)
-        // {
-        //     ...selectedTimeSlot,
-        //     start,
-        //     end,
-        //     isBooked: true, // Now set as booked
-        //     // requestId: //todo: can only be added once the request is created
-        // };
         if (mode === "create") {
             setTimeAndDuration(selectedTimeSlot);
             onNext();
@@ -409,22 +262,15 @@ function AvailabilityCalendarBooking({
                 const timeslotResponse = await changeTimeSlot(selectedTimeSlot, token)
                 console.log("Timeslot updated", timeslotResponse);
 
-                triggerAlert("Timeslot updated successfully", "success");
-                navigate(`/confirmation/${requestId}/timeslotChange`);
+                triggerAlert("Success", "Timeslot updated successfully! You will be redirected to your requests soon...", 'success', 3000, 'dialog', 'center', `/outgoing/requests/${requestId}`);
             } catch (error: any) {
                 console.error('Error changing Timeslot booking:', error);
 
                 if (error instanceof BookingError && error.code === 409) {
-                    triggerAlert("Unfortunately, the selected timeslot is no longer available. Please select another time.", "error");
-                    // await axios.delete(`/api/requests/${requestId}`, {
-                    //     headers: {'Authorization': `Bearer ${token}`}
-                    // });
-                    // console.error('Rolled back the created request due to timeslot booking failure.');
-                    // alert('Unfortunately, the selected timeslot is no longer available. Please select another time.');
-
+                    triggerAlert('Timeslot Unavailable', "Unfortunately, the selected timeslot is no longer available. Please select another time.", "error");
                 } else {
                     // alert('An error occurred while confirming your booking. Please try again.');
-                    triggerAlert("Failed to update timeslot. Please try again later", "error");
+                    triggerAlert('Error', "Failed to update timeslot. Please try again later", "error");
                 }
             }
 
@@ -479,7 +325,7 @@ function AvailabilityCalendarBooking({
 //     }));
 //
     const handleRangeChange = (range: RangeType | undefined) => {
-        if(!range || range == undefined){
+        if (!range) {
             console.log("range undefined")
         }
         try {
@@ -525,27 +371,27 @@ function AvailabilityCalendarBooking({
                 //     // });
                 // } else {
                 //     fetchAndSetAvailability({start, end});
-                    // axios.get(`/api/timeslots/${providerId}`, {
-                    //     headers: {
-                    //         'Authorization': `Bearer ${token}`
-                    //     },
-                    //     params: {
-                    //         start: start,
-                    //         end: end,
-                    //         transitTime:defaultTransitTime
-                    //     }
-                    // }).then(response => {
-                    //     const events = response.data.map((event: any) => ({
-                    //         ...event,
-                    //         start: new Date(event.start),
-                    //         end: new Date(event.end),
-                    //         title: "Available",
-                    //         isBooked: event.isBooked,
-                    //     }));
-                    //     setAvailability(events);
-                    // }).catch(error => {
-                    //     console.error("Error fetching timeslots:", error);
-                    // });
+                // axios.get(`/api/timeslots/${providerId}`, {
+                //     headers: {
+                //         'Authorization': `Bearer ${token}`
+                //     },
+                //     params: {
+                //         start: start,
+                //         end: end,
+                //         transitTime:defaultTransitTime
+                //     }
+                // }).then(response => {
+                //     const events = response.data.map((event: any) => ({
+                //         ...event,
+                //         start: new Date(event.start),
+                //         end: new Date(event.end),
+                //         title: "Available",
+                //         isBooked: event.isBooked,
+                //     }));
+                //     setAvailability(events);
+                // }).catch(error => {
+                //     console.error("Error fetching timeslots:", error);
+                // });
                 // }
             }
         } catch (error: any) {
@@ -617,9 +463,6 @@ function AvailabilityCalendarBooking({
     //     }
     // };
 
-    const handleError = () => {
-        triggerAlert("An error occurred!", "error");
-    };
 
     const scrollToTime = new Date();
     scrollToTime.setHours(9, 0, 0, 0);
@@ -627,7 +470,7 @@ function AvailabilityCalendarBooking({
     let formats = {
         dateFormat: 'dd',
 
-        dayRangeHeaderFormat: ({ start, end }:{start: Date, end:Date}, culture:any) =>
+        dayRangeHeaderFormat: ({start, end}: { start: Date, end: Date }, culture: any) =>
             `${localizer.format(start, 'MMM dd', culture)} — ${localizer.format(end, 'MMM dd, yyyy', culture)}`, // Short format for week range "Oct 01 — Oct 07"
 
     }
@@ -637,7 +480,10 @@ function AvailabilityCalendarBooking({
         return;
     };
     return (
+
         <div>
+            <AlertCustomized alert={alert} closeAlert={closeAlert}/>
+
             <Calendar
                 defaultView='week'
                 views={['week']}
@@ -648,7 +494,7 @@ function AvailabilityCalendarBooking({
                 date={currentDate} //go to next availability
                 // onNavigate={date => setCurrentDate(date)} // Update internal state when manually navigating
                 onNavigate={handleNavigate}
-                formats = {formats}
+                formats={formats}
                 onDrillDown={handleDrillDown}
 
                 backgroundEvents={availability}
@@ -674,13 +520,6 @@ function AvailabilityCalendarBooking({
             {/*        /!*<Button onClick={handleDelete} color="secondary">Delete</Button>*!/*/}
             {/*    </DialogActions>*/}
             {/*</Dialog>*/}
-            <div>
-                {alert.open && (
-                    <Alert severity={alert.severity} onClose={closeAlert}>
-                        {alert.message}
-                    </Alert>
-                )}
-            </div>
 
             <Dialog open={clashDialogOpen.open} onClose={handleClashDialogClose}>
                 <DialogTitle>Timeslot Unavailable</DialogTitle>
