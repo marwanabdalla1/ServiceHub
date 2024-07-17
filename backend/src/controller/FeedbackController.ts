@@ -7,7 +7,7 @@ import {ERRORS} from "../helpers/authHelper";
 import PlatformFeedback from "../models/platformFeedback";//
 
 
-//This is different than the review controller, this is for the feedback form on the website
+//This is different than the review controller, this is for the feedback form for the ServiceHub Platform
 export const submitFeedback:RequestHandler = async (req, res) => {
     try {
         // Assuming `req.user` is set by the `authenticate` middleware
@@ -20,7 +20,6 @@ export const submitFeedback:RequestHandler = async (req, res) => {
 
         const feedback = {
             givenBy: user.userId,  // or any other user identifier included in the token
-            // reviewer : req.body.reviewer,
             category: req.body.category,
             content: req.body.content || "",
             rating: req.body.rating,
@@ -29,7 +28,7 @@ export const submitFeedback:RequestHandler = async (req, res) => {
 
         console.log("review Data: ", feedback)
 
-        // Save review to the database
+        // Save feedback to the database
         const savedFeedback = await PlatformFeedback.create(feedback);
 
         res.status(201).json({ message: "feedback submitted successfully!",
