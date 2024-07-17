@@ -6,6 +6,7 @@ import Account from "../models/account";
 import bcrypt from "bcrypt";
 import {format} from 'date-fns';
 import {ServiceType} from '../models/enums';
+import {formatDateTime} from "../util/dateUtils";
 
 dotenv.config();
 
@@ -48,7 +49,7 @@ const generateEmailTemplate = (firstName: string, otp: string, subject: string, 
             <br /><br />
             Please note that this OTP will only be valid for 60 seconds.
             <br /><br />
-            Please feel free to contact us in case of any issues. If you did not request this email, please reach out to our email 
+            Please feel free to contact us in case of any issues. If you did not try to sign up this email, please reach out to our email 
             <a href="servicehub.seba22@gmail.com" style="color: #007bff;">servicehub.seba22@gmail.com</a>.
             <br /><br />
             Kind regards,
@@ -161,7 +162,7 @@ export const setNewPassword: RequestHandler = async (req, res) => {
 
 const generateCancellationNotificationEmail = (firstName: string, serviceType: ServiceType, startTime: Date) => {
 
-    const formattedStartTime = format(new Date(startTime), 'PPpp');
+    const formattedStartTime = formatDateTime(new Date(startTime));
 
     return `
   <div style="font-family: Arial, sans-serif; margin: 0; padding: 0;">
@@ -180,7 +181,7 @@ const generateCancellationNotificationEmail = (firstName: string, serviceType: S
           </div>
           Thank you for understanding!
           <br /><br />
-          Please feel free to contact us in case of any issues. 
+          Please feel free to contact us in case of any issues at
             <a href="servicehub.seba22@gmail.com" style="color: #007bff;">servicehub.seba22@gmail.com</a>.
             <br /><br />
             Kind regards,
@@ -202,7 +203,7 @@ const generateCancellationConfirmationEmail = (firstName: string, serviceType: S
     <table style="max-width: 600px; margin: auto; border-collapse: collapse; border: 1px solid #ddd;">
       <tr>
         <td style="background-color: #007bff; padding: 20px; text-align: center; color: #fff; font-size: 24px; font-weight: bold;">
-          Confirmation: ${serviceType} Cancellation
+          Cancellation Confirmation: ${serviceType}
         </td>
       </tr>
       <tr>
@@ -212,7 +213,7 @@ const generateCancellationConfirmationEmail = (firstName: string, serviceType: S
           We confirm that your scheduled appointment for ${serviceType} on ${formattedStartTime} has been cancelled.
           <br /><br />
           </div>
-          Please feel free to contact us in case of any issues. 
+          Please feel free to contact us in case of any issues under the email 
             <a href="servicehub.seba22@gmail.com" style="color: #007bff;">servicehub.seba22@gmail.com</a>.
             <br /><br />
             Kind regards,
@@ -266,7 +267,7 @@ export const sendCancellationEmails = (req: Request, res: Response): void => {
 
 const generateRequestConfirmationEmail = (firstName: string, serviceType: ServiceType, startTime: Date) => {
 
-    const formattedStartTime = format(new Date(startTime), 'PPpp');
+    const formattedStartTime = formatDateTime(new Date(startTime));
 
     return `
   <div style="font-family: Arial, sans-serif; margin: 0; padding: 0;">
@@ -290,7 +291,7 @@ const generateRequestConfirmationEmail = (firstName: string, serviceType: Servic
         <br /><br />
 
           </div>
-          Please feel free to contact us in case of any issues. 
+          Please feel free to contact us in case of any issues under the email 
             <a href="servicehub.seba22@gmail.com" style="color: #007bff;">servicehub.seba22@gmail.com</a>.
             <br /><br />
             Kind regards,

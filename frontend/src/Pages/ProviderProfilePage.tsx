@@ -63,7 +63,6 @@ const formatDate = (date: Date) => {
     return format(date, 'dd MMM yyyy, HH:mm');
 };
 
-// TODO: should we use the review model instead of creating a new one?
 export interface Review {
     _id: string;
     reviewer: {
@@ -79,6 +78,8 @@ export interface Review {
     rating: number;
     content: string;
     createdAt: string;
+    updatedAt: string;
+
 }
 
 function ProviderProfilePage() {
@@ -562,7 +563,7 @@ function ProviderProfilePage() {
                                                 {review.content}
                                             </Typography>
                                             <Typography variant="body2" color="text.secondary">
-                                                Reviewed on {new Date(review.createdAt).toLocaleDateString()}
+                                                Reviewed on {new Date(review.updatedAt).toLocaleDateString()}
                                             </Typography>
                                             {/*<Box sx={{display: 'flex', justifyContent: 'space-between', mt: 2}}>*/}
                                             {/*    <Button size="small">Helpful</Button>*/}

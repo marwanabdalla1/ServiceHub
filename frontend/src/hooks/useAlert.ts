@@ -1,5 +1,5 @@
-import { useState, useCallback, useEffect } from 'react';
-import { AlertColor } from '@mui/material';
+import {useState, useCallback, useEffect} from 'react';
+import {AlertColor} from '@mui/material';
 import {useNavigate} from "react-router-dom";
 
 export interface AlertState {
@@ -33,7 +33,7 @@ function useAlert(defaultDuration: number | null) {
             setTimeoutId(null);
         }
 
-        setAlert(prev => ({ ...prev, open: false }));
+        setAlert(prev => ({...prev, open: false}));
 
 
         if (alert.redirectUrl) {
@@ -42,12 +42,14 @@ function useAlert(defaultDuration: number | null) {
             } else {
                 navigate(alert.redirectUrl);
             }
+        } else {
+            window.location.reload()
         }
 
     }, [timeoutId]);
 
-    const triggerAlert = useCallback((title: string, message: string, severity: AlertColor = 'info', duration: number = durationTimeout, type: string = 'dialog', position: string = 'center', redirectUrl?:string) => {
-        setAlert({ open: true, title, message, severity, duration, type, position, redirectUrl });
+    const triggerAlert = useCallback((title: string, message: string, severity: AlertColor = 'info', duration: number = durationTimeout, type: string = 'dialog', position: string = 'center', redirectUrl?: string) => {
+        setAlert({open: true, title, message, severity, duration, type, position, redirectUrl});
 
         const id = setTimeout(() => {
             closeAlert();
