@@ -6,9 +6,10 @@ interface LightBlueFileButtonProps {
     className?: string;
     onFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
     sx?: any; // make the Button component accepts a style prop.
+    icon?: React.ReactNode
 }
 
-function LightBlueFileButton({text, className = '', onFileChange, sx}: Readonly<LightBlueFileButtonProps>) {
+function LightBlueFileButton({text, className = '', onFileChange, sx, icon}: Readonly<LightBlueFileButtonProps>) {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleClick = () => {
@@ -17,10 +18,32 @@ function LightBlueFileButton({text, className = '', onFileChange, sx}: Readonly<
 
     return (
         <StyledButton
-            className={`bg-blue-300 text-slate-800 font-semibold text-xs px-3 py-2 rounded-full shadow hover:bg-gray-100 hover:text-black max-h-8 whitespace-nowrap ${className}`}
+            className={`bg-blue-300 sm:text-sm px-3 py-2 rounded-full ${className}`}
             onClick={handleClick}
-            sx={sx}
+            sx={{
+                ...sx,
+                size: 'small',
+                mb: 1,
+                color: 'black',
+                backgroundColor: 'white',
+                border: '1px solid black',
+                '&:hover': {
+                    backgroundColor: 'black',
+                    color: 'white',
+                    borderColor: 'white'
+                            },
+                fontSize: '13px',
+                maxHeight: 35,
+                width: '100%',
+                display: 'flex',
+                height: 'auto',
+                verticalAlign: 'top',
+                lineHeight: 'normal',
+                alignItems: 'flex-start',
+                justifyContent:'flex-start'
+            }}
         >
+            {icon}
             {text}
             <input type="file" hidden ref={fileInputRef} onChange={onFileChange}/>
         </StyledButton>
