@@ -229,6 +229,9 @@ function UserProfile(): React.ReactElement {
             try {
                 await deleteService(serviceToDelete, token, services, setServices);
                 setServices(services.filter(service => service._id !== serviceToDelete));
+                if (services.length === 0) {
+                    window.location.reload();
+                }
             } catch (error) {
                 console.error('Error deleting service:', error);
             } finally {
