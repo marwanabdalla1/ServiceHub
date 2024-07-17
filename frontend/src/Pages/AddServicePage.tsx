@@ -210,7 +210,7 @@ function AddServicePage() {
                 setIsLoading(false);
                 if (isEditMode) {
                     navigate('/setprofile');
-                } else if (response.status === 201) {
+                } else {
                     navigate('/select-availability', { state: { inAddServiceSteps: true } });
                 }
             } catch (error: any) {
