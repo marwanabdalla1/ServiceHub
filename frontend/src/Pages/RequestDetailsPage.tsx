@@ -1,8 +1,7 @@
-// src/components/JobDetailsPage.tsx
-import React, {useEffect, useState} from 'react';
-import {useLocation, useNavigate, useParams} from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-import {Job} from '../models/Job';
+import { Job } from '../models/Job';
 import {
     Container,
     Typography,
@@ -14,17 +13,14 @@ import {
     Button,
     Dialog, CircularProgress
 } from '@mui/material';
-import {useAuth} from '../contexts/AuthContext';
-import {Review} from "../models/Review"; // Assuming you have a component to list reviews
+import { useAuth } from '../contexts/AuthContext';
+import { Review } from "../models/Review";
 import GenericProviderCard from "../components/tableComponents/GenericProviderCard";
 import GenericConsumerCard from "../components/tableComponents/GenericConsumerCard";
-import {handleAccept, handleCancel, handleDecline, handleTimeChange} from "../utils/requestHandler";
-import {ServiceRequest} from "../models/ServiceRequest";
+import { handleAccept, handleCancel, handleDecline, handleTimeChange } from "../utils/requestHandler";
+import { ServiceRequest } from "../models/ServiceRequest";
 import useAlert from "../hooks/useAlert";
 import AlertCustomized from "../components/AlertCustomized";
-
-import useErrorHandler from '../hooks/useErrorHandler';
-import ErrorPage from "./ErrorPage";
 
 // Define the props interface
 interface RequestDetailsPageProps {
@@ -32,63 +28,39 @@ interface RequestDetailsPageProps {
 
 type Item = ServiceRequest | Job;
 
-
-// tood: modify this
 const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
-    const {requestId} = useParams<{ requestId: string }>();
+    const { requestId } = useParams<{ requestId: string }>();
     const [request, setRequest] = useState<ServiceRequest | null>(null);
-    const {token, account} = useAuth();
+    const { token, account } = useAuth();
     const [reviews, setReviews] = useState<Review[]>([]);
-
-    const {error, setError, handleError} = useErrorHandler();
 
     const [role, setRole] = useState<string | undefined>(undefined)
 
-    // for time change
     const [timeChangePopUp, setTimeChangePopUp] = useState(false);
     const [comment, setComment] = useState('');
 
     const [loading, setLoading] = useState(true);
 
-    const {alert, triggerAlert, closeAlert} = useAlert(3000);
-
+    const { alert, triggerAlert, closeAlert } = useAlert(3000);
 
     const navigate = useNavigate();
     const location = useLocation();
 
     const [redirectPath, setRedirectPath] = useState(() => location.state?.redirectPath || undefined);
 
-
     useEffect(() => {
         setLoading(true);
         const fetchRequest = async () => {
-            try {
+            const response = await axios.get<ServiceRequest>(`/api/requests/${requestId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
 
-                const response = await axios.get<ServiceRequest>(`/api/requests/${requestId}`, {
-                    headers: {Authorization: `Bearer ${token}`},
-                });
+            setRequest(response.data);
+            setLoading(false);
 
-                console.log("request data,", response.data)
-
-                setRequest(response.data);
-                setLoading(false);
-                //
-
-                console.log(response)
-                if (!response) {
-                    setError({title: '404 Not Found', message: 'The request you\'re looking for cannot be found.'});
-                    return;
-                }
-
-                // // Fetch reviews for the request
-                // const reviewsResponse = await axios.get<Review[]>(`/api/reviews/job/${requestId}`, {
-                //     headers: { Authorization: `Bearer ${token}` },
-                // });
-                // setReviews(reviewsResponse.data);
-            } catch (err: any) {
-                setLoading(false)
-                console.error('Failed to fetch request details:', err);
-                handleError(err)
+            if (!response) {
+                navigate("/not-found");
+                return;
             }
         };
 
@@ -98,7 +70,6 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
     }, [requestId, token, account]);
 
     useEffect(() => {
-        // Adjust paths based on role
         if (request) {
             const isProvider = account?._id === request.provider._id;
             const isConsumer = account?._id === request.requestedBy._id;
@@ -119,155 +90,85 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
                     setRedirectPath('/outgoing');
                 }
             } else {
-                // If neither, navigate to unauthorized
                 navigate("/unauthorized");
             }
         }
-
     }, [request, account, token]);
-
-    // unmount
-    useEffect(() => {
-        return () => {
-            setError(null);
-        };
-    }, []);
-
-    if (error) {
-        console.log("youre in iferror", error)
-        return <ErrorPage title={error.title} message={error.message}/>
-    }
 
     if (!request) {
         if (loading) {
             return (
                 <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
-                    <CircularProgress/>
+                    <CircularProgress />
                 </Box>
-            )
+            );
         } else {
-            console.log("error")
-            return <ErrorPage title={"404 Not Found"} message={'The request you\'re looking for cannot be found.'}/>
+            return <div>Request not found</div>;
         }
     }
 
-
-    // Authorization check
-    // if ((role === "provider" && account?._id !== request.provider._id) ||
-    //     (role === "consumer" && account?._id !== request.requestedBy._id)) {
-    //     // You could alternatively redirect to a different page or display a modal
-    //     navigate("/unauthorized")
-    // }
-
     const onCancel = async () => {
-        if (!request) {
-            console.error('No request selected');
-            return;
-        }
+        if (!request) return;
 
-
-        try{
-            await handleCancel({
-                selectedRequest: request,
-                serviceRequests: [],
-                setServiceRequests: null,
-                token: token,
-                setShowMediaCard: () => {
-                },
-            });
-            window.location.reload();
-        }
-        catch (error) {
-            console.error('Error accepting request:', error);
-            // Handle error appropriately if needed
-        }
-
+        await handleCancel({
+            selectedRequest: request,
+            serviceRequests: [],
+            setServiceRequests: null,
+            token: token,
+            setShowMediaCard: () => { },
+        });
+        window.location.reload();
     };
 
-    const onDecline = async() => {
-        if (!request) {
-            console.error('No request selected');
-            return;
-        }
-        try{
-            await handleDecline({
-                selectedRequest: request,
-                serviceRequests: [],
-                setServiceRequests: null,
-                token: token,
-                setShowMediaCard: () => {
-                },
-            });
+    const onDecline = async () => {
+        if (!request) return;
 
-            window.location.reload();
-        }
-        catch (error) {
-            console.error('Error accepting request:', error);
-            // Handle error appropriately if needed
-        }
-
-
+        await handleDecline({
+            selectedRequest: request,
+            serviceRequests: [],
+            setServiceRequests: null,
+            token: token,
+            setShowMediaCard: () => { },
+        });
+        window.location.reload();
     };
 
-    const onAccept = async() => {
-        console.log("accepting in progress...", request)
-        if (!request) {
-            console.error('No request selected');
-            return;
-        }
-        try {
-            await handleAccept({
-                selectedRequest: request,
-                serviceRequests: [],
-                setServiceRequests: null,
-                token: token,
-                setShowMediaCard: () => {
-                },
-            });
-            window.location.reload();
-        } catch (error) {
-            console.error('Error accepting request:', error);
-            // Handle error appropriately if needed
-        }
+    const onAccept = async () => {
+        if (!request) return;
 
+        await handleAccept({
+            selectedRequest: request,
+            serviceRequests: [],
+            setServiceRequests: null,
+            token: token,
+            setShowMediaCard: () => { },
+        });
+        window.location.reload();
     };
 
-    const onTimeChange = async() => {
-        if (!request) {
-            console.error('No request selected');
-            return;
-        }
-        try {
-            await handleTimeChange({
-                selectedRequest: request,
-                serviceRequests: [],
-                setServiceRequests: null,
-                token: token,
-                setShowMediaCard: () => {
-                },
-                comment,
-                setTimeChangePopUp,
-                navigate
-            });
-            window.location.reload();
+    const onTimeChange = async () => {
+        if (!request) return;
 
-        } catch (error) {
-            console.error('Error accepting request:', error);
-            // Handle error appropriately if needed
-        }
-
+        await handleTimeChange({
+            selectedRequest: request,
+            serviceRequests: [],
+            setServiceRequests: null,
+            token: token,
+            setShowMediaCard: () => { },
+            comment,
+            setTimeChangePopUp,
+            navigate
+        });
+        window.location.reload();
     };
-
 
     const providerProps = {
         item: request,
         provider: request?.provider,
         receiver: request?.requestedBy,
-        onClose: () => {
-        },
+        onClose: () => { },
         inDetailPage: true,
         redirectPath: redirectPath,
-
         actions: {
             accept: onAccept,
             cancelRequest: onCancel,
@@ -280,8 +181,7 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
         item: request,
         provider: request?.provider,
         receiver: request?.requestedBy,
-        onClose: () => {
-        },
+        onClose: () => { },
         inDetailPage: true,
         redirectPath: redirectPath,
         actions: {
@@ -289,19 +189,14 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
         }
     };
 
-
     const CardComponent = role === "provider" ? GenericProviderCard : GenericConsumerCard;
     const cardProps = role === "provider" ? providerProps : consumerProps;
 
-    // @ts-ignore
-    // @ts-ignore
     return (
         <Container>
             <div>
-                {/*<button onClick={handleAction}>Do Something</button>*/}
-                <AlertCustomized alert={alert} closeAlert={closeAlert}/>
+                <AlertCustomized alert={alert} closeAlert={closeAlert} />
             </div>
-
 
             <Dialog open={timeChangePopUp} onClose={() => setTimeChangePopUp(false)}>
                 <DialogTitle>Request Time Slot Update</DialogTitle>
@@ -327,12 +222,11 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
                 </DialogActions>
             </Dialog>
 
-            <Box sx={{mt: 4}}>
+            <Box sx={{ mt: 4 }}>
                 <Typography variant="h4" gutterBottom>
                     {request?.serviceType} Request Details
                 </Typography>
                 <CardComponent {...cardProps} />
-
             </Box>
         </Container>
     );
