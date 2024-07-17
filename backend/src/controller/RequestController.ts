@@ -358,6 +358,7 @@ export const handleChangeTimeslot: RequestHandler = async (req, res, next) => {
                 strict: true
             });
             console.log("updated request after changing time:", updatedRequest)
+            res.status(200).json(updatedRequest)
         }
 
     } catch (error) {
