@@ -1,7 +1,7 @@
-import React, {useEffect, useState} from 'react';
-import {useLocation, useNavigate, useParams} from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-import {Job} from '../models/Job';
+import { Job } from '../models/Job';
 import {
     Container,
     Typography,
@@ -111,31 +111,6 @@ function RequestDetailsPage() {
         }
     }, [requestId, token, account]);
 
-    // useEffect(() => {
-    //     if (request) {
-    //         const isProvider = account?._id === request.provider._id;
-    //         const isConsumer = account?._id === request.requestedBy._id;
-    //
-    //         const pathIncludesIncoming = location.pathname.includes("incoming");
-    //         const pathIncludesOutgoing = location.pathname.includes("outgoing");
-    //
-    //         if ((pathIncludesIncoming && !isProvider) || (pathIncludesOutgoing && !isConsumer)) {
-    //             navigate("/unauthorized");
-    //         } else if (isProvider) {
-    //             setRole("provider");
-    //             if (!redirectPath) {
-    //                 setRedirectPath('/incoming');
-    //             }
-    //         } else if (isConsumer) {
-    //             setRole("consumer");
-    //             if (!redirectPath) {
-    //                 setRedirectPath('/outgoing');
-    //             }
-    //         } else {
-    //             navigate("/unauthorized");
-    //         }
-    //     }
-    // }, [request, account, token]);
 
     if (!request) {
         if (loading) {
@@ -145,8 +120,6 @@ function RequestDetailsPage() {
                 </Box>
             );
         } else {
-            // navigate("/not-found")
-            // return;
             return <ErrorPage title={"404 Not Found"} message={'The page you are looking for does not exist.'}/>;
         }
     }
@@ -159,8 +132,8 @@ function RequestDetailsPage() {
             serviceRequests: [],
             setServiceRequests: null,
             token: token,
-            setShowMediaCard: () => {
-            },
+            setShowMediaCard: () => { },
+            triggerAlert: triggerAlert,
         });
         window.location.reload();
     };
@@ -173,8 +146,8 @@ function RequestDetailsPage() {
             serviceRequests: [],
             setServiceRequests: null,
             token: token,
-            setShowMediaCard: () => {
-            },
+            setShowMediaCard: () => { },
+            triggerAlert: triggerAlert,
         });
         window.location.reload();
     };
@@ -187,8 +160,8 @@ function RequestDetailsPage() {
             serviceRequests: [],
             setServiceRequests: null,
             token: token,
-            setShowMediaCard: () => {
-            },
+            setShowMediaCard: () => { },
+            triggerAlert: triggerAlert,
         });
         window.location.reload();
     };
@@ -201,11 +174,12 @@ function RequestDetailsPage() {
             serviceRequests: [],
             setServiceRequests: null,
             token: token,
-            setShowMediaCard: () => {
-            },
+            setShowMediaCard: () => { },
             comment,
             setTimeChangePopUp,
-            navigate
+            navigate,
+            triggerAlert: triggerAlert,
+
         });
         window.location.reload();
     };
@@ -214,8 +188,7 @@ function RequestDetailsPage() {
         item: request,
         provider: request?.provider,
         receiver: request?.requestedBy,
-        onClose: () => {
-        },
+        onClose: () => { },
         inDetailPage: true,
         redirectPath: redirectPath,
         actions: {
@@ -230,8 +203,7 @@ function RequestDetailsPage() {
         item: request,
         provider: request?.provider,
         receiver: request?.requestedBy,
-        onClose: () => {
-        },
+        onClose: () => { },
         inDetailPage: true,
         redirectPath: redirectPath,
         actions: {
@@ -272,7 +244,7 @@ function RequestDetailsPage() {
                 </DialogActions>
             </Dialog>
 
-            <Box sx={{mt: 4}}>
+            <Box sx={{ mt: 4 }}>
                 <Typography variant="h4" gutterBottom>
                     {request?.serviceType} Request Details
                 </Typography>
@@ -280,6 +252,6 @@ function RequestDetailsPage() {
             </Box>
         </Container>
     );
-}
+};
 
 export default RequestDetailsPage;

@@ -1,11 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import {Tabs, Tab, Box, Container} from '@mui/material';
-import IncomingRequestsTable from './IncomingRequestsPage';
-import OfferedServicesTable from './OfferedServicesPage';
 import {useNavigate, useLocation, Outlet} from "react-router-dom";
-import AlertCustomized from "../../components/AlertCustomized";
-import useAlert from "../../hooks/useAlert";
 
+// combined page for the outgoing requests and received jobs table
 function CombinedOutgoingPage() {
     const [selectedTab, setSelectedTab] = useState(0);
     const navigate = useNavigate();
@@ -22,6 +19,7 @@ function CombinedOutgoingPage() {
         }
     }, [location.pathname]);
 
+    // go to corresponding table when changing tabs
     const handleChange = (event: any, newValue: any) => {
         setSelectedTab(newValue);
 
@@ -34,19 +32,9 @@ function CombinedOutgoingPage() {
 
     return (
 
-        // <Container sx={{ p: 0, m: 1 }}>
         <div style={{display: 'flex', width: '100%', overflow: 'hidden'}}>
-                <Box sx={{
-                    width: '180px',
-                    flexShrink: 0,
-                    overflowY: 'hidden',
-                    position: 'sticky',
-                    borderRight: 0,
-                    borderColor: 'divider',
-                    paddingTop: 3,
-                    paddingLeft: 2
-                }}>
-                    <Tabs
+            <Box sx={{width: '15%', minWidth: '100px', position: 'fixed', flexShrink: 0.5, height:'100vh', overflowY:'hidden', borderRight: 0, borderColor: 'divider', paddingTop: 3, paddingLeft: 2}}>
+            <Tabs
                         orientation="vertical"
                         variant="scrollable"
                         value={selectedTab}
@@ -62,12 +50,15 @@ function CombinedOutgoingPage() {
                         <Tab label="Services (Jobs) Received"/>
                     </Tabs>
                 </Box>
-                <Box sx={{flex: 1, p: 1, overflowY: 'hidden'}}>
-                    {/*    {selectedTab === 0 && <IncomingRequestsTable/>}*/}
-                    {/*    {selectedTab === 1 && <OfferedServicesTable/>}*/}
+            <Box sx={{
+                flex: 1,
+                p: 1,
+                ml: '15%',
+                overflowY: 'hidden', //for independent vertical scrolling
+            }}>
+                    {/*display the corresponding table*/}
                     <Outlet/>
                 </Box>
-            {/*</Container>*/}
         </div>
     );
 }

@@ -1,11 +1,11 @@
 import React, {useEffect, useState} from 'react';
 import {Card, CardContent, Typography, Box} from '@mui/material';
-import {Timeslot} from "../models/Timeslot";
-import {Account} from "../models/Account";
-import {ServiceOffering} from "../models/ServiceOffering";
+import {Timeslot} from "../../models/Timeslot";
+import {Account} from "../../models/Account";
+import {ServiceOffering} from "../../models/ServiceOffering";
 import Avatar from "@mui/material/Avatar";
-import {defaultProfileImage, fetchProfileImageById} from "../services/fetchProfileImage";
-import {formatDateTime} from "../utils/dateUtils";
+import {defaultProfileImage, fetchProfileImageById} from "../../services/fetchProfileImage";
+import {formatDateTime} from "../../utils/dateUtils";
 
 interface BookingSideCardProps {
     provider?: Account;
@@ -14,6 +14,7 @@ interface BookingSideCardProps {
     price?: number;
 }
 
+// the sidecard throughout the booking steps
 const BookingSideCard: React.FC<BookingSideCardProps> = ({
                                                              provider,
                                                              timeSlot,
@@ -75,21 +76,6 @@ const BookingSideCard: React.FC<BookingSideCardProps> = ({
                             </>
                         )}
                     </div>
-                    {/*<Typography variant="body2" color="text.secondary">Location: {provider?.location}</Typography>*/}
-
-                    {/*{timeSlot && timeSlot.start && (*/}
-                    {/*    <Typography variant="body2" color="text.secondary">*/}
-                    {/*        Time:*/}
-                    {/*       {formatDateTime(timeSlot.start)}*/}
-                    {/*    </Typography>*/}
-                    {/*)}*/}
-                    {/*{serviceOffering && (*/}
-                    {/*    <Typography variant="body2"*/}
-                    {/*                color="text.secondary">Service provided: {serviceOffering.serviceType}</Typography>*/}
-                    {/*)}*/}
-                    {/*{price && (*/}
-                    {/*    <Typography variant="body2" color="text.secondary">Hourly rate: €{price} per hour</Typography>*/}
-                    {/*)}*/}
                 </Box>
             </CardContent>
         </Card>

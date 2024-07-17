@@ -6,7 +6,7 @@ import StepThree from '../components/bookingSteps/UpdateProfile';
 import StepFour from '../components/bookingSteps/ReviewAndConfirm';
 import {useNavigate, useParams} from 'react-router-dom';
 import {Stepper, Step, StepLabel, Button, Box, Container, Grid} from '@mui/material';
-import BookingSideCard from "../components/BookingSideCard";
+import BookingSideCard from "../components/bookingSteps/BookingSideCard";
 
 const BookingPage = () => {
     const {offeringId, step: stepParam} = useParams<{ offeringId: string; step?: string }>();
@@ -61,8 +61,6 @@ const BookingPage = () => {
         console.log("back step clicked!", index, step)
         if (index < step) { // Only allow navigation to previous steps
             setStep(index + 1);
-            // currentStep(index+1)
-            // navigate(`/offerings/${offeringId}/booking/step${index + 1}`);
         }
     };
 
@@ -80,7 +78,6 @@ const BookingPage = () => {
     };
 
     const currentStep = () => {
-        // console.log("go to step:", gotoStep)
         switch (step) {
             case 1:
                 return <StepOne onNext={nextStep} bookingDetails={bookingDetails}/>;
@@ -116,10 +113,7 @@ const BookingPage = () => {
                                 </Step>
                             ))}
                         </Stepper>
-                        {/*<Button onClick={previousStep}>Back</Button>*/}
-                        {/*<Box sx={{mt: '5'}}>*/}
                         {currentStep()}
-                        {/*</Box>*/}
 
                     </Box>
                 </Grid>

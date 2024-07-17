@@ -194,6 +194,14 @@ const generateCancellationNotificationEmail = (firstName: string, serviceType: S
 `;
 };
 
+
+/**
+ *
+ * @param firstName
+ * @param serviceType
+ * @param startTime
+ */
+
 const generateCancellationConfirmationEmail = (firstName: string, serviceType: ServiceType, startTime: Date) => {
 
     const formattedStartTime = format(new Date(startTime), 'PPpp');

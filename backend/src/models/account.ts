@@ -7,7 +7,6 @@ export interface IAccount extends Document {
     password: string;
     phoneNumber: string;
     address: string;
-    createdOn: Date;
     profileImageId: string;
     description: string;
     location: string;
@@ -17,9 +16,7 @@ export interface IAccount extends Document {
     isPremium: boolean;
     isAdmin: boolean;
     stripeId?: string;
-    serviceOfferings: Types.ObjectId[]; // Reference to ServiceOffering documents
-    availability: Types.ObjectId[];
-    reviews: Types.ObjectId[];
+    serviceOfferings: Types.ObjectId[];
     notifications: Types.ObjectId[];
     requestHistory: Types.ObjectId[];
     jobHistory: Types.ObjectId[];
@@ -35,7 +32,6 @@ const accountSchema: Schema = new Schema({
     postal: { type: String, required: false },
     country: { type: String, required: false },
     stripeId: { type: String, required: false },
-    createdOn: { type: Date, required: false, default: Date.now },
     profileImageId: String,
     description: String,
     location: String,
@@ -43,8 +39,6 @@ const accountSchema: Schema = new Schema({
     isPremium: Boolean,
     isAdmin: Boolean,
     serviceOfferings: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ServiceOffering' }],
-    availability: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Availability' }],
-    reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Review' }],
     notifications: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Notification' }],
     requestHistory: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ServiceRequest' }],
     jobHistory: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Job' }],

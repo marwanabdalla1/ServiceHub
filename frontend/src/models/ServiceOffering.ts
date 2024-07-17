@@ -5,8 +5,8 @@ import { Review } from "./Review";
 export class ServiceOffering {
     _id: string;
     serviceType: ServiceType;
-    lastUpdatedOn: Date;
-    createdOn: Date;
+    updatedAt: Date;
+    createdAt: Date;
     certificate: File | null;
     hourlyRate: number;
     description: string;
@@ -21,13 +21,13 @@ export class ServiceOffering {
     rating: number;
 
 
-    constructor(serviceOfferingId: string, serviceType: ServiceType, lastUpdatedOn: Date, createdOn: Date,
+    constructor(serviceOfferingId: string, serviceType: ServiceType, updatedAt: Date, createdAt: Date,
         certificate: File | null, hourlyRate: number, description: string, isCertified: boolean, location: string,
         provider: Account, baseDuration: number, bufferTimeDuration: number, reviews: Review[], acceptedPaymentMethods: string[], reviewCount: number, rating: number) {
         this._id = serviceOfferingId;
         this.serviceType = serviceType;
-        this.lastUpdatedOn = lastUpdatedOn;
-        this.createdOn = createdOn;
+        this.updatedAt = updatedAt;
+        this.createdAt = createdAt;
         this.certificate = certificate;
         this.hourlyRate = hourlyRate;
         this.description = description;

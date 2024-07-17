@@ -4,7 +4,7 @@ import {Container, Box, Typography, Card, CardContent, TextField, Button, Grid, 
 import {useBooking, BookingDetails} from '../../contexts/BookingContext';
 import axios from "axios";
 import {useAuth} from "../../contexts/AuthContext";
-import BookingSideCard from "../../components/BookingSideCard";
+import BookingSideCard from "./BookingSideCard";
 import {GERMAN_CITIES_SUPPORT} from "../../shared/Constants";
 import {checkEmptyFields} from "../../validators/GeneralValidator";
 import {isValidEmail, isValidName, isValidPhoneNumber, isValidPostalCode} from "../../validators/AccountDataValidator";

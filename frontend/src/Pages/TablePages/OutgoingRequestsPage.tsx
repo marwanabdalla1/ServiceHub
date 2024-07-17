@@ -21,9 +21,12 @@ import {
     DialogActions
 } from "@mui/material";
 import GenericTable from "../../components/tableComponents/GenericTable";
+import useAlert from "../../hooks/useAlert";
+import AlertCustomized from "../../components/AlertCustomized";
 
 type Item = ServiceRequest | Job;
 
+// requests that were sent as by the consumer
 export default function RequestHistoryTable() {
     const [showMediaCard, setShowMediaCard] = React.useState(false);
     const [selectedRequest, setSelectedRequest] = React.useState<ServiceRequest | null>(null);
@@ -35,12 +38,13 @@ export default function RequestHistoryTable() {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
 
+    const {alert, triggerAlert, closeAlert} = useAlert(10000000);
+
     const statusOptions = ['All Statuses', 'Pending', 'Action Needed from Requester', 'Cancelled', 'Declined']; //exclude accepted
     const [statusFilter, setStatusFilter] = useState(['All Statuses']);
     const [serviceTypeFilter, setServiceTypeFilter] = useState(["All Types"]);
 
     useEffect(() => {
-        console.log(token)
         if (token && account) {
             const fetchServiceRequests = async () => {
                 try {
@@ -69,7 +73,6 @@ export default function RequestHistoryTable() {
                     setServiceRequests(response.data.data);
                     setTotal(response.data.total);
                 } catch (error) {
-                    console.error('Failed to fetch service requests:', error);
                     setServiceRequests([]);
                 }
             };
@@ -79,14 +82,12 @@ export default function RequestHistoryTable() {
     }, [account, token, page, rowsPerPage, statusFilter, serviceTypeFilter]);
 
     const handleToggleMediaCard = (req: Item | null) => {
-        console.log("toggle media card", showMediaCard)
         if (req && ((req as ServiceRequest).provider === null || (req as ServiceRequest).serviceOffering === null)) {
             setDialogOpen(true);
             return;
         }
         setSelectedRequest(req as ServiceRequest);
         setShowMediaCard(req !== null);
-        console.log("toggle media card after", showMediaCard)
 
     };
 
@@ -94,7 +95,6 @@ export default function RequestHistoryTable() {
 
     const onCancel = () => {
         if (!selectedRequest) {
-            console.error('No request selected');
             return;
         }
         handleCancel({
@@ -104,6 +104,7 @@ export default function RequestHistoryTable() {
             token,
             account,
             setShowMediaCard,
+            triggerAlert,
         });
     };
 
@@ -113,6 +114,7 @@ export default function RequestHistoryTable() {
 
     return (
         <div style={{display: 'flex', flexDirection: 'row', width: '100%', position: 'relative'}}>
+            <AlertCustomized alert={alert} closeAlert={closeAlert}/>
             <Box sx={{minWidth: 275, margin: 2, width: '100%'}}>
                     <Box>
                         <Typography variant="h6" component="div" sx={{marginBottom: '10px'}}>

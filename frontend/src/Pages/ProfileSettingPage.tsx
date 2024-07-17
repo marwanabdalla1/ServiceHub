@@ -131,6 +131,7 @@ function UserProfile(): React.ReactElement {
                 return;
             }
 
+            // set breakpoint to determine which section we are in
             const breakpoint = window.innerHeight * 0.4;
 
             const profileRect = profileRef.current.getBoundingClientRect();
@@ -298,6 +299,7 @@ function UserProfile(): React.ReactElement {
 
         if (elementRef && elementRef.current) {
             const navbarHeight = 180;
+            // leave some space on top due to navbar
             const elementTop = elementRef.current.getBoundingClientRect().top + window.scrollY - navbarHeight;
 
             window.scrollTo({
@@ -388,6 +390,8 @@ function UserProfile(): React.ReactElement {
             flexDirection: 'row',
             justifyContent: 'space-between'
         }}>
+
+            {/*left side: section navigation*/}
             <List sx={{width: '200px', maxWidth: '20%', mr: '2%', ml: '2%', mt: 5, position: 'fixed'}}>
                 <ListItem>
                     <ListItemButton selected={activeSection === 'profile'}
@@ -434,6 +438,7 @@ function UserProfile(): React.ReactElement {
                 </ListItem>
             </List>
 
+            {/*middle part: profile settings*/}
             <Box component="main"
                  sx={{flex: '1 1 100%', ml: '20%', minWidth: '70%', maxWidth: '75%', mr: "18%", overflowY: 'auto'}}>
 
@@ -709,6 +714,7 @@ function UserProfile(): React.ReactElement {
                 </Paper>
             </Box>
 
+            {/*right part: FAQ card*/}
             <Card sx={{
                 maxWidth: '15%',
                 mt: 10,

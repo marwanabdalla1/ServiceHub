@@ -71,11 +71,11 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
         setOpenDialog(false);
     };
 
-
+    // check if the logged in account is the reviewr
     const isReviewer = account && account?._id.toString() === reviewer?._id.toString();
 
+    // submitting (either new or updated) review
     const handleSubmit = async () => {
-        console.log("review data: ", review)
 
         if (!token) {
             triggerAlert('Error', 'You are not logged in.', 'error');
@@ -96,7 +96,6 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
             recipient: recipient?._id,
         };
 
-        console.log("review data", reviewData)
 
         // POST/patch
         try {
@@ -107,11 +106,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
             triggerAlert(reviewString, '', 'success', 3000, 'dialog', 'center', window.location.pathname.toString())
 
             setIsEditing(false);
-            // setTimeout(() => {
-            //     window.location.reload();
-            // }, 3100); // Delay reloading
         } catch (error) {
-            console.error('Failed to submit review:', error);
             triggerAlert('Failed to submit review.', 'An error occured. Please try again later', 'error', 5000, 'dialog', 'center', `/customer-review/${job._id}`);
         }
     };
@@ -122,13 +117,13 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
 
     const handleCancel = () => {
         setIsEditing(false);
-        console.log("location:", window.location)
         if (!review) {
             //
             onReviewUpdated()
         }
     };
 
+    // delete existing review
     const handleDelete = async () => {
         if (!review?._id) return;
         try {
@@ -136,12 +131,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
                 headers: {Authorization: `Bearer ${token}`}
             });
             triggerAlert('Review deleted successfully!', '', 'success', 3000, 'dialog', 'center', window.location.pathname.toString());
-
-            // alert('Review deleted successfully!');
-            // navigate('/jobs/offeredServices');  // Redirect or update local state
         } catch (error) {
-            console.error('Failed to delete review:', error);
-            // alert('Failed to delete review.');
             triggerAlert('Failed to delete review.', 'Please try again later', 'error', 5000);
 
         } finally {
@@ -153,7 +143,6 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
     return (
         <Card sx={{display: 'flex-start', ml: 2, border: '1px solid', borderColor: 'grey.300'}}>
             <div>
-                {/*<button onClick={handleAction}>Do Something</button>*/}
                 <AlertCustomized alert={alert} closeAlert={closeAlert}/>
             </div>
 
@@ -179,6 +168,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
                 </DialogActions>
             </Dialog>
 
+            {/*display the text field when i am editing my review*/}
             {isReviewer && isEditing ? (
                 <>
                     <CardContent>
@@ -217,8 +207,6 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
                                     height: 56,
                                     mr: 2
                                 }}
-
-                                /*todo: also need to include their profile when GET (in controller)*/
                                 src={profileImage ? profileImage || undefined : defaultProfileImage}
                             />
                             <Box>
@@ -233,6 +221,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
                         <Rating name="read-only" value={review?.rating} readOnly/>
                         <Typography variant="body1">{review?.content}</Typography>
                     </CardContent>
+                    {/*revier can edit and delete*/}
                     {isReviewer && (
                         <CardContent>
                             <Button onClick={handleEdit} variant="outlined" color="primary" sx={{mr: 3}}>

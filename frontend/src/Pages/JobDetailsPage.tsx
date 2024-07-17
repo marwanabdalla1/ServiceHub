@@ -63,6 +63,7 @@ const JobDetailsPage = () => {
             const fetchJob = async () => {
                 try {
 
+                    // fetch the jobs with their corresponding timeslot
                     const response = await axios.get<Job>(`/api/jobs/${jobId}`, {
                         headers: {Authorization: `Bearer ${token}`},
                     });
@@ -71,10 +72,9 @@ const JobDetailsPage = () => {
                         navigate("/not-found");
                         return;
                     }
-                    console.log("job data with timeslot,", response.data)
                     const jobData = response.data;
 
-                    // determine the role
+                    // determine the role of the user
                     if (account && jobData) {
                         const isProvider = account?._id.toString() === jobData.provider._id.toString();
                         const isConsumer = account?._id.toString() === jobData.receiver._id.toString();
@@ -102,7 +102,6 @@ const JobDetailsPage = () => {
                         }
 
                         setJob(jobData);
-
 
 
                         // get the reviews
@@ -164,44 +163,6 @@ const JobDetailsPage = () => {
             }
         }, [jobId, token, account]);
 
-        //
-        // useEffect(() => {
-        //     // Adjust paths based on role
-        //     if (job) {
-        //         const isProvider = account?._id.toString() === job.provider._id.toString();
-        //         const isConsumer = account?._id.toString() === job.receiver._id.toString();
-        //
-        //         const pathIncludesIncoming = location.pathname.includes("incoming");
-        //         const pathIncludesOutgoing = location.pathname.includes("outgoing");
-        //
-        //         if ((pathIncludesIncoming && !isProvider) || (pathIncludesOutgoing && !isConsumer)) {
-        //             navigate("/unauthorized");
-        //         } else if (isProvider) {
-        //             setRole("provider");
-        //             setOtherParty(job.receiver);
-        //             if (!redirectPath) {
-        //                 setRedirectPath('/incoming/jobs');
-        //             }
-        //         } else if (isConsumer) {
-        //             setRole("consumer");
-        //             setOtherParty(job.provider);
-        //             if (!redirectPath) {
-        //                 setRedirectPath('/outgoing/jobs');
-        //             }
-        //         } else {
-        //             // If neither, navigate to unauthorized
-        //             navigate("/unauthorized");
-        //         }
-        //     }
-        // }, [job, account, token])
-
-        // unmount
-        // useEffect(() => {
-        //
-        //     return () => {
-        //         setError(null)
-        //     };
-        // }, []);
 
         if (!job) {
             if (loading) {
@@ -211,18 +172,9 @@ const JobDetailsPage = () => {
                     </Box>
                 )
             } else {
-                console.log("error")
-                // navigate("/not-found")
                 return <ErrorPage title={"404 Not Found"} message={'The page you are looking for does not exist.'}/>;
-                // return <ErrorPage title={"404 Not Found"} message={'The job you\'re looking for cannot be found.'}/>
             }
         }
-        // // Authorization check
-        // if ((role === "provider" && account?._id !== job.provider._id) ||
-        //     (role === "consumer" && account?._id !== job.receiver._id)) {
-        //     navigate("/unauthorized")
-        // }
-
 
         const handleToggleNewReview = () => {
             setShowNewReview(!showNewReview); // Toggle visibility of the review card
@@ -242,12 +194,12 @@ const JobDetailsPage = () => {
                     account: account,
                     setShowMediaCard: () => {
                     },
+                    triggerAlert,
                 });
 
                 window.location.reload();
             } catch (error) {
-                console.error('Error accepting request:', error);
-                // Handle error appropriately if needed
+                triggerAlert("Error", "An error occured. Please refresh the page or try again later.")
             }
 
         };
@@ -271,8 +223,7 @@ const JobDetailsPage = () => {
                 window.location.reload();
             } catch
                 (error) {
-                console.error('Error accepting request:', error);
-                // Handle error appropriately if needed
+                triggerAlert("Error", "An error occured. Please refresh the page or try again later.")
             }
         };
 
@@ -290,12 +241,12 @@ const JobDetailsPage = () => {
                     token: token,
                     setShowMediaCard: () => {
                     },
+                    triggerAlert,
                 });
                 window.location.reload();
 
             } catch (error) {
-                console.error('Error accepting request:', error);
-                // Handle error appropriately if needed
+                triggerAlert("Error", "An error occured. Please refresh the page or try again later.")
             }
 
         };
@@ -360,19 +311,6 @@ const JobDetailsPage = () => {
                         {job.serviceType} Job Details
                     </Typography>
                     <CardComponent {...cardProps} />
-
-                    {/*<MediaCard*/}
-                    {/*    offeredService={job}*/}
-                    {/*    provider={job.provider}*/}
-                    {/*    receiver={job.receiver}*/}
-                    {/*    onComplete={handleAccept}*/}
-                    {/*    onCancel={handleCancel}*/}
-                    {/*    onReview={handleReview}*/}
-                    {/*    onRevoke={handleRevoke}*/}
-                    {/*    onClose={handleCancel}*/}
-                    {/*    // showExpandIcon={false} // Disable the expand icon for the details page*/}
-                    {/*/>*/}
-
                     {job.status.toString() === "completed" &&
                         <Box ref={reviewsRef} sx={{mt: 4}}>
                             <Typography variant="h4">Reviews</Typography>

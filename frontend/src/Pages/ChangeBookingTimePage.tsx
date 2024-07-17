@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import AvailabilityCalendarBooking from "../components/AvailabilityCalendarBooking";
+import AvailabilityCalendarBooking from "../components/calendar/AvailabilityCalendarBooking";
 import {Typography, Container, Button, Box} from '@mui/material';
 import {useLocation, useNavigate, useParams} from 'react-router-dom';
 import {BookingDetails} from "../contexts/BookingContext";
@@ -55,6 +55,7 @@ const ChangeBookingTimePage: React.FC = () => {
     const queryParams = new URLSearchParams(location.search);
     const commentFromProvider = queryParams.get('comment');
     const navigate = useNavigate();
+
     // get the booking details
     useEffect(() => {
             const fetchRequest = async () => {
@@ -75,7 +76,8 @@ const ChangeBookingTimePage: React.FC = () => {
                         navigate("/unauthorized");
                         return;
                     }
-                    // todo: make it non-comment
+
+                    // if a new timeslot was already reselected, requester cannot access anymore
                     if (account && response.data.requestStatus.toString() != RequestStatus.requesterActionNeeded.toString()) {
                         console.log("trigger alert");
                         setRequestNotEditable(true);
@@ -85,12 +87,6 @@ const ChangeBookingTimePage: React.FC = () => {
                     console.log("fetched request when changing booking time:", request)
                 } catch (error: any) {
                     navigate("/not-found")
-                    // handleError(error); // First, use the generic error handler
-                    // // Then, check for a specific error condition
-                    // // if (axios.isAxiosError(error) && error.response && error.response.status === 404) {
-                    // //     // Specific handling for 404 errors in this component
-                    // //     setError('404 Not Found: The specific resource does not exist.');
-                    // // }
                 }
             }
 
@@ -106,11 +102,6 @@ const ChangeBookingTimePage: React.FC = () => {
             setError(null);
         };
     }, []);
-
-    // const [serviceType, setServiceType] = useState("Babysitting"); // Placeholder for the service type [e.g. "Tutoring"]
-    // const [defaultSlotDuration, setDefaultSlotDuration] = useState(60); // Placeholder for the default slot duration
-    // const [globalAvailabilities, setGlobalAvailabilities] = useState<Event[]>([{start: Date.now(), end: Date.now(), title: "Event"}]); // Placeholder for the global availabilities [e.g. tutor availabilities]
-
 
     if (requestNotEditable) {
         return <ErrorPage title={"403 Forbidden"} message={'No action can be made to this request. \n' +
@@ -136,7 +127,6 @@ const ChangeBookingTimePage: React.FC = () => {
             </Box>
             {commentFromProvider && (
                 <Box mt={2} mb={2}>
-                    {/*<Typography>Comment from the provider: {decodeURIComponent(commentFromProvider)}</Typography>*/}
                     <Typography>{decodeURIComponent(commentFromProvider)}</Typography>
 
                 </Box>
