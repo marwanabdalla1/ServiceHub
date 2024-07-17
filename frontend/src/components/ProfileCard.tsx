@@ -36,12 +36,13 @@ export default function MediaCard({ offering, profileImageUrl, loading }: MediaC
         )}
         <CardContent>
           <div>
-            <Typography gutterBottom variant="h5" component="div">
-              {provider.firstName} {provider.lastName}
-            </Typography>
-            <Typography variant="h6" color="text.secondary">
+          <Typography gutterBottom variant="h5" component="div">
               {offering.serviceType}
             </Typography>
+            <Typography variant="h6" color="text.secondary">
+              {provider.firstName} {provider.lastName}
+            </Typography>
+         
 
             <div className='flex space-x-4'>
               <Typography variant="body2" color="text.secondary">
