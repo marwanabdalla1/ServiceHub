@@ -1,17 +1,17 @@
 // Purpose: Contains the functions for handling requests to the /account endpoint.
-import Account from "../models/account";
-import serviceOffering from "../models/serviceOffering";
-import notification from "../models/notification";
-import review from "../models/review";
-import payment from "../models/payment";
-import Timeslot from "../models/timeslot";
-import serviceRequest from "../models/serviceRequest";
-import job from "../models/job";
+import Account from "../../models/account";
+import serviceOffering from "../../models/serviceOffering";
+import notification from "../../models/notification";
+import review from "../../models/review";
+import payment from "../../models/payment";
+import Timeslot from "../../models/timeslot";
+import serviceRequest from "../../models/serviceRequest";
+import job from "../../models/job";
 import {RequestHandler} from "express";
 import * as dotenv from 'dotenv'
 import mongoose from "mongoose";
-import {JobStatus, RequestStatus} from "../models/enums";
-import {cancelTimeslotDirect} from "./TimeSlotController";
+import {JobStatus, RequestStatus} from "../../models/enums";
+import {cancelTimeslotDirect} from "../TimeSlotController";
 
 dotenv.config();
 

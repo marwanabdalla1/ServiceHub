@@ -5,9 +5,9 @@ import * as dotenv from 'dotenv'
 import bcrypt from 'bcrypt';
 import {ERRORS} from "../helpers/authHelper";
 import PlatformFeedback from "../models/platformFeedback";//
-//
 
 
+//This is different than the review controller, this is for the feedback form on the website
 export const submitFeedback:RequestHandler = async (req, res) => {
     try {
         // Assuming `req.user` is set by the `authenticate` middleware

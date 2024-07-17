@@ -2,11 +2,11 @@ import {Request, RequestHandler, Response} from 'express';
 import nodemailer from 'nodemailer';
 import * as dotenv from "dotenv";
 import crypto from 'crypto';
-import Account from "../models/account";
+import Account from "../../models/account";
 import bcrypt from "bcrypt";
 import {format} from 'date-fns';
-import {ServiceType} from '../models/enums';
-import {formatDateTime} from "../util/dateUtils";
+import {ServiceType} from '../../models/enums';
+import {formatDateTime} from "../../util/dateUtils";
 
 dotenv.config();
 

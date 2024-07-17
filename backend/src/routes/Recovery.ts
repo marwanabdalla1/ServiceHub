@@ -1,5 +1,5 @@
 import express from "express";
-import {sendResetPasswordEmail, setNewPassword} from "../controller/EmailController";
+import {sendResetPasswordEmail, setNewPassword} from "../controller/utilityControllers/EmailController";
 
 const router = express.Router();
 router.post('/resetPassword', sendResetPasswordEmail);
