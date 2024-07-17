@@ -203,7 +203,7 @@ const generateCancellationConfirmationEmail = (firstName: string, serviceType: S
     <table style="max-width: 600px; margin: auto; border-collapse: collapse; border: 1px solid #ddd;">
       <tr>
         <td style="background-color: #007bff; padding: 20px; text-align: center; color: #fff; font-size: 24px; font-weight: bold;">
-          Confirmation: ${serviceType} Cancellation
+          Cancellation Confirmation: ${serviceType}
         </td>
       </tr>
       <tr>
