@@ -53,10 +53,10 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
       let url = '/';
       switch (notificationType) {
         case 'New Review':
-          url = `/customer_review/${job}`;
+          url = `/jobs/${job}`;
           break;
         case 'Updated Review':
-          url = `/customer_review/${job}`;
+          url = `/jobs/${job}`;
           break;
         case 'New Job':
           url = `/incoming/jobs/${job}`;

@@ -6,7 +6,6 @@ import SignUpPage from './Pages/AuthPages/SignUpPages/SignUpPage';
 import NavigationBar from './components/Navbar';
 import AdminNavbar from "./components/adminComponents/AdminNavbar";
 import HomePage from './Pages/HomePage';
-import ReviewPage from "./Pages/CustomerReviewPage";
 import ProviderProfilePage from "./Pages/ProviderProfilePage";
 import ProfileSettingPage from "./Pages/ProfileSettingPage";
 import SelectAvailabilityPage from './Pages/SelectAvailabilityPage';
@@ -115,7 +114,6 @@ function MainRoutes({ search, setSearch }: { search: any, setSearch: any }) {
 
                         {/* User Profile */}
                         <Route path="/setprofile" element={<ProfileSettingPage />} />
-                        <Route path="/customer_review/:jobId" element={<ReviewPage />} />
                         <Route path="/forgetPassword" element={<ForgetPasswordPage />} />
                         <Route path="/forgetPassword/emailVerification" element={<OTPPage />} />
                         <Route path="/forgetPassword/resetPassword" element={<ResetPasswordPage />} />
@@ -166,7 +164,6 @@ function MainRoutes({ search, setSearch }: { search: any, setSearch: any }) {
                         <Route path="/outgoing/requests/:requestId" element={<RequestDetailsPage />} />
 
 
-                        <Route path="/write-reviews" element={<ReviewPage />} />
                         <Route path="/faq" element={<FAQPage />} />
 
                         <Route path="/admin" element={<AdminHomePage />} />
