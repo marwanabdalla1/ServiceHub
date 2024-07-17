@@ -40,6 +40,7 @@ function useAlert(defaultDuration: number | null) {
             if (window.location.pathname === alert.redirectUrl) {
                 window.location.reload();
             } else {
+                console.log("navigating")
                 navigate(alert.redirectUrl);
             }
         } else {

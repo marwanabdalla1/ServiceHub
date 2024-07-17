@@ -65,10 +65,10 @@ const ChangeBookingTimePage: React.FC = () => {
                         },
                     });
 
-                    console.log("requests response", response.data.requestedBy, "\n my account;", account?._id)
+                    console.log("requests response", response.data, "\n my account;", account?._id)
                     // make sure only the requestor can access this and only upon request
                     if (!response) {
-                        setError({title:'404 Not Found', message:'The request you\'re looking for cannot be found.'});
+                        navigate("/not-found");
                         return;
                     }
                     if (account && response.data.requestedBy._id.toString() !== account?._id.toString()) {
@@ -76,7 +76,7 @@ const ChangeBookingTimePage: React.FC = () => {
                         return;
                     }
                     // todo: make it non-comment
-                    if (response.data.requestStatus.toString() != RequestStatus.requesterActionNeeded.toString()) {
+                    if (account && response.data.requestStatus.toString() != RequestStatus.requesterActionNeeded.toString()) {
                         console.log("trigger alert");
                         setRequestNotEditable(true);
                     }
@@ -84,12 +84,13 @@ const ChangeBookingTimePage: React.FC = () => {
                     setProviderId(response.data.provider._id)
                     console.log("fetched request when changing booking time:", request)
                 } catch (error: any) {
-                    handleError(error); // First, use the generic error handler
-                    // Then, check for a specific error condition
-                    // if (axios.isAxiosError(error) && error.response && error.response.status === 404) {
-                    //     // Specific handling for 404 errors in this component
-                    //     setError('404 Not Found: The specific resource does not exist.');
-                    // }
+                    navigate("/not-found")
+                    // handleError(error); // First, use the generic error handler
+                    // // Then, check for a specific error condition
+                    // // if (axios.isAxiosError(error) && error.response && error.response.status === 404) {
+                    // //     // Specific handling for 404 errors in this component
+                    // //     setError('404 Not Found: The specific resource does not exist.');
+                    // // }
                 }
             }
 
@@ -116,28 +117,6 @@ const ChangeBookingTimePage: React.FC = () => {
             'If you have already rebooked a timeslot, you can view it in your outgoing requests.'}
                           redirectTitle={"Outgoing Requests"} redirectPath={"/outgoing/requests"}/>;
     }
-    //
-    if (error) {
-        return <ErrorPage title={error.title} message={error.message}/>
-    }
-    //     // Ensure error is converted to string if it's not already
-    //     // @ts-ignore
-    //     const errorMessage = typeof error === 'string' ? error : JSON.stringify(error.message);
-    //
-    //     // Check if the error message contains a colon for splitting
-    //     const hasColon = errorMessage.includes(':');
-    //     const title = hasColon ? errorMessage.split(': ')[0] : "Error";
-    //     const message = hasColon ? errorMessage.split(': ')[1] : errorMessage;
-    //
-    //     return (
-    //         <ErrorPage
-    //             title={title}
-    //             message={message}
-    //             redirectTitle="Back to Home"
-    //             redirectPath="/"
-    //         />
-    //     );
-    // }
 
     const CalendarLegend = () => (
         <Box display="flex" alignItems="center" marginRight={2}>

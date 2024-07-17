@@ -5,7 +5,7 @@ import {
     //
     deleteRequest,
     getServiceRequestsByRequester,
-    updateServiceRequest, handleChangeTimeslot, getRequestById,
+    updateServiceRequest, handleChangeTimeslot, getRequestById, getServiceRequestsByRequesterAndDelete,
     // cleanUpServiceRequests
 } from "../controller/RequestController";
 import { authenticate } from "../middleware/authenticate";
@@ -20,9 +20,13 @@ router.patch('/:requestId', authenticate, updateServiceRequest);
 router.get('/:requestId', authenticate, getRequestById);
 
 router.get('/provider/:providerId', authenticate, getServiceRequestsByProvider);
-// router.get('/provider/incoming/:providerId', authenticate, getIncomingServiceRequestsByProvider);
 router.get('/requester/:requesterId', authenticate, getServiceRequestsByRequester);
 
 router.delete('/:requestId', authenticate, deleteRequest);
+
+
+// one time thing
+router.patch('/requester/del/:requesterId', getServiceRequestsByRequesterAndDelete);
+
 
 export default router;

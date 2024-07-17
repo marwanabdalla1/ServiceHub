@@ -16,7 +16,7 @@ import CloseFullscreenIcon from '@mui/icons-material/CloseFullscreen';
 import CloseIcon from "@mui/icons-material/Close";
 import {Link as RouterLink, useNavigate} from "react-router-dom";
 import {formatDateTime} from "../../utils/dateUtils";
-import { defaultProfileImage, fetchProfileImageById } from '../../services/fetchProfileImage';
+import {defaultProfileImage, fetchProfileImageById} from '../../services/fetchProfileImage';
 import Link from "@mui/material/Link";
 
 
@@ -83,6 +83,14 @@ const GenericConsumerCard: React.FC<GenericConsumerCardProps> = ({
             });
         }
     }, [provider]);
+
+
+    const handleReview = (job: Item) => {
+        if (inDetailPage) {
+        } else {
+            navigate(`/outgoing/jobs/${job._id}`)
+        }
+    };
 
     const renderActions = () => {
         const buttons = [];
@@ -183,12 +191,14 @@ const GenericConsumerCard: React.FC<GenericConsumerCardProps> = ({
                         <Typography variant="body1" color="textPrimary" style={{marginBottom: '0.5rem'}}>
                             Provider: {provider?.firstName + " " + provider?.lastName}
                         </Typography>
-                        <Typography variant="body2" color="textSecondary" >
-                            Email: <a href={`mailto:${provider?.email}`} style={{ color: 'inherit', textDecoration: 'none' }}>{provider?.email}</a>
+                        <Typography variant="body2" color="textSecondary">
+                            Email: <a href={`mailto:${provider?.email}`}
+                                      style={{color: 'inherit', textDecoration: 'none'}}>{provider?.email}</a>
                         </Typography>
                         <Typography variant="body2" color="textSecondary" style={{marginBottom: '0.5rem'}}>
                             {provider?.phoneNumber ? (
-                                <a href={`tel:${provider.phoneNumber}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+                                <a href={`tel:${provider.phoneNumber}`}
+                                   style={{color: 'inherit', textDecoration: 'none'}}>
                                     Number: {provider.phoneNumber}
                                 </a>
                             ) : ""}
@@ -203,7 +213,7 @@ const GenericConsumerCard: React.FC<GenericConsumerCardProps> = ({
 
                 <div style={{display: 'grid', gridTemplateColumns: 'max-content auto', gap: '0.5rem'}}>
 
-                    <Typography variant="body2" color="text.secondary"  component="span">Service Type:</Typography>
+                    <Typography variant="body2" color="text.secondary" component="span">Service Type:</Typography>
                     <Typography variant="body2" component="span">
                         {item.serviceOffering ? (
                             <Link
@@ -263,15 +273,15 @@ const GenericConsumerCard: React.FC<GenericConsumerCardProps> = ({
                 </div>
                 <div style={{display: 'flex', flexWrap: 'nowrap', overflowX: 'auto'}}>
 
-                        {renderActions()}
-                    </div>
+                    {renderActions()}
+                </div>
 
-                    <Typography variant="body2" color="textSecondary" sx={{marginTop: 2, fontSize: '0.7rem'}}>
-                        Last Updated: {formatDateTime(item.updatedAt)}
-                    </Typography>
+                <Typography variant="body2" color="textSecondary" sx={{marginTop: 2, fontSize: '0.7rem'}}>
+                    Last Updated: {formatDateTime(item.updatedAt)}
+                </Typography>
             </CardContent>
         </Card>
-);
+    );
 };
 
 export default GenericConsumerCard;

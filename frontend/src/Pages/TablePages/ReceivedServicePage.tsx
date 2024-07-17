@@ -106,10 +106,6 @@ export default function ReceivedServiceTable() {
         });
     };
 
-    const handleReview = (job: Item) => {
-        navigate(`/jobs/${job._id}`);
-    };
-
     const handleDialogClose = () => {
         setDialogOpen(false);
     };
@@ -166,7 +162,7 @@ export default function ReceivedServiceTable() {
                                          inDetailPage={false}
                                          actions={{
                                              cancelJob: onCancel,
-                                             review: () => handleReview(selectedJob),
+                                             review: () => navigate(`/jobs/${selectedJob._id}`),
                                          }}
                     />
                 </div>

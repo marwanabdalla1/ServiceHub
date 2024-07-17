@@ -27,7 +27,7 @@ type Item = ServiceRequest | Job;
 
 
 // tood: modify this
-const JobDetailsPage: React.FC<JobDetailsPageProps> = () => {
+const JobDetailsPage = () => {
         const {jobId} = useParams<{ jobId: string }>();
         const [job, setJob] = useState<Job | null>(null);
         const {token, account} = useAuth();
@@ -38,7 +38,6 @@ const JobDetailsPage: React.FC<JobDetailsPageProps> = () => {
 
         const [otherParty, setOtherParty] = React.useState<Account | null>(null);
 
-        const {error, setError, handleError} = useErrorHandler();
 
         const [role, setRole] = useState<string | undefined>(undefined)
         const location = useLocation();
@@ -67,30 +66,57 @@ const JobDetailsPage: React.FC<JobDetailsPageProps> = () => {
                     const response = await axios.get<Job>(`/api/jobs/${jobId}`, {
                         headers: {Authorization: `Bearer ${token}`},
                     });
-                    console.log("job data with timeslot,", response.data)
-                    const jobData = response.data;
-                    setJob(jobData);
 
-                    console.log(response)
                     if (!response) {
-                        setError({title: '404 Not Found', message: 'The job you\'re looking for cannot be found.'});
+                        navigate("/not-found");
                         return;
                     }
+                    console.log("job data with timeslot,", response.data)
+                    const jobData = response.data;
 
-                    // Fetch all reviews for the job
-                    try {
+                    // determine the role
+                    if (account && jobData) {
+                        const isProvider = account?._id.toString() === jobData.provider._id.toString();
+                        const isConsumer = account?._id.toString() === jobData.receiver._id.toString();
+
+                        const pathIncludesIncoming = location.pathname.includes("incoming");
+                        const pathIncludesOutgoing = location.pathname.includes("outgoing");
+
+                        if ((pathIncludesIncoming && !isProvider) || (pathIncludesOutgoing && !isConsumer)) {
+                            navigate("/unauthorized");
+                        } else if (isProvider) {
+                            setRole("provider");
+                            setOtherParty(jobData.receiver);
+                            if (!redirectPath) {
+                                setRedirectPath('/incoming/jobs');
+                            }
+                        } else if (isConsumer) {
+                            setRole("consumer");
+                            setOtherParty(jobData.provider);
+                            if (!redirectPath) {
+                                setRedirectPath('/outgoing/jobs');
+                            }
+                        } else {
+                            // If neither, navigate to unauthorized
+                            navigate("/unauthorized");
+                        }
+
+                        setJob(jobData);
+
+
+
+                        // get the reviews
                         const reviewsResponse = await axios.get(`/api/reviews/by-jobs-all/${jobId}`, {
                             headers: {Authorization: `Bearer ${token}`},
                         });
 
-                        console.log("Full response:", reviewsResponse);
-                        console.log("Data field:", reviewsResponse.data);
-                        console.log("Reviews array:", reviewsResponse.data.reviews);
+                        if(!reviewsResponse){
+                            setReviews([]);
+                            setLoading(false);
+                            return;
+                        }
 
-                        const responseData = reviewsResponse.data
-                        console.log("reviews response", reviewsResponse)
-
-                        if (reviewsResponse.data) {
+                        if (reviewsResponse.data && reviewsResponse.data.reviews && reviewsResponse.data.reviews.length > 0) {
                             console.log("success")
                             console.log("setting reviews", reviewsResponse.data.reviews)
                             setReviews(reviewsResponse.data.reviews);
@@ -113,19 +139,20 @@ const JobDetailsPage: React.FC<JobDetailsPageProps> = () => {
                             setLoading(false);
                         } else {
                             console.log('No reviews found');
+                            setLoading(false);
                             setReviews([]);
                         }
 
-                    } catch (error) {
-                        console.log("error in setting review", error)
-                        setLoading(false);
-                        setReviews([]);
                     }
-                } catch (error) {
+                } catch (error:any) {
                     console.error('Failed to fetch job details:', error);
                     setLoading(false);
-                    handleError(error)
-
+                    if (error.response.status && error.response.status === 403) {
+                        navigate("/unauthorized")
+                    } else {
+                        return <ErrorPage title={"404 Not Found"}
+                                          message={'The page you are looking for does not exist.'}/>;
+                    }
 
                 }
 
@@ -137,57 +164,44 @@ const JobDetailsPage: React.FC<JobDetailsPageProps> = () => {
             }
         }, [jobId, token, account]);
 
-
-        useEffect(() => {
-            // Adjust paths based on role
-            if (job) {
-                const isProvider = account?._id.toString() === job.provider._id.toString();
-                const isConsumer = account?._id.toString() === job.receiver._id.toString();
-
-                const pathIncludesIncoming = location.pathname.includes("incoming");
-                const pathIncludesOutgoing = location.pathname.includes("outgoing");
-
-                if ((pathIncludesIncoming && !isProvider) || (pathIncludesOutgoing && !isConsumer)) {
-                    navigate("/unauthorized");
-                } else if (isProvider) {
-                    setRole("provider");
-                    setOtherParty(job.receiver);
-                    if (!redirectPath) {
-                        setRedirectPath('/incoming/jobs');
-                    }
-                } else if (isConsumer) {
-                    setRole("consumer");
-                    setOtherParty(job.provider);
-                    if (!redirectPath) {
-                        setRedirectPath('/outgoing/jobs');
-                    }
-                } else {
-                    // If neither, navigate to unauthorized
-                    navigate("/unauthorized");
-                }
-            }
-        }, [job, account, token])
+        //
+        // useEffect(() => {
+        //     // Adjust paths based on role
+        //     if (job) {
+        //         const isProvider = account?._id.toString() === job.provider._id.toString();
+        //         const isConsumer = account?._id.toString() === job.receiver._id.toString();
+        //
+        //         const pathIncludesIncoming = location.pathname.includes("incoming");
+        //         const pathIncludesOutgoing = location.pathname.includes("outgoing");
+        //
+        //         if ((pathIncludesIncoming && !isProvider) || (pathIncludesOutgoing && !isConsumer)) {
+        //             navigate("/unauthorized");
+        //         } else if (isProvider) {
+        //             setRole("provider");
+        //             setOtherParty(job.receiver);
+        //             if (!redirectPath) {
+        //                 setRedirectPath('/incoming/jobs');
+        //             }
+        //         } else if (isConsumer) {
+        //             setRole("consumer");
+        //             setOtherParty(job.provider);
+        //             if (!redirectPath) {
+        //                 setRedirectPath('/outgoing/jobs');
+        //             }
+        //         } else {
+        //             // If neither, navigate to unauthorized
+        //             navigate("/unauthorized");
+        //         }
+        //     }
+        // }, [job, account, token])
 
         // unmount
         // useEffect(() => {
+        //
         //     return () => {
-        //         setError(null);
+        //         setError(null)
         //     };
         // }, []);
-
-        useEffect(() => {
-
-            return () => {
-                // Cleanup logic
-                // setJob(null);
-                // setReviews([]);
-                // setMyReview(undefined);
-                // setOtherReview(undefined);
-                // setRole(undefined);
-                // setOtherParty(null)
-                setError(null)
-            };
-        }, []);
 
         if (!job) {
             if (loading) {
@@ -198,7 +212,9 @@ const JobDetailsPage: React.FC<JobDetailsPageProps> = () => {
                 )
             } else {
                 console.log("error")
-                return <ErrorPage title={"404 Not Found"} message={'The job you\'re looking for cannot be found.'}/>
+                // navigate("/not-found")
+                return <ErrorPage title={"404 Not Found"} message={'The page you are looking for does not exist.'}/>;
+                // return <ErrorPage title={"404 Not Found"} message={'The job you\'re looking for cannot be found.'}/>
             }
         }
         // // Authorization check
@@ -207,11 +223,6 @@ const JobDetailsPage: React.FC<JobDetailsPageProps> = () => {
         //     navigate("/unauthorized")
         // }
 
-
-        if (error) {
-            console.log("youre in iferror", error)
-            return <ErrorPage title={error.title} message={error.message}/>
-        }
 
         const handleToggleNewReview = () => {
             setShowNewReview(!showNewReview); // Toggle visibility of the review card

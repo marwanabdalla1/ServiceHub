@@ -4,6 +4,7 @@ import Notification from "../models/notification"
 import Job from "../models/job";
 import ServiceOffering from "../models/serviceOffering";
 import mongoose from "mongoose";
+import {createNotificationDirect} from "./NotificationController";
 //
 //
 
@@ -77,23 +78,18 @@ export const submitReview: RequestHandler = async (req, res) => {
 
         // push notification to receiver
         let notificationContent = `A new review has been added to the job ${jobId}.`;
-        // if (otherParty) {
-        //     notificationContent = `A new review from ${otherParty.firstName} ${otherParty.lastName} has been added to the job ${jobId}.`;
-        // }
-        const newNotification = new Notification({
-            isViewed: false,
+
+        const newNotification = await createNotificationDirect({
             content: notificationContent,
             notificationType: "New Review",
-            review: savedReview._id,
-            job: savedReview.job,
-            recipient: savedReview.recipient,  // Assuming 'recipient' should be notified
+            review: (savedReview._id as any).toString(),
+            job: savedReview.job.toString(),
+            recipient: savedReview.recipient.toString(),
         });
-        const createdNnotification = await Notification.create(newNotification);
 
-        console.log(createdNnotification)
         res.status(201).json({
             message: "Review submitted successfully, notification sent.",
-            review: savedReview, notification: createdNnotification
+            review: savedReview, notification: newNotification
         });
 
     } catch (error) {
@@ -141,11 +137,11 @@ export const findAllReviewsToJob: RequestHandler = async (req, res) => {
                     { recipient: userId }
                 ]
         });
-        if (reviews) {
+        if (reviews.length >0) {
             return res.json({ success: true, reviews: reviews });
         } else {
             // return res.json({ success: false, review: []});
-            return res.status(404).json({ message: 'No reviews found for this job ID' });
+            return res.status(200).json({ success: true, reviews: [], message: 'No reviews found for this job ID' });
 
         }
     } catch (error) {
@@ -181,21 +177,20 @@ export const updateReview: RequestHandler = async (req, res) => {
 
         // push notification to receiver
         const notificationContent = `A review has been updated to ${updatedReview.job}.`;
-        const newNotification = new Notification({
-            isViewed: false,
-            content: notificationContent,
-            review: updatedReview._id,
-            notificationType: "Updated Review",
-            job: updatedReview.job,
-            recipient: updatedReview.recipient,  // Assuming 'recipient' should be notified
-        });
-        const createdNnotification = await Notification.create(newNotification);
 
-        console.log(createdNnotification)
+        const newNotification = await createNotificationDirect({
+            content: notificationContent,
+            notificationType: "Updated Review",
+            review: (updatedReview._id as any).toString(),
+            job: updatedReview.job.toString(),
+            recipient: updatedReview.recipient.toString(),
+        });
+
+        console.log(newNotification)
 
         res.status(200).json({
             message: "Review updated and service offering recalculated, notification sent",
-            review: updatedReview, notification: createdNnotification
+            review: updatedReview, notification: newNotification
         });
     } catch (error) {
         console.error("Failed to update review:", error);

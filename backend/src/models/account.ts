@@ -48,7 +48,7 @@ const accountSchema: Schema = new Schema({
     notifications: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Notification' }],
     requestHistory: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ServiceRequest' }],
     jobHistory: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Job' }],
-});
+}, {timestamps: true});
 
 const Account = mongoose.model<IAccount>('Account', accountSchema);
 export default Account;

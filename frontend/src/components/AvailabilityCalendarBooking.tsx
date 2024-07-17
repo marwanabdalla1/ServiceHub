@@ -89,6 +89,8 @@ function AvailabilityCalendarBooking({
     const [nextAvailable, setNextAvailable] = useState<Date | undefined>(undefined);
 
 
+
+
     const findNextAvailableSlot = (events: any[]) => {
         const now = new Date();
         const futureEvents = events.filter(event => new Date(event.start) > now);
