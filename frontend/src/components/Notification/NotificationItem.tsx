@@ -85,7 +85,12 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
         default:
           url = '/';
       }
-      navigate(url);
+
+      if (window.location.pathname === url) {
+        window.location.reload(); // Force reload if already on the same URL
+      } else {
+        navigate(url);
+      }
     } else {
       console.error('Notification update failed, navigation cancelled');
     }

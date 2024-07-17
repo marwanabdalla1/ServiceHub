@@ -319,6 +319,8 @@ function UserProfile(): React.ReactElement {
 
             // Update the subscriptions state after cancellation
             setSubscriptions(subscriptions.map(sub => sub.id === subscriptionId ? {...sub, status: 'canceled'} : sub));
+            window.location.reload();
+
         } catch (error) {
             console.error('Error cancelling subscription:', error);
         }
