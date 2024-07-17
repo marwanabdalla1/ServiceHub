@@ -16,6 +16,6 @@ const PaymentSchema: Schema = new Schema({
     isPaid: {type: Boolean, required: true},
     isCanceled: {type: Boolean, required: true},
     provider: {type: Schema.Types.ObjectId, ref: 'Account', required: true},
-});
+}, {timestamps:true});
 
 export default mongoose.model<IPayment>('Payment', PaymentSchema);
