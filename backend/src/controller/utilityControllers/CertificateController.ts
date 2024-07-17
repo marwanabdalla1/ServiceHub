@@ -1,10 +1,10 @@
 import {GridFsStorage} from "multer-gridfs-storage";
-import env from "../util/validateEnv";
+import env from "../../util/validateEnv";
 import multer from "multer";
 import express, {RequestHandler} from "express";
-import Account, {IAccount} from "../models/account";
+import Account, {IAccount} from "../../models/account";
 import {MongoClient, GridFSBucket, ObjectId} from "mongodb";
-import ServiceOffering, {IServiceOffering} from "../models/serviceOffering";
+import ServiceOffering, {IServiceOffering} from "../../models/serviceOffering";
 
 interface MulterFile extends Express.Multer.File {
     id: ObjectId;

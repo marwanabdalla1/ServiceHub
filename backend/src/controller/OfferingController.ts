@@ -2,6 +2,10 @@ import { Request, Response, NextFunction } from 'express';
 import Account from '../models/account';
 import ServiceOffering from "../models/serviceOffering";
 
+
+
+//This is the controller for returning all the service offerings, it's not responsible for creating or editing the SERVICES
+// All the filtering and sorting is done here in the backend
 export const getOfferings = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userId = (req as any).user; // Assuming userId is available in the request (e.g., from authentication middleware)

@@ -118,5 +118,16 @@ export const deleteNotification = async (req: Request, res: Response) => {
     }
 };
 
-
-
+// Mark all notifications as read
+export const markAllNotificationsAsRead = async (req: Request, res: Response) => {
+    try {
+        const userId = (req as any).user.userId; // Assuming userId is available in the request (e.g., from authentication middleware)
+        await Notification.updateMany(
+            { recipient: userId, isViewed: false },
+            { $set: { isViewed: true } }
+        );
+        res.status(200).json({ message: 'All notifications marked as read' });
+    } catch (error) {
+        res.status(500).json({ message: (error as Error).message });
+    }
+};

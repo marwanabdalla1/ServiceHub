@@ -1,10 +1,10 @@
 import jwt from 'jsonwebtoken';
-import Account from "../models/account";
+import Account from "../../models/account";
 import { RequestHandler } from "express";
 import * as dotenv from 'dotenv'
-import { validateRequestBody } from "../helpers/validate";
+import { validateRequestBody } from "../../helpers/validate";
 import bcrypt from "bcrypt";
-import { ERRORS } from "../helpers/authHelper";
+import { ERRORS } from "../../helpers/authHelper";
 
 dotenv.config();
 

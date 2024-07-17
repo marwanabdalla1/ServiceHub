@@ -3,11 +3,11 @@ import { RequestHandler } from 'express';
 import Stripe from 'stripe';
 import Account from '../models/account';
 
-// Initialize Stripe with your secret key
 const stripe = new Stripe('sk_test_51NEdzDChuUsrK8kGQ9QPN6Zj7mmOI9j61k2q6vCfuDU0cYdf3nn4RGK1uzVZg37iCmrZrODQYzIoagswEbSDZ5J0000jHIY5Nq', {
-  apiVersion: '2024-04-10', // Use the appropriate API version
+  apiVersion: '2024-04-10', 
 });
 
+//This is an endpoint that reidcts the user to the stripe checkout page
 export const pay: RequestHandler = async (req, res) => {
   try {
     const clientId = (req as any).user.userId;
@@ -29,19 +29,17 @@ export const pay: RequestHandler = async (req, res) => {
       await account.save();
     }
 
-    console.log('Creating checkout session for customer email:', account.email);
     const session = await stripe.checkout.sessions.create({
       customer: customer.id,
       line_items: [
         {
-          price: 'price_1PWIQIChuUsrK8kGzhPiet6K', // Replace with your subscription price ID
+          price: 'price_1PWIQIChuUsrK8kGzhPiet6K', 
           quantity: 1,
         },
       ],
       mode: 'subscription',
       success_url: 'http://localhost:3000/setprofile', 
-      //TODO: create an actual page for this indiciating that the payment was unsuccessful
-      cancel_url: 'http://localhost:3000/dontexit',
+      cancel_url: 'http://localhost:3000/failedpayment',
     });
 
     console.log('Checkout session created for customer email:', account.email);
@@ -52,12 +50,11 @@ export const pay: RequestHandler = async (req, res) => {
   }
 };
 
+//This is a webhook that is called when the user has successfully paid for the subscription to become premium
 const becomePro = async (clientId: string) => {
   try {
-    console.log('Becoming Pro for client ID:', clientId);
     // Update the account in your database to mark it as a premium user
     await Account.findByIdAndUpdate(clientId, { isPremium: true });
-    console.log('Account updated to premium');
   } catch (err) {
     console.error('Error updating account to premium:', err);
   }
@@ -93,7 +90,7 @@ export const getSubscriptionData: RequestHandler = async (req, res) => {
   }
 };
 
-// Endpoint to cancel subscription based on client ID
+// Webhook Endpoint to cancel subscription based on client ID
 export const cancelSubscription: RequestHandler = async (req, res) => {
   const clientId = (req as any).user.userId;
   // Call MongoDB to get the email of the user

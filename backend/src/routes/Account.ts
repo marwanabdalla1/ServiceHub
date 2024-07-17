@@ -7,7 +7,7 @@ import {
     adminUserData,
     getAccountById,
     getRequesterById, updateAccountDetailsByAdmin
-} from "../controller/AccountController";
+} from "../controller/utilityControllers/AccountController";
 import {authenticate, isAdmin} from "../middleware/authenticate";
 
 const router = express.Router();

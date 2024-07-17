@@ -35,6 +35,24 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ header }) => {
     }
   };
 
+  const markAllNotificationsAsRead = () => {
+    if (token) {
+      axios.put('/api/notifications/mark-all-read', {}, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+        .then(() => {
+          setNotifications(prevNotifications =>
+            prevNotifications.map(notification => ({ ...notification, isViewed: true }))
+          );
+        })
+        .catch(error => {
+          console.error('Error marking all notifications as read:', error);
+        });
+    }
+  };
+
   useEffect(() => {
     fetchNotifications();
   }, [token]);
@@ -85,7 +103,7 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ header }) => {
       <button onClick={toggleDropdown} className="relative flex items-center justify-center">
         <IoNotificationsOutline className="h-6 w-6" />
         {unreadNotificationsCount > 0 && (
-          <span className="absolute top-0 right-0 flex items-center justify-center h-3 w-3 rounded-full ring-2 ring-white bg-red-400 text-white text-xs">
+          <span className="absolute top-0 right-0 flex items-center justify-center rounded-full ring-2 ring-white bg-red-400 text-white text-xs" style={{ height: '0.75rem', width: '0.75rem', fontSize: '0.7rem' }}>
             {unreadNotificationsCount}
           </span>
         )}
@@ -95,6 +113,7 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ header }) => {
           data={notifications}
           header={header}
           onNotificationViewed={handleNotificationViewed}
+          onMarkAllAsRead={markAllNotificationsAsRead}
         />
       )}
     </div>

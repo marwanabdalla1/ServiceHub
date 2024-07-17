@@ -173,6 +173,8 @@ function MainRoutes({ search, setSearch }: { search: any, setSearch: any }) {
 
                         <Route path="/unauthorized" element={<ErrorPage title="Unauthorized Access"
                             message="You do not have permission to view this page." />} />
+                        <Route path="/failedpayment" element={<ErrorPage title="Failed payment"
+                            message="Your payment did not go through" />} />
                         <Route path="*" element={<ErrorPage title="404 Not Found"
                             message="The page you are looking for does not exist." />} />
                         {/*<Route path="*" element={<h1>Not Found</h1>}/>*/}

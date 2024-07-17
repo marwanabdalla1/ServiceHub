@@ -5,7 +5,7 @@ import {
     //
     deleteRequest,
     getServiceRequestsByRequester,
-    updateServiceRequest, handleChangeTimeslot, getRequestById, getServiceRequestsByRequesterAndDelete,
+    updateServiceRequest, handleChangeTimeslot, getRequestById
     // cleanUpServiceRequests
 } from "../controller/RequestController";
 import { authenticate } from "../middleware/authenticate";
@@ -25,8 +25,6 @@ router.get('/requester/:requesterId', authenticate, getServiceRequestsByRequeste
 router.delete('/:requestId', authenticate, deleteRequest);
 
 
-// one time thing
-router.patch('/requester/del/:requesterId', getServiceRequestsByRequesterAndDelete);
 
 
 export default router;

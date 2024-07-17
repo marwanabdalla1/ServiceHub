@@ -6,7 +6,7 @@ import {
     fetchUncheckedCertificates, fetchCheckedCertificates,
     getCertificate, revertVerifyCertificate,
     uploadCertificate, verifyCertificate
-} from "../controller/CertificateController";
+} from "../controller/utilityControllers/CertificateController";
 
 
 const router = express.Router();
