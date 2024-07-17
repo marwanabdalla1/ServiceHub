@@ -232,6 +232,7 @@ function UserProfile(): React.ReactElement {
         navigate('/select-availability');
     };
 
+    // navigating to the different page sections
     const handleNavigation = (section: string) => {
         setActiveSection(section);
         let elementRef;

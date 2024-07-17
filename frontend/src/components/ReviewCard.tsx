@@ -117,7 +117,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
     };
 
     const handleEdit = () => {
-        setIsEditing(true);  // Set editing to true to render the editable form
+        setIsEditing(true);
     };
 
     const handleCancel = () => {

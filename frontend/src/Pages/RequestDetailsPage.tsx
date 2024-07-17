@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import React, {useEffect, useState} from 'react';
+import {useLocation, useNavigate, useParams} from 'react-router-dom';
 import axios from 'axios';
-import { Job } from '../models/Job';
+import {Job} from '../models/Job';
 import {
     Container,
     Typography,
@@ -13,14 +13,15 @@ import {
     Button,
     Dialog, CircularProgress
 } from '@mui/material';
-import { useAuth } from '../contexts/AuthContext';
-import { Review } from "../models/Review";
+import {useAuth} from '../contexts/AuthContext';
+import {Review} from "../models/Review";
 import GenericProviderCard from "../components/tableComponents/GenericProviderCard";
 import GenericConsumerCard from "../components/tableComponents/GenericConsumerCard";
-import { handleAccept, handleCancel, handleDecline, handleTimeChange } from "../utils/requestHandler";
-import { ServiceRequest } from "../models/ServiceRequest";
+import {handleAccept, handleCancel, handleDecline, handleTimeChange} from "../utils/requestHandler";
+import {ServiceRequest} from "../models/ServiceRequest";
 import useAlert from "../hooks/useAlert";
 import AlertCustomized from "../components/AlertCustomized";
+import ErrorPage from "./ErrorPage";
 
 // Define the props interface
 interface RequestDetailsPageProps {
@@ -28,10 +29,10 @@ interface RequestDetailsPageProps {
 
 type Item = ServiceRequest | Job;
 
-const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
-    const { requestId } = useParams<{ requestId: string }>();
+function RequestDetailsPage() {
+    const {requestId} = useParams<{ requestId: string }>();
     const [request, setRequest] = useState<ServiceRequest | null>(null);
-    const { token, account } = useAuth();
+    const {token, account} = useAuth();
     const [reviews, setReviews] = useState<Review[]>([]);
 
     const [role, setRole] = useState<string | undefined>(undefined)
@@ -41,7 +42,7 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
 
     const [loading, setLoading] = useState(true);
 
-    const { alert, triggerAlert, closeAlert } = useAlert(3000);
+    const {alert, triggerAlert, closeAlert} = useAlert(3000);
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -51,17 +52,58 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
     useEffect(() => {
         setLoading(true);
         const fetchRequest = async () => {
-            const response = await axios.get<ServiceRequest>(`/api/requests/${requestId}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
+            try {
+                const response = await axios.get<ServiceRequest>(`/api/requests/${requestId}`, {
+                    headers: {Authorization: `Bearer ${token}`},
+                });
 
-            setRequest(response.data);
-            setLoading(false);
+                if (!response) {
+                    navigate("/not-found");
+                    return;
+                }
 
-            if (!response) {
-                navigate("/not-found");
-                return;
+
+                // determine the role
+                if (account && response && response.data) {
+                    const isProvider = account?._id === response.data.provider._id;
+                    const isConsumer = account?._id === response.data.requestedBy._id;
+
+                    const pathIncludesIncoming = location.pathname.includes("incoming");
+                    const pathIncludesOutgoing = location.pathname.includes("outgoing");
+
+                    console.log("request found!", isProvider, isConsumer)
+                    if ((pathIncludesIncoming && !isProvider) || (pathIncludesOutgoing && !isConsumer)) {
+                        navigate("/unauthorized");
+                    } else if (isProvider) {
+                        setRole("provider");
+                        if (!redirectPath) {
+                            setRedirectPath('/incoming');
+                        }
+                    } else if (isConsumer) {
+                        setRole("consumer");
+                        if (!redirectPath) {
+                            setRedirectPath('/outgoing');
+                        }
+                    } else {
+                        navigate("/unauthorized");
+                    }
+                }
+
+                setRequest(response.data);
+                setLoading(false);
+
+
+            } catch (error: any) {
+                setLoading(false);
+                console.log("error", error)
+                if (error.response.status && error.response.status === 403) {
+                    navigate("/unauthorized")
+                } else {
+                    return <ErrorPage title={"404 Not Found"}
+                                      message={'The page you are looking for does not exist.'}/>;
+                }
             }
+
         };
 
         if (requestId) {
@@ -69,41 +111,43 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
         }
     }, [requestId, token, account]);
 
-    useEffect(() => {
-        if (request) {
-            const isProvider = account?._id === request.provider._id;
-            const isConsumer = account?._id === request.requestedBy._id;
-
-            const pathIncludesIncoming = location.pathname.includes("incoming");
-            const pathIncludesOutgoing = location.pathname.includes("outgoing");
-
-            if ((pathIncludesIncoming && !isProvider) || (pathIncludesOutgoing && !isConsumer)) {
-                navigate("/unauthorized");
-            } else if (isProvider) {
-                setRole("provider");
-                if (!redirectPath) {
-                    setRedirectPath('/incoming');
-                }
-            } else if (isConsumer) {
-                setRole("consumer");
-                if (!redirectPath) {
-                    setRedirectPath('/outgoing');
-                }
-            } else {
-                navigate("/unauthorized");
-            }
-        }
-    }, [request, account, token]);
+    // useEffect(() => {
+    //     if (request) {
+    //         const isProvider = account?._id === request.provider._id;
+    //         const isConsumer = account?._id === request.requestedBy._id;
+    //
+    //         const pathIncludesIncoming = location.pathname.includes("incoming");
+    //         const pathIncludesOutgoing = location.pathname.includes("outgoing");
+    //
+    //         if ((pathIncludesIncoming && !isProvider) || (pathIncludesOutgoing && !isConsumer)) {
+    //             navigate("/unauthorized");
+    //         } else if (isProvider) {
+    //             setRole("provider");
+    //             if (!redirectPath) {
+    //                 setRedirectPath('/incoming');
+    //             }
+    //         } else if (isConsumer) {
+    //             setRole("consumer");
+    //             if (!redirectPath) {
+    //                 setRedirectPath('/outgoing');
+    //             }
+    //         } else {
+    //             navigate("/unauthorized");
+    //         }
+    //     }
+    // }, [request, account, token]);
 
     if (!request) {
         if (loading) {
             return (
                 <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
-                    <CircularProgress />
+                    <CircularProgress/>
                 </Box>
             );
         } else {
-            return <div>Request not found</div>;
+            // navigate("/not-found")
+            // return;
+            return <ErrorPage title={"404 Not Found"} message={'The page you are looking for does not exist.'}/>;
         }
     }
 
@@ -115,7 +159,8 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
             serviceRequests: [],
             setServiceRequests: null,
             token: token,
-            setShowMediaCard: () => { },
+            setShowMediaCard: () => {
+            },
         });
         window.location.reload();
     };
@@ -128,7 +173,8 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
             serviceRequests: [],
             setServiceRequests: null,
             token: token,
-            setShowMediaCard: () => { },
+            setShowMediaCard: () => {
+            },
         });
         window.location.reload();
     };
@@ -141,7 +187,8 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
             serviceRequests: [],
             setServiceRequests: null,
             token: token,
-            setShowMediaCard: () => { },
+            setShowMediaCard: () => {
+            },
         });
         window.location.reload();
     };
@@ -154,7 +201,8 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
             serviceRequests: [],
             setServiceRequests: null,
             token: token,
-            setShowMediaCard: () => { },
+            setShowMediaCard: () => {
+            },
             comment,
             setTimeChangePopUp,
             navigate
@@ -166,7 +214,8 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
         item: request,
         provider: request?.provider,
         receiver: request?.requestedBy,
-        onClose: () => { },
+        onClose: () => {
+        },
         inDetailPage: true,
         redirectPath: redirectPath,
         actions: {
@@ -181,7 +230,8 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
         item: request,
         provider: request?.provider,
         receiver: request?.requestedBy,
-        onClose: () => { },
+        onClose: () => {
+        },
         inDetailPage: true,
         redirectPath: redirectPath,
         actions: {
@@ -195,7 +245,7 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
     return (
         <Container>
             <div>
-                <AlertCustomized alert={alert} closeAlert={closeAlert} />
+                <AlertCustomized alert={alert} closeAlert={closeAlert}/>
             </div>
 
             <Dialog open={timeChangePopUp} onClose={() => setTimeChangePopUp(false)}>
@@ -222,7 +272,7 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
                 </DialogActions>
             </Dialog>
 
-            <Box sx={{ mt: 4 }}>
+            <Box sx={{mt: 4}}>
                 <Typography variant="h4" gutterBottom>
                     {request?.serviceType} Request Details
                 </Typography>
@@ -230,6 +280,6 @@ const RequestDetailsPage: React.FC<RequestDetailsPageProps> = () => {
             </Box>
         </Container>
     );
-};
+}
 
 export default RequestDetailsPage;
