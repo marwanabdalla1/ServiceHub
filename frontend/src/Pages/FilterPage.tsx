@@ -160,23 +160,6 @@ function FilterPage() {
                         <BlackButton text ='Explore All Our Offerings' onClick={clearFilters} sx={{marginRight: "1rem", fontSize:'20px', padding: "1rem 1rem"}} />
                     </Box>
                 )
-                // ) : (
-                //     <>
-                //         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mx-auto bg-slate-50 max-w-screen-2xl'>
-                //             {offerings.map((offering) => (
-                //                 <MediaCard key={offering._id} offering={offering}
-                //                            profileImageUrl={profileImages[offering._id] || defaultProfileImage}
-                //                            loading={loadingImages[offering._id]} />
-                //             ))}
-                //         </div>
-                //         <Pagination
-                //             currentPage={currentPage}
-                //             totalItems={totalItems}
-                //             itemsPerPage={itemsPerPage}
-                //             onPageChange={handlePageChange}
-                //         />
-                //     </>
-                // )
                 }
             </div>
         </div>

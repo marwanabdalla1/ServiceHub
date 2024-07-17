@@ -103,9 +103,9 @@ const Navbar: React.FC<NavbarProps> = ({ toggleDrawer, onChange, onSearch, searc
             <div className="bg-blue-300 shadow-md h-20">
                 <div className="flex justify-between items-center h-full">
                     <Link to="/">
-                        <img src="/images/logo.png" alt="Logo" className="h-16 ml-4" />
+                    <img src="/images/logo.png" alt="Logo" className="h-16 ml-4 flex-shrink-0" />
                     </Link>
-                    <div className="flex items-center bg-white rounded-full shadow-inner px-2 py-1 w-1/2 ml-2">
+                    <div className="hidden md:flex items-center bg-white rounded-full shadow-inner px-2 py-1 w-1/2 ml-2">
                         <div className="flex items-center flex-grow">
                             <input
                                 type="text"
@@ -124,7 +124,7 @@ const Navbar: React.FC<NavbarProps> = ({ toggleDrawer, onChange, onSearch, searc
                             </button>
                         )}
                     </div>
-                    <div className="flex items-center space-x-4 m-4">
+                    <div className=" hidden md:flex items-center space-x-4 m-4">
                         <ServiceButton isLoggedIn={isLoggedIn()} isProvider={isProvider} isPremium={isPremium} />
                         {isLoggedIn() && (
                             <div className="flex items-center">
@@ -140,7 +140,7 @@ const Navbar: React.FC<NavbarProps> = ({ toggleDrawer, onChange, onSearch, searc
                                 <div className="h-6 w-0.5 bg-gray-800"></div>
                             </div>
                         )}
-                          <div className='relative flex items-center' onClick={handleProfileMenuOpen}>
+                        <div className='relative flex items-center' onClick={handleProfileMenuOpen}>
                             {isPremium && (
                                 <div className="absolute -top-4 right-0 transform translate-x-1/12">
                                     <FontAwesomeIcon icon={faCrown} className="text-yellow-500" />
