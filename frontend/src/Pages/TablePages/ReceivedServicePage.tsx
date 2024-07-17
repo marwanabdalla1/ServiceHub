@@ -12,10 +12,7 @@ import {useAuth} from "../../contexts/AuthContext";
 import {useEffect, useState} from "react";
 import axios from "axios";
 import {useNavigate} from 'react-router-dom';
-import {now} from 'moment';
-import {formatDateTime} from '../../utils/dateUtils';
 import {ServiceRequest} from "../../models/ServiceRequest";
-import GenericProviderCard from "../../components/tableComponents/GenericProviderCard";
 import {
     Button,
     Dialog,
@@ -25,9 +22,12 @@ import {
     DialogActions
 } from "@mui/material";
 import GenericTable from "../../components/tableComponents/GenericTable";
+import useAlert from "../../hooks/useAlert";
+import AlertCustomized from "../../components/AlertCustomized";
 
 type Item = ServiceRequest | Job;
 
+// jobs that a consumer receives
 export default function ReceivedServiceTable() {
     const [showMediaCard, setShowMediaCard] = React.useState(false);
     const [selectedJob, setSelectedJob] = React.useState<Job | null>(null);
@@ -43,6 +43,9 @@ export default function ReceivedServiceTable() {
     const statusOptions = ['All Statuses', 'Open', 'Completed', 'Cancelled'];
     const [statusFilter, setStatusFilter] = useState(['All Statuses']);
     const [serviceTypeFilter, setServiceTypeFilter] = useState(["All Types"]);
+
+    const {alert, triggerAlert, closeAlert} = useAlert(10000000);
+
 
     useEffect(() => {
         if (token && account) {
@@ -72,7 +75,6 @@ export default function ReceivedServiceTable() {
                     setJobs(response.data.data);
                     setTotal(response.data.total);
                 } catch (error) {
-                    console.error('Failed to fetch jobs:', error);
                     setJobs([]);
                 }
             };
@@ -93,7 +95,6 @@ export default function ReceivedServiceTable() {
 
     const onCancel = () => {
         if (!selectedJob) {
-            console.error('No job selected');
             return;
         }
         handleCancel({
@@ -103,6 +104,7 @@ export default function ReceivedServiceTable() {
             token,
             account,
             setShowMediaCard,
+            triggerAlert,
         });
     };
 
@@ -112,6 +114,7 @@ export default function ReceivedServiceTable() {
 
     return (
         <div style={{display: 'flex', flexDirection: 'row', width: '100%', position: 'relative'}}>
+            <AlertCustomized alert={alert} closeAlert={closeAlert}/>
             <Box sx={{minWidth: 275, margin: 2, width: '100%'}}>
                     <Box>
                         <Typography variant="h6" component="div" sx={{marginBottom: '16px'}}>

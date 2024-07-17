@@ -1,9 +1,9 @@
 import React, {useState, useEffect} from 'react';
 import {Calendar, dateFnsLocalizer, SlotInfo} from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import './calendarStyles.css';
-import { NavigateAction, ToolbarProps } from 'react-big-calendar';
-import {format, startOfWeek,endOfWeek, parseISO, getDay, getYear, startOfDay, endOfDay} from 'date-fns';
+import '../calendarStyles.css';
+import {NavigateAction, ToolbarProps} from 'react-big-calendar';
+import {format, startOfWeek, endOfWeek, parseISO, getDay, getYear, startOfDay, endOfDay} from 'date-fns';
 import {enUS} from '@mui/material/locale';
 import {
     Dialog,
@@ -11,23 +11,14 @@ import {
     DialogActions,
     DialogContent,
     DialogTitle,
-    Box,
-    FormControl,
     IconButton,
-    TextField,
-    InputAdornment,
-    Tooltip
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
 
-
 import axios from 'axios';
-import moment from 'moment';
-import {useAuth} from '../contexts/AuthContext';
-import {v4 as uuidv4} from 'uuid';
-import useAlert from "../hooks/useAlert";
-import AlertCustomized from "./AlertCustomized";
+import {useAuth} from '../../contexts/AuthContext';
+import useAlert from "../../hooks/useAlert";
 import {useLocation, useNavigate} from "react-router-dom";
 
 
@@ -68,20 +59,12 @@ interface ServiceScheduleProps {
 
 
 function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceScheduleProps) {
-    const [availability, setAvailability] = useState<TimeSlot[]>([]);
     const [fetchedEvents, setFetchedEvents] = useState<TimeSlot[]>([]);
 
-    // const [bookedEvents, setBookedEvents] = useState<TimeSlot[]>([]);
 
     const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot | null>(null);
 
-    // todo: editing
-    const [editDialogOpen, setEditDialogOpen] = useState(false);
-    const [editAllRecurring, setEditAllRecurring] = useState(false);
-
-
     const [deleteDialog, setDeleteDialog] = useState(false);
-    const [deleteOption, setDeleteOption] = useState('single'); // 'single' or 'all'
     const [actionDialogOpen, setActionDialogOpen] = useState(false);
     const [deleteOptionDialogOpen, setDeleteOptionDialogOpen] = useState(false);
     const [viewBookedDialogOpen, setViewBookedDialogOpen] = useState(false);
@@ -93,19 +76,19 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
     const navigate = useNavigate();
     const location = useLocation();
 
-    console.log(token);
     useEffect(() => {
         const now = new Date();
-        const start = startOfWeek(now, { weekStartsOn: 1 }); // Assumes week starts on Monday
-        const end = endOfWeek(now, { weekStartsOn: 1 }); // Adjust according to the end of the week
+        const start = startOfWeek(now, {weekStartsOn: 1}); // Assumes week starts on Monday
+        const end = endOfWeek(now, {weekStartsOn: 1}); // Adjust according to the end of the week
         fetchEvents(start, end)
     }, [token]); // Dependency array ensures this runs only when fetchedEvents changes
 
-    useEffect(() => {
-        console.log("Updated fetched events:", fetchedEvents);
-    }, [fetchedEvents]);
 
-
+    /**
+     * selecting a timeslot on the calendar
+     * @param start: start of the timeslot
+     * @param end: end of timeslot
+     */
     const handleSelect = async ({start, end}: SlotInfo) => {
         const newTimeSlot: TimeSlot = {
             _id: undefined,
@@ -116,7 +99,8 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
             isBooked: false,
             createdById: ''
         };
-        const isClashing = /*[...fetchedEvents, ...availability]*/
+        // see if there are already existing events at the time
+        const isClashing =
             fetchedEvents.some(TimeSlot => {
                 const newTimeSlotEnd = new Date(newTimeSlot.start.getTime() + defaultSlotDuration * 60000);
                 if (TimeSlot.transitStart && TimeSlot.transitEnd) {
@@ -134,16 +118,15 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
 
             });
 
-
         if (isClashing) {
             setClashDialogOpen(true);
         } else {
+            // if the timeslot is smaller than the default slot duration, round it up to the default duration
             let adjustedEnd = end;
             if (end.getTime() - start.getTime() < defaultSlotDuration * 60000) {
                 adjustedEnd = new Date(start.getTime() + defaultSlotDuration * 60000);
             }
 
-            console.log("account:", account)
             const adjustedTimeSlot: TimeSlot = {
                 _id: undefined,
                 start: start,
@@ -153,29 +136,19 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
                 isBooked: false,
                 createdById: account?._id || ''
             };
-            // setAvailability([...availability, adjustedTimeSlot]);
             setFetchedEvents([...fetchedEvents, adjustedTimeSlot]);
 
-
-            console.log(adjustedTimeSlot)
-
-
             try {
+                // post/save the selected timeslot
                 const response = await axios.post('/api/timeslots', {events: [adjustedTimeSlot]}, {
                     headers: {'Authorization': `Bearer ${token}`}
                 });
-                const savedTimeSlot = response.data.insertedEvents[0]; // returns the created object with _id
-                console.log("before", fetchedEvents)
+                const savedTimeSlot = response.data.insertedEvents[0];
 
-                console.log("saved time slot in handle select:", savedTimeSlot)
+                // update the state
                 setFetchedEvents([...fetchedEvents, {...adjustedTimeSlot, _id: savedTimeSlot._id}]);
-                console.log("after", fetchedEvents)
-                console.log("old selected timeslot:", selectedTimeSlot)
-                // setSelectedTimeSlot(savedTimeSlot)
-                // console.log("new selected timeslot:", selectedTimeSlot)
 
             } catch (error) {
-                console.error("Error saving new timeslot:", error);
                 triggerAlert("Error Saving Timeslot", "There was an error saving the timeslot, please try again later.", "error", 3000, "dialog")
             }
             ;
@@ -198,21 +171,10 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
             }).then(() => {
                 setFetchedEvents(fetchedEvents.filter(a =>
                     !(a.start.getTime() === selectedTimeSlot.start.getTime() && a.end.getTime() === selectedTimeSlot.end.getTime())));
-                console.log(fetchedEvents.length)
                 setDeleteDialog(false);
                 setDeleteOptionDialogOpen(false);
             }).catch(error => {
-                console.error("Error deleting timeslot:", error);
-            });
-        }
-    };
-
-
-    const handleTimeChange = (field: any, value: any) => {
-        if (selectedTimeSlot) {
-            setSelectedTimeSlot({
-                ...selectedTimeSlot,
-                [field]: value
+                triggerAlert("Error Deleting Timeslot", "There deleting an error saving the timeslot, please try again later.", "error", 3000, "dialog")
             });
         }
     };
@@ -220,7 +182,6 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
 
     const handleSelectTimeSlot = (TimeSlot: TimeSlot) => {
         setSelectedTimeSlot(TimeSlot);
-        console.log("selected clicked:", TimeSlot)
         if (TimeSlot.isBooked) {
             setViewBookedDialogOpen(true)
         } else {
@@ -229,52 +190,36 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
     };
 
 
-    // updated
+    // set the selected timeslot to repeat on an weekly basis
     const handleFixWeekly = async () => {
         if (selectedTimeSlot) {
             try {
-                // Construct the URL for the PATCH request
-                // const url = `/api/events/${selectedTimeSlot.id}/fixed`; // Assuming `id` is how you reference events
-                console.log("selected Timeslot:", selectedTimeSlot)
-
                 const updatedTimeSlot = {
                     ...selectedTimeSlot,
                     isFixed: true,
-
                     createdById: account?._id
                 };
-
 
                 // Send the PATCH request
                 const response = await axios.patch("/api/timeslots", updatedTimeSlot, {
                     headers: {'Authorization': `Bearer ${token}`} // Include auth token if needed
                 });
 
-                // Log the response data or handle it as needed
-                console.log("Updated and future instances added:", response.data);
-
-                // fetchEvents();
-
+                // update local state
                 const newFetchedEvents = fetchedEvents.map(event =>
-                    event._id === selectedTimeSlot._id ? { ...event, isFixed: true } : event
+                    event._id === selectedTimeSlot._id ? {...event, isFixed: true} : event
                 );
 
                 setFetchedEvents(newFetchedEvents);
 
-                // setFetchedEvents([...fetchedEvents, response.data])
 
                 // Close any open dialogs or UI elements
                 setDeleteDialog(false);
                 setActionDialogOpen(false);
             } catch (error) {
-                console.error("Error updating the event:", error);
+                triggerAlert("Error Updating Timeslot", "There deleting an error saving the timeslots, please try again later.", "error", 3000, "dialog")
             }
         }
-    };
-
-
-    const handleClose = () => {
-        setDeleteDialog(false);
     };
 
 
@@ -288,12 +233,10 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
 
     const fetchEvents = async (start: Date, end: Date) => {
         try {
-            console.log("start and end in fetchEvents frontend:",start.toISOString(), end.toISOString())
             const response = await axios.get('/api/timeslots', {
                 headers: {'Authorization': `Bearer ${token}`},
                 params: {start: start.toISOString(), end: end.toISOString()}
             });
-            console.log("fetchEvents frontend start and end:", start, end)
             const allEvents = response.data.map((event: any) => ({
                 ...event,
                 start: new Date(event.start),
@@ -302,62 +245,41 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
                 transitStart: event.transitStart ? new Date(event.transitStart) : undefined,
                 transitEnd: event.transitEnd ? new Date(event.transitEnd) : undefined
             }));
-            const bookedEvents = allEvents.filter((event: TimeSlot) => event.isBooked);
-            const editableEvents = allEvents.filter((event: TimeSlot) => !event.isBooked);
-            // setBookedEvents(bookedEvents);
-            // setAvailability(editableEvents);
-            console.log("fetched before", fetchedEvents)
-
             setFetchedEvents(allEvents)
-            console.log("all events", allEvents)
-            console.log("fetched after", fetchedEvents)
-
         } catch (error) {
             console.error("Error fetching timeslots:", error);
         }
     };
 
 
+    // go to the previous/next week
     const handleRangeChange = (range: RangeType) => {
         if (Array.isArray(range)) {
             const start = startOfDay(range[0]);
             const end = endOfDay(range[range.length - 1]);
-            console.log("end", end)
 
-            const lastDate = new Date(Math.max(.../*availability*/fetchedEvents.map(slot => slot.end.getTime())));
             fetchEvents(start, end)
 
-            console.log("fetched events after range change,", fetchedEvents)
-
-            // if (end > lastDate) {
-            //     console.log("need to extend calendar, here is frontend")
+            // check if we need to extend the saved timeslots in the DB ( fixed events are saved for the upcoming 6 months until someone navigates to a time beyond that, then more future timeslots will be generated )
             axios.post('/api/timeslots/extend', {
-                // start: lastDate,
                 start: start,
                 end: end,
-                // end: moment(lastDate).add(6, 'months').toDate(),
             }, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             }).then(() => {
-                // no need to fetch again i guess
-                // fetchEvents(start, end)
+                // no need to fetch again
             }).catch(error => {
                 console.error("Error extending fixed slots:", error);
             });
-            // } else {
-            //     fetchEvents(start, end)
-            // }
         }
     };
 
     // styling for the calendar
     const eventPropGetter = (event: TimeSlot) => {
         if (event.isBooked) {
-            // Check for transit times
-            // const hasTransit = event.transitStart && event.transitEnd;
-
+            // Check for transit times and display them in a different color
             if (event.transitStart && event.transitEnd) {
                 const transitStart = new Date(event.transitStart).getTime();
                 const transitEnd = new Date(event.transitEnd).getTime();
@@ -384,7 +306,6 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
                         lightblue ${beforePercent + eventPercent}%
                     )`,
                         color: 'black',
-                        // pointerEvents: 'none' as 'none',
                         opacity: 0.6,
                         zIndex: 1,
                     }
@@ -403,7 +324,7 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
             };
         }
 
-        // Style for editable events
+        // Style for editable events, different for fixed vs non-fixed ones
         return {
             className: 'editable-event',
             style: {
@@ -422,61 +343,22 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
         return event.transitEnd ? new Date(event.transitEnd) : new Date(event.end);
     };
 
-
+    // automatically scroll to the "work start" of the day
     const scrollToTime = new Date();
     scrollToTime.setHours(9, 0, 0, 0);
 
 
-    // const CustomToolbar = ({ label, onNavigate, onView }: ToolbarProps<TimeSlot>) => {
-    //     const currentYear = new Date().getFullYear();
-    //
-    //     return (
-    //         <div className="rbc-toolbar">
-    //   <span className="rbc-btn-group">
-    //     <button type="button" onClick={() => onNavigate(NavigateAction.PREVIOUS)}>Back</button>
-    //     <button type="button" onClick={() => onNavigate(NavigateAction.TODAY)}>Today</button>
-    //     <button type="button" onClick={() => onNavigate(NavigateAction.NEXT)}>Next</button>
-    //   </span>
-    //             <span className="rbc-toolbar-label">{label} - {currentYear}</span>
-    //             <span className="rbc-btn-group">
-    //     <button type="button" onClick={() => onView('week')}>Week</button>
-    //     <button type="button" onClick={() => onView('month')}>Month</button>
-    //   </span>
-    //         </div>
-    //     );
-    // };
-
-
+    // format the calendar to display month, day and year
     let formats = {
         dateFormat: 'dd',
-
-        // dayFormat: (date: Date, culture: any, localizer: any) =>
-        //     localizer.format(date, 'DDD', culture),
-
-        // dayFormat: (date: Date, culture: string,) =>
-        //     localizer.format(date, 'DDD', culture),
-        //
-        // dayRangeHeaderFormat: ({ start, end }:{start: Date, end:Date}, culture:any) =>
-        //     `${localizer.format(start, 'MMM dd', culture)} — ${localizer.format(end, 'MMM dd, yyyy', culture)}`, // Format range as "Oct 01 — Oct 07, 2022".
-
-        // weekRangeHeaderFormat: (date:Date, culture: any) =>
-        //     localizer.format(date, 'MMMM yyyy', culture), // Full month and year, e.g., "October 2022".
-        //
-        // monthHeaderFormat: (date:Date, culture:any) =>
-        //     localizer.format(date, 'MMMM yyyy', culture), // Full month and year, e.g., "October 2022".
-        //
-        // yearHeaderFormat: (date:Date, culture:any) =>
-        //     localizer.format(date, 'yyyy', culture) // Year only, e.g., "2022".
-
-        dayRangeHeaderFormat: ({ start, end }:{start: Date, end:Date}, culture:any) =>
+        dayRangeHeaderFormat: ({start, end}: { start: Date, end: Date }, culture: any) =>
             `${localizer.format(start, 'MMM dd', culture)} — ${localizer.format(end, 'MMM dd, yyyy', culture)}`, // Short format for week range "Oct 01 — Oct 07"
 
     }
 
 
-
     const handleDrillDown = (event: any) => {
-        // Prevent any drill down action.
+        // Prevent any drill down action to prevent errors (we only allow weekly view)
         return;
     };
 
@@ -489,49 +371,20 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
                 step={15}
                 localizer={localizer}
                 scrollToTime={scrollToTime}
-                events={fetchedEvents/*[...fetchedEvents, ...availability]*/}
+                events={fetchedEvents}
                 startAccessor={getStartAccessor}
                 endAccessor={getEndAccessor}
                 style={{height: 520}}
-                formats = {formats}
-                // onEventDrop={handleEventDrop}
-                // onEventResize={handleEventResize}
+                formats={formats}
                 onDrillDown={handleDrillDown}
                 selectable
                 onSelectSlot={handleSelect}
                 onSelectEvent={handleSelectTimeSlot}
                 onRangeChange={handleRangeChange}
                 eventPropGetter={eventPropGetter}
-                // backgroundEvents={bookedEvents}
-                className="bg-black-300" // Apply Tailwind class here
-                // components={{
-                //     week: {
-                //         header: MyCustomWeekDateHandler,
-                //     },
-                // }}
-                // components={{
-                //     event: ({ event }) => <EventTooltip event={event} />
-                // }}
-                //     components={{
-                //         event: CustomEvent
-                //     }}
+                className="bg-black-300"
+
             />
-            {/*<Dialog open={deleteDialog} onClose={handleClose}>*/}
-            {/*    <DialogTitle>Delete Slot?</DialogTitle>*/}
-            {/*    <DialogContent>*/}
-            {/*        {selectedTimeSlot && <p>{selectedTimeSlot.title}</p>}*/}
-            {/*    </DialogContent>*/}
-            {/*    <DialogActions>*/}
-            {/*        <Button onClick={handleClose}>Cancel</Button>*/}
-            {/*        <Button onClick={handleFixWeekly}>Repeat Weekly</Button>*/}
-            {/*        <Button onClick={handleDelete} color="secondary">Delete</Button>*/}
-            {/*    </DialogActions>*/}
-            {/*</Dialog>*/}
-            {/*<div>*/}
-            {/*    /!*<button onClick={handleAction}>Do Something</button>*!/*/}
-            {/*    <AlertCustomized alert={alert} closeAlert={closeAlert}/>*/}
-            {/*</div>*/}
-            {/*the dialog for editing/managing events*/}
             <Dialog open={actionDialogOpen} onClose={() => setActionDialogOpen(false)}>
                 <DialogTitle>Manage Time Slot
                     <IconButton
@@ -552,10 +405,8 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setActionDialogOpen(false)}>Close</Button>
-                    {/* Include Edit button logic here if needed */}
-
-                    {/*todo: make */}
-                    <Button onClick={handleFixWeekly}>Repeat Weekly</Button>
+                    {selectedTimeSlot && !selectedTimeSlot.isFixed && (
+                        <Button onClick={handleFixWeekly}>Repeat Weekly</Button>)}
                     <Button onClick={() => {
                         if (selectedTimeSlot?.isFixed) {
                             setDeleteOptionDialogOpen(true);  // Open delete options for fixed events
@@ -604,6 +455,7 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
                 </DialogActions>
             </Dialog>
 
+            {/*dialogs for clicking on booked events*/}
             <Dialog open={viewBookedDialogOpen} onClose={handleViewBookedDialogClose}>
                 <DialogTitle>Timeslot Booked</DialogTitle>
                 <DialogContent>
@@ -618,21 +470,16 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
                     <Button onClick={() => setViewBookedDialogOpen(false)}>Close</Button>
                     {selectedTimeSlot?.jobId && (
                         <Button onClick={() => navigate(`/incoming/jobs/${selectedTimeSlot.jobId}`, {
-                            state: { redirectPath: location }
+                            state: {redirectPath: location}
                         })}>View Job Details</Button>
                     )}
                     {selectedTimeSlot?.requestId && (
-                        <Button onClick={() => navigate(`/incoming/requests/${selectedTimeSlot.requestId}`,{
-                            state: { redirectPath: location }
+                        <Button onClick={() => navigate(`/incoming/requests/${selectedTimeSlot.requestId}`, {
+                            state: {redirectPath: location}
                         })}>View Request Details</Button>
                     )}
                 </DialogActions>
             </Dialog>
-            {/*<Box display="flex" justifyContent="flex-end" sx={{ mt: 4 }}>*/}
-            {/*<Button variant="contained" color="primary" onClick={saveAvailability}>*/}
-            {/*    Save Availability*/}
-            {/*</Button>*/}
-            {/*</Box>*/}
         </div>
     );
 }

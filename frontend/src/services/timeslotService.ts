@@ -10,28 +10,11 @@ export class BookingError extends Error {
     }
 }
 
-// export const bookTimeSlot = (timeSlot: any, token: string|null) => {
-//     return new Promise((resolve, reject) => {
-//         axios.post('/api/timeslots/book', timeSlot, {
-//             headers: {'Authorization': `Bearer ${token}`}
-//         })
-//             .then(response => {
-//                 resolve(response.data);
-//             })
-//             .catch(error => {
-//                 if (error.response) {
-//                     if (error.response.status === 409) {
-//                         reject(new BookingError("Timeslot is no longer available", 409));
-//                     } else {
-//                         reject(new BookingError("An error occurred while booking the timeslot", error.response.status));
-//                     }
-//                 } else {
-//                     reject(new Error("Network or other error"));
-//                 }
-//             });
-//     });
-// };
-
+/**
+ * book a timeslot from a provider
+ * @param timeSlot: the selected time to be booked
+ * @param token
+ */
 export const bookTimeSlot = (timeSlot: any, token: string|null): Promise<any> => {
     return new Promise((resolve, reject) => {
         console.log("bookTimeSlot:", timeSlot)
@@ -58,44 +41,18 @@ export const bookTimeSlot = (timeSlot: any, token: string|null): Promise<any> =>
     });
 };
 
-// export const changeTimeSlot = (timeSlot: any, token: string|null) => {
-//
-//     return new Promise((resolve, reject) => {
-//         console.log("changing timeslot to this:", timeSlot)
-//
-//         // this includes changing timeslot AND sending notification
-//         axios.post('/api/requests/change-timeslots', {...timeSlot, isUpdate:true}, {
-//             headers: {'Authorization': `Bearer ${token}`}
-//         })
-//             .then(response => {
-//                 resolve(response.data);
-//
-//             })
-//             .catch(error => {
-//                 if (error.response) {
-//                     if (error.response.status === 409) {
-//                         reject(new BookingError("Timeslot is no longer available", 409));
-//                     } else {
-//                         console.log(error)
-//                         reject(new BookingError("An error occurred while booking the timeslot", error.response));
-//                     }
-//                 } else {
-//                     reject(new Error("Network or other error"));
-//                 }
-//             });
-//     });
-// };
 
-
+/**
+ * // change the timeslots upon provider's request (request status: action needed from requester)
+ * @param timeSlot: new timeslot to book
+ * @param token
+ */
 export const changeTimeSlot = async (timeSlot: any, token: string|null) => {
-    // const requestId = timeSlot.requestId;
     try {
-        // Proceed to change the timeslot
+        // change the timeslot
         const response = await axios.post('/api/requests/change-timeslots', {...timeSlot, isUpdate: true}, {
             headers: {'Authorization': `Bearer ${token}`}
         });
-
-        console.log("change timeslot data", response)
         // Return the successful response data
         return response.data;
     } catch (error: any) {

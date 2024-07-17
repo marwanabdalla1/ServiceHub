@@ -15,7 +15,6 @@ import {useLocation, useNavigate} from "react-router-dom";
 import {useRecovery} from "../../../contexts/RecoveryContext";
 import {toast} from "react-toastify";
 import {useAuth} from "../../../contexts/AuthContext";
-import {User} from "../../../models/Account";
 
 const defaultTheme = createTheme({
     palette: {

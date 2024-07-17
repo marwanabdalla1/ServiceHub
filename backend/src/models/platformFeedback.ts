@@ -13,8 +13,7 @@ export interface IPlatformFeedback extends Document {
     rating: number;
     content: string;
     category: ReviewCategory;
-    givenBy: Types.ObjectId; // Reference to an Account document
-    // Other fields...
+    givenBy: Types.ObjectId;
 }
 
 const PlatformFeedbackSchema: Schema = new Schema({
@@ -23,7 +22,6 @@ const PlatformFeedbackSchema: Schema = new Schema({
     content: { type: String, required: true },
     category: { type: String, enum: Object.values(ReviewCategory), required: true },
     givenBy: { type: Schema.Types.ObjectId, ref: 'Account', required: true },
-    // Other fields...
 }, { timestamps: true });
 
 export default mongoose.model<IPlatformFeedback>('PlatformFeedback', PlatformFeedbackSchema);
