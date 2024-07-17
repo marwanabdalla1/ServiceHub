@@ -153,7 +153,7 @@ const SelectAvailabilityPage: React.FC = () => {
                     onClick={() => navigate('/')}
                     sx={{ ml: 2, backgroundColor: "64B5F6"}}
                 >
-                    Go to homepage
+                    Finish and go to homepage
                 </Button>
             </Box>
         </Container>

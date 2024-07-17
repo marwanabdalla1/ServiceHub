@@ -158,6 +158,7 @@ function AvailabilityCalendarBooking({
 
 
     const handleNavigate = (date: Date) => {
+        // todo: uncomment!
         // if (isBefore(date, new Date())) {
         //     console.log('Cannot go back past today');
         //     return; // Prevent navigation to past dates

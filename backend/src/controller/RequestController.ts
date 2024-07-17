@@ -12,8 +12,6 @@ import {
 import mongoose from 'mongoose';
 import {sortBookingItems} from "../util/requestAndJobUtils";
 import {formatDateTime} from "../util/dateUtils";
-
-
 /**
  * Handles missing required properties in the request body.
  * @param req - Express request object
@@ -360,6 +358,7 @@ export const handleChangeTimeslot: RequestHandler = async (req, res, next) => {
                 strict: true
             });
             console.log("updated request after changing time:", updatedRequest)
+            res.status(200).json(updatedRequest)
         }
 
     } catch (error) {
@@ -460,49 +459,4 @@ export const deleteRequest: RequestHandler = async (req, res) => {
 };
 
 
-
-// one time delete thing:
-
-export const getServiceRequestsByRequesterAndDelete: RequestHandler = async (req, res) => {
-    try {
-        const {requesterId} = req.params;
-
-
-        const query: Query = {requestedBy: requesterId};
-
-        const serviceRequests = await ServiceRequest.find(query)
-            .populate([
-                {
-                    path: 'requestedBy',
-                    select: 'firstName lastName email profileImageId phoneNumber address location postal country'
-                },
-                {
-                    path: 'provider',
-                    select: 'firstName lastName email profileImageId phoneNumber address location postal country'
-                }
-            ])
-            .exec();
-
-        if (serviceRequests.length === 0) {
-            return res.status(404).json({message: "No service requests found for this requester."});
-        }
-
-        const requestsWithTimeslots = await Promise.all(serviceRequests.map(async (request) => {
-            const timeslot = await Timeslot.findOne({requestId: request._id}).exec();
-            return {...request.toObject(), timeslot};
-        }));
-
-        for (const requestwslot of requestsWithTimeslots){
-            if(!requestwslot.timeslot){
-                console.log("to delete:", requestwslot)
-                await ServiceRequest.findByIdAndDelete(requesterId)
-            }
-        }
-
-
-    } catch (error: any) {
-        console.error("Failed to retrieve service requests:", error);
-        res.status(500).json({message: "Internal server error", error: error.message});
-    }
-};
 

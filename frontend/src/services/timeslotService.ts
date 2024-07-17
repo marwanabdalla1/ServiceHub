@@ -95,6 +95,7 @@ export const changeTimeSlot = async (timeSlot: any, token: string|null) => {
             headers: {'Authorization': `Bearer ${token}`}
         });
 
+        console.log("change timeslot data", response)
         // Return the successful response data
         return response.data;
     } catch (error: any) {

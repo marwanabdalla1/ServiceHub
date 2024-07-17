@@ -258,12 +258,17 @@ const GenericConsumerCard: React.FC<GenericConsumerCardProps> = ({
                         {generalStatus}
                     </Typography>
 
-                    <Typography variant="body2" color="text.secondary" sx={{marginBottom: '1rem'}} component="span">
-                        Description:
-                    </Typography>
-                    <Typography variant="body2" sx={{marginBottom: '1rem'}} component='span'>
-                        {item.comment}
-                    </Typography>
+                    {item.comment && item.comment.trim() && (
+                        <>
+                            <Typography variant="body2" color="text.secondary" sx={{marginBottom: '1rem'}}
+                                        component="span">
+                                Description:
+                            </Typography>
+                            <Typography variant="body2" sx={{marginBottom: '1rem'}} component='span'>
+                                {item.comment}
+                            </Typography>
+                        </>
+                    )}
 
                 </div>
                 <div style={{display: 'flex', flexWrap: 'nowrap', overflowX: 'auto'}}>
