@@ -106,6 +106,7 @@ function FilterPage() {
     const handleSortChange = (sortKey: string | null) => {
         console.log('Sort key:', sortKey);
         setSortKey(sortKey);
+        setCurrentPage(1)
     };
 
     const handleApplyFilters = (newFilterState: FilterState) => {
@@ -115,6 +116,7 @@ function FilterPage() {
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
+        window.scroll(0,0)
     };
 
     return (
