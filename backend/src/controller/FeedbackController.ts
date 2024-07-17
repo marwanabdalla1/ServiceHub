@@ -10,7 +10,6 @@ import PlatformFeedback from "../models/platformFeedback";//
 //This is different than the review controller, this is for the feedback form for the ServiceHub Platform
 export const submitFeedback:RequestHandler = async (req, res) => {
     try {
-        // Assuming `req.user` is set by the `authenticate` middleware
         const user = (req as any).user;
         console.log("request to submit review by:", JSON.stringify(user))
         if (!user) {
