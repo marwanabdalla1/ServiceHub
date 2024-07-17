@@ -76,32 +76,46 @@ function UserProfile(): React.ReactElement {
 
     useEffect(() => {
         const fetchData = async () => {
-            try {
-                const [accountResponse, profileImage, servicesResponse, subscriptionResponse] = await Promise.all([
-                    axios.get('/api/account', {
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        }
-                    }),
-                    fetchProfileImageByToken(token!),
-                    axios.get('/api/offerings/myoffering', {
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        }
-                    }),
-                    axios.get('/api/becomepro/subscription', {
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        }
-                    })
-                ]);
+            let accountResponse, profileImage, servicesResponse, subscriptionResponse;
 
+            try {
+                accountResponse = await axios.get('/api/account', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
                 setAccount(accountResponse.data);
+            } catch (error) {
+                console.error('Error fetching account data:', error);
+            }
+
+            try {
+                profileImage = await fetchProfileImageByToken(token!);
                 setProfileImage(profileImage);
+            } catch (error) {
+                console.error('Error fetching profile image:', error);
+            }
+
+            try {
+                servicesResponse = await axios.get('/api/offerings/myoffering', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
                 setServices(servicesResponse.data || []);
+            } catch (error) {
+                console.error('Error fetching service data:', error);
+            }
+
+            try {
+                subscriptionResponse = await axios.get('/api/becomepro/subscription', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
                 setSubscriptions(subscriptionResponse.data);
             } catch (error) {
-                console.error('Error fetching data:', error);
+                console.error('Error fetching subscription data:', error);
             }
         };
 

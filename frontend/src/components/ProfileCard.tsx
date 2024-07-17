@@ -21,8 +21,8 @@ interface MediaCardProps {
 export default function MediaCard({ offering, profileImageUrl, loading }: MediaCardProps) {
   const provider = offering.provider;
   return (
-    <div className='border margin-4'>
-      <Card sx={{ borderRadius: '15px' }}>
+    <div className='border margin-4 rounded-2xl overflow-hidden'>
+      <Card>
         {loading ? (
           <Box display="flex" justifyContent="center" alignItems="center" height={280}>
             <CircularProgress />
@@ -37,10 +37,10 @@ export default function MediaCard({ offering, profileImageUrl, loading }: MediaC
         <CardContent>
           <div>
             <Typography gutterBottom variant="h5" component="div">
-              {provider.firstName} {provider.lastName}
+              {offering.serviceType}
             </Typography>
             <Typography variant="h6" color="text.secondary">
-              {offering.serviceType}
+              {provider.firstName} {provider.lastName}
             </Typography>
 
             <div className='flex space-x-4'>
@@ -49,7 +49,7 @@ export default function MediaCard({ offering, profileImageUrl, loading }: MediaC
               </Typography>
               <div className='flex space-x-1 items-center'>
                 <Typography variant="body2" color="text.secondary">
-                  {offering.rating === 0? 0 : offering.rating.toFixed(2)}
+                  {offering.rating === 0 ? 0 : offering.rating.toFixed(2)}
                 </Typography>
                 <GoStarFill className='text-yellow-500' />
               </div>
