@@ -10,7 +10,7 @@ const AdminHomePage: React.FC = () => {
 
     // admin panel
     useEffect(() => {
-        if (!token || (account && !isAdmin())) {
+        if (!token || !account || !isAdmin()) {
             navigate('/unauthorized');
         }
     }, [token, account]);
