@@ -81,8 +81,6 @@ const Navbar: React.FC<NavbarProps> = ({ toggleDrawer, onChange, onSearch, searc
     };
 
     const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-        console.log(token);
-        console.log("isLoggedIn: " + isLoggedIn());
         setProfileAnchorEl(event.currentTarget);
     };
 

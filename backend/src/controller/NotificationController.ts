@@ -12,10 +12,10 @@ interface NotificationInput {
     review?: string;
     recipient: string;
 }
+
 // Create a new notification
 export const createNotification = async (req: Request, res: Response) => {
     try {
-        // console.log("notification data:", req.body)
         const { content, notificationType, job, review, recipient, serviceRequest } = req.body;
         const newNotification = new Notification({
             isViewed: false,
@@ -36,7 +36,7 @@ export const createNotification = async (req: Request, res: Response) => {
 };
 
 
-// Refactored to accept parameters directly, NOT from API endpoint
+// create a notification direction, not from API endpoint
 export async function createNotificationDirect({ content, notificationType, job, review, recipient, serviceRequest }: NotificationInput) {
     try {
         const newNotification = new Notification({
@@ -60,9 +60,7 @@ export const getNotifications = async (req: Request, res: Response) => {
     try {
         // From the token, retrieve all notifications where the recipient is the id from the token
         const userId = (req as any).user.userId; // Assuming userId is available in the request (e.g., from authentication middleware)
-        // console.log("userId: ", userId);
         const notifications = await Notification.find({ recipient: userId }).sort({ createdAt: -1 }); // Sorting by createdAt in descending order
-        // console.log("notifications: ", notifications);
         res.status(200).json(notifications);
     } catch (error) {
         res.status(500).json({ message: (error as Error).message });
@@ -84,7 +82,6 @@ export const getNotificationById = async (req: Request, res: Response) => {
 export const updateNotification = async (req: Request, res: Response) => {
     try {
         const { isViewed, content, job, review, recipient, serviceRequest } = req.body;
-        console.log("Notification ID " + req.params.id);
 
         // Create an update object dynamically based on the request body
         const updateFields: any = {};

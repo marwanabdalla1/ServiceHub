@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from 'react';
 import {
-    Container,
     Box,
     Typography,
     Card,
@@ -11,17 +10,15 @@ import {
     AlertColor,
     AlertTitle, LinearProgress
 } from '@mui/material';
-import {useBooking, BookingDetails} from '../../contexts/BookingContext';
+import { BookingDetails} from '../../contexts/BookingContext';
 import {useNavigate} from "react-router-dom";
-import axios, {AxiosError} from "axios";
+import axios from "axios";
 import {RequestStatus, ServiceType} from "../../models/enums";
 import {useAuth} from "../../contexts/AuthContext";
-import {Timeslot} from "../../models/Timeslot";
-import {bookTimeSlot, BookingError} from '../../services/timeslotService';
+import { BookingError} from '../../services/timeslotService';
 import useAlert from "../../hooks/useAlert";
 import AlertCustomized from "../AlertCustomized";
-import {formatDateTime} from "../../utils/dateUtils";
-import * as mongoose from "mongoose";
+
 
 
 interface ReviewAndConfirmProps {
@@ -30,6 +27,7 @@ interface ReviewAndConfirmProps {
 
 }
 
+// step 4 of booking
 function ReviewAndConfirm({bookingDetails, handleCancel}: ReviewAndConfirmProps) {
     // const { bookingDetails } = useBooking();
     const navigate = useNavigate();
@@ -68,14 +66,6 @@ function ReviewAndConfirm({bookingDetails, handleCancel}: ReviewAndConfirmProps)
         }
         return () => clearInterval(timer);
     }, [showAlert, countdown]);
-
-
-    const checkTimeslotAvailability = async (start: Date, end: Date, createdById: string) => {
-        return axios.get(`/api/timeslots/check-availability`, {
-            params: {start, end, createdById},
-            headers: {'Authorization': `Bearer ${token}`}
-        });
-    };
 
 
     class BookingError extends Error {
@@ -118,15 +108,12 @@ function ReviewAndConfirm({bookingDetails, handleCancel}: ReviewAndConfirmProps)
                 timeSlot: bookingDetails.timeSlot, //this includes transit time
                 appointmentStartTime: bookingDetails.timeSlot?.start,
                 appointmentEndTime: bookingDetails.timeSlot?.end,
-                // uploads: [], //bookingDetails.uploads? || [],
                 comment: comment || " ",
                 serviceFee: bookingDetails.price, // Assuming the frontend uses 'fee' and backend expects 'serviceFee'
                 serviceOffering: bookingDetails.serviceOffering?._id, // Adjust field names as needed
                 job: undefined,
                 provider: bookingDetails.provider?._id,
                 requestedBy: bookingDetails.requestedBy?._id,
-                // requestedBy: "666eda4dda888fe359668b63",
-                // rating:  0, // Set default if not provided //no rating for the request, only for jobs
             };
 
             if (bookingDetails.provider?._id === bookingDetails.requestedBy?._id) {
@@ -135,8 +122,7 @@ function ReviewAndConfirm({bookingDetails, handleCancel}: ReviewAndConfirmProps)
                 return;
             }
 
-            console.log((bookingDetails))
-            console.log(requestData)
+
 
 
             try {
@@ -148,71 +134,23 @@ function ReviewAndConfirm({bookingDetails, handleCancel}: ReviewAndConfirmProps)
                 });
                 const requestId = response.data._id;
                 setRequestId(requestId);
-                console.log()
-                console.log('Booking confirmed:', response.data);
 
                 sendEmailNotification(bookingDetails.requestedBy?.email ? bookingDetails.requestedBy?.email : "",
                     bookingDetails.requestedBy?.firstName ? bookingDetails.requestedBy?.firstName : "",
                     bookingDetails.serviceType, bookingDetails.timeSlot?.start ? bookingDetails.timeSlot?.start : new Date());
 
 
-                // not needed, now all handled in backend
-                // const timeSlotWithRequest = {
-                //     ...bookingDetails.timeSlot,
-                //     // title: bookingDetails.timeSlot?.title,
-                //     requestId: requestId,
-                // };
-
-                // try {
-                // step 2: post the timeslot into timeslot table
-                // todo: comment out later
-                // const timeslotResponse = await bookTimeSlot(timeSlotWithRequest, token);
-                // console.log("Timeslot booked successfully", timeslotResponse);
-                //
-                // // // step 3: send notification to provider
-                // const notificationContent = `You have a new service request for ${requestData.serviceType} at ${formatDateTime(requestData.timeSlot?.start)}.`;
-                //
-                // const notificationData = {
-                //     isViewed: false,
-                //     content: notificationContent,
-                //     notificationType: "New Request",
-                //     serviceRequest: requestId,
-                //     recipient: requestData.provider
-                // };
-                // // generate new notification
-                // try {
-                //     const notification = await axios.post("api/notifications/", notificationData, {
-                //         headers: {Authorization: `Bearer ${token}`}
-                //     });
-                //     console.log("Notification sent!", notification);
-                //
-                // } catch (notificationError) {
-                //     console.error('Error sending notification:', notificationError);
-                // }
-
-                // navigate('/confirmation'); // Navigate to a confirmation page or show a confirmation message
                 navigate(`/confirmation/${requestId}/booking`); // Navigate to a confirmation page or show a confirmation message
 
 
                 //     if booking timeslot fails, then roll back the request
             } catch (error: any) {
-                console.error('Error confirming booking:', error);
 
                 if (error.code === 409 || error.response?.status === 409) {
                     setAlertMessage('Unfortunately, the selected timeslot is no longer available. Please select another time.');
                     setAlertSeverity('error');
                     setShowAlert(true);
                     setCountdown(5);
-                    // try {
-                    //     if (requestId) {
-                    //         console.log(requestId)
-                    //         await axios.delete(`/api/requests/${requestId}`, {
-                    //             headers: {'Authorization': `Bearer ${token}`}
-                    //         });
-                    //     }
-                    // } catch (error: any) {
-                    //     console.log(error)
-                    // }
                 } else {
                     // alert('An error occurred while confirming your booking. Please try again.');
                     setAlertMessage('An error occurred while confirming your booking. Please try again.');
@@ -249,11 +187,9 @@ function ReviewAndConfirm({bookingDetails, handleCancel}: ReviewAndConfirmProps)
     return (
         <>
             <div>
-                {/*<button onClick={handleAction}>Do Something</button>*/}
                 <AlertCustomized alert={alert} closeAlert={closeAlert}/>
             </div>
 
-            {/*todo: modify this to use the component*/}
             {showAlert && (
                 <Box sx={{position: 'relative', mb: 2, maxWidth: '500px', margin: 'auto'}}>
                     <LinearProgress variant="determinate" value={(countdown / 5) * 100}
@@ -274,16 +210,12 @@ function ReviewAndConfirm({bookingDetails, handleCancel}: ReviewAndConfirmProps)
                 </Box>
             )}
             <>
-                {/*<Typography variant="h6" gutterBottom>*/}
-                {/*    Step 4 of 4*/}
-                {/*</Typography>*/}
+                {/*review and confirm*/}
                 <Typography variant="h4" gutterBottom>
                     Review and confirm booking
                 </Typography>
-                {/*<Box sx={{display: 'flex', justifyContent: 'space-between', mt: 2}}>*/}
-                {/*    <Button variant="outlined" onClick={onBack}>Back</Button>*/}
-                {/*</Box>*/}
                 <Card sx={{mb: 2}}>
+                    {/*details of the booking*/}
                     <CardContent>
                         <Typography variant="h6" gutterBottom>
                             Booking Details
@@ -306,6 +238,7 @@ function ReviewAndConfirm({bookingDetails, handleCancel}: ReviewAndConfirmProps)
                     </CardContent>
                 </Card>
                 <Card sx={{mb: 2}}>
+                    {/*consumer can add notes*/}
                     <CardContent>
                         <Typography variant="h6" gutterBottom>
                             Add Booking Notes
@@ -323,6 +256,7 @@ function ReviewAndConfirm({bookingDetails, handleCancel}: ReviewAndConfirmProps)
                 </Card>
                 <Box sx={{display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mt: 2}}>
 
+                    {/*display a "disclaimer" info that providers have access to the consumer's contact*/}
                     <Typography variant="body2" color="text-secondary" sx={{maxWidth: "50%",
                         fontSize: '0.75rem',
                         textAlign: 'right',

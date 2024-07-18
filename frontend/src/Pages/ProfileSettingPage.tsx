@@ -43,6 +43,8 @@ import ListItem from "@mui/joy/ListItem";
 import List from "@mui/joy/List";
 import {ListItemButton} from "@mui/joy";
 import LightBlueButton from "../components/inputs/BlueButton";
+import useAlert from "../hooks/useAlert";
+import AlertCustomized from "../components/AlertCustomized";
 
 type EditModeType = {
     [key: string]: boolean;
@@ -74,6 +76,8 @@ function UserProfile(): React.ReactElement {
 
     const [activeSection, setActiveSection] = useState("profile");
 
+    const {alert, triggerAlert, closeAlert} = useAlert(30000);
+
     useEffect(() => {
 
         const fetchData = async () => {
@@ -87,14 +91,12 @@ function UserProfile(): React.ReactElement {
                 });
                 setAccount(accountResponse.data);
             } catch (error) {
-                console.error('Error fetching account data:', error);
             }
 
             try {
                 profileImage = await fetchProfileImageByToken(token!);
                 setProfileImage(profileImage);
             } catch (error) {
-                console.error('Error fetching profile image:', error);
             }
 
             try {
@@ -105,7 +107,7 @@ function UserProfile(): React.ReactElement {
                 });
                 setServices(servicesResponse.data || []);
             } catch (error) {
-                console.error('Error fetching service data:', error);
+            //     proceed
             }
 
             try {
@@ -116,7 +118,7 @@ function UserProfile(): React.ReactElement {
                 });
                 setSubscriptions(subscriptionResponse.data);
             } catch (error) {
-                console.error('Error fetching subscription data:', error);
+            //     proceed
             }
         };
 
@@ -131,6 +133,7 @@ function UserProfile(): React.ReactElement {
                 return;
             }
 
+            // set breakpoint to determine which section we are in
             const breakpoint = window.innerHeight * 0.4;
 
             const profileRect = profileRef.current.getBoundingClientRect();
@@ -211,7 +214,7 @@ function UserProfile(): React.ReactElement {
 
     const handleKeyPress = (event: React.KeyboardEvent, field: string) => {
         if (event.key === 'Enter') {
-            updateAccountFields(account, field, token, null, fieldValue, setFieldValue).then(() => console.log('Field saved'));
+            updateAccountFields(account, field, token, null, fieldValue, setFieldValue).then(() => {});
             handleEditClick(field);
         }
     };
@@ -233,7 +236,7 @@ function UserProfile(): React.ReactElement {
                     window.location.reload();
                 }
             } catch (error) {
-                console.error('Error deleting service:', error);
+                triggerAlert("Error deleting service", 'An error occurred. Please refresh the page or try again later.', 'error')
             } finally {
                 setOpenServiceDeleteDialog(false);
                 setServiceToDelete(null);
@@ -267,7 +270,7 @@ function UserProfile(): React.ReactElement {
                 }
                 navigate('/login');
             } catch (error) {
-                console.error('Error deleting account:', error);
+                triggerAlert("Error deleting acount", 'An error occurred. Please refresh the page or try again later.', 'error')
             }
         } else {
             toast("Emails do not match");
@@ -301,6 +304,7 @@ function UserProfile(): React.ReactElement {
 
         if (elementRef && elementRef.current) {
             const navbarHeight = 180;
+            // leave some space on top due to navbar
             const elementTop = elementRef.current.getBoundingClientRect().top + window.scrollY - navbarHeight;
 
             window.scrollTo({
@@ -317,15 +321,12 @@ function UserProfile(): React.ReactElement {
                 }
             });
 
-            console.log(`Status: ${response.status}`);
-            console.log(response.data);
-
             // Update the subscriptions state after cancellation
             setSubscriptions(subscriptions.map(sub => sub.id === subscriptionId ? {...sub, status: 'canceled'} : sub));
             window.location.reload();
 
         } catch (error) {
-            console.error('Error cancelling subscription:', error);
+            triggerAlert("Error cancelling subscription", 'An error occurred. Please refresh the page or try again later.', 'error')
         }
     };
     const renderField = (label: string, field: string, isEditable: boolean = true) => {
@@ -363,12 +364,9 @@ function UserProfile(): React.ReactElement {
                         <>
                             <Button
                                 onClick={() => {
-                                    updateAccountFields(account, field, token, null, fieldValue, setFieldValue).then(() => console.log('Field updated'));
+                                    updateAccountFields(account, field, token, null, fieldValue, setFieldValue).then(() => {});
                                     handleEditClick(field)
                                 }}>Save</Button>
-                            {/*<Button onClick={() => {*/}
-                            {/*    handleEditClick(field)*/}
-                            {/*}}>Cancel</Button>*/}
                         </>
                     )}
                 </Box>
@@ -393,6 +391,13 @@ function UserProfile(): React.ReactElement {
             flexDirection: 'row',
             justifyContent: 'space-between'
         }}>
+
+            {/*alert*/}
+            <div>
+                <AlertCustomized alert={alert} closeAlert={closeAlert}/>
+            </div>
+
+            {/*left side: section navigation*/}
             <List sx={{width: '200px', maxWidth: '20%', mr: '2%', ml: '2%', mt: 5, position: 'fixed'}}>
                 <ListItem>
                     <ListItemButton selected={activeSection === 'profile'}
@@ -439,6 +444,7 @@ function UserProfile(): React.ReactElement {
                 </ListItem>
             </List>
 
+            {/*middle part: profile settings*/}
             <Box component="main"
                  sx={{flex: '1 1 100%', ml: '20%', minWidth: '70%', maxWidth: '75%', mr: "18%", overflowY: 'auto'}}>
 
@@ -714,6 +720,7 @@ function UserProfile(): React.ReactElement {
                 </Paper>
             </Box>
 
+            {/*right part: FAQ card*/}
             <Card sx={{
                 maxWidth: '15%',
                 mt: 10,

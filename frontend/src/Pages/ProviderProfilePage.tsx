@@ -1,5 +1,3 @@
-// this is more like offering profile page instead of provider profile page
-
 import React, {useEffect, useState} from 'react';
 import {
     Container,
@@ -7,7 +5,6 @@ import {
     Typography,
     Card,
     CardContent,
-    Button,
     Avatar,
     Grid,
     Divider,
@@ -16,10 +13,7 @@ import {
     Rating, FormControl, InputLabel, MenuItem,
     SelectChangeEvent
 } from '@mui/material';
-import {GoStarFill} from "react-icons/go";
 import {Account, Account as ServiceProvider} from '../models/Account';
-import {DaysOfWeek, ServiceType, JobStatus, ResponseStatus, RequestStatus} from '../models/enums';
-import {styled} from '@mui/system';
 import SearchIcon from '@mui/icons-material/Search';
 import ReviewsIcon from '@mui/icons-material/Reviews';
 import PinDropIcon from '@mui/icons-material/PinDrop';
@@ -30,38 +24,17 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import LightBlueButton from "../components/inputs/BlueButton";
 import {ServiceOffering} from '../models/ServiceOffering';
-import {Link, useParams, useNavigate} from 'react-router-dom';
+import { useParams, useNavigate} from 'react-router-dom';
 import {useBooking} from "../contexts/BookingContext";
 import axios from "axios";
 import Select from "@mui/material/Select";
-import {format} from 'date-fns';
-import {useAuth} from "../contexts/AuthContext";
-import {response} from "express";
-import * as url from "node:url";
 import StarIcon from '@mui/icons-material/Star';
 import {defaultProfileImage, fetchProfileImageById, fetchReviewerProfileImages} from "../services/fetchProfileImage";
 import CircularProgress from "@mui/material/CircularProgress";
 import ErrorPage from "./ErrorPage";
-
-// !todo s
-// 1. link reviews
-//     if someone has no reviews just don't have the part
-// 2. display contact info
-// 3. display next availability
+import {formatDateTime} from "../utils/dateUtils";
 
 
-const daysOfWeekToString = (day: DaysOfWeek): string => {
-    return DaysOfWeek[day];
-};
-
-// const formatTime = (date: Date): string => {
-//     return date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
-// };
-
-const formatDate = (date: Date) => {
-    // const date = new Date(dateString);
-    return format(date, 'dd MMM yyyy, HH:mm');
-};
 
 export interface Review {
     _id: string;
@@ -82,6 +55,7 @@ export interface Review {
 
 }
 
+// a provider offering's public profile page
 function ProviderProfilePage() {
     const {fetchAccountDetails, fetchOfferingDetails} = useBooking();
     const [provider, setProvider] = useState<ServiceProvider | null>(null);
@@ -96,9 +70,7 @@ function ProviderProfilePage() {
     const [profileImage, setProfileImage] = useState<string | null>(null);
     const [reviewerProfileImages, setReviewerProfileImages] = useState<{ [key: string]: string }>({});
 
-    // const provider = mockProvider;
     const {offeringId} = useParams<{ offeringId: string }>(); //use this to then make a request to the user with the id to get the user data
-
 
     const navigate = useNavigate();
 
@@ -112,6 +84,7 @@ function ProviderProfilePage() {
                     const fetchedOffering = await fetchOfferingDetails(offeringId);
                     setOffering(fetchedOffering);
 
+                    // Fetch next availability for the provider
                     try {
                         const response = await axios.get(`/api/timeslots/next-availability/${fetchedOffering.provider}`, {
                             params: {
@@ -126,29 +99,27 @@ function ProviderProfilePage() {
                 } catch (error) {
                     console.error("Failed to fetch offering details:", error);
                 }
+                // fetch provider's account details
                 try {
                     const fetchedProvider = await fetchAccountDetails(offeringId);
                     setProvider(fetchedProvider);
                     fetchProfileImageById(fetchedProvider._id).then(image => {
                         setProfileImage(image);
-                        console.log("profile image fetched");
                     });
 
 
                 } catch (error) {
                     console.error("Failed to fetch account details:", error);
                 }
+
+                // fetch reviews on this offering
                 try {
                     const reviewResponse = await axios.get(`/api/reviews/${offeringId}`);
                     setReviews(reviewResponse.data.review);
                     setLoading(false);
 
-
-
                 } catch (error) {
-                    console.error("Failed to fetch reviews:", error);
                     setLoading(false);
-
                 }
             } else {
                 setLoading(false);
@@ -158,7 +129,7 @@ function ProviderProfilePage() {
     }, [offeringId]);
 
 
-// Use the useEffect hook to call the new function when reviews change
+    // Fetch reviewer profile images when reviews change
     useEffect(() => {
         if (reviews.length > 0) {
             fetchReviewerProfileImages(reviews).then(images => {
@@ -183,6 +154,7 @@ function ProviderProfilePage() {
         navigate(`/offerings/${offeringId}/booking/step0`);
     };
 
+    // handle the searching and filtering of reviews
     const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(event.target.value);
     };
@@ -254,6 +226,7 @@ function ProviderProfilePage() {
         },
     };
 
+    // Helper function to format address
     function formatAddress(country: any, location: any, postal: any) {
         // Filter out undefined or null values and join with a comma
         return [country, location, postal].filter(Boolean).join(', ');
@@ -262,6 +235,8 @@ function ProviderProfilePage() {
     return (
         <Container>
             <Box sx={{mt: 4}}>
+
+                {/*providers' general info*/}
                 <Grid container spacing={4} sx={{mt: 2}}>
                     <Grid item xs={3}>
                         <Avatar
@@ -304,24 +279,6 @@ function ProviderProfilePage() {
                                 )}
                             </Box>
 
-                            {/*kinda redundant here*/}
-                            {/*/!*<Box sx={{display: 'flex', alignItems: 'center'}}>*!/*/}
-                            {/*    {totalReviews > 0 ? (*/}
-                            {/*        <>*/}
-
-                            {/*            <Typography variant="body1" sx={{mr: 0}} gutterBottom>*/}
-                            {/*                {offering.rating.toFixed(2)}*/}
-                            {/*                 ({offering.reviewCount} reviews)*/}
-
-                            {/*            </Typography>*/}
-                            {/*        </>*/}
-                            {/*    ) : (*/}
-                            {/*        <Typography variant="body1" sx={{ml: 1}} color="text.secondary" gutterBottom>*/}
-                            {/*            (0 reviews)*/}
-                            {/*        </Typography>*/}
-                            {/*    )}*/}
-                            {/*/!*</Box>*!/*/}
-
                             <Box sx={{display: 'flex', flexDirection: 'row', alignItems:'center'}}>
                                 <PinDropIcon sx={{mr: 1}}></PinDropIcon>
                                 <Typography variant="body1" gutterBottom>
@@ -333,7 +290,7 @@ function ProviderProfilePage() {
 
                             <Typography variant="body1" gutterBottom>
                                 <CalendarMonthIcon sx={{mr: 1}}></CalendarMonthIcon>
-                                Next Availability: {nextAvailability ? formatDate(new Date(nextAvailability.start)) : 'No available times'}
+                                Next Availability: {nextAvailability ? formatDateTime(new Date(nextAvailability.start)) : 'No available times'}
                                 {/*{provider.availability}  */}
                             </Typography>
                             </Box>
@@ -341,6 +298,7 @@ function ProviderProfilePage() {
 
                         <Divider sx={{mt: 2}}/>
 
+                        {/*description, contact and payment method*/}
                         <Box sx={{display: 'flex', alignItems: 'flex-start', mt: 2, justifyContent: 'space-between'}}>
                             <Box sx={{flex: '1 1 45%', display: 'flex', flexDirection: 'row'}}>
                                 <DescriptionIcon sx={{mt: 2, mr: 1}}></DescriptionIcon>
@@ -351,13 +309,6 @@ function ProviderProfilePage() {
                                 </Box>
                             </Box>
 
-                            {/*<AccessTimeIcon sx={{mt:2}}/>*/}
-                            {/*<Box sx={{display: 'flex', flexDirection: 'column', flex: '1 1 30%', alignItems: 'left', mt: 2}}>*/}
-                            {/*    <Typography variant="body2" color="text.secondary">*/}
-                            {/*        {provider.email} </Typography>*/}
-                            {/*    <Typography variant="body2" color="text.secondary">*/}
-                            {/*        {provider.phoneNumber} </Typography>*/}
-                            {/*</Box>*/}
                             <Box sx={{mt: 2, flex: '1 1 30%'}}>
                                 <Box sx={{display: 'flex', alignItems: 'center', mb: 0}}>
                                     <EmailIcon sx={{mr: 1}}/>
@@ -380,13 +331,15 @@ function ProviderProfilePage() {
                                         Service Fee: €{offering.hourlyRate}/hour
                                     </Typography>
                                     <Typography variant="body2" color="text.secondary">
-                                        Payment methods: {offering.acceptedPaymentMethods}{/*todo: add this to */}
+                                        Payment methods: {offering.acceptedPaymentMethods}
                                     </Typography>
                                 </Box>
                             </Box>
                         </Box>
                     </Grid>
                 </Grid>
+
+                {/*display reviews for the offering*/}
                 <Grid container spacing={4} sx={{mt: 4}}>
                     <Grid item xs={3}>
                         <Card>
@@ -404,14 +357,6 @@ function ProviderProfilePage() {
                                         <Typography variant="body2">
                                             {offering.reviewCount} global ratings
                                         </Typography>
-                                        {/*<Box sx={{mt: 2}}>*/}
-                                        {/*    <Typography variant="body2">5 star</Typography>*/}
-                                        {/*    <Box sx={{backgroundColor: 'black', height: 10, width: '80%'}}></Box>*/}
-                                        {/*    <Typography variant="body2">80%</Typography>*/}
-                                        {/*    <Typography variant="body2">4 star</Typography>*/}
-                                        {/*    <Box sx={{backgroundColor: 'black', height: 10, width: '20%'}}></Box>*/}
-                                        {/*    <Typography variant="body2">20%</Typography>*/}
-                                        {/*</Box>*/}
                                         <Box sx={{mt: 2}}>
                                             {ratingCounts.map((count, index) => (
                                                 <Box key={index} sx={{display: 'flex', alignItems: 'center', mb: 1}}>
@@ -440,26 +385,19 @@ function ProviderProfilePage() {
 
 
                     </Grid>
+
+                    {/*if no reviews, display some placeholders to make the aesthetics look better*/}
                     {totalReviews<=0 &&(
                         <Box sx={{ maxWidth: 800, margin: 'auto', padding: 2 }}>
-                            {/* Engaging Graphic */}
-                            {/*<Box sx={{ textAlign: 'center', marginBottom: 2 }}>*/}
-                            {/*    <img src="/assets/moving-service-graphic.svg" alt="Moving Service" style={{ maxWidth: '100%' }} />*/}
-                            {/*</Box>*/}
-
-
-                            {/* Invitation to Review */}
 
 
                                 <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
-
-
                                     <ReviewsIcon sx={{
                                         mr: 5,
                                         color: 'white',
                                         backgroundColor: '#93c5fd',
-                                        borderRadius: '50%', // Makes the background a circle
-                                        p: 2, //padding
+                                        borderRadius: '50%',
+                                        p: 2,
                                         fontSize: '5rem' //big icon
 
                                     }} />
@@ -552,7 +490,6 @@ function ProviderProfilePage() {
                                                     variant="h6">{review.reviewer.firstName + " " + review.reviewer.lastName}</Typography>
                                             </Box>
                                             <Box sx={{display: 'flex', alignItems: 'center', mb: 2}}>
-                                                {/*<GoStarFill className='text-yellow-500'/>*/}
                                                 <Rating precision={0.5} defaultValue={review.rating}
                                                         readOnly={true}/>
                                                 <Typography variant="body2" sx={{ml: 1}}>
@@ -565,10 +502,6 @@ function ProviderProfilePage() {
                                             <Typography variant="body2" color="text.secondary">
                                                 Reviewed on {new Date(review.updatedAt).toLocaleDateString()}
                                             </Typography>
-                                            {/*<Box sx={{display: 'flex', justifyContent: 'space-between', mt: 2}}>*/}
-                                            {/*    <Button size="small">Helpful</Button>*/}
-                                            {/*    <Button size="small">Report Abuse</Button>*/}
-                                            {/*</Box>*/}
                                         </CardContent>
                                     </Card>
                                 )) : ""}

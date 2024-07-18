@@ -3,7 +3,6 @@ import Drawer from '@mui/joy/Drawer';
 import Button from '@mui/joy/Button';
 import Card from '@mui/joy/Card';
 import CardContent from '@mui/joy/CardContent';
-import Checkbox from '@mui/joy/Checkbox';
 import DialogTitle from '@mui/joy/DialogTitle';
 import DialogContent from '@mui/joy/DialogContent';
 import ModalClose from '@mui/joy/ModalClose';
@@ -11,8 +10,6 @@ import Divider from '@mui/joy/Divider';
 import FormControl from '@mui/joy/FormControl';
 import FormLabel from '@mui/joy/FormLabel';
 import FormHelperText from '@mui/joy/FormHelperText';
-import List from '@mui/joy/List';
-import ListItem from '@mui/joy/ListItem';
 import Stack from '@mui/joy/Stack';
 import RadioGroup from '@mui/joy/RadioGroup';
 import Radio from '@mui/joy/Radio';
@@ -33,10 +30,6 @@ import BuildIcon from '@mui/icons-material/Build';
 import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
 import Box from '@mui/material/Box';
 import {GERMAN_CITIES_SUPPORT} from "../shared/Constants";
-
-// const germanCities = [
-//   'Berlin', 'Munich', 'Hamburg', 'Cologne', 'Frankfurt', 'Stuttgart', 'Düsseldorf', 'Dortmund', 'Essen', 'Leipzig'
-// ];
 
 interface DrawerFilterProps {
   openDrawer: boolean;

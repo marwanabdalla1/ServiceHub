@@ -11,8 +11,7 @@ import { authenticate } from "../middleware/authenticate";
 
 const router = express.Router();
 
-// Example route that requires authentication
-router.post('/', authenticate, submitReview); //todo: if auth is implemented first in app, no need to have it again
+router.post('/', authenticate, submitReview);
 
 router.get('/by-jobs/:jobId', authenticate, findExistingReview);
 router.get('/by-jobs-all/:jobId', authenticate, findAllReviewsToJob);

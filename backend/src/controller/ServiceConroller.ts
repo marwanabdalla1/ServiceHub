@@ -11,8 +11,6 @@ import job from '../models/job';
 export const addService = async (req: Request, res: Response) => {
     try {
         const userId = (req as any).user.userId;
-        console.log("User id", userId);
-        console.log(req.body);
 
         const {
             selectedService,
@@ -79,7 +77,6 @@ export const addService = async (req: Request, res: Response) => {
         // Return the saved service offering;
         res.status(201).send(savedServiceOffering);
     } catch (err) {
-        console.error('Error adding service:', err);
         res.status(500).send('Internal Server Error');
     }
 }
@@ -89,9 +86,6 @@ export const editService = async (req: Request, res: Response) => {
     try {
         const userId = (req as any).user.userId;
         const serviceId = req.params.id;
-        console.log("User id", userId);
-        console.log("Service id", serviceId);
-        console.log(req.body);
 
         const {
             selectedService,
@@ -119,7 +113,6 @@ export const editService = async (req: Request, res: Response) => {
         }
 
         // Update the ServiceOffering object
-        // serviceOffering.serviceType = serviceType; //it shouldn't update the service type
         serviceOffering.hourlyRate = Number(hourlyRate);
         serviceOffering.description = description;
         serviceOffering.acceptedPaymentMethods = acceptedPaymentMethods.map((method: {
@@ -134,7 +127,6 @@ export const editService = async (req: Request, res: Response) => {
 
         res.status(200).send('Service offering updated successfully');
     } catch (err) {
-        console.error('Error editing service:', err);
         res.status(500).send('Internal Server Error');
     }
 }
@@ -196,7 +188,6 @@ export const deleteService = async (req: Request, res: Response, next: NextFunct
             return res.status(500).send('Failed to delete service offering');
         }
     } catch (err) {
-        console.error('Error deleting service:', err);
         return res.status(500).send('Internal Server Error');
     }
 };

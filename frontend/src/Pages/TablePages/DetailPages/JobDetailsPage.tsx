@@ -2,21 +2,21 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {useLocation, useNavigate, useParams} from 'react-router-dom';
 import axios from 'axios';
-import {Job} from '../models/Job';
+import {Job} from '../../../models/Job';
 import {Container, Typography, Box, CircularProgress} from '@mui/material';
-import {useAuth} from '../contexts/AuthContext';
-import {Review} from "../models/Review"; // Assuming you have a component to list reviews
-import GenericProviderCard from "../components/tableComponents/GenericProviderCard";
-import GenericConsumerCard from "../components/tableComponents/GenericConsumerCard";
-import {handleCancel, handleComplete, handleRevoke} from "../utils/jobHandler";
-import {ServiceRequest} from "../models/ServiceRequest";
-import useAlert from "../hooks/useAlert";
-import AlertCustomized from "../components/AlertCustomized";
-import useErrorHandler from "../hooks/useErrorHandler";
-import ErrorPage from "./ErrorPage";
-import ReviewCard from "../components/ReviewCard";
-import BlackButton from "../components/inputs/blackbutton";
-import {Account} from "../models/Account";
+import {useAuth} from '../../../contexts/AuthContext';
+import {Review} from "../../../models/Review"; // Assuming you have a component to list reviews
+import GenericProviderCard from "../../../components/tableComponents/GenericProviderCard";
+import GenericConsumerCard from "../../../components/tableComponents/GenericConsumerCard";
+import {handleCancel, handleComplete, handleRevoke} from "../../../utils/jobHandler";
+import {ServiceRequest} from "../../../models/ServiceRequest";
+import useAlert from "../../../hooks/useAlert";
+import AlertCustomized from "../../../components/AlertCustomized";
+import useErrorHandler from "../../../hooks/useErrorHandler";
+import ErrorPage from "../../ErrorPage";
+import ReviewCard from "../../../components/ReviewCard";
+import BlackButton from "../../../components/inputs/blackbutton";
+import {Account} from "../../../models/Account";
 
 // Define the props interface
 interface JobDetailsPageProps {
@@ -63,6 +63,7 @@ const JobDetailsPage = () => {
             const fetchJob = async () => {
                 try {
 
+                    // fetch the jobs with their corresponding timeslot
                     const response = await axios.get<Job>(`/api/jobs/${jobId}`, {
                         headers: {Authorization: `Bearer ${token}`},
                     });
@@ -71,10 +72,9 @@ const JobDetailsPage = () => {
                         navigate("/not-found");
                         return;
                     }
-                    console.log("job data with timeslot,", response.data)
                     const jobData = response.data;
 
-                    // determine the role
+                    // determine the role of the user
                     if (account && jobData) {
                         const isProvider = account?._id.toString() === jobData.provider._id.toString();
                         const isConsumer = account?._id.toString() === jobData.receiver._id.toString();
@@ -104,7 +104,6 @@ const JobDetailsPage = () => {
                         setJob(jobData);
 
 
-
                         // get the reviews
                         const reviewsResponse = await axios.get(`/api/reviews/by-jobs-all/${jobId}`, {
                             headers: {Authorization: `Bearer ${token}`},
@@ -117,35 +116,26 @@ const JobDetailsPage = () => {
                         }
 
                         if (reviewsResponse.data && reviewsResponse.data.reviews && reviewsResponse.data.reviews.length > 0) {
-                            console.log("success")
-                            console.log("setting reviews", reviewsResponse.data.reviews)
                             setReviews(reviewsResponse.data.reviews);
-                            console.log(reviews)
 
                             // Finding my review and other's review
                             const revFromMe = reviewsResponse.data.reviews.find((r: Review) => r.reviewer.toString() === account?._id.toString());
-                            console.log("rev from me:", revFromMe)
                             if (revFromMe) {
                                 setMyReview(revFromMe)
                             }
                             const revFromOther = reviewsResponse.data.reviews.find((r: Review) => r.recipient.toString() === account?._id.toString());
-                            console.log("rev from other:", revFromOther)
                             if (revFromOther) {
                                 setOtherReview(revFromOther)
                             }
 
-                            console.log("My review: ", myReview);
-                            console.log("Other review:", otherReview);
                             setLoading(false);
                         } else {
-                            console.log('No reviews found');
                             setLoading(false);
                             setReviews([]);
                         }
 
                     }
                 } catch (error:any) {
-                    console.error('Failed to fetch job details:', error);
                     setLoading(false);
                     if (error.response.status && error.response.status === 403) {
                         navigate("/unauthorized")
@@ -156,7 +146,6 @@ const JobDetailsPage = () => {
 
                 }
 
-                console.log("reviews here:", reviews)
             };
 
             if (jobId) {
@@ -164,44 +153,6 @@ const JobDetailsPage = () => {
             }
         }, [jobId, token, account]);
 
-        //
-        // useEffect(() => {
-        //     // Adjust paths based on role
-        //     if (job) {
-        //         const isProvider = account?._id.toString() === job.provider._id.toString();
-        //         const isConsumer = account?._id.toString() === job.receiver._id.toString();
-        //
-        //         const pathIncludesIncoming = location.pathname.includes("incoming");
-        //         const pathIncludesOutgoing = location.pathname.includes("outgoing");
-        //
-        //         if ((pathIncludesIncoming && !isProvider) || (pathIncludesOutgoing && !isConsumer)) {
-        //             navigate("/unauthorized");
-        //         } else if (isProvider) {
-        //             setRole("provider");
-        //             setOtherParty(job.receiver);
-        //             if (!redirectPath) {
-        //                 setRedirectPath('/incoming/jobs');
-        //             }
-        //         } else if (isConsumer) {
-        //             setRole("consumer");
-        //             setOtherParty(job.provider);
-        //             if (!redirectPath) {
-        //                 setRedirectPath('/outgoing/jobs');
-        //             }
-        //         } else {
-        //             // If neither, navigate to unauthorized
-        //             navigate("/unauthorized");
-        //         }
-        //     }
-        // }, [job, account, token])
-
-        // unmount
-        // useEffect(() => {
-        //
-        //     return () => {
-        //         setError(null)
-        //     };
-        // }, []);
 
         if (!job) {
             if (loading) {
@@ -211,18 +162,9 @@ const JobDetailsPage = () => {
                     </Box>
                 )
             } else {
-                console.log("error")
-                // navigate("/not-found")
                 return <ErrorPage title={"404 Not Found"} message={'The page you are looking for does not exist.'}/>;
-                // return <ErrorPage title={"404 Not Found"} message={'The job you\'re looking for cannot be found.'}/>
             }
         }
-        // // Authorization check
-        // if ((role === "provider" && account?._id !== job.provider._id) ||
-        //     (role === "consumer" && account?._id !== job.receiver._id)) {
-        //     navigate("/unauthorized")
-        // }
-
 
         const handleToggleNewReview = () => {
             setShowNewReview(!showNewReview); // Toggle visibility of the review card
@@ -230,7 +172,6 @@ const JobDetailsPage = () => {
 
         const onCancel = async () => {
             if (!job) {
-                console.error('No job selected');
                 return;
             }
             try {
@@ -242,19 +183,18 @@ const JobDetailsPage = () => {
                     account: account,
                     setShowMediaCard: () => {
                     },
+                    triggerAlert,
                 });
 
                 window.location.reload();
             } catch (error) {
-                console.error('Error accepting request:', error);
-                // Handle error appropriately if needed
+                triggerAlert("Error", "An error occured. Please refresh the page or try again later.")
             }
 
         };
 
         const onComplete = async () => {
             if (!job) {
-                console.error('No job selected');
                 return;
             }
             try {
@@ -271,15 +211,13 @@ const JobDetailsPage = () => {
                 window.location.reload();
             } catch
                 (error) {
-                console.error('Error accepting request:', error);
-                // Handle error appropriately if needed
+                triggerAlert("Error", "An error occured. Please refresh the page or try again later.")
             }
         };
 
 // handle revoking completed job
         const onRevoke = async () => {
             if (!job) {
-                console.error('No job selected');
                 return;
             }
             try {
@@ -290,12 +228,12 @@ const JobDetailsPage = () => {
                     token: token,
                     setShowMediaCard: () => {
                     },
+                    triggerAlert,
                 });
                 window.location.reload();
 
             } catch (error) {
-                console.error('Error accepting request:', error);
-                // Handle error appropriately if needed
+                triggerAlert("Error", "An error occured. Please refresh the page or try again later.")
             }
 
         };
@@ -351,7 +289,6 @@ const JobDetailsPage = () => {
         return (
             <Container>
                 <div>
-                    {/*<button onClick={handleAction}>Do Something</button>*/}
                     <AlertCustomized alert={alert} closeAlert={closeAlert}/>
                 </div>
 
@@ -360,24 +297,11 @@ const JobDetailsPage = () => {
                         {job.serviceType} Job Details
                     </Typography>
                     <CardComponent {...cardProps} />
-
-                    {/*<MediaCard*/}
-                    {/*    offeredService={job}*/}
-                    {/*    provider={job.provider}*/}
-                    {/*    receiver={job.receiver}*/}
-                    {/*    onComplete={handleAccept}*/}
-                    {/*    onCancel={handleCancel}*/}
-                    {/*    onReview={handleReview}*/}
-                    {/*    onRevoke={handleRevoke}*/}
-                    {/*    onClose={handleCancel}*/}
-                    {/*    // showExpandIcon={false} // Disable the expand icon for the details page*/}
-                    {/*/>*/}
-
+                    {/*only completed jobs can have reviews section*/}
                     {job.status.toString() === "completed" &&
                         <Box ref={reviewsRef} sx={{mt: 4}}>
                             <Typography variant="h4">Reviews</Typography>
                             <Box sx={{display: 'flex', justifyContent: 'space-between', width: '100%'}}>
-                                {/*<ReviewList reviews={reviews} /> /!* Render reviews *!/*/}
                                 {otherReview ? (
                                     <Box sx={{width: '45%', p: 1}}>
                                         <Typography variant="h6" sx={{mt: 3}}>Review from {otherParty?.firstName} to

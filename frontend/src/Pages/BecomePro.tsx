@@ -78,7 +78,7 @@ const BecomeProPage: React.FC = () => {
                         </div>
                         <div className="border-l-2 border-gray-900 h-12 mx-4"></div>
                         <div className="flex flex-col items-center">
-                            <h3 className="text-2xl font-bold">200+</h3>
+                            <h3 className="text-2xl font-bold">20+</h3>
                             <h3>Pro Customers</h3>
                         </div>
                     </div>

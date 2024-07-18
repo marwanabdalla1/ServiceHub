@@ -52,13 +52,12 @@ export enum ServiceType {
 
 export enum NotificationType {
     // new request/new job/ (job/request) status changed/ new review/ change time request from provider etc.
-    newRequest = "New Request", // 0
-    newJob = "New Job", // 1
-    JobStatusChanged = "Job Status Changed", // 2
-    RequestStatusChanged = "Request Status Changed", // 3
-    newReview = "New Review", //
-    timeRequestChanged = "Request Time Has Changed", // 5
-    timeslotChangeRequest = "Timeslot Change Request", // 5
-    updatedReview = "Updated Review", // 4
-
+    newRequest = "New Request",
+    newJob = "New Job",
+    JobStatusChanged = "Job Status Changed",
+    RequestStatusChanged = "Request Status Changed",
+    newReview = "New Review",
+    timeRequestChanged = "Request Time Has Changed",
+    timeslotChangeRequest = "Timeslot Change Request",
+    updatedReview = "Updated Review",
 }

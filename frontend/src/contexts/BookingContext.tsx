@@ -2,17 +2,14 @@ import React, {createContext, useContext, useState, ReactNode, useCallback} from
 import { Account } from '../models/Account';
 import {ServiceOffering} from "../models/ServiceOffering";
 import {ServiceType} from "../models/enums";
-import {Review} from "../models/Review";
 import axios from "axios";
 import {Timeslot} from "../models/Timeslot";
 
 export interface BookingDetails {
     location: string | undefined;     // Location of service
-    // startTime: Date | undefined;         // Time of appointment
     price: number | undefined;        // Price of service
     provider: Account | undefined;     // Service provider
     requestedBy: Account | undefined;  // User who requested the service
-    // endTime?: Date | null;     // endtime/duration of the service
     serviceOffering: ServiceOffering | undefined;
     serviceType: ServiceType | undefined;
     timeSlot: Timeslot | undefined
@@ -62,7 +59,6 @@ export const BookingProvider: React.FC<{ children: ReactNode }> = ({ children })
     const fetchAccountDetails = async (offeringId: string): Promise<Account> => {
         const offeringResponse = await axios.get(`/api/offerings/${offeringId}`);
         const offeringData = await offeringResponse.data;
-        // console.log(offeringData);
 
         if (!offeringData.provider) {
             throw new Error('Provider not found in the offering data');
@@ -70,34 +66,18 @@ export const BookingProvider: React.FC<{ children: ReactNode }> = ({ children })
 
         // Fetch the provider details using the provider ID from the offering data
         const providerResponse = await axios.get(`/api/account/providers/${offeringData.provider}`);
-        console.log(providerResponse)
         const providerData =  providerResponse.data;
 
-        // console.log(providerData);
         return providerData;
     };
-
-    // const fetchOfferingDetails = async (offeringId: string) => {
-    //     // try {
-    //         const response = await axios.get(`/api/offerings/${offeringId}`);
-    //         const data = response.data;
-    //         console.log("response text:", data);
-    //         return data;
-    //     // } catch(error: any) {
-    //         // console.log("error fetching  data: ", error);
-    //         // return null}
-    //     // }
-    // };
 
     const resetBookingDetails = () => setBookingDetails(defaultBookingDetails); // Reset function
 
     const fetchOfferingDetails = async (offeringId:string) => {
         try {
             const response = await axios.get(`/api/offerings/${offeringId}`);
-            console.log("response text:", response.data);
             return response.data;
         } catch (error) {
-            console.error("Error fetching offering details:", error);
             throw error;
         }
     };

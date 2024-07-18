@@ -9,8 +9,6 @@ import {useAuth} from "../../contexts/AuthContext";
 import {useEffect, useState} from "react";
 import axios from "axios";
 import {Link, useNavigate} from 'react-router-dom';
-import {now} from 'moment';
-import {formatDateTime} from '../../utils/dateUtils';
 import {handleComplete, handleRevoke, handleCancel} from "../../utils/jobHandler";
 import useAlert from "../../hooks/useAlert";
 import AlertCustomized from "../../components/AlertCustomized";
@@ -26,6 +24,7 @@ import GenericTable from "../../components/tableComponents/GenericTable";
 
 type Item = ServiceRequest | Job;
 
+// jobs that a provider has accepted
 export default function OfferedServicesTable() {
     const [showMediaCard, setShowMediaCard] = React.useState(false);
     const [selectedJob, setSelectedJob] = React.useState<Job | null>(null);
@@ -69,7 +68,6 @@ export default function OfferedServicesTable() {
                         });
                     }
 
-                    console.log(params)
 
                     const response = await axios.get(`/api/jobs/provider/${account._id}?${params.toString()}`, {
                         headers: {Authorization: `Bearer ${token}`}
@@ -78,7 +76,6 @@ export default function OfferedServicesTable() {
                     setJobs(response.data.data);
                     setTotal(response.data.total);
                 } catch (error) {
-                    console.error('Failed to fetch service jobs:', error);
                     setJobs([]);
                 }
             };
@@ -96,19 +93,11 @@ export default function OfferedServicesTable() {
         setShowMediaCard(job !== null);
     };
 
-    const handleChangeServiceType = (event: any) => {
-        setServiceTypeFilter(event.target.value);
-        setPage(0);
-    };
 
-    const handleChangeStatus = (event: any) => {
-        setStatusFilter(event.target.value);
-        setPage(0);
-    };
 
+    // actions to perform on the offered
     const onComplete = () => {
         if (!selectedJob) {
-            console.error('No job selected');
             return;
         }
         handleComplete({
@@ -123,7 +112,6 @@ export default function OfferedServicesTable() {
 
     const onRevoke = () => {
         if (!selectedJob) {
-            console.error('No job selected');
             return;
         }
         handleRevoke({
@@ -132,12 +120,13 @@ export default function OfferedServicesTable() {
             setJobs,
             token,
             setShowMediaCard,
+            triggerAlert,
+
         });
     };
 
     const onCancel = () => {
         if (!selectedJob) {
-            console.error('No job selected');
             return;
         }
         handleCancel({
@@ -147,6 +136,8 @@ export default function OfferedServicesTable() {
             token,
             account,
             setShowMediaCard,
+            triggerAlert,
+
         });
     };
 
