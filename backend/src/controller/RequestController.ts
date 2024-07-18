@@ -46,7 +46,6 @@ interface Query {
 export const createServiceRequest: RequestHandler = async (req: Request, res: Response, next) => {
     const user = (req as any).user;
 
-    console.log("request body:" + JSON.stringify(req.body), "userID: ", user.userId)
     const error = errorHandler(req, res, [
         "requestStatus",
         "serviceType",
@@ -67,29 +66,29 @@ export const createServiceRequest: RequestHandler = async (req: Request, res: Re
         });
     }
 
-
     // use transaction: either both request + timeslot succeeds or neither
     const session = await mongoose.startSession();
 
     try {
         session.startTransaction();
 
-        // Extract fields from req.body and possibly validate or transform them
+        // Extract fields from req.body
         const {timeSlot, ...requestBody} = req.body;
 
-        console.log("request body: " + requestBody)
         const newServiceRequest = await ServiceRequest.create(requestBody);
 
         if (!newServiceRequest._id) {
             return res.status(400).send({message: "Failed to create service request."});
         }
 
+        // book the timeslot
         const timeSlotData = {...timeSlot, requestId: newServiceRequest._id.toString()};
         await bookTimeslotDirect(timeSlotData, session);
 
-        // update the user
+        // update the user's request history
         await updateUserRequestHistory(req.body.provider, newServiceRequest._id.toString());
 
+        // commit
         await session.commitTransaction();
 
         res.status(201).send(newServiceRequest);
@@ -105,7 +104,6 @@ export const createServiceRequest: RequestHandler = async (req: Request, res: Re
                 recipient: req.body.provider
             });
         } catch (notificationError: any) {
-            console.error("Failed to create notification:", notificationError.message);
         }
 
     } catch (error: any) {
@@ -131,7 +129,6 @@ async function updateUserRequestHistory(userId: string, requestId: string) {
             $push: {requestHistory: requestId}
         });
     } catch (error) {
-        console.error("Failed to update user's request history:", error);
         throw new Error("Failed to update user's request history");
     }
 }
@@ -143,9 +140,6 @@ export const updateServiceRequest: RequestHandler = async (req: Request, res: Re
     const userId = (req as any).user.userId;
     const {requestId} = req.params;
     const updates = req.body;
-
-    console.log("update service request: ", userId, requestId)
-    console.log("request updates:", updates)
 
     const serviceRequest = await ServiceRequest.findById(requestId);
 
@@ -159,14 +153,12 @@ export const updateServiceRequest: RequestHandler = async (req: Request, res: Re
     }
 
     try {
+        // check if the update requires us to cancel the timeslot (i.e. release the timeslot to "available" again)
         const requiresCancellation = [RequestStatus.declined, "declined", RequestStatus.cancelled, RequestStatus.requesterActionNeeded].includes(updates.requestStatus);
-        console.log("requires cancellation: ", RequestStatus.requesterActionNeeded)
         if (requiresCancellation) {
             const cancellationResult = await cancelTimeslotWithRequestId(requestId);
-            console.log(cancellationResult.message);
         }
 
-        console.log("cancellation done", requestId)
         const updatedRequest = await ServiceRequest.findByIdAndUpdate(requestId, updates, {
             new: true,
             upsert: true,
@@ -175,9 +167,7 @@ export const updateServiceRequest: RequestHandler = async (req: Request, res: Re
 
         // updates the timeslot
         if (updates.requestStatus.toString() === "accepted") {
-            console.log("need to handle accept ")
             const updatedtimeslot = await updateTimeslotWithRequestId(requestId, updates.job)
-            console.log("updated timeslot with job:", updatedtimeslot)
         }
         res.status(200).json(updatedRequest);
 
@@ -196,19 +186,16 @@ export const getServiceRequestsByProvider: RequestHandler = async (req, res) => 
 
         // Ensure only the provider can get their own requests
         if (userId !== providerId) {
-            console.log("userId: ", userId, "\n providerId: ", providerId)
             return res.status(403).json({message: "Unauthorized access."});
         }
 
         const {serviceType, requestStatus, page, limit} = req.query;
 
-        console.log("queries", req.query)
-
+        // only not-accepted requests are retrieved, accepted ones are automatically turned into jobs
         const query: Query = {provider: providerId, requestStatus: {$ne: 'accepted'}};
 
         // Adding filters based on query parameters
         if (requestStatus) {
-            // query.requestStatus = requestStatus;
             if (Array.isArray(requestStatus)) {
                 query.requestStatus = {$in: requestStatus};
             } else {
@@ -216,7 +203,6 @@ export const getServiceRequestsByProvider: RequestHandler = async (req, res) => 
             }
         }
         if (serviceType) {
-            // query.serviceType = serviceType;
             if (Array.isArray(serviceType)) {
                 query.serviceType = {$in: serviceType};
             } else {
@@ -224,6 +210,7 @@ export const getServiceRequestsByProvider: RequestHandler = async (req, res) => 
             }
         }
 
+        // find the requests
         const serviceRequests = await ServiceRequest.find(query)
             .populate([
                 {
@@ -241,14 +228,15 @@ export const getServiceRequestsByProvider: RequestHandler = async (req, res) => 
             return res.status(404).json({message: "No service requests found for this provider."});
         }
 
+        // find the corresponding timeslots to the request
         const requestsWithTimeslots = await Promise.all(serviceRequests.map(async (request) => {
             const timeslot = await Timeslot.findOne({requestId: request._id}).exec();
             return {...request.toObject(), timeslot: timeslot || undefined};
         }));
 
+        // sort the requests according to time
         const sortedRequestsWithTimeslots = sortBookingItems(requestsWithTimeslots);
 
-        console.log("sorted requests", requestsWithTimeslots)
         const paginatedRequestsWithTimeslots = sortedRequestsWithTimeslots.slice((Number(page) - 1) * Number(limit), (Number(page)) * Number(limit));
 
         res.status(200).json({
@@ -257,7 +245,6 @@ export const getServiceRequestsByProvider: RequestHandler = async (req, res) => 
         });
 
     } catch (error: any) {
-        console.error("Failed to retrieve service requests:", error);
         res.status(500).json({message: "Internal server error", error: error.message});
     }
 };
@@ -272,14 +259,12 @@ export const getServiceRequestsByRequester: RequestHandler = async (req, res) =>
 
         // Ensure only the requester can get their own requests
         if (userId !== requesterId) {
-            console.log("userId: ", userId, "\n requesterId: ", requesterId)
             return res.status(403).json({message: "Unauthorized access."});
         }
 
         const {serviceType, requestStatus, page = 1, limit = 10} = req.query;
 
-        console.log("queries", req.query)
-
+        // accepted requests are not included since they are jobs
         const query: Query = {requestedBy: requesterId, requestStatus: {$ne: 'accepted'}};
 
         // Adding filters based on query parameters
@@ -322,7 +307,6 @@ export const getServiceRequestsByRequester: RequestHandler = async (req, res) =>
         });
 
     } catch (error: any) {
-        console.error("Failed to retrieve service requests:", error);
         res.status(500).json({message: "Internal server error", error: error.message});
     }
 };
@@ -335,7 +319,6 @@ export const handleChangeTimeslot: RequestHandler = async (req, res, next) => {
 
     let success = true;  // Flag to track success of booking
 
-    console.log("req body in handleChangeTimeslot", req.body)
 
     try {
         // book the new timeslot
@@ -343,12 +326,11 @@ export const handleChangeTimeslot: RequestHandler = async (req, res, next) => {
             const bookedTimeslot = await bookTimeslotDirect(req.body);
         } catch (error: any) {
             success = false;
-            console.error("Error in handling timeslot change:", error);
             if (!res.headersSent) {
                 res.status(500).json({message: "Failed to process timeslot change."});
             }
         }
-        //
+
         // if booking was successful, update the service request
         if (success) {
             // update the request status to pending again
@@ -357,7 +339,6 @@ export const handleChangeTimeslot: RequestHandler = async (req, res, next) => {
                 upsert: true,
                 strict: true
             });
-            console.log("updated request after changing time:", updatedRequest)
             res.status(200).json(updatedRequest)
         }
 
@@ -376,7 +357,6 @@ export const handleChangeTimeslot: RequestHandler = async (req, res, next) => {
                     review: undefined
                 });
             } catch (notificationError) {
-                console.error("Failed to create notification:", notificationError);
             }
         }
     }
@@ -406,7 +386,6 @@ export const getRequestById: RequestHandler = async (req, res) => {
             }
         ]).exec();
 
-        console.log(serviceRequest)
 
         if (!serviceRequest) {
             return res.status(404).json({message: "Service request not found."});
@@ -414,19 +393,16 @@ export const getRequestById: RequestHandler = async (req, res) => {
 
         // Ensure only the provider/consumer can access this request
         if (userId !== serviceRequest.requestedBy._id.toString() && userId !== serviceRequest.provider._id.toString()) {
-            console.log("userId: ", userId, "\n requesterId: ", serviceRequest.requestedBy._id, "provider ID:", serviceRequest.provider._id)
             return res.status(403).json({message: "Unauthorized access."});
         }
 
         const timeslot = await Timeslot.findOne({requestId: requestId}).exec();
         const requestWithTimeslot = {...serviceRequest.toObject(), timeslot: timeslot || undefined};
 
-        console.log("incoming requests with their timeslots", requestWithTimeslot)
 
         res.status(200).json(requestWithTimeslot);
 
     } catch (error: any) {
-        console.error("Failed to retrieve service requests:", error);
         res.status(500).json({message: "Internal server error", error: error.message});
     }
 };
@@ -436,7 +412,6 @@ export const getRequestById: RequestHandler = async (req, res) => {
  */
 export const deleteRequest: RequestHandler = async (req, res) => {
     const {requestId} = req.params;
-    console.log(req)
     const userId = (req as any).user._id;
 
     try {

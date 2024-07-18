@@ -34,7 +34,6 @@ MongoClient.connect(env.MONGO_CONNECTION_STRING!,)
         });
     })
     .catch((err: Error) => {
-        console.error("Failed to connect to MongoDB or set up GridFSBucket:", err);
         throw err;
     });
 
@@ -52,7 +51,6 @@ export const uploadCertificate: RequestHandler = async (req, res) => {
 
         // Check if the service exists
         if (!service) {
-            console.log("Service not found");
             return res.status(404).json({
                 error: "Not Found",
                 message: "Service not found."

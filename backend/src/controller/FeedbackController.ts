@@ -1,9 +1,4 @@
-import jwt from 'jsonwebtoken';
-import Account from "../models/account";
 import {RequestHandler} from "express";
-import * as dotenv from 'dotenv'
-import bcrypt from 'bcrypt';
-import {ERRORS} from "../helpers/authHelper";
 import PlatformFeedback from "../models/platformFeedback";//
 
 

@@ -1,36 +1,24 @@
 import { RequestHandler } from "express";
 import Review from "../models/review";
-import Notification from "../models/notification"
 import Job from "../models/job";
 import ServiceOffering from "../models/serviceOffering";
-import mongoose from "mongoose";
 import {createNotificationDirect} from "./NotificationController";
-//
-//
 
-// the reviewer has to have used the service (or is the provider)
-// no other reviews has existed for this job
+// submitting a review
 export const submitReview: RequestHandler = async (req, res) => {
     try {
-        // Assuming `req.user` is set by the `authenticate` middleware
         const user = (req as any).user;
-        console.log("request to submit review by:", JSON.stringify(user))
         if (!user) {
             return res.status(403).json({ error: "User data not found, authorization failed." });
         }
-
-        // sanity check
         const { content, rating, recipient, serviceOffering, jobId } = req.body;
-
-        // console.log("job: ", req.body)
 
         const jobDetails = await Job.findById(jobId).select('provider receiver');
         if (!jobDetails) {
             return res.status(404).json({ error: "Job not found." });
         }
-        console.log("job details:", jobDetails)
 
-        // Check if the user is the client or the provider of the job
+        // authorization check: Check if the user is the client or the provider of the job
         const isClient = jobDetails.receiver._id.toString() === user.userId;
         const isProvider = jobDetails.provider._id.toString() === user.userId;
 
@@ -59,12 +47,8 @@ export const submitReview: RequestHandler = async (req, res) => {
             job: req.body.jobId,
         };
 
-        console.log("review Data: ", reviewData)
-
         // Save review to the database
         const savedReview = await Review.create(reviewData);
-
-        console.log("saved review:", savedReview)
 
         // Update the service offering only if the reviewer is the client
         if (isClient && savedReview) {
@@ -74,7 +58,6 @@ export const submitReview: RequestHandler = async (req, res) => {
             });
             await recalculateServiceOfferingRating(savedReview.serviceOffering);
         }
-
 
         // push notification to receiver
         let notificationContent = `A new review has been added to the job ${jobId}.`;
@@ -93,7 +76,6 @@ export const submitReview: RequestHandler = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Failed to submit review:", error);
         res.status(500).json({ error: "Internal server error", message: "Could not submit review." });
     }
 };
@@ -103,7 +85,6 @@ export const submitReview: RequestHandler = async (req, res) => {
 export const findExistingReview: RequestHandler = async (req, res) => {
     const user = (req as any).user;
     const { jobId } = req.params;
-    console.log("job id for finding request: ", jobId)
     const userId = user.userId; // Assuming you're using some authentication middleware
 
     try {
@@ -116,16 +97,14 @@ export const findExistingReview: RequestHandler = async (req, res) => {
 
         }
     } catch (error) {
-        console.error('Server error while fetching review:', error);
-
         res.status(500).json({ success: false, message: "Server error", error });
     }
 }
 
+// find all reviews for a specific job
 export const findAllReviewsToJob: RequestHandler = async (req, res) => {
     const user = (req as any).user;
     const { jobId } = req.params;
-    console.log("job id for finding request: ", jobId)
     const userId = user.userId; // Assuming you're using some authentication middleware
 
     try {
@@ -140,13 +119,11 @@ export const findAllReviewsToJob: RequestHandler = async (req, res) => {
         if (reviews.length >0) {
             return res.json({ success: true, reviews: reviews });
         } else {
-            // return res.json({ success: false, review: []});
+            // if no reviews are made yet, still return success
             return res.status(200).json({ success: true, reviews: [], message: 'No reviews found for this job ID' });
 
         }
     } catch (error) {
-        console.error('Server error while fetching review:', error);
-
         res.status(500).json({ success: false, message: "Server error", error });
     }
 }
@@ -166,14 +143,13 @@ export const updateReview: RequestHandler = async (req, res) => {
             ...req.body
         }
         const updatedReview = await Review.findByIdAndUpdate(reviewId, { $set: updates }, { new: true });
-        console.log("updated Review", updatedReview)
+
         if (!updatedReview) {
             return res.status(404).json({ message: "Review not found" });
         }
 
         // logic to update a review
         await recalculateServiceOfferingRating(updatedReview.serviceOffering);
-        // res.status(200).json(updatedReview);
 
         // push notification to receiver
         const notificationContent = `A review has been updated to ${updatedReview.job}.`;
@@ -186,14 +162,12 @@ export const updateReview: RequestHandler = async (req, res) => {
             recipient: updatedReview.recipient.toString(),
         });
 
-        console.log(newNotification)
 
         res.status(200).json({
             message: "Review updated and service offering recalculated, notification sent",
             review: updatedReview, notification: newNotification
         });
     } catch (error) {
-        console.error("Failed to update review:", error);
         res.status(500).json({ message: "Failed to update review", error });
     }
 };
@@ -235,27 +209,23 @@ export const deleteReview: RequestHandler = async (req, res) => {
 
         res.status(200).json({ message: "Review deleted successfully." });
     } catch (error) {
-        console.error("Failed to delete review:", error);
         res.status(500).json({ error: "Internal server error", message: "Could not delete review." });
     }
 };
 
-// Function to recalculate and update the rating and review count for a service offering
+// Function to recalculate and update the rating and review count for a service offering after a review is updated/added
 async function recalculateServiceOfferingRating(serviceOfferingId: any) {
-    console.log("service offering id:", serviceOfferingId)
     try {
 
         // Find the service offering to get its provider
         const serviceOffering = await ServiceOffering.findById(serviceOfferingId).select('provider');
         if (!serviceOffering) {
-            console.error("Service offering not found:", serviceOfferingId);
             return;
         }
 
         const reviews = await Review.find({
             serviceOffering: serviceOfferingId,
             recipient: serviceOffering.provider});
-        // console.log("all reviews:", reviews)
         const totalRating = reviews.reduce((acc, curr) => acc + curr.rating, 0);
         const reviewCount = reviews.length;
         const averageRating = reviewCount > 0 ? totalRating / reviewCount : 0;
@@ -266,26 +236,23 @@ async function recalculateServiceOfferingRating(serviceOfferingId: any) {
             totalRating: totalRating
         });
 
-        console.log("Service offering ratings recalculated:", { serviceOfferingId, averageRating, reviewCount });
     } catch (error) {
-        console.error("Error recalculating service offering ratings:", error);
+        return;
     }
 }
 
 
 
-// get all reviews of an offering
+// get all reviews of an offering -> this is displayed in the provider's offering profile page
 // this does NOT require signing in!
 export const getAllReviewsByOffering: RequestHandler = async (req, res) => {
     // const user = (req as any).user;
     const { offeringId } = req.params;
-    console.log("offering id for finding reviews: ", offeringId)
 
     try {
         // Find the service offering to get its provider
         const serviceOffering = await ServiceOffering.findById(offeringId).select('provider');
         if (!serviceOffering) {
-            console.error("Service offering not found:", offeringId);
             return;
         }
 
@@ -295,8 +262,6 @@ export const getAllReviewsByOffering: RequestHandler = async (req, res) => {
             { path: 'reviewer', select: 'firstName lastName email profileImageId' },
         ]).exec();
         if (reviews) {
-            console.log(reviews.length, reviews)
-
             return res.json({ review: reviews });
         }
 
