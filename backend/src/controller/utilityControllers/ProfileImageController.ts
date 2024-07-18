@@ -2,7 +2,7 @@ import {GridFsStorage} from "multer-gridfs-storage";
 import env from "../../util/validateEnv";
 import multer from "multer";
 import express, {RequestHandler} from "express";
-import Account from "../models/account";
+import Account from "../../models/account";
 import {GridFSBucket, MongoClient, ObjectId} from "mongodb";
 
 interface MulterFile extends Express.Multer.File {

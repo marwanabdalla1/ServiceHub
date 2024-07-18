@@ -1,13 +1,23 @@
 import React, {useEffect, useState} from 'react';
 import axios from 'axios';
 import {
-    Container, Table, TableBody, TableCell, TableContainer,
-    TableHead, TableRow, Paper, Typography, TextField, Button, Grid, Box
+    Box,
+    Button,
+    Container,
+    Grid,
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    TextField,
+    Typography
 } from '@mui/material';
 import {useAuth} from "../../../contexts/AuthContext";
 import {useNavigate} from "react-router-dom";
 import {deleteAccount} from "../../../services/accountService";
-import ConfirmDeleteDialog from "../../../components/dialogs/ConfirmDeleteDialog";
 import {toast} from "react-toastify";
 
 interface Account {
@@ -67,9 +77,20 @@ export default function AdminUserData(): React.ReactElement {
         fetchUsers();
     };
 
-    const handleDelete = (account: Account) => {
-        setSelectedAccount(account);
-        setOpenDeleteAccountDialog(true);
+    // const handleDelete = (account: Account) => {
+    //     setSelectedAccount(account);
+    //     setOpenDeleteAccountDialog(true);
+    // };
+    const handleDelete = async (account: Account) => {
+        try {
+            if (token) {
+                await deleteAccount(token, account._id);
+                // Refresh the user list after deletion
+                await fetchUsers();
+            }
+        } catch (error) {
+            toast.error('Error deleting user data.');
+        }
     };
 
     const handleDeleteAccountCloseDialog = () => {
@@ -189,15 +210,15 @@ export default function AdminUserData(): React.ReactElement {
                 </Table>
             </TableContainer>
 
-            {selectedAccount && (
-                <ConfirmDeleteDialog
-                    open={openDeleteAccountDialog}
-                    onClose={handleDeleteAccountCloseDialog}
-                    onConfirm={handleConfirmDeleteAccount}
-                    message="Are you sure you want to delete this account?"
-                    isDeleteAccount={true}
-                />
-            )}
+            {/*{selectedAccount && (*/}
+            {/*    <ConfirmDeleteDialog*/}
+            {/*        open={openDeleteAccountDialog}*/}
+            {/*        onClose={handleDeleteAccountCloseDialog}*/}
+            {/*        onConfirm={handleConfirmDeleteAccount}*/}
+            {/*        message="Are you sure you want to delete this account?"*/}
+            {/*        isDeleteAccount={true}*/}
+            {/*    />*/}
+            {/*)}*/}
         </Container>
     );
 };
