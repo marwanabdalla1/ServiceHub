@@ -1,8 +1,19 @@
 import React, {useEffect, useState} from 'react';
 import axios from 'axios';
 import {
-    Container, Table, TableBody, TableCell, TableContainer,
-    TableHead, TableRow, Paper, Typography, TextField, Button, Grid, Box
+    Box,
+    Button,
+    Container,
+    Grid,
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    TextField,
+    Typography
 } from '@mui/material';
 import {useAuth} from "../../../contexts/AuthContext";
 import {useNavigate} from "react-router-dom";
@@ -28,10 +39,9 @@ export default function AdminUserData(): React.ReactElement {
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (!token || !account || !isAdmin()) {
+        if (!token || (account && !isAdmin())) {
             navigate('/unauthorized');
         }
-
         fetchUsers();
     }, [token, account]);
 
@@ -74,7 +84,7 @@ export default function AdminUserData(): React.ReactElement {
     const handleConfirmDeleteAccount = async (email?: string) => {
         if (email === selectedAccount?.email) {
             try {
-                if (token&&selectedAccount) {
+                if (token && selectedAccount) {
                     await deleteAccount(token, selectedAccount._id);
                     // Refresh the user list after deletion
                     await fetchUsers();

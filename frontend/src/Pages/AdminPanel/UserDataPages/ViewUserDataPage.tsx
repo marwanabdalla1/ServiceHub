@@ -60,11 +60,11 @@ export default function ViewUserData(): React.ReactElement {
         description: "",
     });
 
-    const {isAdmin, token} = useAuth();
     const navigate = useNavigate();
+    const {isAdmin, token, account : loggedInAccount} = useAuth();
 
     useEffect(() => {
-        if (!token || !account || !isAdmin()) {
+        if (!token || (loggedInAccount && !isAdmin())) {
             navigate('/unauthorized');
         }
         const fetchData = async () => {
