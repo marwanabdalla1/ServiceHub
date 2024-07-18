@@ -97,7 +97,7 @@ function FilterPage() {
     const clearFilters = () => {
         setFilterState({
             type: '',
-            priceRange: [15, 60],
+            priceRange: [0, 9999],
             locations: [],
             isLicensed: undefined,
         });
