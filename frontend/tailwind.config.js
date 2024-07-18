@@ -8,8 +8,8 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-      customBlue: '#1e40af', // Define your custom color
-      customGreen: '#C8D7D7', // Another custom color
+      customBlue: '#1e40af', 
+      customGreen: '#C8D7D7', 
       customBlack: '#2B2E4A',
       customGray: {
         light: '#f7fafc',
