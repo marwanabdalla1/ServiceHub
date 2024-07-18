@@ -230,8 +230,8 @@ async function generateAndSavePremiumUpgradeReview(user: any): Promise<void> {
 
 async function generateTestData(numRecords: number): Promise<void> {
     for (let i = 0; i < numRecords; i++) {
-        const firstName = faker.name.firstName();
-        const lastName = faker.name.lastName();
+        const firstName = faker.name.firstName().replace(/[^a-zA-Z]/g, '');
+        const lastName = faker.name.lastName().replace(/[^a-zA-Z]/g, '');
         const hashedPassword = await bcrypt.hash('securepassword', 10);
         const email = `${firstName.toLowerCase()}${lastName.toLowerCase()}@gmail.com`
 
@@ -254,7 +254,7 @@ async function generateTestData(numRecords: number): Promise<void> {
             location: 'München',
             postal: '80' + faker.random.number({min: 100, max: 999}).toString(),
             isProvider: true,
-            isPremium: Math.random() <= 0.4,
+            isPremium: Math.random() <= 0.2,
         });
 
         const user = await newUser.save();

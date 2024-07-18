@@ -100,7 +100,6 @@ async function findNonOverlappingTimeslot(requestStatus: RequestStatus, serviceO
     return null;
 }
 
-
 async function generateAndSaveServiceRequest(accounts: any[]): Promise<any> {
     // Randomly select an account as ServiceProvider
     const serviceProviderIndex = Math.floor(Math.random() * accounts.length);

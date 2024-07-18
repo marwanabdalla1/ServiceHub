@@ -229,7 +229,7 @@ function ProviderProfilePage() {
     // Helper function to format address
     function formatAddress(location: any, postal: any) {
         // Filter out undefined or null values and join with a comma
-        return ["German", location, postal].filter(Boolean).join(', ');
+        return ["Germany", location, postal].filter(Boolean).join(', ');
     }
 
     return (
