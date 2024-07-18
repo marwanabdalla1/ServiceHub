@@ -128,8 +128,7 @@ export const cancelSubscription: RequestHandler = async (req, res) => {
 // Webhook endpoint to handle events from Stripe
 export const handleStripeWebhook: RequestHandler = async (req, res) => {
   const sig = req.headers['stripe-signature'] as string | undefined;
-  const endpointSecret = 'whsec_e4288e0ddca69894ef6e5a36c76cd72a81db96434dd98b78a87812094cecde30';
-  
+  const endpointSecret = 'whsec_a355678d4fb8d4cfc9905764307fd1e29bfbb428e53602b67e9dde8f4ef79fd1';
   let event: Stripe.Event;
 
   try {

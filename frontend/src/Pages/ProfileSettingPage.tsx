@@ -79,6 +79,11 @@ function UserProfile(): React.ReactElement {
     const {alert, triggerAlert, closeAlert} = useAlert(30000);
 
     useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
+
+    useEffect(() => {
         if(!token){
             navigate("/unauthorized")
         }
@@ -144,7 +149,7 @@ function UserProfile(): React.ReactElement {
             const dangerZoneRect = dangerZoneRef.current.getBoundingClientRect();
 
 
-            if (dangerZoneRect.top < breakpoint * 1.5) {
+            if (dangerZoneRect.top < breakpoint) {
                 setActiveSection('dangerZone');
             } else if (profileRect.top <= breakpoint && profileRect.bottom > breakpoint) {
                 setActiveSection('profile');
