@@ -2,7 +2,7 @@ import express from 'express';
 import {
     deleteReview, findAllReviewsToJob,
     findExistingReview,
-    getAllReviewsByOffering,
+    getAllReviewsByOffering, getScoreByUser,
     submitReview,
     updateReview
 } from "../controller/ReviewController";
@@ -23,6 +23,9 @@ router.patch('/:reviewId', authenticate, updateReview);
 router.delete('/:reviewId', authenticate, deleteReview);
 
 router.get('/:offeringId', getAllReviewsByOffering);
+
+router.get('/score/:accountId', authenticate, getScoreByUser);
+
 
 export default router;
 

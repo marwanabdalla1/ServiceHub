@@ -19,6 +19,8 @@ import {formatDateTime} from "../../utils/dateUtils";
 import {defaultProfileImage, fetchProfileImageById} from "../../services/fetchProfileImage";
 import Link from "@mui/material/Link";
 import {Link as RouterLink} from 'react-router-dom';
+import axios from "axios";
+import {GoStarFill} from "react-icons/go";
 
 
 type Item = ServiceRequest | Job;
@@ -74,15 +76,42 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
         const navigate = useNavigate();
         const [profileImage, setProfileImage] = useState<string | null>(null);
 
-        // todo: check account is provider otherwise not authorized?
+        // score of the consumer
+        const [averageScore, setAverageScore] = useState<number>(0); // State to store average score
+        const [consumerReviewsCount, setConsumerReviewsCount] = useState<number>(0); // State to store average score
+
 
         useEffect(() => {
-            if (receiver) {
+            if (token && account && receiver) {
                 fetchProfileImageById(receiver._id).then((image) => {
                     setProfileImage(image);
                 });
+
+
+                // Fetch the score of the consumer
+                const getConsumerScore = async (accountId: string) => {
+                    try {
+                        const response = await axios.get(`/api/reviews/score/${accountId}`, {
+                            headers: {Authorization: `Bearer ${token}`},
+                        });
+                        console.log(response)
+                        if (response && response.data) {
+                            setAverageScore(response.data.averageScore);
+                            setConsumerReviewsCount(response.data.count);
+
+                        } else {
+                            setAverageScore(0);
+                        }
+                    } catch (error) {
+                        setAverageScore(0);
+                    }
+                }
+
+                getConsumerScore(receiver._id.toString())
+
             }
-        }, [receiver]);
+
+        }, [token, account, receiver]);
 
         const renderActions = () => {
             const buttons = [];
@@ -109,7 +138,8 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
                                               sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
 
                 } else if (item.requestStatus === "pending" && !item.timeslot) {
-                    buttons.push(<BlackButton text="Timeslot invalid. Click to cancel request" onClick={() =>  actions.cancelRequest?.(item)}
+                    buttons.push(<BlackButton text="Timeslot invalid. Click to cancel request"
+                                              onClick={() => actions.cancelRequest?.(item)}
                                               sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
                 }
                 if (actions.cancelRequest && ["action needed from requester"].includes(item.requestStatus)) {
@@ -201,15 +231,27 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
                             <Typography variant="h6">
                                 {isJob(item) ? "Job Detail" : "Request Detail"}
                             </Typography>
-                            <Typography variant="body1" color="textPrimary">
-                                Receiver: {receiver?.firstName + " " + receiver?.lastName}
-                            </Typography>
-                            <Typography variant="body2" color="textSecondary" >
-                                Email: <a href={`mailto:${receiver?.email}`} style={{ color: 'inherit', textDecoration: 'none' }}>{receiver?.email}</a>
+                            <div style={{display: "flex", justifyContent: "space-between"}}>
+                                <Typography variant="body1" color="textPrimary" marginRight={2}>
+                                    Receiver: {receiver?.firstName + " " + receiver?.lastName}
+                                </Typography>
+                                {Number(consumerReviewsCount) !== 0 && (
+                                    <div style={{display: "flex", justifyContent: "start"}}>
+                                        <GoStarFill className='text-yellow-500'/>
+                                        <Typography variant="body2" color="text.secondary">
+                                            {averageScore} ({consumerReviewsCount})
+                                        </Typography>
+                                    </div>
+                                )}
+                            </div>
+                            <Typography variant="body2" color="textSecondary">
+                                Email: <a href={`mailto:${receiver?.email}`}
+                                          style={{color: 'inherit', textDecoration: 'none'}}>{receiver?.email}</a>
                             </Typography>
                             <Typography variant="body2" color="textSecondary">
                                 {receiver?.phoneNumber ? (
-                                    <a href={`tel:${receiver.phoneNumber}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+                                    <a href={`tel:${receiver.phoneNumber}`}
+                                       style={{color: 'inherit', textDecoration: 'none'}}>
                                         Phone: {receiver.phoneNumber}
                                     </a>
                                 ) : ""}

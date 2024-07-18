@@ -47,9 +47,15 @@ export default function MediaCard({offering, profileImageUrl, loading}: MediaCar
                                 </Typography>
                             </div>
 
-                            <Typography variant="h6" color="text.secondary">
-                                €{offering.hourlyRate}/hr
-                            </Typography>
+                            <div>
+                                <Typography variant="h6" color="text.secondary">
+                                    €{offering.hourlyRate}/hr
+                                </Typography>
+                                <Typography variant="body1" color="text.secondary">
+                                    {provider.location}
+                                </Typography>
+                            </div>
+
                         </div>
 
                         <div className='flex items-center space-x-4'>
