@@ -34,7 +34,7 @@ const BookingPage = () => {
                     const provider = await fetchAccountDetails(offeringId);
                     setProvider(provider);
                 } catch (error) {
-                    console.error('Error fetching provider details:', error);
+                    return;
                 }
             }
         };
@@ -58,7 +58,6 @@ const BookingPage = () => {
 
 
     const handleStep = (index: number) => () => {
-        console.log("back step clicked!", index, step)
         if (index < step) { // Only allow navigation to previous steps
             setStep(index + 1);
         }

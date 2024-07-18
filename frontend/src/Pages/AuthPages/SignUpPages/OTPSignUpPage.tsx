@@ -67,7 +67,6 @@ export default function EmailVerification() {
 
         try {
             if (input_otp === otp) {
-                console.log("OTP Page: "+firstName, lastName, email, password);
                 const data: UserData = {
                     firstName: location.state.firstName,
                     lastName: location.state.lastName,

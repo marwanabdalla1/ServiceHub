@@ -35,7 +35,7 @@ const SelectAvailabilityPage: React.FC = () => {
     }
 
     if (!token || !account || (account && !isProvider)) {
-        // If not a provider, redirect to home or another appropriate page
+        // If not a provider, not authorized to set  schedule
         navigate('/unauthorized');
     }
 

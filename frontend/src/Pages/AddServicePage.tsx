@@ -5,6 +5,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 import { toast } from "react-toastify";
+import useAlert from "../hooks/useAlert";
+import AlertCustomized from "../components/AlertCustomized";
 
 interface FormData {
     selectedService: { title: string } | null;
@@ -57,9 +59,10 @@ function AddServicePage() {
     const [isLoading, setIsLoading] = useState<boolean>(false); // New state for loading
     const isEditMode = Boolean(serviceToEdit);
 
+    const {alert, triggerAlert, closeAlert} = useAlert(3000);
+
     useEffect(() => {
         if (isEditMode && serviceToEdit) {
-            console.log('Service to edit:', serviceToEdit);
             setFormData({
                 selectedService: { title: serviceToEdit.serviceType },
                 hourlyRate: serviceToEdit.hourlyRate.toString(),
@@ -69,7 +72,7 @@ function AddServicePage() {
                 defaultSlotTime: serviceToEdit.baseDuration.toString(),
                 travelTime: serviceToEdit.bufferTimeDuration.toString()
             });
-            fetchCertificate(serviceToEdit._id).then(r => console.log('Certificate fetched'));
+            fetchCertificate(serviceToEdit._id).then(r => {});
         }
     }, [isEditMode, serviceToEdit]);
 
@@ -83,9 +86,8 @@ function AddServicePage() {
                 responseType: 'blob'
             });
             setCertificate(certificateResponse.data);
-            console.log('Certificate fetched:', certificateResponse.data)
         } catch (error) {
-            console.error('Error fetching certificate:', error);
+            return
         }
     };
 
@@ -97,7 +99,6 @@ function AddServicePage() {
                     'Authorization': `Bearer ${token}`
                 }
             });
-            console.log('Certificate deleted:', response.data);
             setCertificate(null); // Reset the certificate state
         } catch (error) {
             console.error('Error deleting certificate:', error);
@@ -214,24 +215,29 @@ function AddServicePage() {
                     navigate('/select-availability', { state: { inAddServiceSteps: true } });
                 }
             } catch (error: any) {
-                console.error('Error submitting service:', error);
                 setIsLoading(false);
                 if (error.response && error.response.status === 400 && error.response.data === 'You already provide this service') {
-                    setErrorMessage('You already provide this service');
+                    triggerAlert("Duplicated service", 'You already provide this service', 'error')
+
                 } else {
-                    setErrorMessage('An error occurred. Please try again.');
+                    triggerAlert("Error", 'An error occurred. Please try again.', 'error')
+
                 }
             }
         } else {
-            console.log('Form validation failed');
+            triggerAlert("Form validation failed", 'Please check all your inputs and try again.', 'error')
+
         }
     };
 
     return (
         <Box className="w-full h-full flex items-center justify-center bg-gray-100" p={3}>
+            <div>
+                <AlertCustomized alert={alert} closeAlert={closeAlert}/>
+            </div>
             <Box className="w-full max-w-5xl p=6 bg-white shadow-md rounded-lg">
                 {!isEditMode && (
-                    <Stepper activeStep={1} alternativeLabel sx={{ mb: 2 }}>
+                    <Stepper activeStep={1} alternativeLabel sx={{mb: 2}}>
                         <Step>
                             <StepLabel>Check Profile</StepLabel>
                         </Step>
@@ -286,7 +292,7 @@ function AddServicePage() {
                                     shrink: true,
                                 }}
                             />
-                            <Typography variant="caption" color="textSecondary" style={{ marginLeft: '10px' }}>
+                            <Typography variant="caption" color="textSecondary" style={{marginLeft: '10px'}}>
                                 {/* (Range: 15 to 80 euros) */}
                             </Typography>
                         </Box>
@@ -351,19 +357,19 @@ function AddServicePage() {
                                 Upload professional certificate to your service (optional)
                             </p>
                             {certificate && (
-                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <div style={{display: 'flex', justifyContent: 'space-between'}}>
                                     <div>Certificate uploaded</div>
                                     <div>
                                         <a
                                             href={URL.createObjectURL(certificate)}
                                             download
-                                            style={{ marginRight: '10px' }}
+                                            style={{marginRight: '10px'}}
                                         >
                                             Download
                                         </a>
                                         <button
                                             onClick={handleDeleteCertificate}
-                                            style={{ color: 'red', textDecoration: 'underline' }}
+                                            style={{color: 'red', textDecoration: 'underline'}}
                                         >
                                             Delete
                                         </button>
@@ -386,11 +392,11 @@ function AddServicePage() {
                     </Grid>
                 </Grid>
                 <Box mt={4} className="flex justify-center p-2">
-                    <LightBlueButton className="py-2 px-2" text="Submit" onClick={handleSubmit} />
+                    <LightBlueButton className="py-2 px-2" text="Submit" onClick={handleSubmit}/>
                 </Box>
                 {isLoading && (
                     <Box mt={2} className="flex justify-center">
-                        <CircularProgress />
+                        <CircularProgress/>
                     </Box>
                 )}
             </Box>

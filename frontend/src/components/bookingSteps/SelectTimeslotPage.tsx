@@ -1,7 +1,6 @@
 import React from 'react';
-import {Link, useNavigate, useParams} from 'react-router-dom';
-import {Container, Box, Typography, Card, CardContent, Grid, Button} from '@mui/material';
-import {useBooking, BookingDetails} from '../../contexts/BookingContext';
+import {Box, Typography} from '@mui/material';
+import { BookingDetails} from '../../contexts/BookingContext';
 import AvailabilityCalendarBooking from "../calendar/AvailabilityCalendarBooking";
 
 
@@ -11,7 +10,7 @@ interface SelectTimeslotProps {
     bookingDetails: BookingDetails;
 }
 
-// step 2
+// step 2 of booking
 function SelectTimeslot({onNext, handleCancel, bookingDetails}: SelectTimeslotProps) {
     // color legend to be displayed
     const CalendarLegend = () => (

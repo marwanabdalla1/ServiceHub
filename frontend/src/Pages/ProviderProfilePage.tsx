@@ -5,7 +5,6 @@ import {
     Typography,
     Card,
     CardContent,
-    Button,
     Avatar,
     Grid,
     Divider,
@@ -71,7 +70,6 @@ function ProviderProfilePage() {
     const [profileImage, setProfileImage] = useState<string | null>(null);
     const [reviewerProfileImages, setReviewerProfileImages] = useState<{ [key: string]: string }>({});
 
-    // const provider = mockProvider;
     const {offeringId} = useParams<{ offeringId: string }>(); //use this to then make a request to the user with the id to get the user data
 
     const navigate = useNavigate();

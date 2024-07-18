@@ -172,6 +172,7 @@ export default function ReceivedServiceTable() {
             )}
 
 
+            {/*handling deleted provider accounts*/}
             <Dialog open={dialogOpen} onClose={handleDialogClose}>
                 <DialogTitle>Service Provider Not Available</DialogTitle>
                 <DialogContent>

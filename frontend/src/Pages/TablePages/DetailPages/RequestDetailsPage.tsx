@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-import { Job } from '../models/Job';
+import { Job } from '../../../models/Job';
 import {
     Container,
     Typography,
@@ -13,15 +13,15 @@ import {
     Button,
     Dialog, CircularProgress
 } from '@mui/material';
-import {useAuth} from '../contexts/AuthContext';
-import {Review} from "../models/Review";
-import GenericProviderCard from "../components/tableComponents/GenericProviderCard";
-import GenericConsumerCard from "../components/tableComponents/GenericConsumerCard";
-import {handleAccept, handleCancel, handleDecline, handleTimeChange} from "../utils/requestHandler";
-import {ServiceRequest} from "../models/ServiceRequest";
-import useAlert from "../hooks/useAlert";
-import AlertCustomized from "../components/AlertCustomized";
-import ErrorPage from "./ErrorPage";
+import {useAuth} from '../../../contexts/AuthContext';
+import {Review} from "../../../models/Review";
+import GenericProviderCard from "../../../components/tableComponents/GenericProviderCard";
+import GenericConsumerCard from "../../../components/tableComponents/GenericConsumerCard";
+import {handleAccept, handleCancel, handleDecline, handleTimeChange} from "../../../utils/requestHandler";
+import {ServiceRequest} from "../../../models/ServiceRequest";
+import useAlert from "../../../hooks/useAlert";
+import AlertCustomized from "../../../components/AlertCustomized";
+import ErrorPage from "../../ErrorPage";
 
 // Define the props interface
 interface RequestDetailsPageProps {
@@ -71,7 +71,6 @@ function RequestDetailsPage() {
                     const pathIncludesIncoming = location.pathname.includes("incoming");
                     const pathIncludesOutgoing = location.pathname.includes("outgoing");
 
-                    console.log("request found!", isProvider, isConsumer)
                     if ((pathIncludesIncoming && !isProvider) || (pathIncludesOutgoing && !isConsumer)) {
                         navigate("/unauthorized");
                     } else if (isProvider) {
@@ -95,7 +94,7 @@ function RequestDetailsPage() {
 
             } catch (error: any) {
                 setLoading(false);
-                console.log("error", error)
+                // authorization check
                 if (error.response.status && error.response.status === 403) {
                     navigate("/unauthorized")
                 } else {
@@ -211,6 +210,7 @@ function RequestDetailsPage() {
         }
     };
 
+    // which card to display depends on the role of the logged in user
     const CardComponent = role === "provider" ? GenericProviderCard : GenericConsumerCard;
     const cardProps = role === "provider" ? providerProps : consumerProps;
 

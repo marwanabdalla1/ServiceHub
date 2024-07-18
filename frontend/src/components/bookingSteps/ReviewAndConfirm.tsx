@@ -27,7 +27,7 @@ interface ReviewAndConfirmProps {
 
 }
 
-// step 4
+// step 4 of booking
 function ReviewAndConfirm({bookingDetails, handleCancel}: ReviewAndConfirmProps) {
     // const { bookingDetails } = useBooking();
     const navigate = useNavigate();

@@ -107,7 +107,6 @@ function GenericTable({
         event: React.MouseEvent<HTMLButtonElement> | null,
         newPage: number
     ): void => {
-        console.log("new page", newPage)
         setShowMediaCard(false)
         setPage(newPage);
     };
@@ -122,7 +121,7 @@ function GenericTable({
 
     return (
         <div>
-            {/*filtering dropdowns*/}
+            {/*filtering dropdowns, this allows to select multiple service types and/or multiple statuses*/}
             <Box sx={{display: 'flex', marginBottom: 2}}>
                 <FormControl style={{width: 300, marginRight: 5}}>
                     <InputLabel id="service-type-label">Filter Service Type</InputLabel>
@@ -169,7 +168,7 @@ function GenericTable({
             </Box>
 
             {data.length === 0 ?
-                //display information if there are no matching results
+                //display placeholder information if there are no matching results
                 (
                     <Typography variant="body1">
                         You don't have any matches

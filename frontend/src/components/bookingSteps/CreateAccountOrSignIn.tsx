@@ -1,8 +1,7 @@
 import React, {useEffect} from 'react';
-import {useLocation, useNavigate, useParams} from 'react-router-dom';
-import {Container, Box, Typography, Button, Card, CardContent} from '@mui/material';
+import {useLocation, useNavigate} from 'react-router-dom';
+import { Typography, Button} from '@mui/material';
 import {BookingDetails, useBooking} from '../../contexts/BookingContext';
-import {Account} from "../../models/Account";
 import {useAuth} from "../../contexts/AuthContext";
 
 
@@ -11,7 +10,7 @@ interface CreateAccountOrSignInProps {
     bookingDetails: BookingDetails;
 }
 
-// step one
+// step one of booking (skipped if the user is already signed in)
 function CreateAccountOrSignIn({onNext, bookingDetails}: CreateAccountOrSignInProps) {
     const {setRequestedBy} = useBooking();
     const navigate = useNavigate();
@@ -38,7 +37,6 @@ function CreateAccountOrSignIn({onNext, bookingDetails}: CreateAccountOrSignInPr
     if (!account || !token) {
         return (
             <>
-
                 <Typography variant="h4" gutterBottom>
                     Create account or sign in
                 </Typography>

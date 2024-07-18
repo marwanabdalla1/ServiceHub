@@ -61,11 +61,9 @@ export const AccountProvider = ({children}: Props) => {
     const [isFetched, setIsFetched] = useState<boolean>(false);
 
     const [account, setAccount] = useState<Account | null>(null);
-    // const [nextPath, setNextPath] = useState('/');  // Default to home
 
 
     useEffect(() => {
-        // const account = localStorage.getItem('account');
         const token = localStorage.getItem('token');
 
         if (token) {
@@ -121,7 +119,6 @@ export const AccountProvider = ({children}: Props) => {
                 const from = location.state?.from || '/';  // Default path if no redirect was set
                 navigate(from);  // Redirect to the intended page or a default path
 
-                // navigate(redirect);
             }
         } catch
             (error) {

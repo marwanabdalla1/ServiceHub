@@ -2,21 +2,21 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {useLocation, useNavigate, useParams} from 'react-router-dom';
 import axios from 'axios';
-import {Job} from '../models/Job';
+import {Job} from '../../../models/Job';
 import {Container, Typography, Box, CircularProgress} from '@mui/material';
-import {useAuth} from '../contexts/AuthContext';
-import {Review} from "../models/Review"; // Assuming you have a component to list reviews
-import GenericProviderCard from "../components/tableComponents/GenericProviderCard";
-import GenericConsumerCard from "../components/tableComponents/GenericConsumerCard";
-import {handleCancel, handleComplete, handleRevoke} from "../utils/jobHandler";
-import {ServiceRequest} from "../models/ServiceRequest";
-import useAlert from "../hooks/useAlert";
-import AlertCustomized from "../components/AlertCustomized";
-import useErrorHandler from "../hooks/useErrorHandler";
-import ErrorPage from "./ErrorPage";
-import ReviewCard from "../components/ReviewCard";
-import BlackButton from "../components/inputs/blackbutton";
-import {Account} from "../models/Account";
+import {useAuth} from '../../../contexts/AuthContext';
+import {Review} from "../../../models/Review"; // Assuming you have a component to list reviews
+import GenericProviderCard from "../../../components/tableComponents/GenericProviderCard";
+import GenericConsumerCard from "../../../components/tableComponents/GenericConsumerCard";
+import {handleCancel, handleComplete, handleRevoke} from "../../../utils/jobHandler";
+import {ServiceRequest} from "../../../models/ServiceRequest";
+import useAlert from "../../../hooks/useAlert";
+import AlertCustomized from "../../../components/AlertCustomized";
+import useErrorHandler from "../../../hooks/useErrorHandler";
+import ErrorPage from "../../ErrorPage";
+import ReviewCard from "../../../components/ReviewCard";
+import BlackButton from "../../../components/inputs/blackbutton";
+import {Account} from "../../../models/Account";
 
 // Define the props interface
 interface JobDetailsPageProps {
@@ -116,35 +116,26 @@ const JobDetailsPage = () => {
                         }
 
                         if (reviewsResponse.data && reviewsResponse.data.reviews && reviewsResponse.data.reviews.length > 0) {
-                            console.log("success")
-                            console.log("setting reviews", reviewsResponse.data.reviews)
                             setReviews(reviewsResponse.data.reviews);
-                            console.log(reviews)
 
                             // Finding my review and other's review
                             const revFromMe = reviewsResponse.data.reviews.find((r: Review) => r.reviewer.toString() === account?._id.toString());
-                            console.log("rev from me:", revFromMe)
                             if (revFromMe) {
                                 setMyReview(revFromMe)
                             }
                             const revFromOther = reviewsResponse.data.reviews.find((r: Review) => r.recipient.toString() === account?._id.toString());
-                            console.log("rev from other:", revFromOther)
                             if (revFromOther) {
                                 setOtherReview(revFromOther)
                             }
 
-                            console.log("My review: ", myReview);
-                            console.log("Other review:", otherReview);
                             setLoading(false);
                         } else {
-                            console.log('No reviews found');
                             setLoading(false);
                             setReviews([]);
                         }
 
                     }
                 } catch (error:any) {
-                    console.error('Failed to fetch job details:', error);
                     setLoading(false);
                     if (error.response.status && error.response.status === 403) {
                         navigate("/unauthorized")
@@ -155,7 +146,6 @@ const JobDetailsPage = () => {
 
                 }
 
-                console.log("reviews here:", reviews)
             };
 
             if (jobId) {
@@ -182,7 +172,6 @@ const JobDetailsPage = () => {
 
         const onCancel = async () => {
             if (!job) {
-                console.error('No job selected');
                 return;
             }
             try {
@@ -206,7 +195,6 @@ const JobDetailsPage = () => {
 
         const onComplete = async () => {
             if (!job) {
-                console.error('No job selected');
                 return;
             }
             try {
@@ -230,7 +218,6 @@ const JobDetailsPage = () => {
 // handle revoking completed job
         const onRevoke = async () => {
             if (!job) {
-                console.error('No job selected');
                 return;
             }
             try {
@@ -302,7 +289,6 @@ const JobDetailsPage = () => {
         return (
             <Container>
                 <div>
-                    {/*<button onClick={handleAction}>Do Something</button>*/}
                     <AlertCustomized alert={alert} closeAlert={closeAlert}/>
                 </div>
 
@@ -311,11 +297,11 @@ const JobDetailsPage = () => {
                         {job.serviceType} Job Details
                     </Typography>
                     <CardComponent {...cardProps} />
+                    {/*only completed jobs can have reviews section*/}
                     {job.status.toString() === "completed" &&
                         <Box ref={reviewsRef} sx={{mt: 4}}>
                             <Typography variant="h4">Reviews</Typography>
                             <Box sx={{display: 'flex', justifyContent: 'space-between', width: '100%'}}>
-                                {/*<ReviewList reviews={reviews} /> /!* Render reviews *!/*/}
                                 {otherReview ? (
                                     <Box sx={{width: '45%', p: 1}}>
                                         <Typography variant="h6" sx={{mt: 3}}>Review from {otherParty?.firstName} to

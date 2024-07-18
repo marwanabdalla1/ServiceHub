@@ -48,11 +48,9 @@ interface GenericConsumerCardProps {
 
 // Helper to determine if item is a Job
 const isJob = (item: Item): item is Job => {
-    console.log("is item job?", (item as Job).receiver !== undefined);
     return (item as Job).receiver !== undefined; // Or any other unique property of Job
 };
 
-// const isJob = (item as Job).receiver !== undefined;  // Assuming 'receiver' is unique to Job
 
 
 const GenericConsumerCard: React.FC<GenericConsumerCardProps> = ({
@@ -74,37 +72,24 @@ const GenericConsumerCard: React.FC<GenericConsumerCardProps> = ({
         navigate(`/change-booking-time/${request._id}`); // Navigate to the calendar to select a new Timeslot
     }
 
-    // todo: check account is correct consumer otherwise not authorized?
-
     useEffect(() => {
-        if (provider) {
+        if (token && account && provider) {
             fetchProfileImageById(provider._id).then((image) => {
                 setProfileImage(image);
             });
         }
-    }, [provider]);
+    }, [token, account, provider]);
 
-
-    const handleReview = (job: Item) => {
-        if (inDetailPage) {
-        } else {
-            navigate(`/outgoing/jobs/${job._id}`)
-        }
-    };
 
     const renderActions = () => {
         const buttons = [];
         if (!isJob(item)) {
             // ServiceRequest actions
             if (item.requestStatus === "cancelled") {
-                console.log("No Actions possible for CANCELLED requests!");
+            //     no action possible
             } else if (item.requestStatus === RequestStatus.declined) {
-                console.log("No Actions possible for DECLINED requests!");
-                // } else if (item.requestStatus === RequestStatus.accepted) {
-                //     buttons.push(<BlackButton text="Cancel Request" onClick={() => actions.cancelRequest?.(item)}
-                //                               sx={{marginRight: "1rem"}}/>);
+            //     no action possible
             } else if (item.requestStatus === RequestStatus.accepted && item.job) {
-                console.log("request with job:", item)
                 buttons.push(<BlackButton text="View Job" onClick={() => navigate(`/outgoing/jobs/${item.job}`)}
                                           sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
             } else if (actions.cancelRequest && ["pending", "action needed from requester"].includes(item.requestStatus)) {
@@ -160,6 +145,7 @@ const GenericConsumerCard: React.FC<GenericConsumerCardProps> = ({
 
     return (
         <Card>
+            {/*render button depending on if we are in detailed page*/}
             <IconButton onClick={handleIconClick}>
                 {inDetailPage ? <CloseFullscreenIcon/> : <OpenInFullIcon/>}
             </IconButton>
@@ -179,6 +165,7 @@ const GenericConsumerCard: React.FC<GenericConsumerCardProps> = ({
                 <CloseIcon/>
             </button>
 
+            {/*details*/}
             <CardContent>
                 <div style={{display: 'flex', alignItems: 'center', marginBottom: '1rem'}}>
                     <Avatar alt={provider?.firstName + " " + provider?.lastName}

@@ -1,7 +1,6 @@
 import React from 'react';
 import { Typography, Container, Button, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import SpaceIcon from '@mui/icons-material/Public'; // Assuming a simple planet-like icon for simplicity
 import SentimentVeryDissatisfiedIcon from '@mui/icons-material/SentimentVeryDissatisfied';
 interface ErrorPageProps {
     title: string;
@@ -10,6 +9,7 @@ interface ErrorPageProps {
     redirectTitle?: string;
 }
 
+// uniform, reusable error page
 const ErrorPage: React.FC<ErrorPageProps> = ({
                                                  title,
                                                  message,

@@ -99,14 +99,6 @@ export default function SignUp() {
                 toast.error('Passwords do not match.');
                 return;
             }
-
-            // createAccountEmail(email, firstName);
-            // navigate("/signup/otp", {
-            //     state: {
-            //         firstName, lastName, email, password
-            //     }
-            // });
-
             const data: UserData = {
                 firstName: firstName,
                 lastName: lastName,

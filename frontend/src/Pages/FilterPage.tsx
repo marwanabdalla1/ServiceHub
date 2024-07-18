@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import NavigationBar from '../components/Navbar';
 import MediaCard from '../components/ProfileCard';
-import { DrawerFilter } from '../components/DrawFilter';
+import {DrawerFilter} from '../components/DrawFilter';
 import Sort from '../components/Sort';
-import { useLocation, useNavigate } from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 import axios from 'axios';
-import { ServiceOffering } from '../models/ServiceOffering';
+import {ServiceOffering} from '../models/ServiceOffering';
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
-import { Pagination } from '../components/Pagination';
-import { fetchProfileImagesForServiceOffering } from "../services/fetchProfileImage";
+import {Pagination} from '../components/Pagination';
+import {fetchProfileImagesForServiceOffering} from "../services/fetchProfileImage";
 import {Typography} from "@mui/material";
 import BlackButton from "../components/inputs/blackbutton"; // Import from the new file
 import OutletIcon from '@mui/icons-material/Outlet';
@@ -44,7 +44,6 @@ function FilterPage() {
     const itemsPerPage = 12; // You can adjust this as needed
     const [totalItems, setTotalItems] = useState(0); // To keep track of total items
     const navigate = useNavigate();
-    console.log(defaultProfileImage);
 
     useEffect(() => {
         const fetchAndSortOfferings = async () => {
@@ -57,11 +56,14 @@ function FilterPage() {
                 searchTerm: search,
                 page: currentPage,
                 limit: itemsPerPage,
-                sortKey, 
+                sortKey,
             };
 
             try {
-                const response = await axios.get<{ data: ServiceOffering[], total: number }>('/api/offerings', { params });
+                const response = await axios.get<{
+                    data: ServiceOffering[],
+                    total: number
+                }>('/api/offerings', {params});
                 const data = response.data.data;
                 const totalItems = response.data.total;
                 setTotalItems(totalItems); // Set total items
@@ -71,7 +73,7 @@ function FilterPage() {
                 await fetchProfileImagesForServiceOffering(data, setProfileImages, setLoadingImages, setLoading);
 
             } catch (error) {
-                console.error('Error fetching data:', error);
+                return;
             }
         };
 
@@ -84,7 +86,7 @@ function FilterPage() {
 
     const handleSearch = () => {
         setCurrentPage(1);
-        navigate("/filter", { state: { searchTerm: search } });
+        navigate("/filter", {state: {searchTerm: search}});
     };
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,7 +106,6 @@ function FilterPage() {
     };
 
     const handleSortChange = (sortKey: string | null) => {
-        console.log('Sort key:', sortKey);
         setSortKey(sortKey);
         setCurrentPage(1)
     };
@@ -116,13 +117,13 @@ function FilterPage() {
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
-        window.scroll(0,0)
+        window.scroll(0, 0)
     };
 
     return (
         <div>
             <NavigationBar toggleDrawer={toggleDrawer} onChange={handleInputChange} onSearch={handleSearch}
-                           search={search} setSearch={setSearch} />
+                           search={search} setSearch={setSearch}/>
             <div className='flex-col items-center'>
                 <DrawerFilter
                     openDrawer={isDrawerOpen}
@@ -131,18 +132,19 @@ function FilterPage() {
                     onApplyFilters={handleApplyFilters}
                     onClearFilters={clearFilters}
                 />
-                <Sort onSortChange={handleSortChange} />
+                <Sort onSortChange={handleSortChange}/>
                 {loading ? (
                     <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
-                        <CircularProgress />
+                        <CircularProgress/>
                     </Box>
                 ) : offerings.length > 0 ? (
                     <>
-                        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mx-auto bg-slate-50 max-w-screen-2xl'>
+                        <div
+                            className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mx-auto bg-slate-50 max-w-screen-2xl'>
                             {offerings.map((offering) => (
                                 <MediaCard key={offering._id} offering={offering}
                                            profileImageUrl={profileImages[offering._id] || defaultProfileImage}
-                                           loading={loadingImages[offering._id]} />
+                                           loading={loadingImages[offering._id]}/>
                             ))}
                         </div>
                         <Pagination
@@ -154,12 +156,15 @@ function FilterPage() {
                     </>
                 ) : (
 
-                    <Box display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" minHeight="70vh" maxWidth='40vw' mt={4} mx="auto">
+                    // no corresponding offerings found
+                    <Box display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start"
+                         minHeight="70vh" maxWidth='40vw' mt={4} mx="auto">
                         <OutletIcon sx={{mb: 2, fontSize: 80}}></OutletIcon>
                         <Typography variant="h4" textAlign="center" sx={{mb: 5}}>
                             Oh no, it looks like we couldn't find any service offerings matching your criteria!
                         </Typography>
-                        <BlackButton text ='Explore All Our Offerings' onClick={clearFilters} sx={{marginRight: "1rem", fontSize:'20px', padding: "1rem 1rem"}} />
+                        <BlackButton text='Explore All Our Offerings' onClick={clearFilters}
+                                     sx={{marginRight: "1rem", fontSize: '20px', padding: "1rem 1rem"}}/>
                     </Box>
                 )
                 }

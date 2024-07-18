@@ -11,12 +11,6 @@ import AlertCustomized from "../components/AlertCustomized";
 import ErrorPage from "./ErrorPage";
 import useErrorHandler from "../hooks/useErrorHandler";
 
-// interface ChangeBookingTimeslotProps {
-//     onNext: () => void;
-//     onBack: () => void;
-//     bookingDetails: BookingDetails;
-// }
-
 interface ServiceRequest {
     _id: string;
     serviceType: string;
@@ -62,12 +56,11 @@ const ChangeBookingTimePage: React.FC = () => {
                 try {
                     const response = await axios.get(`/api/requests/${requestId}`, {
                         headers: {
-                            'Authorization': `Bearer ${token}`,  // Pass the token if authentication is needed
+                            'Authorization': `Bearer ${token}`,
                         },
                     });
 
-                    console.log("requests response", response.data, "\n my account;", account?._id)
-                    // make sure only the requestor can access this and only upon request
+                    // make sure only the requester can access this and only upon provider's request
                     if (!response) {
                         navigate("/not-found");
                         return;
@@ -79,12 +72,10 @@ const ChangeBookingTimePage: React.FC = () => {
 
                     // if a new timeslot was already reselected, requester cannot access anymore
                     if (account && response.data.requestStatus.toString() != RequestStatus.requesterActionNeeded.toString()) {
-                        console.log("trigger alert");
                         setRequestNotEditable(true);
                     }
                     setRequest(response.data);
                     setProviderId(response.data.provider._id)
-                    console.log("fetched request when changing booking time:", request)
                 } catch (error: any) {
                     navigate("/not-found")
                 }
@@ -125,6 +116,7 @@ const ChangeBookingTimePage: React.FC = () => {
                     Choose an alternative time for your booking
                 </Typography>
             </Box>
+            {/*display provider's comment if any*/}
             {commentFromProvider && (
                 <Box mt={2} mb={2}>
                     <Typography>{decodeURIComponent(commentFromProvider)}</Typography>
@@ -132,6 +124,7 @@ const ChangeBookingTimePage: React.FC = () => {
                 </Box>
             )}
 
+            {/*info for the consumer*/}
             <Box display="flex" alignItems="center" justifyContent="space-between" sx={{mt: 3, mb: 2}}>
                 <Typography variant="body2" gutterBottom marginBottom={2} style={{whiteSpace: 'pre-line'}}
                             sx={{flex: 6}}>
@@ -151,7 +144,7 @@ const ChangeBookingTimePage: React.FC = () => {
                 mode={"change"}
                 defaultSlotDuration={request?.serviceOffering.baseDuration || 60}
                 defaultTransitTime={request?.serviceOffering?.bufferTimeDuration || 30}
-                onNext={() => console.log("next")}
+                onNext={() => {}} //no next step needed
             />
 
         </Container>
