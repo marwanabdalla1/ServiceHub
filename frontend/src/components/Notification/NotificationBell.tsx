@@ -37,19 +37,27 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ header }) => {
 
   const markAllNotificationsAsRead = () => {
     if (token) {
+      // Update the local state first
+      setNotifications(prevNotifications =>
+        prevNotifications.map(notification => ({ ...notification, isViewed: true }))
+      );
+
+      // Then perform the API request
       axios.put('/api/notifications/mark-all-read', {}, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-        .then(() => {
-          setNotifications(prevNotifications =>
-            prevNotifications.map(notification => ({ ...notification, isViewed: true }))
-          );
-        })
-        .catch(error => {
-          console.error('Error marking all notifications as read:', error);
-        });
+      .then(() => {
+        console.log('All notifications marked as read successfully.');
+      })
+      .catch(error => {
+        console.error('Error marking all notifications as read:', error);
+        // Optionally, revert the local state change if the request fails
+        setNotifications(prevNotifications =>
+          prevNotifications.map(notification => ({ ...notification, isViewed: false }))
+        );
+      });
     }
   };
 

@@ -2,7 +2,7 @@ import {Request, Response, NextFunction} from 'express';
 import ServiceOffering from "../models/serviceOffering";
 import Account from '../models/account';
 import mongoose, {Types} from 'mongoose';
-import {JobStatus, RequestStatus, ServiceType} from '../models/enums'; // Assuming this is where your enum is defined
+import {JobStatus, RequestStatus, ServiceType} from '../models/enums'; 
 import serviceRequest from '../models/serviceRequest';
 import review from '../models/review';
 import job from '../models/job';

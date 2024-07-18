@@ -30,11 +30,12 @@ ServiceHub is a platform designed to connect service consumers and service provi
  ```bash
   stripe listen --forward-to http://localhost:8080/webhook
  ```
-
-
-
-
-
+ - Then the new test key and the webhook secrets can be injected via
+ ```bash
+ docker-compose up -d \
+  -e STRIPE_SECRET_KEY=new_sk_test_XXXXXXXXXXXXXXXXXXXXXXXX \
+  -e STRIPE_WEBHOOK_SECRET=new_whsec_XXXXXXXXXXXXXXXXXXXXXXXX
+```
 
 ### Accessing existing user accounts
 - Any account on the platform follows the credentials convention of:

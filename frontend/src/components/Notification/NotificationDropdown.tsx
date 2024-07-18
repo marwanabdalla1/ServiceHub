@@ -6,7 +6,7 @@ interface NotificationDropdownProps {
   data: Notification[];
   header?: string;
   onNotificationViewed: (id: string) => void;
-  onMarkAllAsRead: () => void; // New prop forf marking all as read
+  onMarkAllAsRead: () => void; // New prop for marking all as read
 }
 
 const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
@@ -22,7 +22,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
           <h3 className="text-lg font-semibold">{header}</h3>
           <button
             onClick={onMarkAllAsRead}
-            className=" group-hover:opacity-100 text-blue-400 hover:bg-gray-100 px-4 py-2 rounded transition-opacity duration-300"
+            className="group-hover:opacity-100 text-blue-400 hover:bg-gray-100 px-4 py-2 rounded transition-opacity duration-300"
           >
             Mark all as read
           </button>
