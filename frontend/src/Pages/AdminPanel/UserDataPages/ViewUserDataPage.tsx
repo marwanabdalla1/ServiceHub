@@ -129,7 +129,14 @@ export default function ViewUserData(): React.ReactElement {
         postal: string;
         location: string;
     }) => {
-        await saveAddress(updatedAddress, account, token, accountId, setAccount);
+        await saveAddress(updatedAddress, account, token, accountId, setAccount).then(() =>
+            setFieldValue(prevState => ({
+                ...prevState,
+                address: [updatedAddress.address, updatedAddress.postal, updatedAddress.location]
+                    .filter(field => field !== null && field !== undefined && field.trim() !== "")
+                    .join(", ")
+            }))
+        );
         setOpenAddressDialog(false);
     };
 

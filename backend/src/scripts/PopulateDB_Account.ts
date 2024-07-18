@@ -23,7 +23,7 @@ mongoose.connect(mongoDbUrl as string, {
 console.log('MongoDB connected');
 
 async function createServiceOfferingsForUser(user: any, serviceTypes: string[]): Promise<void> {
-    for (let j = 0; j < 2; j++) {
+    for (let j = 0; j < 1; j++) {
         const serviceOffering = new ServiceOffering({
             serviceType: serviceTypes[Math.floor(Math.random() * serviceTypes.length)],
             hourlyRate: Math.floor(Math.random() * (60 - 20 + 1)) + 20,
@@ -271,7 +271,7 @@ async function generateTestData(numRecords: number): Promise<void> {
     console.log(`${numRecords} accounts with service offerings inserted.`);
 }
 
-generateTestData(5)
+generateTestData(50)
     .then(() => mongoose.disconnect())
     .catch((err) => {
         console.error(err);

@@ -34,6 +34,8 @@ function calculateAppointmentTimes(requestStatus: RequestStatus, serviceOffering
     appointmentEndTime: Date
 } {
     const currentDate = new Date();
+    const acceptPastDate = new Date();
+    acceptPastDate.setMonth(currentDate.getMonth() - 3); // 3 months ago
     const pastDate = new Date(currentDate.getTime() - 20 * 24 * 60 * 60 * 1000); // 20 days ago
     const futureDate = new Date(currentDate.getTime() + 20 * 24 * 60 * 60 * 1000); // 20 days in the future
     const pendingStartDate = new Date(currentDate.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days later
@@ -48,8 +50,8 @@ function calculateAppointmentTimes(requestStatus: RequestStatus, serviceOffering
             appointmentStartTime = getRandomDate(new Date(currentDate.getTime() - 10 * 24 * 60 * 60 * 1000), futureDate);
             break;
         case RequestStatus.accepted:
-            if (Math.random() < 0.5) {
-                appointmentStartTime = getRandomDate(pastDate, currentDate);
+            if (Math.random() < 0.9) {
+                appointmentStartTime = getRandomDate(acceptPastDate, currentDate);
             } else {
                 appointmentStartTime = getRandomDate(currentDate, futureDate);
             }
@@ -102,10 +104,15 @@ async function findNonOverlappingTimeslot(requestStatus: RequestStatus, serviceO
 
 async function generateAndSaveServiceRequest(accounts: any[]): Promise<any> {
     // Randomly select an account as ServiceProvider
-    const serviceProviderIndex = Math.floor(Math.random() * accounts.length);
-    const serviceProvider = accounts[serviceProviderIndex];
-    const serviceOfferings = serviceProvider.serviceOfferings;
 
+    let serviceProviderIndex;
+    let serviceProvider;
+    do {
+        serviceProviderIndex = Math.floor(Math.random() * accounts.length);
+        serviceProvider = accounts[serviceProviderIndex];
+    } while (!serviceProvider.isProvider); // Continue looping until a valid serviceProvider is found
+
+    const serviceOfferings = serviceProvider.serviceOfferings;
     // Randomly select a ServiceOffering from the ServiceProvider
     const serviceOfferingIndex = Math.floor(Math.random() * serviceOfferings.length);
     const serviceOfferingId = serviceOfferings[serviceOfferingIndex];
@@ -169,7 +176,7 @@ async function createJobForAcceptedRequest(savedRequest: any) {
 
     let jobStatus: JobStatus;
     if (savedRequest.appointmentEndTime >= twentyDaysAgo && savedRequest.appointmentEndTime <= twoDaysFuture) {
-        jobStatus = Math.random() < 0.9 ? JobStatus.completed : JobStatus.cancelled; // 90% chance to be completed
+        jobStatus = Math.random() < 0.95 ? JobStatus.completed : JobStatus.cancelled; // 90% chance to be completed
     } else {
         const statusChance = Math.random();
         if (statusChance < 0.5) {
@@ -388,17 +395,16 @@ async function addReviewForCompletedJob(job: any) {
 
 async function generateTestData(numberOfEntries: number) {
     try {
-        // Fetch accounts and their service offerings
-        // const accounts = await Account.find({
-        //     email: {
-        //         $regex: /^[a-zA-Z]+[a-zA-Z]+@gmail\.com$/,
-        //         $options: 'i'
-        //     }
-        // }).populate('serviceOfferings');
+        //Fetch accounts and their service offerings
+        const accounts = await Account.find({
+            email: {
+                $regex: /^[a-zA-Z]+[a-zA-Z]+@gmail\.com$/,
+                $options: 'i'
+            }
+        }).populate('serviceOfferings');
 
-        const emails = ["barbarawitting@gmail.com", "terenceschuppe@gmail.com", "dovieo'connell@gmail.com", "krisgreenholt@gmail.com", "tavareslind@gmail.com"];
-
-        const accounts = await Account.find({ email: { $in: emails } });
+        // const emails = ["barbarawitting@gmail.com", "terenceschuppe@gmail.com", "dovieo'connell@gmail.com", "krisgreenholt@gmail.com", "tavareslind@gmail.com"];
+        // const accounts = await Account.find({ email: { $in: emails } });
 
         if (accounts.length < 2) {
             console.error('Not enough accounts with service offerings found.');
@@ -442,31 +448,14 @@ async function generateTestData(numberOfEntries: number) {
                 } else {
                     serviceOffering.reviews.push(savedToProviderReview._id);
                     serviceOffering.reviewCount++;
+                    if (!serviceOffering.totalRating) {
+                        serviceOffering.totalRating = 0;
+                    }
                     serviceOffering.totalRating += savedToProviderReview.rating;
                     serviceOffering.rating = serviceOffering.totalRating / serviceOffering.reviewCount;
                     await serviceOffering.save();
-
-                    const account = await Account.findById(serviceOffering.provider);
-                    if(account) {
-                        if(!account.reviews) {
-                            account.reviews = [];
-                        }
-                        account.reviews.push(savedToProviderReview._id as Types.ObjectId);
-                    }
                 }
 
-                // Save the review for the receiver
-                if (!savedToReceiverReview) {
-                    console.error('Failed to save review for completed job.');
-                } else {
-                    const account = await Account.findById(savedRequest.requestedBy);
-                    if(account) {
-                        if(!account.reviews) {
-                            account.reviews = [];
-                        }
-                        account.reviews.push(savedToReceiverReview._id as Types.ObjectId);
-                    }
-                }
             }
         }
     } catch (error) {
@@ -475,7 +464,7 @@ async function generateTestData(numberOfEntries: number) {
 }
 
 // Example usage
-generateTestData(200).then(() => {
+generateTestData(500).then(() => {
     console.log('Test data generation complete.');
     mongoose.disconnect();
 });
