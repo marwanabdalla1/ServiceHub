@@ -294,36 +294,27 @@ function UserProfile(): React.ReactElement {
         navigate('/select-availability');
     };
 
-    // navigating to the different page sections
+
+
     const handleNavigation = (section: string) => {
         setActiveSection(section);
-        let elementRef;
         switch (section) {
             case 'profile':
-                elementRef = profileRef;
+                window.scrollTo(0, 0);
+                // profileRef.current?.scrollIntoView({behavior: 'smooth', block:'start'});
                 break;
             case 'serviceProvider':
-                elementRef = serviceProviderRef;
+                serviceProviderRef.current?.scrollIntoView({behavior: 'smooth'});
                 break;
             case 'dangerZone':
-                elementRef = dangerZoneRef;
+                dangerZoneRef.current?.scrollIntoView({ behavior: 'smooth' });
                 break;
             default:
-                window.scrollTo({top: 0, behavior: 'smooth'});
-                return;
-        }
-
-        if (elementRef && elementRef.current) {
-            const navbarHeight = 180;
-            // leave some space on top due to navbar
-            const elementTop = elementRef.current.getBoundingClientRect().top + window.scrollY - navbarHeight;
-
-            window.scrollTo({
-                top: elementTop,
-                behavior: 'smooth'
-            });
+                window.scrollTo(0, 0);
+                break;
         }
     };
+
     const cancelSubscription = async (subscriptionId: string) => {
         try {
             const response = await axios.post(`/api/becomepro/subscription/cancel`, {}, {
