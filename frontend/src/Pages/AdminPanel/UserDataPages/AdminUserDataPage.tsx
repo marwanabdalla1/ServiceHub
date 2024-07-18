@@ -9,15 +9,9 @@ import {useNavigate} from "react-router-dom";
 import {deleteAccount} from "../../../services/accountService";
 import ConfirmDeleteDialog from "../../../components/dialogs/ConfirmDeleteDialog";
 import {toast} from "react-toastify";
+import {Account} from "../../../models/Account";
+import {formatDateTime} from "../../../utils/dateUtils";
 
-interface Account {
-    email: string;
-    firstName: string;
-    lastName: string;
-    role: string;
-    createdOn: string;
-    _id: string;
-}
 
 export default function AdminUserData(): React.ReactElement {
     const [accounts, setAccounts] = useState<Account[]>([]);
@@ -25,7 +19,7 @@ export default function AdminUserData(): React.ReactElement {
         email: '',
         firstName: '',
         lastName: '',
-        accountId: ''
+        accountId: '',
     });
     const [openDeleteAccountDialog, setOpenDeleteAccountDialog] = useState(false);
     const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
@@ -97,7 +91,6 @@ export default function AdminUserData(): React.ReactElement {
     };
 
     const handleView = (accountId: string) => {
-        console.log('View user data:', accountId);
         navigate('/admin/viewUserData', {state: {accountId}});
     };
 
@@ -158,6 +151,7 @@ export default function AdminUserData(): React.ReactElement {
                             <TableCell align="center">Email</TableCell>
                             <TableCell align="center">First Name</TableCell>
                             <TableCell align="center">Last Name</TableCell>
+                            <TableCell align="center">isProvider</TableCell>
                             <TableCell align="center">Created At</TableCell>
                             <TableCell align="center">Account ID</TableCell>
                             <TableCell align="center">Action</TableCell>
@@ -169,7 +163,8 @@ export default function AdminUserData(): React.ReactElement {
                                 <TableCell align="center">{user.email}</TableCell>
                                 <TableCell align="center">{user.firstName}</TableCell>
                                 <TableCell align="center">{user.lastName}</TableCell>
-                                <TableCell align="center">{new Date(user.createdOn).toLocaleDateString()}</TableCell>
+                                <TableCell align="center">{user.isProvider?.toString()}</TableCell>
+                                <TableCell align="center">{formatDateTime(user.createdAt || new Date())}</TableCell>
                                 <TableCell align="center">{user._id}</TableCell>
                                 <TableCell align="center">
                                     <Box textAlign="center">

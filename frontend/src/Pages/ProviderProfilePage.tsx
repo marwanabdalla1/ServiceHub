@@ -97,7 +97,8 @@ function ProviderProfilePage() {
                         console.error("Failed to fetch next availability:", error);
                     }
                 } catch (error) {
-                    console.error("Failed to fetch offering details:", error);
+                    setLoading(false)
+                    navigate("/not-found")
                 }
                 // fetch provider's account details
                 try {
@@ -109,7 +110,8 @@ function ProviderProfilePage() {
 
 
                 } catch (error) {
-                    console.error("Failed to fetch account details:", error);
+                    setLoading(false)
+                    navigate("/not-found")
                 }
 
                 // fetch reviews on this offering
@@ -117,7 +119,6 @@ function ProviderProfilePage() {
                     const reviewResponse = await axios.get(`/api/reviews/${offeringId}`);
                     setReviews(reviewResponse.data.review);
                     setLoading(false);
-
                 } catch (error) {
                     setLoading(false);
                 }
