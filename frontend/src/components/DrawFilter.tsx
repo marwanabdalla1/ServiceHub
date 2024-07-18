@@ -242,9 +242,9 @@ export const DrawerFilter: React.FC<DrawerFilterProps> = ({
               max={100}
               step={1}
               marks={[
-                { value: 10, label: '$10' },
-                { value: 55, label: '$55' },
-                { value: 100, label: '$100' }
+                { value: 10, label: '€10' },
+                { value: 55, label: '€55' },
+                { value: 100, label: '€100' }
               ]}
             />
           </FormControl>
