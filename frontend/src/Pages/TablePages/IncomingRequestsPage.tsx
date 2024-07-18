@@ -7,7 +7,7 @@ import {
     DialogTitle,
     DialogContentText,
     Box,
-    TextField,
+    TextField, CircularProgress,
 
 } from '@mui/material';
 
@@ -54,49 +54,64 @@ export default function IncomingRequestTable() {
     const statusOptions = ['All Statuses', 'Pending', 'Action Needed from Requester', 'Cancelled', 'Declined']; //exclude accepted
     const [statusFilter, setStatusFilter] = useState(['All Statuses']);
     const [serviceTypeFilter, setServiceTypeFilter] = useState(["All Types"]);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
 
 
     useEffect(() => {
-        if (token && account) {
+        setIsLoading(true)
+        const fetchServiceRequests = async () => {
+            try {
+                const params = new URLSearchParams({
+                    page: (page + 1).toString(), // API is zero-indexed, React state is zero-indexed
+                    limit: rowsPerPage.toString(),
+                });
 
-            const fetchServiceRequests = async () => {
-                try {
-                    const params = new URLSearchParams({
-                        page: (page + 1).toString(), // API is zero-indexed, React state is zero-indexed
-                        limit: rowsPerPage.toString(),
+
+                if (statusFilter.length > 0 && !statusFilter.includes('All Statuses')) {
+                    statusFilter.forEach(type => {
+                        params.append('requestStatus', type.toLowerCase());
                     });
-
-
-                    if (statusFilter.length > 0 && !statusFilter.includes('All Statuses')) {
-                        statusFilter.forEach(type => {
-                            params.append('requestStatus', type.toLowerCase());
-                        });
-                    }
-
-
-                    // Handling multiple service type filters
-                    if (serviceTypeFilter.length > 0 && !serviceTypeFilter.includes('All Types')) {
-                        serviceTypeFilter.forEach(type => {
-                            params.append('serviceType', type);
-                        });
-                    }
-
-
-                    const response = await axios.get(`/api/requests/provider/${account._id}?${params.toString()}`, {
-                        headers: {Authorization: `Bearer ${token}`}
-                    });
-
-                    setServiceRequests(response.data.data);
-                    setTotal(response.data.total);
-                } catch (error) {
-                    setServiceRequests([]);
                 }
-            };
 
+
+                // Handling multiple service type filters
+                if (serviceTypeFilter.length > 0 && !serviceTypeFilter.includes('All Types')) {
+                    serviceTypeFilter.forEach(type => {
+                        params.append('serviceType', type);
+                    });
+                }
+
+                const response = await axios.get(`/api/requests/provider/${account?._id}?${params.toString()}`, {
+                    headers: {Authorization: `Bearer ${token}`}
+                });
+
+                setServiceRequests(response.data.data);
+                setTotal(response.data.total);
+
+            } catch (error) {
+                setServiceRequests([]);
+            } finally {
+                setIsLoading(false);
+            }
+
+        }
+
+        if (!token) {
+            navigate('/unauthorized');
+        }
+        if (token && account) {
             fetchServiceRequests();
         }
     }, [token, account, page, rowsPerPage, statusFilter, serviceTypeFilter]);
 
+
+    if (isLoading) {
+        return (
+            <Box mt={20} className="flex justify-center">
+                <CircularProgress/>
+            </Box>
+        )
+    }
 
     const handleToggleMediaCard = (req: ServiceRequest | Item | null) => {
         if (req && (req as ServiceRequest).requestedBy === null) {
@@ -178,39 +193,39 @@ export default function IncomingRequestTable() {
     return (
         <div style={{display: 'flex', flexDirection: 'row', width: '100%', position: 'relative'}}>
 
-                <AlertCustomized alert={alert} closeAlert={closeAlert}/>
+            <AlertCustomized alert={alert} closeAlert={closeAlert}/>
 
-                <Box sx={{minWidth: 275, margin: 2, width: '100%'}}>
-                    <Box>
-                        <Typography variant="h6" component="div" sx={{marginBottom: '10px'}}>
-                            Incoming Requests
-                        </Typography>
-                        <Typography variant="body2" component="div" sx={{marginBottom: '18px'}}>
-                            Hint: Accepted requests automatically turn into
-                            <Link to="/incoming/jobs"> jobs</Link> and are thus not shown here.
-                        </Typography>
-                    </Box>
-
-                    <Box style={{flex: showMediaCard ? '3 1 auto' : '1 1 0%', marginRight: showMediaCard ? '30%' : '5%'}}>
-                        <GenericTable data={serviceRequests}
-                                      count={total}
-                                      page={page}
-                                      setPage={setPage}
-                                      rowsPerPage={rowsPerPage}
-                                      setRowsPerPage={setRowsPerPage}
-                                      setShowMediaCard={setShowMediaCard}
-                                      onViewDetails={handleToggleMediaCard}
-                                      isProvider={true}
-                                      statusOptions={statusOptions}
-                                      statusFilter={statusFilter}
-                                      setStatusFilter={setStatusFilter}
-                                      serviceTypeFilter={serviceTypeFilter}
-                                      setServiceTypeFilter={setServiceTypeFilter}
-                        />
-
-
-                    </Box>
+            <Box sx={{minWidth: 275, margin: 2, width: '100%'}}>
+                <Box>
+                    <Typography variant="h6" component="div" sx={{marginBottom: '10px'}}>
+                        Incoming Requests
+                    </Typography>
+                    <Typography variant="body2" component="div" sx={{marginBottom: '18px'}}>
+                        Hint: Accepted requests automatically turn into
+                        <Link to="/incoming/jobs"> jobs</Link> and are thus not shown here.
+                    </Typography>
                 </Box>
+
+                <Box style={{flex: showMediaCard ? '3 1 auto' : '1 1 0%', marginRight: showMediaCard ? '30%' : '5%'}}>
+                    <GenericTable data={serviceRequests}
+                                  count={total}
+                                  page={page}
+                                  setPage={setPage}
+                                  rowsPerPage={rowsPerPage}
+                                  setRowsPerPage={setRowsPerPage}
+                                  setShowMediaCard={setShowMediaCard}
+                                  onViewDetails={handleToggleMediaCard}
+                                  isProvider={true}
+                                  statusOptions={statusOptions}
+                                  statusFilter={statusFilter}
+                                  setStatusFilter={setStatusFilter}
+                                  serviceTypeFilter={serviceTypeFilter}
+                                  setServiceTypeFilter={setServiceTypeFilter}
+                    />
+
+
+                </Box>
+            </Box>
             {/*</div>*/}
 
 

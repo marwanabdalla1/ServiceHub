@@ -1,5 +1,5 @@
 import * as React from 'react';
-import Box from '@mui/material/Box'; // Changed import
+import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import {Job} from '../../models/Job';
 
@@ -18,7 +18,7 @@ import {
     DialogTitle,
     DialogContent,
     DialogContentText,
-    DialogActions
+    DialogActions, CircularProgress
 } from "@mui/material";
 import GenericTable from "../../components/tableComponents/GenericTable";
 
@@ -44,9 +44,12 @@ export default function OfferedServicesTable() {
 
     const navigate = useNavigate();
 
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+
+
     useEffect(() => {
         if (token && account) {
-
+            setIsLoading(true)
             const fetchJobs = async () => {
                 try {
                     const params = new URLSearchParams({
@@ -77,12 +80,23 @@ export default function OfferedServicesTable() {
                     setTotal(response.data.total);
                 } catch (error) {
                     setJobs([]);
+                } finally{
+                    setIsLoading(false)
                 }
             };
-
             fetchJobs();
+        } else{
+            navigate('/unauthorized');
         }
     }, [account, token, page, rowsPerPage, statusFilter, serviceTypeFilter]);
+
+    if (isLoading) {
+        return (
+            <Box mt={20} className="flex justify-center">
+                <CircularProgress/>
+            </Box>
+        )
+    }
 
     const handleToggleMediaCard = (job: Item | null) => {
         if (job && (job as Job).receiver === null) {

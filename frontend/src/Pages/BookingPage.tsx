@@ -5,7 +5,7 @@ import StepTwo from '../components/bookingSteps/SelectTimeslotPage';
 import StepThree from '../components/bookingSteps/UpdateProfile';
 import StepFour from '../components/bookingSteps/ReviewAndConfirm';
 import {useNavigate, useParams} from 'react-router-dom';
-import {Stepper, Step, StepLabel, Button, Box, Container, Grid} from '@mui/material';
+import {Stepper, Step, StepLabel, Box, Container, Grid} from '@mui/material';
 import BookingSideCard from "../components/bookingSteps/BookingSideCard";
 
 const BookingPage = () => {

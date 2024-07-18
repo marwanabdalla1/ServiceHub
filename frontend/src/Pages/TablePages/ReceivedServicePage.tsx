@@ -19,7 +19,7 @@ import {
     DialogTitle,
     DialogContent,
     DialogContentText,
-    DialogActions
+    DialogActions, CircularProgress
 } from "@mui/material";
 import GenericTable from "../../components/tableComponents/GenericTable";
 import useAlert from "../../hooks/useAlert";
@@ -44,12 +44,16 @@ export default function ReceivedServiceTable() {
     const [statusFilter, setStatusFilter] = useState(['All Statuses']);
     const [serviceTypeFilter, setServiceTypeFilter] = useState(["All Types"]);
 
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+
     const {alert, triggerAlert, closeAlert} = useAlert(10000000);
+
 
 
     useEffect(() => {
         if (token && account) {
             const fetchJobs = async () => {
+                setIsLoading(true)
                 try {
                     const params = new URLSearchParams({
                         page: (page + 1).toString(),
@@ -76,13 +80,24 @@ export default function ReceivedServiceTable() {
                     setTotal(response.data.total);
                 } catch (error) {
                     setJobs([]);
+                } finally{
+                    setIsLoading(false)
                 }
             };
 
             fetchJobs();
+        } else{
+            navigate("/unauthorized")
         }
     }, [account, token, page, rowsPerPage, statusFilter, serviceTypeFilter]);
 
+    if (isLoading) {
+        return (
+            <Box mt={20} className="flex justify-center">
+                <CircularProgress/>
+            </Box>
+        )
+    }
     const handleToggleMediaCard = (job: Item | null) => {
         if (job && ((job as Job).provider === null || (job as Job).serviceOffering === null)) {
             setDialogOpen(true);

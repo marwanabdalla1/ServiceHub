@@ -386,14 +386,15 @@ function AvailabilityCalendar({Servicetype, defaultSlotDuration}: ServiceSchedul
 
             />
             <Dialog open={actionDialogOpen} onClose={() => setActionDialogOpen(false)}>
-                <DialogTitle>Manage Time Slot
+                <DialogTitle>Manage Timeslot
                     <IconButton
                         aria-label="close"
                         onClick={() => setActionDialogOpen(false)}
                         sx={{
-                            position: 'absolute',
-                            right: 8,
-                            top: 8,
+                            position: 'sticky',
+                            ml: 5,
+                            right: 0,
+                            top: 0,
                             color: (theme) => theme.palette.grey[500],
                         }}
                     >

@@ -107,7 +107,7 @@ function UserProfile(): React.ReactElement {
                 });
                 setServices(servicesResponse.data || []);
             } catch (error) {
-            //     proceed
+                //     proceed
             }
 
             try {
@@ -118,7 +118,7 @@ function UserProfile(): React.ReactElement {
                 });
                 setSubscriptions(subscriptionResponse.data);
             } catch (error) {
-            //     proceed
+                //     proceed
             }
         };
 
@@ -214,7 +214,8 @@ function UserProfile(): React.ReactElement {
 
     const handleKeyPress = (event: React.KeyboardEvent, field: string) => {
         if (event.key === 'Enter') {
-            updateAccountFields(account, field, token, null, fieldValue, setFieldValue).then(() => {});
+            updateAccountFields(account, field, token, null, fieldValue, setFieldValue).then(() => {
+            });
             handleEditClick(field);
         }
     };
@@ -364,7 +365,8 @@ function UserProfile(): React.ReactElement {
                         <>
                             <Button
                                 onClick={() => {
-                                    updateAccountFields(account, field, token, null, fieldValue, setFieldValue).then(() => {});
+                                    updateAccountFields(account, field, token, null, fieldValue, setFieldValue).then(() => {
+                                    });
                                     handleEditClick(field)
                                 }}>Save</Button>
                         </>
@@ -603,8 +605,17 @@ function UserProfile(): React.ReactElement {
                                             <Grid container alignItems="center" spacing={2} key={service._id}>
                                                 <Grid item xs>
                                                     <Box sx={{display: 'flex', alignItems: 'center'}}>
-                                                        <Typography
-                                                            variant="body1">{service.serviceType}</Typography>
+                                                        {/*reference to the actual offering*/}
+                                                        <Link href={`/offerings/${service._id}`} underline="none"
+                                                              sx={{
+                                                            color: 'inherit',
+                                                            '&:hover': {
+                                                                color: 'gray',
+                                                            },
+                                                        }}>
+                                                            <Typography sx={{ color: 'inherit' }}
+                                                                variant="body1">{service.serviceType}</Typography>
+                                                        </Link>
                                                         {service.isCertified && (
                                                             <Typography variant="body2" sx={{
                                                                 color: '#388e3c',

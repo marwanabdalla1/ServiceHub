@@ -302,7 +302,7 @@ function ProviderProfilePage() {
                         <Box sx={{display: 'flex', alignItems: 'flex-start', mt: 2, justifyContent: 'space-between'}}>
                             <Box sx={{flex: '1 1 45%', display: 'flex', flexDirection: 'row'}}>
                                 <DescriptionIcon sx={{mt: 2, mr: 1}}></DescriptionIcon>
-                                <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 2}}>
+                                <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 2, mr: 2}}>
                                     <Typography variant="body2" color="text.secondary">
                                         {offering.description ? offering.description : "Welcome to my service page."}
                                     </Typography>
@@ -331,7 +331,7 @@ function ProviderProfilePage() {
                                         Service Fee: €{offering.hourlyRate}/hour
                                     </Typography>
                                     <Typography variant="body2" color="text.secondary">
-                                        Payment methods: {offering.acceptedPaymentMethods}
+                                        Payment methods: {offering.acceptedPaymentMethods.join(", ")}
                                     </Typography>
                                 </Box>
                             </Box>
