@@ -38,6 +38,9 @@ function useAlert(defaultDuration: number | null) {
 
 
         if (alert.redirectUrl) {
+            if(alert.redirectUrl.toString() === 'none'){
+                return;
+            }
             if (window.location.pathname === alert.redirectUrl) {
                 window.location.reload();
             } else {

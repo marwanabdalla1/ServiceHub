@@ -8,6 +8,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Feedback } from '../models/Feedback';
 import { defaultProfileImage, fetchFeedbackProfileImages } from "../services/fetchProfileImage";
 import ErrorPage from './ErrorPage'
+import {useNavigate} from "react-router-dom";
 
 const stripePromise = loadStripe('pk_test_51NEdzDChuUsrK8kGX1Wcu8TazsmDPprhV212alFOg78GS9W3FW8JLv1S6FyJnirCaj4f5UevhfUetfDSxIvATSHp003QYXNJYT');
 
@@ -15,6 +16,7 @@ const BecomeProPage: React.FC = () => {
     const { token } = useAuth();
     const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
     const [feedbackProfileImages, setFeedbackProfileImages] = useState<{ [key: string]: string }>({});
+    const navigate = useNavigate();
     useEffect(() => {
         const fetchReviews = async () => {
             try {
@@ -25,7 +27,7 @@ const BecomeProPage: React.FC = () => {
                 });
                 setFeedbacks(response.data);
             } catch (error) {
-                console.error('Error fetching reviews:', error);
+                setFeedbacks([])
             }
         };
 
@@ -41,6 +43,9 @@ const BecomeProPage: React.FC = () => {
     }, [feedbacks]);
 
     const handleJoinNow = async () => {
+        if(!token){
+            navigate("/login")
+        }
         try {
             const response = await axios.post('/api/becomepro/payment',
                 {}, {
@@ -103,7 +108,7 @@ const BecomeProPage: React.FC = () => {
                             <CardContent>
                                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                                     <Avatar
-                                        src={feedbackProfileImages[feedback.givenBy._id] || defaultProfileImage}
+                                        src={feedbackProfileImages[feedback.givenBy?._id] || defaultProfileImage}
                                         sx={{ mr: 2 }}
                                         alt={feedback.title}
                                     />
@@ -116,7 +121,7 @@ const BecomeProPage: React.FC = () => {
                                     {feedback.content}
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary">
-                                    Feedback given by {feedback.givenBy.firstName} {feedback.givenBy.lastName} on {new Date(feedback.createdAt).toLocaleDateString()}
+                                    Feedback given by {feedback.givenBy?.firstName} {feedback.givenBy?.lastName} on {new Date(feedback.createdAt).toLocaleDateString()}
                                 </Typography>
                             </CardContent>
                         </Card>

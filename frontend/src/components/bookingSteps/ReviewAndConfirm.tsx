@@ -140,7 +140,7 @@ function ReviewAndConfirm({bookingDetails, handleCancel}: ReviewAndConfirmProps)
                     bookingDetails.serviceType, bookingDetails.timeSlot?.start ? bookingDetails.timeSlot?.start : new Date());
 
 
-                navigate(`/confirmation/${requestId}/booking`); // Navigate to a confirmation page or show a confirmation message
+                navigate(`/confirmation/${requestId}`); // Navigate to a confirmation page or show a confirmation message
 
 
                 //     if booking timeslot fails, then roll back the request

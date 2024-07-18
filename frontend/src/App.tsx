@@ -134,7 +134,7 @@ function MainRoutes({ search, setSearch }: { search: any, setSearch: any }) {
                         {/* provider's offering profile & Booking steps */}
                         <Route path="/offerings/:offeringId" element={<ProviderProfilePage />} />
                         <Route path="/offerings/:offeringId/booking/:step" element={<BookingPage />} />
-                        <Route path="/confirmation/:requestId/:type" element={<ConfirmationPage />} />
+                        <Route path="/confirmation/:requestId" element={<ConfirmationPage />} />
                         <Route path="/change-booking-time/:requestId" element={<ChangeBookingTimePage />} />
 
                         {/*request/job tables and corresponding details pages*/}

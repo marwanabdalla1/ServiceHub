@@ -5,6 +5,7 @@ import {
     TableHead, TableRow, Paper, Button, Typography
 } from '@mui/material';
 import {useAuth} from "../../contexts/AuthContext";
+import {useNavigate} from "react-router-dom";
 
 interface Service {
     serviceId: string;
@@ -22,7 +23,14 @@ export default function VerifyCertificates(): React.ReactElement {
     const [certificate, setCertificate] = useState<File | null>(null);
     const [users, setUsers] = useState<User[]>([]);
     const [checkedUsers, setCheckedUsers] = useState<User[]>([]);
-    const {token} = useAuth();
+    const {isAdmin, token, account} = useAuth();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!token || !account || !isAdmin()) {
+            navigate('/unauthorized');
+        }
+    }, [token, account]);
 
     const parseCertificateData = (responseData: ArrayBuffer): User[] => {
         const dataView = new DataView(responseData);

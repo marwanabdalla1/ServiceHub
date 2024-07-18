@@ -44,6 +44,7 @@ type AccountContextType = {
     isAdmin: () => boolean;
     isReady: boolean;
     isFetched: boolean;
+    setIsFetched: (value: boolean) => void;
 }
 
 type Props = { children: React.ReactNode };
@@ -89,7 +90,7 @@ export const AccountProvider = ({children}: Props) => {
                 });
         }
 
-    }, [token]);
+    }, [token, isFetched]);
 
     function handleResponse(response: AxiosResponse<any>) {
         localStorage.setItem('token', response?.data.token);
@@ -185,7 +186,7 @@ export const AccountProvider = ({children}: Props) => {
 
     return (
         <AccountContext.Provider
-            value={{token, account, isProvider, isPremium, registerUser, loginUser, logoutUser, isLoggedIn, isAdmin, isReady, isFetched}}>
+            value={{token, account, isProvider, isPremium, registerUser, loginUser, logoutUser, isLoggedIn, isAdmin, isReady, isFetched, setIsFetched}}>
             {isReady ? children : null}
         </AccountContext.Provider>
     );

@@ -35,10 +35,12 @@ export const submitFeedback:RequestHandler = async (req, res) => {
 export const getPremiumUpgradeReviews: RequestHandler = async (req, res) => {
     try {
         const reviews = await PlatformFeedback.find({ category: 'Premium Upgrade' })
-            .populate('givenBy')// get the account details
-            .sort({ rating: -1 }) // sort by rating in descending order
-            .limit(20); // limit the results to 20
-        res.status(200).json(reviews);
+            .populate('givenBy').exec()
+
+        const filteredReviews = reviews.filter(review => review.givenBy)
+            .sort((a, b) => b.rating - a.rating)
+            .slice(0,10)
+        res.status(200).json(filteredReviews);
     } catch (error) {
         res.status(500).json({ error: "Internal server error", message: "Could not fetch reviews." });
     }

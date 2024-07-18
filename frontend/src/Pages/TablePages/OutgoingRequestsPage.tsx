@@ -3,7 +3,7 @@ import Box from '@mui/material/Box';
 
 import Typography from '@mui/material/Typography';
 
-import {Link as Routerlink} from 'react-router-dom'
+import {Link as Routerlink, useNavigate} from 'react-router-dom'
 
 import {ServiceRequest} from '../../models/ServiceRequest';
 import axios from "axios";
@@ -18,7 +18,7 @@ import {
     DialogTitle,
     DialogContent,
     DialogContentText,
-    DialogActions
+    DialogActions, CircularProgress
 } from "@mui/material";
 import GenericTable from "../../components/tableComponents/GenericTable";
 import useAlert from "../../hooks/useAlert";
@@ -44,9 +44,14 @@ export default function RequestHistoryTable() {
     const [statusFilter, setStatusFilter] = useState(['All Statuses']);
     const [serviceTypeFilter, setServiceTypeFilter] = useState(["All Types"]);
 
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+
+    const navigate = useNavigate();
+
     useEffect(() => {
         if (token && account) {
             const fetchServiceRequests = async () => {
+                setIsLoading(true)
                 try {
                     const params = new URLSearchParams({
                         page: (page + 1).toString(),
@@ -74,12 +79,25 @@ export default function RequestHistoryTable() {
                     setTotal(response.data.total);
                 } catch (error) {
                     setServiceRequests([]);
+                } finally {
+                    setIsLoading(false)
                 }
             };
 
             fetchServiceRequests();
+        } else{
+            navigate("/unauthorized")
         }
     }, [account, token, page, rowsPerPage, statusFilter, serviceTypeFilter]);
+
+    if (isLoading) {
+        return (
+            <Box mt={20} className="flex justify-center">
+                <CircularProgress/>
+            </Box>
+        )
+    }
+
 
     const handleToggleMediaCard = (req: Item | null) => {
         if (req && ((req as ServiceRequest).provider === null || (req as ServiceRequest).serviceOffering === null)) {

@@ -12,7 +12,8 @@ export interface BookingDetails {
     requestedBy: Account | undefined;  // User who requested the service
     serviceOffering: ServiceOffering | undefined;
     serviceType: ServiceType | undefined;
-    timeSlot: Timeslot | undefined
+    timeSlot: Timeslot | undefined;
+    [key: string]: any;
 }
 
 interface BookingContextProps {
@@ -34,6 +35,7 @@ const defaultBookingDetails = {
     serviceOffering: undefined,
     serviceType: undefined,
     timeSlot: undefined,
+
 };
 const BookingContext = createContext<BookingContextProps | undefined>(undefined);
 

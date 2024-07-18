@@ -7,7 +7,7 @@ import {
     TableHead,
     TableRow,
     TablePagination,
-    Tooltip, IconButton, FormControl, InputLabel, Select, MenuItem, Box, Typography
+    Tooltip, IconButton, FormControl, InputLabel, Select, MenuItem, Box, Typography, CircularProgress
 } from '@mui/material';
 import GenericTableRow from "./GenericTableRow";
 import {Job} from "../../models/Job";
@@ -53,7 +53,7 @@ function GenericTable({
                           statusFilter,
                           setStatusFilter,
                           serviceTypeFilter,
-                          setServiceTypeFilter
+                          setServiceTypeFilter,
                       }: GenericTableProps) {
     const {token, account} = useAuth();
 
@@ -121,6 +121,7 @@ function GenericTable({
 
     return (
         <div>
+
             {/*filtering dropdowns, this allows to select multiple service types and/or multiple statuses*/}
             <Box sx={{display: 'flex', marginBottom: 2}}>
                 <FormControl style={{width: 300, marginRight: 5}}>

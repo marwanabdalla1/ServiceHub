@@ -1,6 +1,9 @@
-import React, { CSSProperties, FC } from 'react';
+import React, {CSSProperties, FC, useEffect} from 'react';
 import {useAuth} from "../../contexts/AuthContext";
-import { useParams } from 'react-router-dom';
+import {useNavigate, useParams} from 'react-router-dom';
+import axios from "axios";
+import {Feedback} from "../../models/Feedback";
+import {ServiceRequest} from "../../models/ServiceRequest";
 
 interface Styles {
     container: CSSProperties;
@@ -9,31 +12,50 @@ interface Styles {
     highlight: CSSProperties;
 }
 
-type MessageType = 'booking' | 'timeslotChange';
+type MessageType = 'booking'
 
 // confirmation page sent out to the consumers to confirm their booking
 const ConfirmationPage: FC = () => {
 
-    const { requestId, type } = useParams<{ requestId: string; type?: MessageType }>();
-    const { account } = useAuth();
+    const {requestId, type} = useParams<{ requestId: string; type?: MessageType }>();
+    const {account, token} = useAuth();
+    const navigate = useNavigate();
 
 
-    const messages = {
-        booking: {
-            thankYou: "Thank you for your order!",
-            confirmationInfo: "We'll send your confirmation to",
-        },
-        timeslotChange: {
-            thankYou: "Your timeslot change was successful!",
-            confirmationInfo: "Your new timeslot details will be sent to",
-        },
-        default: {
-            thankYou: "Thank you!",
-            confirmationInfo: "Information will be sent to",
+    useEffect(() => {
+        if (!token) {
+            navigate("/unauthorized")
         }
-    };
 
-    const currentMessage = messages[type as MessageType] || messages.default;
+        const fetchRequest = async () => {
+            try {
+                const response = await axios.get<ServiceRequest>(`/api/requests/${requestId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                // check if this is actually the request receiver of this request
+                if (account && response && response.data.requestedBy && response.data.requestedBy._id.toString() !== account._id.toString()) {
+                    navigate("/not-found")
+                }
+            } catch (error) {
+                navigate("/not-found")
+            }
+        };
+
+        if (token && account) {
+            fetchRequest()
+        }
+
+
+    }, [token, account]);
+
+
+    const currentMessage = {
+        thankYou: "Thank you for your order!",
+        confirmationInfo: "We'll send your confirmation to",
+    }
 
 
     const styles: Styles = {

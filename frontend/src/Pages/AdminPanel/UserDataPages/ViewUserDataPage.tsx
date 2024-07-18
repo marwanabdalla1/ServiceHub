@@ -37,7 +37,6 @@ export default function ViewUserData(): React.ReactElement {
     const location = useLocation();
     const accountId = location.state?.accountId;
     const [account, setAccount] = useState<any>(null);
-    const { token } = useAuth();
     const [services, setServices] = useState<any[]>([]);
     const [openServiceDeleteDialog, setOpenServiceDeleteDialog] = useState(false);
     const [openAddressDialog, setOpenAddressDialog] = useState(false);
@@ -61,7 +60,13 @@ export default function ViewUserData(): React.ReactElement {
         description: "",
     });
 
+    const {isAdmin, token} = useAuth();
+    const navigate = useNavigate();
+
     useEffect(() => {
+        if (!token || !account || !isAdmin()) {
+            navigate('/unauthorized');
+        }
         const fetchData = async () => {
             if (token && accountId) {
                 try {

@@ -12,6 +12,7 @@ import * as dotenv from 'dotenv'
 import mongoose from "mongoose";
 import {JobStatus, RequestStatus} from "../../models/enums";
 import {cancelTimeslotDirect} from "../TimeSlotController";
+import platformFeedback from "../../models/platformFeedback";
 
 dotenv.config();
 
@@ -52,6 +53,8 @@ export const deleteAccount: RequestHandler = async (req, res, next) => {
         await notification.deleteMany({recipient: new mongoose.Types.ObjectId(userId)});
 
         await review.deleteMany({reviewer: new mongoose.Types.ObjectId(userId)});
+
+        await platformFeedback.deleteMany({givenBy: new mongoose.Types.ObjectId(userId)});
 
         await payment.deleteMany({userId: new mongoose.Types.ObjectId(userId)});
 

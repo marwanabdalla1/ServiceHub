@@ -25,6 +25,8 @@ function UpdateSProfile() {
     useEffect(() => {
         if (account) {
             setLoading(false);
+        } else{
+            navigate('/unauthorized')
         }
     }, [account]);
 
