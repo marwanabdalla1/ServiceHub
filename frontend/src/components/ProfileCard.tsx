@@ -10,6 +10,7 @@ import Box from '@mui/material/Box';
 import { ServiceOffering } from '../models/ServiceOffering';
 import { GoStarFill } from "react-icons/go";
 import { Link } from 'react-router-dom';
+import { useMediaQuery, useTheme } from '@mui/material';
 
 interface MediaCardProps {
     offering: ServiceOffering;
@@ -19,6 +20,9 @@ interface MediaCardProps {
 
 export default function MediaCard({ offering, profileImageUrl, loading }: MediaCardProps) {
     const provider = offering.provider;
+    const theme = useTheme();
+    const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+
     return (
         <div className='border margin-4 rounded-2xl overflow-hidden'>
             <Card>
@@ -38,10 +42,30 @@ export default function MediaCard({ offering, profileImageUrl, loading }: MediaC
 
                         <div className="flex justify-between items-center">
                             <div>
-                                <Typography gutterBottom variant="h5" component="div">
+                                <Typography 
+                                    gutterBottom 
+                                    variant="h5" 
+                                    component="div"
+                                    sx={{
+                                        maxWidth: '250px', // Set max width to prevent overflow
+                                        whiteSpace: 'nowrap', // Prevent text from wrapping
+                                        overflow: 'hidden', // Hide overflow text
+                                        textOverflow: 'ellipsis' // Add ellipsis if text overflows
+                                    }}
+                                >
                                     {offering.serviceType}
                                 </Typography>
-                                <Typography variant="h6" color="text.secondary" sx={{ mt: -1 }}>
+                                <Typography 
+                                    variant="h6" 
+                                    color="text.secondary" 
+                                    sx={{ 
+                                        mt: -1,
+                                        maxWidth: '250px', // Set max width to prevent overflow
+                                        whiteSpace: 'nowrap', // Prevent text from wrapping
+                                        overflow: 'hidden', // Hide overflow text
+                                        textOverflow: 'ellipsis' // Add ellipsis if text overflows
+                                    }}
+                                >
                                     {provider.firstName} {provider.lastName}
                                 </Typography>
                             </div>
@@ -50,14 +74,20 @@ export default function MediaCard({ offering, profileImageUrl, loading }: MediaC
                                 <Typography variant="h6" color="text.secondary">
                                     €{offering.hourlyRate}/hr
                                 </Typography>
-                                <Typography variant="body1" color="text.secondary" sx={{
-                                    maxWidth: '150px', // Set max width to prevent overflow
-                                    whiteSpace: 'nowrap', // Prevent text from wrapping
-                                    overflow: 'hidden', // Hide overflow text
-                                    textOverflow: 'ellipsis' // Add ellipsis if text overflows
-                                }}>
-                                    {provider.location}
-                                </Typography>
+                                {!isSmallScreen && (
+                                    <Typography 
+                                        variant="body1" 
+                                        color="text.secondary" 
+                                        sx={{
+                                            maxWidth: '150px', // Set max width to prevent overflow
+                                            whiteSpace: 'nowrap', // Prevent text from wrapping
+                                            overflow: 'hidden', // Hide overflow text
+                                            textOverflow: 'ellipsis' // Add ellipsis if text overflows
+                                        }}
+                                    >
+                                        {provider.location}
+                                    </Typography>
+                                )}
                             </div>
 
                         </div>
