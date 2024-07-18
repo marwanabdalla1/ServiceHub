@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { Notification } from '../../models/Notification'; // Import Notification interface
 import { useNavigate } from 'react-router-dom';
@@ -12,7 +12,7 @@ interface NotificationItemProps extends Notification {
 const NotificationItem: React.FC<NotificationItemProps> = ({
   _id,
   content,
-  isViewed: initialIsViewed,
+  isViewed,
   updatedAt,
   notificationType,
   review,
@@ -20,7 +20,6 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
   serviceRequest,
   onNotificationViewed,
 }) => {
-  const [isViewed, setIsViewed] = useState(initialIsViewed); // Local state for isViewed
   const timeAgo = formatDistanceToNow(new Date(updatedAt), { addSuffix: true });
   const navigate = useNavigate(); // useNavigate hook to navigate
   const { token } = useAuth(); // useAuth hook to get the token
@@ -45,8 +44,8 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
   };
 
   const handleClick = async () => {
-    setIsViewed(true); // Update local state immediately
     onNotificationViewed(_id); // Update the parent state
+
     const updatedNotification = await updateNotificationStatus();
     if (updatedNotification) {
       // Define the URL based on NotificationType
