@@ -55,6 +55,7 @@ export default function IncomingRequestTable() {
     const [statusFilter, setStatusFilter] = useState(['All Statuses']);
     const [serviceTypeFilter, setServiceTypeFilter] = useState(["All Types"]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [firstFetchReady, setFirstFetchReady] = useState<boolean>(false);
 
 
     useEffect(() => {
@@ -101,11 +102,13 @@ export default function IncomingRequestTable() {
         }
         if (token && account) {
             fetchServiceRequests();
+            // the first fetch has been completed, so no need to be return a loading cirularprogress every time a filter change
+            setFirstFetchReady(true)
         }
     }, [token, account, page, rowsPerPage, statusFilter, serviceTypeFilter]);
 
 
-    if (isLoading) {
+    if (isLoading && !firstFetchReady) {
         return (
             <Box mt={20} className="flex justify-center">
                 <CircularProgress/>

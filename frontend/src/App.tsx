@@ -122,7 +122,6 @@ function MainRoutes({ search, setSearch }: { search: any, setSearch: any }) {
                         {/*filtering/searching page*/}
                         <Route path="/filter" element={<FilterPage />} />
 
-
                         {/* Add another service/become pro*/}
                         <Route path="/update-sprofile" element={<UpdateSProfile />} />
                         <Route path="/addservice" element={<AddServicePage />} />

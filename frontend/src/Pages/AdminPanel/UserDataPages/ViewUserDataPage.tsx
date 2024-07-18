@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
     Container,
     Typography,
@@ -14,14 +14,14 @@ import {
     DialogTitle,
     Grid
 } from '@mui/material';
-import { useLocation, useNavigate } from 'react-router-dom';
+import {useLocation, useNavigate} from 'react-router-dom';
 import axios from 'axios';
-import { toast } from 'react-toastify';
-import { isValidPhoneNumber } from '../../../validators/AccountDataValidator';
+import {toast} from 'react-toastify';
+import {isValidPhoneNumber} from '../../../validators/AccountDataValidator';
 import AddressDialog from '../../../components/dialogs/AddressDialog';
-import { useAuth } from '../../../contexts/AuthContext';
-import { loadAccount, saveAddress, updateAccountFields } from '../../../services/accountService';
-import { deleteService } from '../../../services/serviceOfferingService';
+import {useAuth} from '../../../contexts/AuthContext';
+import {loadAccount, saveAddress, updateAccountFields} from '../../../services/accountService';
+import {deleteService} from '../../../services/serviceOfferingService';
 import BlueButton from "../../../components/inputs/BlueButton";
 import ConfirmDeleteDialog from "../../../components/dialogs/ConfirmDeleteDialog";
 
@@ -60,11 +60,11 @@ export default function ViewUserData(): React.ReactElement {
         description: "",
     });
 
-    const {isAdmin, token} = useAuth();
+    const {isAdmin, token, account : loggedInAccount} = useAuth();
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (!token || !account || !isAdmin()) {
+        if (!token || (loggedInAccount && !isAdmin())) {
             navigate('/unauthorized');
         }
         const fetchData = async () => {
@@ -80,7 +80,7 @@ export default function ViewUserData(): React.ReactElement {
             }
         };
         fetchData();
-    }, [token, accountId, account]);
+    }, [token, accountId, account, loggedInAccount]);
 
     useEffect(() => {
         const fetchServices = async () => {
@@ -100,7 +100,7 @@ export default function ViewUserData(): React.ReactElement {
 
     useEffect(() => {
         if (account) {
-            const { address, postal, location } = account;
+            const {address, postal, location} = account;
             const concatenatedAddress = [address, postal, location]
                 .filter(field => field !== null && field !== undefined && field.trim() !== "")
                 .join(", ");
@@ -117,11 +117,11 @@ export default function ViewUserData(): React.ReactElement {
     }, [account]);
 
     const handleEditClick = (field: string) => {
-        setEditMode(prevState => ({ ...prevState, [field]: !prevState[field] }));
+        setEditMode(prevState => ({...prevState, [field]: !prevState[field]}));
     };
 
     const handleFieldChange = (field: string, newValue: string) => {
-        setFieldValue(prevState => ({ ...prevState, [field]: newValue }));
+        setFieldValue(prevState => ({...prevState, [field]: newValue}));
     };
 
     const handleSaveAddress = async (updatedAddress: {
@@ -167,9 +167,9 @@ export default function ViewUserData(): React.ReactElement {
     const renderField = (label: string, field: string, isEditable: boolean = true) => {
         if (field === 'address') {
             return (
-                <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 0 }}>
-                    <Typography variant="body1" sx={{ fontWeight: 'bold' }}>{label}:</Typography>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Box sx={{display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 0}}>
+                    <Typography variant="body1" sx={{fontWeight: 'bold'}}>{label}:</Typography>
+                    <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                         <Typography variant="body1">{fieldValue[field]}</Typography>
                         <Button onClick={() => setOpenAddressDialog(true)}>Edit</Button>
                     </Box>
@@ -177,9 +177,9 @@ export default function ViewUserData(): React.ReactElement {
             );
         }
         return (
-            <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 0 }}>
-                <Typography variant="body1" sx={{ fontWeight: 'bold' }}>{label}:</Typography>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box sx={{display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 0}}>
+                <Typography variant="body1" sx={{fontWeight: 'bold'}}>{label}:</Typography>
+                <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                     {field === 'userId' || !editMode[field] ? (
                         <Typography variant="body1">{fieldValue[field]}</Typography>
                     ) : (
@@ -200,12 +200,12 @@ export default function ViewUserData(): React.ReactElement {
     };
 
     return (
-        <Container component="main" maxWidth="md" sx={{ mt: 4, backgroundColor: '#f5f5f5', borderRadius: '20px' }}>
-            <Paper variant="outlined" sx={{ p: 3, borderRadius: '20px' }}>
-                <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', fontSize: '24px', color: '#007BFF' }}>
+        <Container component="main" maxWidth="md" sx={{mt: 4, backgroundColor: '#f5f5f5', borderRadius: '20px'}}>
+            <Paper variant="outlined" sx={{p: 3, borderRadius: '20px'}}>
+                <Typography variant="h6" gutterBottom sx={{fontWeight: 'bold', fontSize: '24px', color: '#007BFF'}}>
                     Public Profile
                 </Typography>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: 3 }}>
+                <Box sx={{display: 'flex', flexDirection: 'column', gap: 3, p: 3}}>
                     {renderField("User ID", "userId")}
                     {renderField("First Name", "firstName")}
                     {renderField("Last Name", "lastName")}
@@ -215,18 +215,24 @@ export default function ViewUserData(): React.ReactElement {
                     {renderField("Description", "description")}
                     {account?.isProvider && (
                         <>
-                            <Divider sx={{ my: 2 }} />
-                            <Typography variant="h6" gutterBottom component="div" sx={{ fontWeight: 'bold', fontSize: '24px', color: '#007BFF' }}>
+                            <Divider sx={{my: 2}}/>
+                            <Typography variant="h6" gutterBottom component="div"
+                                        sx={{fontWeight: 'bold', fontSize: '24px', color: '#007BFF'}}>
                                 Service Provider Settings
                             </Typography>
-                            <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 0 }}>
-                                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Provided Services:</Typography>
-                                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                            <Box sx={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'space-between',
+                                gap: 0
+                            }}>
+                                <Typography variant="h6" sx={{fontWeight: 'bold'}}>Provided Services:</Typography>
+                                <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
                                     {services.length > 0 ? (
                                         services.map(service => (
                                             <Grid container alignItems="center" spacing={2} key={service._id}>
                                                 <Grid item xs>
-                                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                    <Box sx={{display: 'flex', alignItems: 'center'}}>
                                                         <Typography variant="body1">{service.serviceType}</Typography>
                                                         {service.isCertified && (
                                                             <Typography variant="body2" sx={{
@@ -241,7 +247,8 @@ export default function ViewUserData(): React.ReactElement {
                                                     </Box>
                                                 </Grid>
                                                 <Grid item>
-                                                    <Button onClick={() => handleServiceDeleteOpenDialog(service._id)} sx={{ color: 'red' }}>Delete</Button>
+                                                    <Button onClick={() => handleServiceDeleteOpenDialog(service._id)}
+                                                            sx={{color: 'red'}}>Delete</Button>
                                                 </Grid>
                                             </Grid>
                                         ))

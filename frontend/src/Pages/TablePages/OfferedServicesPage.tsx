@@ -45,9 +45,13 @@ export default function OfferedServicesTable() {
     const navigate = useNavigate();
 
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [firstFetchReady, setFirstFetchReady] = useState<boolean>(false);
 
 
     useEffect(() => {
+        if (!token) {
+            navigate('/unauthorized');
+        }
         if (token && account) {
             setIsLoading(true)
             const fetchJobs = async () => {
@@ -80,17 +84,16 @@ export default function OfferedServicesTable() {
                     setTotal(response.data.total);
                 } catch (error) {
                     setJobs([]);
-                } finally{
+                } finally {
                     setIsLoading(false)
                 }
             };
             fetchJobs();
-        } else{
-            navigate('/unauthorized');
+            setFirstFetchReady(true)// only flip once
         }
     }, [account, token, page, rowsPerPage, statusFilter, serviceTypeFilter]);
 
-    if (isLoading) {
+    if (isLoading && !setFirstFetchReady) {
         return (
             <Box mt={20} className="flex justify-center">
                 <CircularProgress/>
@@ -106,7 +109,6 @@ export default function OfferedServicesTable() {
         setSelectedJob(job as Job);
         setShowMediaCard(job !== null);
     };
-
 
 
     // actions to perform on the offered
@@ -161,36 +163,36 @@ export default function OfferedServicesTable() {
 
     return (
         <div style={{display: 'flex', flexDirection: 'row', width: '100%', position: 'relative'}}>
-                <AlertCustomized alert={alert} closeAlert={closeAlert}/>
+            <AlertCustomized alert={alert} closeAlert={closeAlert}/>
 
             <Box sx={{minWidth: 275, margin: 2, width: '100%'}}>
-                    <Box>
-                        <Typography variant="h6" component="div" sx={{marginBottom: '10px'}}>
-                            Offered Services (Jobs)
-                        </Typography>
-                        <Typography variant="body2" component="div" sx={{marginBottom: '16px'}}>
-                            When you accept a request, it automatically turns into a job.
-                        </Typography>
-                    </Box>
-
-                    <Box style={{flex: showMediaCard ? '3 1 auto' : '1 1 0%', marginRight: showMediaCard ? '30%' : '5%'}}>
-                        <GenericTable data={jobs}
-                                      count={total}
-                                      page={page}
-                                      setPage={setPage}
-                                      rowsPerPage={rowsPerPage}
-                                      setRowsPerPage={setRowsPerPage}
-                                      setShowMediaCard={setShowMediaCard}
-                                      onViewDetails={handleToggleMediaCard}
-                                      isProvider={true}
-                                      statusOptions={statusOptions}
-                                      statusFilter={statusFilter}
-                                      setStatusFilter={setStatusFilter}
-                                      serviceTypeFilter={serviceTypeFilter}
-                                      setServiceTypeFilter={setServiceTypeFilter}
-                        />
-                    </Box>
+                <Box>
+                    <Typography variant="h6" component="div" sx={{marginBottom: '10px'}}>
+                        Offered Services (Jobs)
+                    </Typography>
+                    <Typography variant="body2" component="div" sx={{marginBottom: '16px'}}>
+                        When you accept a request, it automatically turns into a job.
+                    </Typography>
                 </Box>
+
+                <Box style={{flex: showMediaCard ? '3 1 auto' : '1 1 0%', marginRight: showMediaCard ? '30%' : '5%'}}>
+                    <GenericTable data={jobs}
+                                  count={total}
+                                  page={page}
+                                  setPage={setPage}
+                                  rowsPerPage={rowsPerPage}
+                                  setRowsPerPage={setRowsPerPage}
+                                  setShowMediaCard={setShowMediaCard}
+                                  onViewDetails={handleToggleMediaCard}
+                                  isProvider={true}
+                                  statusOptions={statusOptions}
+                                  statusFilter={statusFilter}
+                                  setStatusFilter={setStatusFilter}
+                                  serviceTypeFilter={serviceTypeFilter}
+                                  setServiceTypeFilter={setServiceTypeFilter}
+                    />
+                </Box>
+            </Box>
 
             {showMediaCard && selectedJob && (
                 <div style={{

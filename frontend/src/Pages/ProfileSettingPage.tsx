@@ -11,7 +11,7 @@ import {
     IconButton,
     Grid,
     Tooltip, Card, CardContent,
-    Link
+    Link, CircularProgress
 } from '@mui/material';
 
 import {Link as RouterLink} from 'react-router-dom';
@@ -79,7 +79,12 @@ function UserProfile(): React.ReactElement {
     const {alert, triggerAlert, closeAlert} = useAlert(30000);
 
     useEffect(() => {
-        if(!token){
+        window.scrollTo(0, 0);
+    }, []);
+
+
+    useEffect(() => {
+        if (!token) {
             navigate("/unauthorized")
         }
 
@@ -93,12 +98,6 @@ function UserProfile(): React.ReactElement {
                     }
                 });
                 setAccount(accountResponse.data);
-            } catch (error) {
-            }
-
-            try {
-                profileImage = await fetchProfileImageByToken(token!);
-                setProfileImage(profileImage);
             } catch (error) {
             }
 
@@ -123,43 +122,60 @@ function UserProfile(): React.ReactElement {
             } catch (error) {
                 //     proceed
             }
+
+            try {
+                profileImage = await fetchProfileImageByToken(token!);
+                setProfileImage(profileImage);
+            } catch (error) {
+            }
+
         };
 
         if (token) {
             fetchData();
         }
 
-        // scroll listener
-        const handleScroll = () => {
-
-            if (!profileRef.current || !serviceProviderRef.current || !dangerZoneRef.current) {
-                return;
-            }
-
-            // set breakpoint to determine which section we are in
-            const breakpoint = window.innerHeight * 0.4;
-
-            const profileRect = profileRef.current.getBoundingClientRect();
-            const serviceProviderRect = serviceProviderRef.current.getBoundingClientRect();
-            const dangerZoneRect = dangerZoneRef.current.getBoundingClientRect();
-
-
-            if (dangerZoneRect.top < breakpoint * 1.5) {
-                setActiveSection('dangerZone');
-            } else if (profileRect.top <= breakpoint && profileRect.bottom > breakpoint) {
-                setActiveSection('profile');
-            } else if (serviceProviderRect.top <= breakpoint && serviceProviderRect.bottom > breakpoint) {
-                setActiveSection('serviceProvider');
-            }
-        };
-
-        window.addEventListener('scroll', handleScroll);
-
-        return () => {
-            window.removeEventListener('scroll', handleScroll);
-        };
     }, [token, client_reference_id]);
 
+    // // scroll listener
+    // const handleScroll = () => {
+    //
+    //     if (!profileRef.current || !serviceProviderRef.current || !dangerZoneRef.current) {
+    //         return;
+    //     }
+    //
+    //     // set breakpoint to determine which section we are in
+    //     const breakpoint = window.innerHeight * 0.4;
+    //
+    //     const profileRect = profileRef.current.getBoundingClientRect();
+    //     const serviceProviderRect = serviceProviderRef.current.getBoundingClientRect();
+    //     const dangerZoneRect = dangerZoneRef.current.getBoundingClientRect();
+    //
+    //
+    //     if (dangerZoneRect.top < breakpoint) {
+    //         setActiveSection('dangerZone');
+    //     } else if (profileRect.top <= breakpoint && profileRect.bottom > breakpoint) {
+    //         setActiveSection('profile');
+    //     } else if (serviceProviderRect.top <= breakpoint && serviceProviderRect.bottom > breakpoint) {
+    //         setActiveSection('serviceProvider');
+    //     }
+    // };
+    //
+    // window.addEventListener('scroll', handleScroll);
+    //
+    // return () => {
+    //     window.removeEventListener('scroll', handleScroll);
+    // };
+
+    // if (loading) {
+    //     return (
+    //         <Container>
+    //             <Box sx={{display: 'flex', justifyContent: 'center', mt: 4}}>
+    //                 <CircularProgress/>
+    //             </Box>
+    //         </Container>
+    //     );
+    // }
 
     const [editMode, setEditMode] = useState<EditModeType>({
         firstName: false,
@@ -289,36 +305,26 @@ function UserProfile(): React.ReactElement {
         navigate('/select-availability');
     };
 
-    // navigating to the different page sections
+
     const handleNavigation = (section: string) => {
         setActiveSection(section);
-        let elementRef;
         switch (section) {
             case 'profile':
-                elementRef = profileRef;
+                window.scrollTo(0, 0);
+                // profileRef.current?.scrollIntoView({behavior: 'smooth', block:'start'});
                 break;
             case 'serviceProvider':
-                elementRef = serviceProviderRef;
+                serviceProviderRef.current?.scrollIntoView({behavior: 'smooth'});
                 break;
             case 'dangerZone':
-                elementRef = dangerZoneRef;
+                dangerZoneRef.current?.scrollIntoView({behavior: 'smooth'});
                 break;
             default:
-                window.scrollTo({top: 0, behavior: 'smooth'});
-                return;
-        }
-
-        if (elementRef && elementRef.current) {
-            const navbarHeight = 180;
-            // leave some space on top due to navbar
-            const elementTop = elementRef.current.getBoundingClientRect().top + window.scrollY - navbarHeight;
-
-            window.scrollTo({
-                top: elementTop,
-                behavior: 'smooth'
-            });
+                window.scrollTo(0, 0);
+                break;
         }
     };
+
     const cancelSubscription = async (subscriptionId: string) => {
         try {
             const response = await axios.post(`/api/becomepro/subscription/cancel`, {}, {
@@ -602,13 +608,13 @@ function UserProfile(): React.ReactElement {
                                                         {/*reference to the actual offering*/}
                                                         <Link href={`/offerings/${service._id}`} underline="none"
                                                               sx={{
-                                                            color: 'inherit',
-                                                            '&:hover': {
-                                                                color: 'gray',
-                                                            },
-                                                        }}>
-                                                            <Typography sx={{ color: 'inherit' }}
-                                                                variant="body1">{service.serviceType}</Typography>
+                                                                  color: 'inherit',
+                                                                  '&:hover': {
+                                                                      color: 'gray',
+                                                                  },
+                                                              }}>
+                                                            <Typography sx={{color: 'inherit'}}
+                                                                        variant="body1">{service.serviceType}</Typography>
                                                         </Link>
                                                         {service.isCertified && (
                                                             <Typography variant="body2" sx={{
