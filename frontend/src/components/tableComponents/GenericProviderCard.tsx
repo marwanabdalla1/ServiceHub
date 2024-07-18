@@ -55,11 +55,8 @@ interface GenericProviderCardProps {
 
 // Helper to determine if item is a Job
 const isJob = (item: Item): item is Job => {
-    console.log("is item job?", (item as Job).receiver !== undefined);
     return (item as Job).receiver !== undefined; // Or any other unique property of Job
 };
-
-// const isJob = (item as Job).receiver !== undefined;  // Assuming 'receiver' is unique to Job
 
 
 const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
@@ -94,7 +91,6 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
                         const response = await axios.get(`/api/reviews/score/${accountId}`, {
                             headers: {Authorization: `Bearer ${token}`},
                         });
-                        console.log(response)
                         if (response && response.data) {
                             setAverageScore(response.data.averageScore);
                             setConsumerReviewsCount(response.data.count);
@@ -119,14 +115,10 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
 
                 // ServiceRequest actions
                 if (item.requestStatus === "cancelled") {
-                    console.log("No Actions possible for CANCELLED requests!");
+                    //no actions possible
                 } else if (item.requestStatus === RequestStatus.declined) {
-                    console.log("No Actions possible for DECLINED requests!");
-                    // } else if (item.requestStatus === RequestStatus.accepted) {
-                    //     buttons.push(<BlackButton text="Cancel Request" onClick={() => actions.cancelRequest?.(item)}
-                    //                               sx={{marginRight: "1rem"}}/>);
+                    //no actions possible
                 } else if (item.requestStatus === RequestStatus.accepted && item.job) {
-                    console.log("request with job:", item)
                     buttons.push(<BlackButton text="View Job" onClick={() => navigate(`/incoming/jobs/${item.job}`)}
                                               sx={{marginRight: "1rem", padding: "0.5rem 0.5rem"}}/>);
                 } else if (item.requestStatus === "pending" && item.timeslot) {
@@ -203,6 +195,7 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
 
         return (
             <Card>
+                {/*render button depending on if we are in detailed page*/}
                 <IconButton onClick={handleIconClick}>
                     {inDetailPage ? <CloseFullscreenIcon/> : <OpenInFullIcon/>}
                 </IconButton>
@@ -222,6 +215,7 @@ const GenericProviderCard: React.FC<GenericProviderCardProps> = ({
                     <CloseIcon/>
                 </button>
 
+                {/*details*/}
                 <CardContent>
                     <div style={{display: 'flex', alignItems: 'center', marginBottom: '1rem'}}>
                         <Avatar alt={receiver?.firstName + " " + receiver?.lastName}

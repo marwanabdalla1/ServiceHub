@@ -2,7 +2,6 @@ import {RequestHandler} from 'express';
 import moment from 'moment';
 import Timeslot, {ITimeslot} from '../models/timeslot';
 import mongoose, {ClientSession, Types} from "mongoose";
-import {ObjectId} from "mongodb";
 
 // Custom error class for Timeslot-related errors
 class TimeslotError extends Error {
@@ -114,19 +113,20 @@ export const extendFixedSlots: RequestHandler = async (req, res, next) => {
 
         const eventsToExtend = [];
 
-        // Fetch potential future events, including non-active ones
+        // Fetch potential future events (i.e. all fixed timeslots of the provider in the future)
         const potentialFutureEvents = await Timeslot.find({
             createdById: userId,
             isFixed: true,
             start: { $gte: endDate.toDate() }
         });
 
-        // Filter future events to check exact timing match
+        // Filter future events to check exact time matches
         for (const event of fixedEvents) {
             const eventDayOfWeek = moment(event.start).day();
             const startTime = moment(event.start).format('HH:mm');
             const endTime = moment(event.end).format('HH:mm');
 
+            // check if there is at least one future event of this fixed series
             const futureExists = potentialFutureEvents.some(
                 futureEvent => {
                     const isAfter = moment(futureEvent.start).isAfter(event.end);
@@ -149,7 +149,6 @@ export const extendFixedSlots: RequestHandler = async (req, res, next) => {
             try {
                 existingTimeslots = await getEventsDirect(userId);
             } catch (error) {
-                console.error("Error fetching existing timeslots:", error);
                 existingTimeslots = []; // Continue with empty array if error
             }
 
@@ -189,9 +188,9 @@ export const deleteTimeslot: RequestHandler = async (req, res, next) => {
         const { title, isFixed } = event;
 
         // Delete the specific event
-        const deletedOne = await Timeslot.deleteOne({ start: startTime, end: endTime, createdById: userId });
+        await Timeslot.deleteOne({ start: startTime, end: endTime, createdById: userId });
 
-        // If the event is fixed, delete its future instances
+        // If the event is fixed and deleteAllFuture is set to true, delete its future instances
         if (isFixed && deleteAllFuture) {
             const weekday = (startTime.getDay() + 1) % 7 || 7; // Convert 0 (Sunday in JS) to 7 for MongoDB
             const futureStartDate = moment(startTime).add(1, 'week');
@@ -219,7 +218,7 @@ export const deleteTimeslot: RequestHandler = async (req, res, next) => {
                 }
             });
 
-            // Update all previous ones to make them not fixed
+            // Update all previous ones of this fixed series to make them not fixed
             await Timeslot.updateMany({
                 createdById: userId,
                 title,
@@ -254,51 +253,6 @@ export const deleteTimeslot: RequestHandler = async (req, res, next) => {
         return res.status(500).json({
             error: "Internal server error",
             message: message,
-        });
-    }
-};
-
-// PATCH Timeslot Endpoint
-export const updateTimeslot: RequestHandler = async (req, res, next) => {
-    try {
-        const userId = (req as any).user.userId;
-        const { event, updateAllFuture } = req.body;
-        const newStart = new Date(req.body.newStart);
-        const newEnd = new Date(req.body.newEnd);
-        const { _id, start, end, isFixed } = event;
-
-        // Update only the specific event
-        if (!updateAllFuture) {
-            await Timeslot.updateOne(
-                { _id: _id, createdById: userId },
-                { $set: { start: newStart, end: newEnd, isFixed: false } }
-            );
-        } else if (isFixed && updateAllFuture) {
-            // Parse original start and end times to match exact future instances
-            const originalStart = new Date(start);
-            const originalEnd = new Date(end);
-            const dayOfWeek = (originalStart.getDay() + 1) % 7 || 7;
-
-            const futureStartDate = moment(newStart).startOf('week');
-
-            await Timeslot.updateMany(
-                {
-                    createdById: userId,
-                    title: event.title,
-                    isFixed: true,
-                    start: { $gte: futureStartDate.toDate() },
-                    $expr: { $eq: [{ $dayOfWeek: "$start" }, dayOfWeek] }
-                },
-                { $set: { start: newStart, end: newEnd } }
-            );
-        }
-
-        res.status(200).json({ message: 'Timeslot updated successfully' });
-    } catch (err: any) {
-        console.error("Error updating timeslot:", err);
-        res.status(500).json({
-            error: "Internal server error",
-            message: err.message || "An error occurred"
         });
     }
 };
@@ -352,7 +306,6 @@ async function getEventsDirect(userId: any, start?: string, end?: string) {
 
         return Timeslot.find(query);
     } catch (error) {
-        console.error("Error fetching timeslots for user:", error);
         throw error; // Rethrow to handle it in the calling function
     }
 }
@@ -428,7 +381,6 @@ export const getAvailabilityByProviderId: RequestHandler = async (req, res, next
 
         res.json(adjustedTimeslots);
     } catch (error: any) {
-        console.error("Error fetching timeslots:", error);
         res.status(500).json({ error: 'Internal Server Error', message: error.message });
     }
 };
@@ -448,14 +400,13 @@ export const saveEvents: RequestHandler = async (req, res, next) => {
             try {
                 existingTimeslots = await getEventsDirect(userId);
             } catch (error) {
-                console.error("Error fetching existing timeslots:", error);
                 existingTimeslots = []; // Continue with empty array if error
             }
             const futureEndDate = moment(fixedEvents[0].end).endOf('week').add(6, 'months');
             futureInstances = await generateWeeklyInstances(fixedEvents, existingTimeslots, moment(fixedEvents[0].start).add(1, 'week'), futureEndDate);
         }
 
-        // Insert new events
+        // Insert new events into DB
         const allEventsToInsert = [...events, ...futureInstances];
         const insertedEvents = await Timeslot.insertMany(allEventsToInsert.map(event => ({
             title: event.title,
@@ -480,7 +431,7 @@ export const saveEvents: RequestHandler = async (req, res, next) => {
     }
 };
 
-// Get events by provider
+// Get all events by provider
 export const getEventsByProvider: RequestHandler = async (req, res, next) => {
     const { providerId } = req.params;
     try {
@@ -518,7 +469,6 @@ export const turnExistingEventIntoFixed: RequestHandler = async (req, res, next)
             try {
                 existingTimeslots = await getEventsDirect(userId, eventToUpdate.start.toISOString(), futureEndDate.toISOString());
             } catch (error) {
-                console.error("Error fetching existing timeslots:", error);
                 existingTimeslots = []; // Continue with empty array if error
             }
             futureInstances = await generateWeeklyInstances([eventToUpdate], existingTimeslots, moment(eventToUpdate.start).add(1, 'week'), futureEndDate);
@@ -579,12 +529,16 @@ export const checkAvailability: RequestHandler = async (req, res) => {
         }
         res.status(200).json({ isAvailable: false });
     } catch (error: any) {
-        console.error("Error checking timeslot availability:", error);
         res.status(500).json({ message: "Internal server error", error: error.message });
     }
 };
 
 // Book a timeslot directly
+/**
+ *
+ * @param timeslotData - information of the timeslot
+ * @param sessionPassed - client session
+ */
 export const bookTimeslotDirect = async (timeslotData: any, sessionPassed?: ClientSession) => {
     const {
         start,
@@ -609,7 +563,7 @@ export const bookTimeslotDirect = async (timeslotData: any, sessionPassed?: Clie
     }
 
     try {
-        // Find overlapping timeslots
+        // Find overlapping timeslots (i.e. find available timeslots that covers this time)
         const overlappingSlots = await Timeslot.find({
             createdById: createdById,
             end: { $gt: transitStart },
@@ -617,29 +571,28 @@ export const bookTimeslotDirect = async (timeslotData: any, sessionPassed?: Clie
             isBooked: false
         }).session(session);
 
+        // if no slots are available during the desired booking time, return an error
         if (overlappingSlots.length <= 0) {
             throw new TimeslotError("Timeslot is no longer available.", 409);
         }
 
-        console.log("Overlapping slots to process:",  overlappingSlots.length, overlappingSlots,
-            overlappingSlots.map(slot => slot._id));
 
-        // Check availability
+        // Check availability right before the booking
         let available = false;
 
+        // create a copy to not modify the original overlappingSlots
         const copiedSlots = overlappingSlots.map(slot => slot.toObject());
 
+        // merge all the overlapping available timeslots
         const merged = mergeTimeslots(copiedSlots);
 
         // if the booking time is covered by an available slot, the provider is available
         for (const slot of merged) {
             if (slot.start <= new Date(transitStart) && slot.end >= new Date(transitEnd)) {
-                console.log("slot info in merged:", slot)
                 available = true;
                 break;
             }
         }
-
 
         if (!available) {
             throw new TimeslotError("Timeslot is no longer available.", 409);
@@ -661,22 +614,17 @@ export const bookTimeslotDirect = async (timeslotData: any, sessionPassed?: Clie
         // Save the new timeslot
         await newTimeslot.save({ session });
 
-        console.log("the timeslot data:", timeslotData)
-        // Adjust timeslots based on the booked time
+        // Adjust exiting available timeslots based on the booked time
         for (const slot of overlappingSlots) {
-            console.log("processing slot of overlappingSlots...")
             // if the booked slot entirely covers an existing availability, delete the existing available slot
             if (moment(new Date(slot.start)).isSameOrAfter(moment(new Date(transitStart))) && moment(new Date(slot.end)).isSameOrBefore(moment(new Date(transitEnd)))) {
-                console.log("exact match found!", slot)
                 const exactMatchResponse = await Timeslot.findByIdAndDelete(slot._id, { session });
-                console.log("deleted the exact match:", exactMatchResponse)
 
             }
             // if the existing availability covers the entirety of the booking slot, cut the exiting one
             else if (moment(new Date(slot.start)).isBefore(moment(new Date(transitStart))) &&
                 moment(new Date(slot.end)).isAfter(moment(new Date(transitEnd)))) {
 
-                console.log("entirely covers match found!", slot)
                 const createdSeparated = await Timeslot.create([{
                     start: slot.start,
                     end: transitStart,
@@ -692,26 +640,22 @@ export const bookTimeslotDirect = async (timeslotData: any, sessionPassed?: Clie
                     createdById: slot.createdById,
                     isBooked: false
                 }], { session });
-                console.log("separated ones for entirely covers:", createdSeparated)
                 const deletion = await Timeslot.findByIdAndDelete(slot._id, { session });
-                console.log("deleted one of the matches:", deletion)
 
             }
             // if the existing availability is partially covered by the booking slot, adjust its start and end
             else {
                 if (moment(new Date(slot.end)).isAfter(moment(new Date(transitEnd)))) {
                     slot.start = transitEnd;
-                    console.log("partial cover match found 1!", slot)
 
                 } else if (moment(new Date(slot.start)).isBefore(moment(new Date(transitStart)))) {
-                    console.log("partial cover match found 2!", slot)
                     slot.end = transitStart;
                 }
                 const finalCheck = await slot.save({ session });
-                console.log("final check", finalCheck)
             }
         }
 
+        // potentially end the session
         if (ownSession) {
             await session.commitTransaction();
         }
@@ -720,7 +664,6 @@ export const bookTimeslotDirect = async (timeslotData: any, sessionPassed?: Clie
         if (ownSession) {
             await session.abortTransaction();
         }
-        console.error("Failed to book timeslot:", error);
         throw error; // Rethrow to handle elsewhere
     } finally {
         if (ownSession) {
@@ -740,7 +683,6 @@ export const bookTimeslot: RequestHandler = async (req, res, next) => {
         res.status(201).json(result);
     } catch (error: any) {
         await session.abortTransaction();
-        console.error("Failed to book timeslot:", error);
         if (error instanceof TimeslotError) {
             res.status(error.statusCode).json({ message: error.message });
         } else {
@@ -751,7 +693,7 @@ export const bookTimeslot: RequestHandler = async (req, res, next) => {
     }
 };
 
-// Cancel a timeslot by ID
+// Cancel a booked timeslot by ID -> just set it back to available
 export const cancelTimeslot: RequestHandler = async (req, res) => {
     const { timeslotId } = req.params;
 
@@ -759,7 +701,6 @@ export const cancelTimeslot: RequestHandler = async (req, res) => {
         const updatedTimeslot = await cancelTimeslotDirect(timeslotId);
         res.status(200).json({ message: "Timeslot cancelled successfully", updatedTimeslot });
     } catch (error: any) {
-        console.error("Error cancelling timeslot:", error);
         res.status(500).json({ message: "Failed to cancel timeslot", error: error.message });
     }
 };
@@ -769,7 +710,6 @@ export async function cancelTimeslotWithRequestId(requestId: string): Promise<{ 
     try {
         const foundTimeslot = await findTimeslotByRequestId(requestId);
         if (!foundTimeslot) {
-            console.log(`No timeslot found with requestId: ${requestId}, proceeding without cancellation.`);
             return { success: true, message: "No timeslot to cancel, proceeding..." };
         }
 
@@ -777,7 +717,6 @@ export async function cancelTimeslotWithRequestId(requestId: string): Promise<{ 
         await cancelTimeslotDirect(foundTimeslot._id);
         return { success: true, message: "Timeslot cancelled successfully" };
     } catch (error) {
-        console.error("Error cancelling timeslot:", error);
         throw new Error("Failed to cancel timeslot");
     }
 }
@@ -787,27 +726,21 @@ export async function cancelTimeslotWithRequestId(requestId: string): Promise<{ 
 export async function updateTimeslotWithRequestId(requestId: string, jobId: string): Promise<{ success: boolean, message: string, timeslot?: any }> {
     try {
 
-        console.log(`Received requestId: ${requestId}, jobId: ${jobId}`);
-
         const foundTimeslot = await findTimeslotByRequestId(requestId);
         if (!foundTimeslot) {
-            console.log(`No timeslot found with requestId: ${requestId}`);
             return { success: false, message: "No timeslot to update, proceeding..." };
         }
 
         foundTimeslot.jobId = new Types.ObjectId(jobId);
-        console.log(`Found timeslot before update:`, foundTimeslot);
 
         const updatedTimeslot = await foundTimeslot.save();
-        console.log(`Updated timeslot:`, updatedTimeslot);
         return { success: true, timeslot: updatedTimeslot, message: "Timeslot updated successfully with the job" };
     } catch (error) {
-        console.error("Error updating timeslot:", error);
         throw new Error("Failed to update timeslot");
     }
 }
 
-// Cancel a timeslot directly by ID
+// Cancel a booked timeslot directly by ID
 export async function cancelTimeslotDirect(timeslotId: String | Types.ObjectId) {
     try {
         const timeslot = await Timeslot.findById(timeslotId);
@@ -831,7 +764,6 @@ export async function cancelTimeslotDirect(timeslotId: String | Types.ObjectId) 
 
         return await timeslot.save();
     } catch (error) {
-        console.error("Failed to cancel timeslot:", error);
         throw error;
     }
 }
@@ -842,12 +774,10 @@ export async function findTimeslotByRequestId(requestId: String | Types.ObjectId
     try {
         const timeslot = await Timeslot.findOne({ requestId: requestId });
         if (!timeslot) {
-            console.log(`No timeslot found for requestId: ${requestId}`);
             return null;
         }
         return timeslot;
     } catch (error) {
-        console.error("Database error in findTimeslotByRequestId:", error);
         return null;
     }
 }
@@ -857,7 +787,7 @@ const getDurationInMinutes = (start: Date, end: Date): number => {
     return (new Date(end).getTime() - new Date(start).getTime()) / 60000;
 };
 
-// Get the next available timeslot
+// Get the next available timeslot to display at the provider's profile
 export const getNextAvailability: RequestHandler = async (req, res, next) => {
     const { providerId } = req.params;
     const transitTime = parseInt(req.query.transitTime as string) || 30;
@@ -869,6 +799,7 @@ export const getNextAvailability: RequestHandler = async (req, res, next) => {
             { createdById: new Types.ObjectId(providerId) }
         ];
 
+        // the timeslot has to be in the future
         const timeslots: ITimeslot[] = await Timeslot.find({
             $or: providerIdConditions,
             isBooked: false,
@@ -889,7 +820,6 @@ export const getNextAvailability: RequestHandler = async (req, res, next) => {
             return res.status(404).json({ message: 'No available timeslots found' });
         }
     } catch (error: any) {
-        console.error("Error fetching next availability:", error);
         res.status(500).json({ error: 'Internal Server Error', message: error.message });
     }
 };

@@ -15,7 +15,6 @@ import {useLocation, useNavigate} from "react-router-dom";
 import {useRecovery} from "../../../contexts/RecoveryContext";
 import {toast} from "react-toastify";
 import {useAuth} from "../../../contexts/AuthContext";
-import {User} from "../../../models/Account";
 
 const defaultTheme = createTheme({
     palette: {
@@ -68,7 +67,6 @@ export default function EmailVerification() {
 
         try {
             if (input_otp === otp) {
-                console.log("OTP Page: "+firstName, lastName, email, password);
                 const data: UserData = {
                     firstName: location.state.firstName,
                     lastName: location.state.lastName,

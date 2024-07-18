@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from 'express';
-import Account from '../models/account';
 import ServiceOffering from "../models/serviceOffering";
 
 
@@ -9,8 +8,6 @@ import ServiceOffering from "../models/serviceOffering";
 export const getOfferings = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userId = (req as any).user; // Assuming userId is available in the request (e.g., from authentication middleware)
-        console.log('User id ' + userId);
-        console.log("Getting offerings");
 
         const { type, priceRange, locations, isLicensed, searchTerm, page = 1, limit = 10, sortKey } = req.query;
         const filters = {
@@ -24,10 +21,8 @@ export const getOfferings = async (req: Request, res: Response, next: NextFuncti
         if ((req as any).user && (req as any).user.userId) {
             // If the request is authenticated, get offerings for the specific user
             const userId = (req as any).user.userId;
-            console.log(`Fetching offerings for user ID: ${userId}`);
 
             const userOfferings = await ServiceOffering.find({ provider: userId }).populate('provider');
-            // console.log('User offerings:', userOfferings);
 
             if (!userOfferings || userOfferings.length === 0) {
                 return res.status(404).json({ message: 'No service offerings found for the authenticated user' });
@@ -36,14 +31,8 @@ export const getOfferings = async (req: Request, res: Response, next: NextFuncti
             return res.json(userOfferings);
         } else {
             // If the request is not authenticated, fetch all offerings and apply filters
-            console.log("Fetching all offerings with filters:", filters);
-
             const offerings = await ServiceOffering.find().populate('provider').exec();
-            console.log('Service Offerings:', offerings);
-            console.log('Services found:', offerings.length);
             const filteredOfferings = filterOfferings(offerings, filters);
-
-            console.log('Filtered offerings found:', filteredOfferings.length);
 
             // Separate premium and non-premium offerings
             const premiumOfferings = filteredOfferings.filter(offering => offering.provider.isPremium);
@@ -75,7 +64,6 @@ export const getOfferings = async (req: Request, res: Response, next: NextFuncti
             });
         }
     } catch (err: any) {
-        console.error('Error fetching data:', err);
         res.status(500).send('Internal Server Error');
     }
 };
@@ -135,12 +123,9 @@ const sortOfferings = (offerings: any[], sortKey: string) => {
 };
 
 export const getServiceOfferingById = async (req: Request, res: Response) => {
-    console.log("Full URL:", req.protocol + '://' + req.get('host') + req.originalUrl);
     const { offeringId } = req.params;
-    console.log("params:", req.params);
     try {
         const offering = await ServiceOffering.findById(offeringId)//.populate('provider');
-        console.log("finding service...");
         if (!offering) {
             return res.status(404).json({ message: 'Service offering not found' });
         }
@@ -152,7 +137,6 @@ export const getServiceOfferingById = async (req: Request, res: Response) => {
 
 export const getServiceOfferingsByUser = async (req: Request, res: Response) => { //The authenticated version of the getOfferings function (uses token)
     try {
-        console.log("getting offerings");
         const userId = (req as any).user.userId;
         const offerings = await ServiceOffering.find({ provider: userId }).populate('provider');
         if (!offerings) {

@@ -11,6 +11,7 @@ interface Styles {
 
 type MessageType = 'booking' | 'timeslotChange';
 
+// confirmation page sent out to the consumers to confirm their booking
 const ConfirmationPage: FC = () => {
 
     const { requestId, type } = useParams<{ requestId: string; type?: MessageType }>();

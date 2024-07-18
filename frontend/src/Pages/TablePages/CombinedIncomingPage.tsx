@@ -1,10 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {Tabs, Tab, Box, Container} from '@mui/material';
-import IncomingRequestsTable from './IncomingRequestsPage';
-import OfferedServicesTable from './OfferedServicesPage';
 import {useNavigate, useLocation, Outlet} from "react-router-dom";
-import AlertCustomized from "../../components/AlertCustomized";
-import useAlert from "../../hooks/useAlert";
 
 function CombinedServicePage() {
     const [selectedTab, setSelectedTab] = useState(0);
@@ -23,6 +19,7 @@ function CombinedServicePage() {
     }, [location.pathname]);
 
 
+    // go to the corresponding table when changing tabs
     const handleChange = (event: any, newValue: any) => {
         setSelectedTab(newValue);
 
@@ -35,12 +32,10 @@ function CombinedServicePage() {
 
     return (
 
-        // <Container sx={{ p: 0, m: 1 }}>
         <div  style={{display: 'flex', width: '100%'}}>
                 <Box sx={{width: '15%', minWidth: '100px', position: 'fixed', flexShrink: 0.5, height:'100vh', overflowY:'hidden', borderRight: 0, borderColor: 'divider', paddingTop: 3, paddingLeft: 2}}>
                     <Tabs
                         orientation="vertical"
-                        // variant="scrollable"
                         value={selectedTab}
                         onChange={handleChange}
                         aria-label="Vertical tabs"
@@ -61,9 +56,9 @@ function CombinedServicePage() {
                     ml: '15%',
                     overflowY: 'hidden', //for independent vertical scrolling
                 }}>
+                    {/*the two incoming pages*/}
                     <Outlet/>
                 </Box>
-        {/*</Container>*/}
         </div>
     );
 }

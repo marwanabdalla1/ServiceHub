@@ -38,8 +38,8 @@ import OfferedServicesTable from "./Pages/TablePages/OfferedServicesPage";
 import IncomingRequestsTable from "./Pages/TablePages/IncomingRequestsPage";
 import RequestHistoryTable from "./Pages/TablePages/OutgoingRequestsPage";
 import ReceivedServiceTable from "./Pages/TablePages/ReceivedServicePage";
-import JobDetailsPage from "./Pages/JobDetailsPage";
-import RequestDetailsPage from "./Pages/RequestDetailsPage";
+import JobDetailsPage from "./Pages/TablePages/DetailPages/JobDetailsPage";
+import RequestDetailsPage from "./Pages/TablePages/DetailPages/RequestDetailsPage";
 import CombinedOutgoingPage from "./Pages/TablePages/CombinedOutgoingPage";
 import CombinedServicePage from "./Pages/TablePages/CombinedIncomingPage";
 import { RecoveryProvider } from "./contexts/RecoveryContext";
@@ -112,35 +112,32 @@ function MainRoutes({ search, setSearch }: { search: any, setSearch: any }) {
                         <Route path="/signup" element={<SignUpPage />} />
                         <Route path="/signup/otp" element={<OTPSignUpPage />} />
 
-                        {/* User Profile */}
+                        {/* User Profile settings */}
                         <Route path="/setprofile" element={<ProfileSettingPage />} />
                         <Route path="/forgetPassword" element={<ForgetPasswordPage />} />
                         <Route path="/forgetPassword/emailVerification" element={<OTPPage />} />
                         <Route path="/forgetPassword/resetPassword" element={<ResetPasswordPage />} />
                         <Route path="/forgetPassword/success" element={<ResetPasswordSuccessPage />} />
+
+                        {/*filtering/searching page*/}
                         <Route path="/filter" element={<FilterPage />} />
 
 
-                        {/* Add another one for it */}
+                        {/* Add another service/become pro*/}
                         <Route path="/update-sprofile" element={<UpdateSProfile />} />
                         <Route path="/addservice" element={<AddServicePage />} />
-                        {/*<Route path="/provider-profile/:id" element={<ProviderProfilePage/>}/>*/}
-                        <Route path="/select-availability" element={<SelectAvailabilityPage />} />
-                        <Route path="/change-booking-time/:requestId" element={<ChangeBookingTimePage />} />
-                        {/*<Route path="/select-availability-booking" element={<SelectAvailabilityBooking_temp/>}/>*/}
-
-                        {/* Booking */}
-                        <Route path="/offerings/:offeringId" element={<ProviderProfilePage />} />
-                        <Route path="/offerings/:offeringId/booking/:step" element={<BookingPage />} />
-                        <Route path="/select-availability" element={<SelectAvailabilityPage />} />
                         <Route path="/becomepro" element={<BecomeProPage />} />
 
+                        {/*select availability*/}
+                        <Route path="/select-availability" element={<SelectAvailabilityPage />} />
 
-                        {/*booking*/}
-                        {/* <Route path="/offerings/:offeringId" element={<ProviderProfilePage/>}/>
-                       <Route path="/offerings/:offeringId/booking/:step" element={<BookingPage/>}/> */}
+                        {/* provider's offering profile & Booking steps */}
+                        <Route path="/offerings/:offeringId" element={<ProviderProfilePage />} />
+                        <Route path="/offerings/:offeringId/booking/:step" element={<BookingPage />} />
                         <Route path="/confirmation/:requestId/:type" element={<ConfirmationPage />} />
+                        <Route path="/change-booking-time/:requestId" element={<ChangeBookingTimePage />} />
 
+                        {/*request/job tables and corresponding details pages*/}
                         <Route path="/incoming" element={<CombinedServicePage />}>
                             <Route index element={<Navigate replace to="requests" />} />
                             <Route path="requests" element={<IncomingRequestsTable />} />
@@ -152,8 +149,6 @@ function MainRoutes({ search, setSearch }: { search: any, setSearch: any }) {
                             <Route path="requests" element={<RequestHistoryTable />} />
                             <Route path="jobs" element={<ReceivedServiceTable />} />
                         </Route>
-                        {/*todo: get this once it's done*/}
-                        {/*<Route path="incoming/jobs/:jobId" element={<JobDetailsPage />} />*/}
                         <Route path="/jobs/:jobId" element={<JobDetailsPage />} />
                         <Route path="/incoming/jobs/:jobId" element={<JobDetailsPage />} />
                         <Route path="/outgoing/jobs/:jobId" element={<JobDetailsPage />} />
@@ -163,21 +158,22 @@ function MainRoutes({ search, setSearch }: { search: any, setSearch: any }) {
                         <Route path="/incoming/requests/:requestId" element={<RequestDetailsPage />} />
                         <Route path="/outgoing/requests/:requestId" element={<RequestDetailsPage />} />
 
-
+                        {/*faq*/}
                         <Route path="/faq" element={<FAQPage />} />
 
+                        {/*admin pages*/}
                         <Route path="/admin" element={<AdminHomePage />} />
                         <Route path="/admin/verifyCertificate" element={<VerifyCertificatePage />} />
                         <Route path="/admin/UserData" element={<AdminUserDataPage />} />
                         <Route path="/admin/viewUserData" element={<ViewUserDataPage />} />
 
+                        {/*error pages*/}
                         <Route path="/unauthorized" element={<ErrorPage title="Unauthorized Access"
                             message="You do not have permission to view this page." />} />
                         <Route path="/failedpayment" element={<ErrorPage title="Failed payment"
                             message="Your payment did not go through" />} />
                         <Route path="*" element={<ErrorPage title="404 Not Found"
                             message="The page you are looking for does not exist." />} />
-                        {/*<Route path="*" element={<h1>Not Found</h1>}/>*/}
                     </Routes>
                 </div>
                 <div>

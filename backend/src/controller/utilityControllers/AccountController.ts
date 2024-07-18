@@ -161,7 +161,6 @@ export async function cancelAllLinkedTimeslots(userId: string) {
  */
 export const getProviderById: RequestHandler = async (req, res) => {
     try {
-        console.log(req.params)
         const account = await Account.findById(req.params.providerId);
         if (!account) {
             return res.status(404).json({message: 'Account not found! ' + req.params.providerId});
@@ -263,7 +262,6 @@ export const getAccountDetails: RequestHandler = async (req, res) => {
  */
 export const getRequesterById: RequestHandler = async (req, res) => {
     try {
-        console.log(req.params)
         const account = await Account.findById(req.params.requesterId);
         if (!account) {
             return res.status(404).json({message: 'Account not found! ' + req.params.requesterId});

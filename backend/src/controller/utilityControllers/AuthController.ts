@@ -133,7 +133,6 @@ export const login: RequestHandler = async (req, res, next) => {
         }
 
         let token;
-        console.log(req.body.rememberMe);
         if (req.body.rememberMe) {
             token = jwt.sign({ userId: account._id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '7d' });
         } else {

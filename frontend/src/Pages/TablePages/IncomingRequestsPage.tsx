@@ -34,6 +34,7 @@ import useAlert from '../../hooks/useAlert';
 
 type Item = ServiceRequest | Job;
 
+// incoming requests of the provider
 export default function IncomingRequestTable() {
     const [showMediaCard, setShowMediaCard] = React.useState(false);
     const [selectedRequest, setSelectedRequest] = React.useState<ServiceRequest | null>(null);
@@ -56,7 +57,6 @@ export default function IncomingRequestTable() {
 
 
     useEffect(() => {
-        console.log(token)
         if (token && account) {
 
             const fetchServiceRequests = async () => {
@@ -81,17 +81,14 @@ export default function IncomingRequestTable() {
                         });
                     }
 
-                    console.log(params)
 
                     const response = await axios.get(`/api/requests/provider/${account._id}?${params.toString()}`, {
                         headers: {Authorization: `Bearer ${token}`}
                     });
 
-                    console.log("fetched service requests,", response)
                     setServiceRequests(response.data.data);
                     setTotal(response.data.total);
                 } catch (error) {
-                    console.error('Failed to fetch service requests:', error);
                     setServiceRequests([]);
                 }
             };
@@ -102,11 +99,6 @@ export default function IncomingRequestTable() {
 
 
     const handleToggleMediaCard = (req: ServiceRequest | Item | null) => {
-        console.log("Request:", req);
-        console.log("showMediaCard now", showMediaCard);
-
-        console.log("showMediaCard will be set to:", req !== null);
-
         if (req && (req as ServiceRequest).requestedBy === null) {
             setDialogOpen(true);
             return;
@@ -115,10 +107,9 @@ export default function IncomingRequestTable() {
         setShowMediaCard(req !== null);
     };
 
-
+    //methods for performing actions on the incoming request
     const onAccept = () => {
         if (!selectedRequest) {
-            console.error('No request selected');
             return;
         }
         handleAccept({
@@ -127,13 +118,12 @@ export default function IncomingRequestTable() {
             setServiceRequests,
             token,
             setShowMediaCard,
+            triggerAlert,
         });
-
     };
 
     const onDecline = () => {
         if (!selectedRequest) {
-            console.error('No request selected');
             return;
         }
         handleDecline({
@@ -142,12 +132,12 @@ export default function IncomingRequestTable() {
             setServiceRequests,
             token,
             setShowMediaCard,
+            triggerAlert,
         });
     };
 
     const onCancel = () => {
         if (!selectedRequest) {
-            console.error('No request selected');
             return;
         }
         handleCancel({
@@ -157,12 +147,15 @@ export default function IncomingRequestTable() {
             token,
             account,
             setShowMediaCard,
+            triggerAlert,
         });
     };
 
+    /**
+     *   ask the requester to choose a new time
+     */
     const onTimeChange = () => {
         if (!selectedRequest) {
-            console.error('No request selected');
             return;
         }
         handleTimeChange({
@@ -173,7 +166,9 @@ export default function IncomingRequestTable() {
             setShowMediaCard,
             comment,
             setTimeChangePopUp,
-            navigate
+            navigate,
+            triggerAlert,
+
         });
     };
     const handleDialogClose = () => {
@@ -181,11 +176,7 @@ export default function IncomingRequestTable() {
     };
 
     return (
-        // <div style={{display: 'flex'}}>
-        //     <div style={{flex: 1, padding: '10px'}}>
         <div style={{display: 'flex', flexDirection: 'row', width: '100%', position: 'relative'}}>
-            {/*<div style={{flexGrow: showMediaCard ? 1 : 1, transition: 'flex-grow 0.3s', padding: '10px'}}>*/}
-            {/*<div >*/}
 
                 <AlertCustomized alert={alert} closeAlert={closeAlert}/>
 
@@ -247,7 +238,6 @@ export default function IncomingRequestTable() {
                 </DialogActions>
             </Dialog>
             {showMediaCard && selectedRequest && (
-                // <div style={{position: 'sticky', flexShrink: 0, width: 400, marginLeft: 'auto'}}>
                 <div style={{
                     width: '25%',
                     flex: '1 0 25%',

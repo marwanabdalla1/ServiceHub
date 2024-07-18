@@ -1,11 +1,10 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import Account from '../models/account';
-import Job, { IJob } from "../models/job";
+import Job from "../models/job";
 
 import {cancelTimeslotWithRequestId, updateTimeslotWithRequestId} from "./TimeSlotController";
 import Timeslot from "../models/timeslot";
 import {sortBookingItems} from "../util/requestAndJobUtils";
-import ServiceRequest from "../models/serviceRequest";
 
 
 
@@ -28,13 +27,10 @@ function errorHandler(req: Request, res: Response, requiredProperties: string[])
     return false;
 }
 
-// after provider accepted
+// after provider accepted a service request, create a job
 export const createJob: RequestHandler = async (req: Request, res: Response) => {
-
-    // Assuming `req.user` is set by the `authenticate` middleware
     const user = (req as any).user;
 
-    console.log("request body for creating job:" + req.body)
 
 
     // Check for required properties
@@ -65,38 +61,17 @@ export const createJob: RequestHandler = async (req: Request, res: Response) => 
 
 
     try {
-        // Extract fields from req.body and possibly validate or transform them
-
+        // Extract fields from req.body and create a new job
         const jobDetails = {
             ...req.body,
             provider: user.userId,
 
         };
-        // const jobDetails = req.body; // Simplified, assuming body has all required fields
-
-        console.log("request body job details:" + jobDetails)
         let newJob = await Job.create(jobDetails);
 
         if (!newJob._id) {
             return res.status(400).send({ message: "Failed to create service request." });
         }
-
-
-        // push notification to receiver
-        // const notificationContent = `A new job has been created.`;
-
-        // todo: move the create notification here from IncomingRequestsTable
-        // const newNotification = new Notification({
-        //     isViewed: false,
-        //     content: notificationContent,
-        //     job: newJob._id,
-        //     recipient: user.userId,  // Assuming 'recipient' should be notified
-        // });
-        // const createdNnotification = await Notification.create(newNotification);
-
-        // console.log(createdNnotification)
-
-        // update timeslot
 
         await updateUserJobHistory(req.body.provider, newJob._id.toString());
 
@@ -114,11 +89,11 @@ async function updateUserJobHistory(userId: string, jobId: string) {
             $push: { jobHistory: jobId }
         });
     } catch (error) {
-        console.error("Failed to update user's job history:", error);
         throw new Error("Failed to update user's job history");
     }
 }
 
+// get all the jobs offered by a provider
 export const getJobsByProvider: RequestHandler = async (req, res) => {
 
     try {
@@ -128,7 +103,6 @@ export const getJobsByProvider: RequestHandler = async (req, res) => {
 
         //make sure only the provider him/herself can get this
         if (userId !== providerId) {
-            console.log ("userId: ", userId, "\n providerId: ", providerId)
             return res.status(403).json({ message: "Unauthorized access." });
         }
 
@@ -152,14 +126,16 @@ export const getJobsByProvider: RequestHandler = async (req, res) => {
             ])
             .exec();
 
+        // also get the timeslots of the jobs
         const jobsWithTimeslots = await Promise.all(jobs.map(async (job) => {
             const timeslot = await Timeslot.findOne({ jobId: job._id }).exec();
             return { ...job.toObject(), timeslot: timeslot || undefined };
         }));
 
+        // sort the jobs according to our sorting logic: future ones closest to today, then past ones closest to today
         const sortedJobsWithTimeslots = sortBookingItems(jobsWithTimeslots);
 
-        console.log("jobs with their timeslots", jobsWithTimeslots)
+        // paginate the jobs
         const paginatedJobssWithTimeslots = sortedJobsWithTimeslots.slice((Number(page)-1) * Number(limit), (Number(page)) * Number(limit));
 
 
@@ -168,27 +144,23 @@ export const getJobsByProvider: RequestHandler = async (req, res) => {
             total: sortedJobsWithTimeslots.length})
         ;
     } catch (error: any) {
-        console.error("Failed to retrieve jobs:", error);
         res.status(500).json({ message: "Internal server error", error: error.message });
     }
 }
 
+// get all the jobs that a person has requested
 export const getJobsByRequester: RequestHandler = async (req, res) => {
     const { requesterId } = req.params;  // Extract the provider ID from URL parameters
     const userId = (req as any).user.userId;
 
-    //make sure only the provider him/herself can get this
+    //make sure only the requester him/herself can get this
     if (userId !== requesterId) {
-        console.log ("userId: ", userId, "\n requesterId: ", requesterId)
         return res.status(403).json({ message: "Unauthorized access." });
     }
 
     try {
 
-
         const { serviceType, status, page = 1, limit = 10 } = req.query;
-
-        console.log("queries", req.query)
 
         let query:Query = { receiver: requesterId };
 
@@ -208,32 +180,33 @@ export const getJobsByRequester: RequestHandler = async (req, res) => {
             .exec();
 
 
-
         if (!jobs.length) {
             return res.status(404).json({ message: "No jobs found for this receiver." });
         }
 
+        // find the linked timeslots
         const jobsWithTimeslots = await Promise.all(jobs.map(async (job) => {
             const timeslot = await Timeslot.findOne({ jobId: job._id }).exec();
             return { ...job.toObject(), timeslot: timeslot || undefined };
         }));
 
+        // sort the jobs according to timeslots
         const sortedJobsWithTimeslots = sortBookingItems(jobsWithTimeslots);
 
-        console.log("jobs with their timeslots", jobsWithTimeslots)
-        const paginatedJobssWithTimeslots = sortedJobsWithTimeslots.slice((Number(page)-1) * Number(limit), (Number(page)) * Number(limit));
+        // paginate the jobs
+        const paginatedJobsWithTimeslots = sortedJobsWithTimeslots.slice((Number(page)-1) * Number(limit), (Number(page)) * Number(limit));
 
 
         res.status(200).json({
-            data: paginatedJobssWithTimeslots,
+            data: paginatedJobsWithTimeslots,
             total: sortedJobsWithTimeslots.length});
 
     } catch (error: any) {
-        console.error("Failed to retrieve jobs:", error);
         res.status(500).json({ message: "Internal server error", error: error.message });
     }
 }
 
+// update one job
 export const updateJob: RequestHandler = async (req: Request, res: Response) => {
     // Get the userId from the JWT token
     const userId = (req as any).user.userId;
@@ -241,15 +214,11 @@ export const updateJob: RequestHandler = async (req: Request, res: Response) => 
     const updates = req.body;
 
 
-    console.log("job updates:", updates)
-
     const job = await Job.findById(jobId)
 
     if (!job) {
         return res.status(404).json({ message: "Job not found" });
     }
-
-    //console.log("User ID: ", userId, "Provider ID: ", job.provider._id.toString(), "Receiver ID: ", job.receiver._id.toString())
 
     // Check if the user is authorized to access this service request
     if (job.provider._id.toString() !== userId && job.receiver._id.toString() !== userId) {
@@ -261,12 +230,10 @@ export const updateJob: RequestHandler = async (req: Request, res: Response) => 
         const updatedJob = await Job.findByIdAndUpdate(jobId, updates, { new: true, upsert: true, strict: true });
 
 
-        // handle cancellation
+        // handle cancellation: if a job is cancelled, we need to also cancel the booked timeslot
         const requiresCancellation = [ "cancelled"].includes(updates.status);
-        console.log("requires cancellation: ",requiresCancellation)
         if (requiresCancellation) {
             const cancellationResult = await cancelTimeslotWithRequestId(job.request.toString());
-            console.log(cancellationResult.message);
         }
 
         res.status(200).json(updatedJob);
@@ -277,6 +244,7 @@ export const updateJob: RequestHandler = async (req: Request, res: Response) => 
 
 
 
+// get job by jobId
 export const getJobById: RequestHandler = async (req, res) => {
     const { jobId } = req.params;  // Extract the Job ID from URL parameters
     const userId = (req as any).user.userId;
@@ -291,9 +259,8 @@ export const getJobById: RequestHandler = async (req, res) => {
             return res.status(404).json({ message: "No job found for this ID." });
         }
 
-        //make sure only the provider/consumer him/herself can get this
+        //authorization: make sure only the provider/consumer him/herself can get this
         if (userId !== job.receiver._id.toString() && userId !== job.provider._id.toString()) {
-            console.log("userId: ", userId, "\n receiver ID: ", job.receiver._id, "provider ID:", job.provider._id)
             return res.status(403).json({ message: "Unauthorized access." });
         }
 
@@ -301,11 +268,9 @@ export const getJobById: RequestHandler = async (req, res) => {
         const timeslot = await Timeslot.findOne({ jobId: jobId }).exec();
         const jobWithTimeslot = { ...job.toObject(), timeslot: timeslot || undefined };
 
-        console.log("incoming requests with their timeslots", jobWithTimeslot)
 
         res.status(200).json(jobWithTimeslot);
     } catch (error: any) {
-        console.error("Failed to retrieve job:", error);
         res.status(500).json({ message: "Internal server error", error: error.message });
     }
 }

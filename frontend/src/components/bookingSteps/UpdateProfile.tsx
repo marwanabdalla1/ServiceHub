@@ -1,13 +1,11 @@
 import React, {useEffect, useState} from 'react';
-import {useNavigate} from 'react-router-dom';
-import {Container, Box, Typography, Card, CardContent, TextField, Button, Grid, Autocomplete} from '@mui/material';
-import {useBooking, BookingDetails} from '../../contexts/BookingContext';
+import { Box, Typography, Card, CardContent, TextField, Button, Grid, Autocomplete} from '@mui/material';
+import { BookingDetails} from '../../contexts/BookingContext';
 import axios from "axios";
 import {useAuth} from "../../contexts/AuthContext";
-import BookingSideCard from "../../components/BookingSideCard";
 import {GERMAN_CITIES_SUPPORT} from "../../shared/Constants";
 import {checkEmptyFields} from "../../validators/GeneralValidator";
-import {isValidEmail, isValidName, isValidPhoneNumber, isValidPostalCode} from "../../validators/AccountDataValidator";
+import {isValidName, isValidPhoneNumber, isValidPostalCode} from "../../validators/AccountDataValidator";
 import {toast} from "react-toastify";
 
 
@@ -25,16 +23,14 @@ interface UserDetails {
     address: string;
     postal: string;
     location: string;
-    // email: string; //should not be changed here
+    // email: string; //should not be changeable here
     phoneNumber: string;
 
     [key: string]: string | number;  // Allows any string to index into the object, expecting a string or number value
 }
 
-
+// step 3 of booking: the user has to update their contact details before their first booking
 function UpdateProfile({onNext, handleCancel, bookingDetails}: UpdateProfileProps) {
-    // const { bookingDetails } = useBooking();
-    const navigate = useNavigate();
     const {token} = useAuth();
 
     // Initialize state directly from bookingDetails.requestedBy
@@ -47,8 +43,6 @@ function UpdateProfile({onNext, handleCancel, bookingDetails}: UpdateProfileProp
         email: bookingDetails.requestedBy?.email || '',
         phoneNumber: bookingDetails.requestedBy?.phoneNumber || ''
     });
-
-    console.log("requested by:", bookingDetails.requestedBy)
 
 
     const [editMode, setEditMode] = useState(false);
@@ -65,7 +59,6 @@ function UpdateProfile({onNext, handleCancel, bookingDetails}: UpdateProfileProp
         const fields = ['firstName', 'lastName', 'phoneNumber', 'address', 'postal', 'location']; // Extend based on required fields
         return fields.some(field => !userDetails[field]);
     };
-
 
     const handleSaveProfile = async () => {
         if (checkEmptyFields(userDetails.firstName, 'First Name') || checkEmptyFields(userDetails.lastName, 'Last Name') ||
@@ -95,26 +88,19 @@ function UpdateProfile({onNext, handleCancel, bookingDetails}: UpdateProfileProp
         }
 
         const apiEndpoint = '/api/account/'
-        console.log(userDetails)
         try {
             const response = await axios.put(apiEndpoint, userDetails, {
                 headers: {'Authorization': `Bearer ${token}`},
             });
-            console.log('User updated:', response.data);
             onNext();
         } catch (error) {
             console.error('Error updating user:', error);
         }
 
-        // Handle save profile logic
-        // navigate('/review-and-confirm');
     };
 
 
     return (
-        // <Container>
-        //     <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-        //         <Box sx={{ width: '75%'  }}>
         <>
             <Typography variant="h4" gutterBottom>
                 Please confirm your contact data
@@ -225,7 +211,6 @@ function UpdateProfile({onNext, handleCancel, bookingDetails}: UpdateProfileProp
                                 disabled={isAnyFieldMissing()}>
                             {isModified ? "Save" : "Confirm"}
                         </Button>
-                        {/*todo: handle cancel*/}
                         <Button variant="outlined" onClick={handleCancel}>Cancel </Button>
                     </Box>
                 </CardContent>

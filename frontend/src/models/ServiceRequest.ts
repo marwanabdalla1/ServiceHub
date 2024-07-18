@@ -1,7 +1,7 @@
-import { ServiceType, RequestStatus } from "./enums";
-import { Job } from "./Job";
-import { Account } from "./Account";
-import { ServiceOffering } from "./ServiceOffering";
+import {ServiceType, RequestStatus} from "./enums";
+import {Job} from "./Job";
+import {Account} from "./Account";
+import {ServiceOffering} from "./ServiceOffering";
 import {Timeslot} from "./Timeslot";
 
 
@@ -10,7 +10,6 @@ export class ServiceRequest {
     requestStatus: RequestStatus;
     serviceType: ServiceType;
 
-    // todo: delete
     appointmentStartTime?: Date;
     appointmentEndTime?: Date | undefined;
     uploads: File[];
@@ -20,20 +19,16 @@ export class ServiceRequest {
 
     //foreign keys
     job: Job | null;
-    serviceOffering: ServiceOffering | undefined | null;   //todo: make it non-null
+    serviceOffering: ServiceOffering | undefined | null;
     provider: Account;
     requestedBy: Account;
     timeslot: Timeslot | undefined;
-    rating: number;
-
     updatedAt?: Date;
     createdAt?: Date;
 
 
-
-
-    constructor(serviceRequestId: string, requestStatus: RequestStatus,serviceType: ServiceType, serviceOffering: ServiceOffering | undefined | null,
-        appointmentStartTime: Date,  appointmentEndTime: undefined, uploads: File[], comment: string, serviceFee: number, duration: number, job: Job | null, provider: Account, timeslot: Timeslot|undefined, requestedBy: Account, rating: number, updatedAt: Date|undefined, createdAt: Date|undefined) {
+    constructor(serviceRequestId: string, requestStatus: RequestStatus, serviceType: ServiceType, serviceOffering: ServiceOffering | undefined | null,
+                appointmentStartTime: Date, appointmentEndTime: undefined, uploads: File[], comment: string, serviceFee: number, duration: number, job: Job | null, provider: Account, timeslot: Timeslot | undefined, requestedBy: Account, updatedAt: Date | undefined, createdAt: Date | undefined) {
         this._id = serviceRequestId;
         this.requestStatus = requestStatus;
         this.serviceType = serviceType;
@@ -48,9 +43,8 @@ export class ServiceRequest {
         this.provider = provider;
         this.timeslot = timeslot;
         this.requestedBy = requestedBy;
-        this.rating = rating;
-        this.updatedAt=updatedAt;
-        this.createdAt=createdAt;
+        this.updatedAt = updatedAt;
+        this.createdAt = createdAt;
 
     }
 }

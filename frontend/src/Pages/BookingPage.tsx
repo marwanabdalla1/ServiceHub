@@ -6,7 +6,7 @@ import StepThree from '../components/bookingSteps/UpdateProfile';
 import StepFour from '../components/bookingSteps/ReviewAndConfirm';
 import {useNavigate, useParams} from 'react-router-dom';
 import {Stepper, Step, StepLabel, Button, Box, Container, Grid} from '@mui/material';
-import BookingSideCard from "../components/BookingSideCard";
+import BookingSideCard from "../components/bookingSteps/BookingSideCard";
 
 const BookingPage = () => {
     const {offeringId, step: stepParam} = useParams<{ offeringId: string; step?: string }>();
@@ -34,7 +34,7 @@ const BookingPage = () => {
                     const provider = await fetchAccountDetails(offeringId);
                     setProvider(provider);
                 } catch (error) {
-                    console.error('Error fetching provider details:', error);
+                    return;
                 }
             }
         };
@@ -58,11 +58,8 @@ const BookingPage = () => {
 
 
     const handleStep = (index: number) => () => {
-        console.log("back step clicked!", index, step)
         if (index < step) { // Only allow navigation to previous steps
             setStep(index + 1);
-            // currentStep(index+1)
-            // navigate(`/offerings/${offeringId}/booking/step${index + 1}`);
         }
     };
 
@@ -80,7 +77,6 @@ const BookingPage = () => {
     };
 
     const currentStep = () => {
-        // console.log("go to step:", gotoStep)
         switch (step) {
             case 1:
                 return <StepOne onNext={nextStep} bookingDetails={bookingDetails}/>;
@@ -99,6 +95,7 @@ const BookingPage = () => {
         <Container maxWidth="lg" sx={{mt: 4, display: 'flex'}}>
             <Grid container spacing={8}>
                 <Grid item xs={9}>
+                    {/*stepper on top to see which step we're in*/}
                     <Box display="flex" flexDirection="column" mt={2} width={"100%"} mb={4} mr={10}>
                         <Stepper activeStep={step - 1} alternativeLabel sx={{mb: 2}}>
                             {steps.map((label, index) => (
@@ -116,10 +113,7 @@ const BookingPage = () => {
                                 </Step>
                             ))}
                         </Stepper>
-                        {/*<Button onClick={previousStep}>Back</Button>*/}
-                        {/*<Box sx={{mt: '5'}}>*/}
                         {currentStep()}
-                        {/*</Box>*/}
 
                     </Box>
                 </Grid>

@@ -55,19 +55,17 @@ function GenericTable({
                           serviceTypeFilter,
                           setServiceTypeFilter
                       }: GenericTableProps) {
-    const [selectedItem, setSelectedItem] = React.useState<ServiceRequest | Job | null>(null);
-    const [selectedItems, setSelectedItems] = React.useState<Item[]>([]);
     const {token, account} = useAuth();
 
     const [statusOpen, setStatusOpen] = useState(false);  // For the status dropdown
 
     const [serviceTypeOpen, setServiceTypeOpen] = useState(false);  // For the service type dropdown
 
+    // change the status filter of the table, multiple statuses possible
     const handleChangeStatus = (event: any) => {
-        // setStatusFilter(event.target.value);
         const value = event.target.value;
         if (value.includes('All Statuses')) {
-            setStatusFilter(['All Statuses']); // Reset to only 'All Requests'
+            setStatusFilter(['All Statuses']); // Reset to only 'All Statuses'
             setStatusOpen(false); // Close the dropdown
         } else {
             setStatusFilter(typeof value === 'string' ? value.split(',') : value);
@@ -83,12 +81,11 @@ function GenericTable({
         setStatusOpen(true);
     }
 
+    // change the service type filter of the table, multiple types possible
     const handleChangeServiceType = (event: any) => {
-        // setServiceTypeFilter(event.target.value);
         const value = event.target.value;
-        // `value` will now be an array of selected values
         if (value.includes('All Types')) {
-            setServiceTypeFilter(['All Types']); // Reset to only 'All Requests'
+            setServiceTypeFilter(['All Types']); // Reset the filter
             setServiceTypeOpen(false); // Close the dropdown
         } else {
             setServiceTypeFilter(typeof value === 'string' ? value.split(',') : value)
@@ -98,7 +95,6 @@ function GenericTable({
         setPage(0);
     };
 
-
     const handleServiceTypeOpen = () => {
         if (serviceTypeFilter.includes('All Types')) {
             setServiceTypeFilter([]);
@@ -106,11 +102,11 @@ function GenericTable({
         setServiceTypeOpen(true);
     }
 
+    // pagination and changing the number of rows displayed in the page
     const handleChangePage = (
         event: React.MouseEvent<HTMLButtonElement> | null,
         newPage: number
     ): void => {
-        console.log("new page", newPage)
         setShowMediaCard(false)
         setPage(newPage);
     };
@@ -125,6 +121,7 @@ function GenericTable({
 
     return (
         <div>
+            {/*filtering dropdowns, this allows to select multiple service types and/or multiple statuses*/}
             <Box sx={{display: 'flex', marginBottom: 2}}>
                 <FormControl style={{width: 300, marginRight: 5}}>
                     <InputLabel id="service-type-label">Filter Service Type</InputLabel>
@@ -171,6 +168,7 @@ function GenericTable({
             </Box>
 
             {data.length === 0 ?
+                //display placeholder information if there are no matching results
                 (
                     <Typography variant="body1">
                         You don't have any matches
@@ -185,6 +183,7 @@ function GenericTable({
                         ) : ''}. </Typography>
                 ) :
                 (
+                    // actual table if there are results
                     <>
                         <TableContainer sx={{mb: 4}}>
                             <Table>
@@ -197,8 +196,9 @@ function GenericTable({
                                             {isProvider ? "Requester/Receiver" : "Provider"}
                                         </TableCell>
                                         <TableCell>Appointment Time
+                                            {/*tooltip for the "(invalid date")*/}
                                             <Tooltip
-                                                title="Invalid appointment time occurs when the request is cancelled, declined or when the provider has required the time to be changed."
+                                                title="Invalid appointment time (invalid date) occurs when the request is cancelled, declined or when the provider has required the time to be changed."
                                                 placement="top">
                                                 <IconButton>
                                                     <InfoIcon/>
@@ -206,6 +206,7 @@ function GenericTable({
                                             </Tooltip>
                                         </TableCell>
                                         <TableCell>
+                                            {/*how is the table sorted*/}
                                             <Tooltip
                                                 title="Tables are sorted by upcoming appointments nearest to today, followed by recent past appointments."
                                                 placement="top">
@@ -217,6 +218,7 @@ function GenericTable({
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
+                                    {/*the actual data*/}
                                     {data.map((row) => (
                                         <GenericTableRow key={row._id} item={row}
                                                          isProvider={isProvider}
@@ -226,6 +228,7 @@ function GenericTable({
                             </Table>
                         </TableContainer>
 
+                        {/*pagination*/}
                         <TablePagination
                             sx={{
                                 '.MuiTablePagination-toolbar': {
@@ -262,7 +265,6 @@ function GenericTable({
                         /> </>
                 )
             }
-
         </div>
     )
         ;
