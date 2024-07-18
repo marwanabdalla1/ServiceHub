@@ -70,6 +70,8 @@ function FilterPage() {
 
                 setOfferings(data);
                 setLoading(false);
+                // reset the states
+                navigate(location.pathname, { replace: true, state: {} });
                 await fetchProfileImagesForServiceOffering(data, setProfileImages, setLoadingImages, setLoading);
 
             } catch (error) {

@@ -75,8 +75,6 @@ export const uploadCertificate: RequestHandler = async (req, res) => {
             // Save the new certificate
             const certificateId = (req.file as MulterFile).id.toString();
 
-            // Update the service offering with the new certificate
-            // TODO: Check if the service is already certified -> isCertified check should not be here
             const updates = {certificateId: certificateId, isCertified: false};
 
 

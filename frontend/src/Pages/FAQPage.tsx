@@ -27,7 +27,7 @@ const FAQPage = () => {
         },
         {
             question: "Which services can be offered on Service Hub?",
-            answer: "The service that are currently available on Service Hub are: petsitting, babysitting, bike repair, cleaning, moving, tutoring, landscaping, and remodeling."
+            answer: "Service Hub currently offers a variety of services including petsitting, babysitting, bike repair, cleaning, moving, tutoring, landscaping, and remodeling. We are always looking to expand our offerings. If you have a service you would like to provide that is not currently listed, please don't hesitate to contact us. We welcome new ideas and strive to accommodate the growing needs of our community."
         },
         {
             question: "What does the 'licensed' tag next to a service offering mean?",

@@ -1,8 +1,16 @@
 import React, {useEffect, useState} from 'react';
 import axios from 'axios';
 import {
-    Box, Container, Table, TableBody, TableCell, TableContainer,
-    TableHead, TableRow, Paper, Button, Typography
+    Button,
+    Container,
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Typography
 } from '@mui/material';
 import {useAuth} from "../../contexts/AuthContext";
 import {useNavigate} from "react-router-dom";
@@ -20,7 +28,6 @@ interface User {
 
 
 export default function VerifyCertificates(): React.ReactElement {
-    const [certificate, setCertificate] = useState<File | null>(null);
     const [users, setUsers] = useState<User[]>([]);
     const [checkedUsers, setCheckedUsers] = useState<User[]>([]);
     const {isAdmin, token, account} = useAuth();
@@ -156,13 +163,15 @@ export default function VerifyCertificates(): React.ReactElement {
                 },
                 responseType: 'blob'
             });
-            setCertificate(certificateResponse.data);
 
-            if (certificate && certificate.size > 0) {
-                const url = window.URL.createObjectURL(certificate);
-                window.open(url);
-                window.URL.revokeObjectURL(url);
-            }
+            const url = window.URL.createObjectURL(certificateResponse.data);
+            console.log(
+                'Certificate fetched:',
+                certificateResponse.data,
+                'URL:', url
+            );
+            window.open(url);
+            window.URL.revokeObjectURL(url);
 
             console.log('Certificate fetched:', certificateResponse.data)
         } catch (error) {
@@ -174,63 +183,75 @@ export default function VerifyCertificates(): React.ReactElement {
         label: string;
         color: string;
         action: (serviceId: string) => void
-    }[]) => (
-        <TableContainer component={Paper}>
-            <Table>
-                <TableHead>
-                    <TableRow>
-                        <TableCell align="center">User Email</TableCell>
-                        <TableCell align="center">Service</TableCell>
-                        <TableCell align="center">Certificate</TableCell>
-                        <TableCell align="center">Actions</TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {users.map((user) => (
-                        user.services.map((service) => (
-                            <TableRow key={service.serviceId}>
-                                <TableCell align="center">{user.email}</TableCell>
-                                <TableCell align="center">{service.serviceType}</TableCell>
-                                <TableCell align="center">
-                                    <Button
-                                        variant="contained"
-                                        onClick={() => fetchCertificate(service.serviceId, `${user.email}-${service.serviceType}.pdf`)}
-                                    >
-                                        View
-                                    </Button>
-                                </TableCell>
-                                <TableCell align="center">
-                                    {actions.map(({label, color, action}) => (
+    }[]) => {
+        // If the table contain the revert action -> verified certificate table -> include status column
+        const showStatusColumn = actions.some(action => action.label === "Revert");
+
+        return (
+            <TableContainer component={Paper}>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell align="center">User Email</TableCell>
+                            <TableCell align="center">Service</TableCell>
+                            {showStatusColumn && <TableCell align="center">Status</TableCell>}
+                            <TableCell align="center">Certificate</TableCell>
+                            <TableCell align="center">Actions</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {users.map((user) => (
+                            user.services.map((service) => (
+                                <TableRow key={service.serviceId}>
+                                    <TableCell align="center">{user.email}</TableCell>
+                                    <TableCell align="center">{service.serviceType}</TableCell>
+                                    {showStatusColumn && (
+                                        <TableCell align="center">
+                                            {service.isCertified ? "Approved" : "Declined"}
+                                        </TableCell>
+                                    )}
+                                    <TableCell align="center">
                                         <Button
                                             variant="contained"
-                                            color={color as "primary" | "error"} // Cast color to the correct type
-                                            onClick={() => action(service.serviceId)}
-                                            style={{marginLeft: '10px'}}
+                                            onClick={() => fetchCertificate(service.serviceId, `${user.email}-${service.serviceType}.pdf`)}
                                         >
-                                            {label}
+                                            View
                                         </Button>
-                                    ))}
-                                </TableCell>
-                            </TableRow>
-                        ))
-                    ))}
-                </TableBody>
-            </Table>
-        </TableContainer>
-    );
+                                    </TableCell>
+                                    <TableCell align="center">
+                                        {actions.map(({label, color, action}) => (
+                                            <Button
+                                                key={label}
+                                                variant="contained"
+                                                color={color as "primary" | "error"}
+                                                onClick={() => action(service.serviceId)}
+                                                style={{marginLeft: '10px'}}
+                                            >
+                                                {label}
+                                            </Button>
+                                        ))}
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+        );
+    };
 
 
     return (
         <Container component="main" maxWidth="md" sx={{mt: 4}}>
             <Typography variant="h6" gutterBottom sx={{fontWeight: 'bold', fontSize: '30px', color: '#007BFF'}}>
-                Unchecked Certificates
+                Unverified Certificates
             </Typography>
             {renderCertificatesTable(users, [
                 {label: "Verify", color: "primary", action: handleVerify},
                 {label: "Decline", color: "error", action: handleDecline}
             ])}
             <Typography variant="h6" gutterBottom sx={{fontWeight: 'bold', fontSize: '30px', color: '#007BFF', mt: 4}}>
-                Checked Certificates
+                Verified Certificates
             </Typography>
             {renderCertificatesTable(checkedUsers, [
                 {label: "Revert", color: "error", action: handleRevert}
