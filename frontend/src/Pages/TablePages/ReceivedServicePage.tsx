@@ -44,13 +44,17 @@ export default function ReceivedServiceTable() {
     const [statusFilter, setStatusFilter] = useState(['All Statuses']);
     const [serviceTypeFilter, setServiceTypeFilter] = useState(["All Types"]);
 
+    const [firstFetchReady, setFirstFetchReady] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+
 
     const {alert, triggerAlert, closeAlert} = useAlert(10000000);
 
 
-
     useEffect(() => {
+        if (!token) {
+            navigate('/unauthorized');
+        }
         if (token && account) {
             const fetchJobs = async () => {
                 setIsLoading(true)
@@ -80,18 +84,17 @@ export default function ReceivedServiceTable() {
                     setTotal(response.data.total);
                 } catch (error) {
                     setJobs([]);
-                } finally{
+                } finally {
                     setIsLoading(false)
                 }
             };
 
             fetchJobs();
-        } else{
-            navigate("/unauthorized")
+            setFirstFetchReady(true);
         }
     }, [account, token, page, rowsPerPage, statusFilter, serviceTypeFilter]);
 
-    if (isLoading) {
+    if (isLoading && !firstFetchReady) {
         return (
             <Box mt={20} className="flex justify-center">
                 <CircularProgress/>
@@ -131,36 +134,36 @@ export default function ReceivedServiceTable() {
         <div style={{display: 'flex', flexDirection: 'row', width: '100%', position: 'relative'}}>
             <AlertCustomized alert={alert} closeAlert={closeAlert}/>
             <Box sx={{minWidth: 275, margin: 2, width: '100%'}}>
-                    <Box>
-                        <Typography variant="h6" component="div" sx={{marginBottom: '16px'}}>
-                            Services (Jobs) Received
-                        </Typography>
-                        <Typography variant="body2" component="div" sx={{marginBottom: '16px'}}>
-                            When the provider accepts a request, it is automatically turned into a job. Here are all the
-                            services (jobs) you've received.
-                        </Typography>
-                    </Box>
-
-                    <Box style={{flex: showMediaCard ? '3 1 auto' : '1 1 0%', marginRight: showMediaCard ? '30%' : '5%'}}>
-
-                        <GenericTable data={jobs}
-                                      count={total}
-                                      page={page}
-                                      setPage={setPage}
-                                      rowsPerPage={rowsPerPage}
-                                      setRowsPerPage={setRowsPerPage}
-                                      setShowMediaCard={setShowMediaCard}
-                                      onViewDetails={handleToggleMediaCard}
-                                      statusOptions={statusOptions}
-                                      statusFilter={statusFilter}
-                                      setStatusFilter={setStatusFilter}
-                                      serviceTypeFilter={serviceTypeFilter}
-                                      setServiceTypeFilter={setServiceTypeFilter}
-                                      isProvider={false}/>
-
-
-                    </Box>
+                <Box>
+                    <Typography variant="h6" component="div" sx={{marginBottom: '16px'}}>
+                        Services (Jobs) Received
+                    </Typography>
+                    <Typography variant="body2" component="div" sx={{marginBottom: '16px'}}>
+                        When the provider accepts a request, it is automatically turned into a job. Here are all the
+                        services (jobs) you've received.
+                    </Typography>
                 </Box>
+
+                <Box style={{flex: showMediaCard ? '3 1 auto' : '1 1 0%', marginRight: showMediaCard ? '30%' : '5%'}}>
+
+                    <GenericTable data={jobs}
+                                  count={total}
+                                  page={page}
+                                  setPage={setPage}
+                                  rowsPerPage={rowsPerPage}
+                                  setRowsPerPage={setRowsPerPage}
+                                  setShowMediaCard={setShowMediaCard}
+                                  onViewDetails={handleToggleMediaCard}
+                                  statusOptions={statusOptions}
+                                  statusFilter={statusFilter}
+                                  setStatusFilter={setStatusFilter}
+                                  serviceTypeFilter={serviceTypeFilter}
+                                  setServiceTypeFilter={setServiceTypeFilter}
+                                  isProvider={false}/>
+
+
+                </Box>
+            </Box>
             {showMediaCard && selectedJob && (
                 <div style={{
                     width: '25%',

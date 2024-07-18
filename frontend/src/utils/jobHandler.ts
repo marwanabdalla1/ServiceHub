@@ -41,11 +41,11 @@ export const handleComplete = async ({
 
         //   sanity check: appointment time has to be in the past
         //TODO: uncomment
-        if (!selectedJob.timeslot?.end || moment(selectedJob.timeslot.end).isAfter(moment())) {
-            console.error('The job cannot be completed, since its appointment is in the future.');
-            triggerAlert("Job Cannot Be Completed", "The job cannot be completed, since the appointment ends in the future. Please try again after the end time.", "error", 100000, "dialog", "center")
-            return;
-        }
+        // if (!selectedJob.timeslot?.end || moment(selectedJob.timeslot.end).isAfter(moment())) {
+        //     console.error('The job cannot be completed, since its appointment is in the future.');
+        //     triggerAlert("Job Cannot Be Completed", "The job cannot be completed, since the appointment ends in the future. Please try again after the end time.", "error", 10000000, "dialog", "center", 'none')
+        //     return;
+        // }
 
         try {
 
@@ -67,9 +67,10 @@ export const handleComplete = async ({
             if (setJobs) {
                 setJobs(updatedOfferedServices);
             }
+            triggerAlert("Success", "Successfully marked job as completed.", "success", 10000, "dialog", "center")
             setShowMediaCard(false);
         } catch (error) {
-            triggerAlert("Error", "An error occured. Please try again later or refresh the page.", "error", 10000, "dialog", "center")
+            triggerAlert("Error", "An error occurred. Please try again later or refresh the page.", "error", 10000, "dialog", "center")
         }
 
         const {status, _id, receiver, provider, ...rest} = selectedJob;
@@ -137,6 +138,7 @@ export const handleRevoke = async ({
         if (setJobs) {
             setJobs(updatedOfferedServices);
         }
+        triggerAlert("Success", "Successfully revoked job completion.", "success", 10000, "dialog", "center")
         setShowMediaCard(false);
     } catch (error) {
         triggerAlert("Error", "An error occurred. Please try again later or refresh the page.", "error", 10000, "dialog", "center")

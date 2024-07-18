@@ -45,10 +45,15 @@ export default function RequestHistoryTable() {
     const [serviceTypeFilter, setServiceTypeFilter] = useState(["All Types"]);
 
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    // added to make sure filter change does NOT trigger a loading circular process everytime
+    const [firstFetchReady, setFirstFetchReady] = useState<boolean>(false);
 
     const navigate = useNavigate();
 
     useEffect(() => {
+        if (!token) {
+            navigate('/unauthorized');
+        }
         if (token && account) {
             const fetchServiceRequests = async () => {
                 setIsLoading(true)
@@ -85,12 +90,11 @@ export default function RequestHistoryTable() {
             };
 
             fetchServiceRequests();
-        } else{
-            navigate("/unauthorized")
+            setFirstFetchReady(true)
         }
     }, [account, token, page, rowsPerPage, statusFilter, serviceTypeFilter]);
 
-    if (isLoading) {
+    if (isLoading && !setFirstFetchReady) {
         return (
             <Box mt={20} className="flex justify-center">
                 <CircularProgress/>

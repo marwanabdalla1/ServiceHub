@@ -109,7 +109,7 @@ const JobDetailsPage = () => {
                             headers: {Authorization: `Bearer ${token}`},
                         });
 
-                        if(!reviewsResponse){
+                        if (!reviewsResponse) {
                             setReviews([]);
                             setLoading(false);
                             return;
@@ -135,7 +135,7 @@ const JobDetailsPage = () => {
                         }
 
                     }
-                } catch (error:any) {
+                } catch (error: any) {
                     setLoading(false);
                     if (error.response.status && error.response.status === 403) {
                         navigate("/unauthorized")
@@ -207,8 +207,6 @@ const JobDetailsPage = () => {
                     },
                     triggerAlert,
                 });
-
-                window.location.reload();
             } catch
                 (error) {
                 triggerAlert("Error", "An error occured. Please refresh the page or try again later.")
@@ -230,7 +228,6 @@ const JobDetailsPage = () => {
                     },
                     triggerAlert,
                 });
-                window.location.reload();
 
             } catch (error) {
                 triggerAlert("Error", "An error occured. Please refresh the page or try again later.")
