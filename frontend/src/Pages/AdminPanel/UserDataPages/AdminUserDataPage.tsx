@@ -27,14 +27,19 @@ export default function AdminUserData(): React.ReactElement {
         lastName: '',
         accountId: ''
     });
-    const {token} = useAuth();
-    const navigate = useNavigate();
     const [openDeleteAccountDialog, setOpenDeleteAccountDialog] = useState(false);
     const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
 
+    const {isAdmin, token, account} = useAuth();
+    const navigate = useNavigate();
+
     useEffect(() => {
+        if (!token || !account || !isAdmin()) {
+            navigate('/unauthorized');
+        }
+
         fetchUsers();
-    }, []);
+    }, [token, account]);
 
     const fetchUsers = async () => {
         try {
@@ -75,7 +80,7 @@ export default function AdminUserData(): React.ReactElement {
     const handleConfirmDeleteAccount = async (email?: string) => {
         if (email === selectedAccount?.email) {
             try {
-                if (token&&selectedAccount) {
+                if (token && selectedAccount) {
                     await deleteAccount(token, selectedAccount._id);
                     // Refresh the user list after deletion
                     await fetchUsers();

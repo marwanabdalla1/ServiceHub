@@ -75,7 +75,7 @@ const Navbar: React.FC<NavbarProps> = ({ toggleDrawer, onChange, onSearch, searc
             setAnchorEl(event.currentTarget);
         }
     };
-
+    console.log(account)
     const handleMenuClose = () => {
         setAnchorEl(null);
     };

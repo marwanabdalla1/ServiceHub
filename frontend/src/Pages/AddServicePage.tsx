@@ -21,7 +21,7 @@ interface FormData {
 function AddServicePage() {
     const navigate = useNavigate();
     const location = useLocation();
-    const { token, account } = useAuth();
+    const { token, account, setIsFetched } = useAuth();
     const isProvider = account?.isProvider;
     const serviceToEdit = location.state?.service || null;
     const [certificate, setCertificate] = useState<File | null>(null);
@@ -62,6 +62,9 @@ function AddServicePage() {
     const {alert, triggerAlert, closeAlert} = useAlert(3000);
 
     useEffect(() => {
+        if(!token){
+            navigate("/unauthorized")
+        }
         if (isEditMode && serviceToEdit) {
             setFormData({
                 selectedService: { title: serviceToEdit.serviceType },
@@ -74,7 +77,7 @@ function AddServicePage() {
             });
             fetchCertificate(serviceToEdit._id).then(r => {});
         }
-    }, [isEditMode, serviceToEdit]);
+    }, [isEditMode, serviceToEdit, token]);
 
     const fetchCertificate = async (_id: string) => {
         try {
@@ -178,7 +181,6 @@ function AddServicePage() {
             try {
                 let response;
                 if (isEditMode) {
-                    console.log('Editing service:', serviceToEdit._id);
                     response = await axios.put(`/api/services/edit-service/${serviceToEdit._id}`, submissionData, {
                         headers: {
                             'Authorization': `Bearer ${token}`
@@ -206,12 +208,12 @@ function AddServicePage() {
                         });
                     }
                 }
-                console.log(`Status: ${response.status}`);
-                console.log(response.data);
                 setIsLoading(false);
                 if (isEditMode) {
                     navigate('/setprofile');
                 } else {
+                    // set isFetched to false so that the account will be refetched and updated
+                    setIsFetched(false);
                     navigate('/select-availability', { state: { inAddServiceSteps: true } });
                 }
             } catch (error: any) {
@@ -225,7 +227,7 @@ function AddServicePage() {
                 }
             }
         } else {
-            triggerAlert("Form validation failed", 'Please check all your inputs and try again.', 'error')
+            triggerAlert("Form validation failed", 'Please check all your inputs and try again.', 'error', 5000, 'dialog', 'center', 'none')
 
         }
     };

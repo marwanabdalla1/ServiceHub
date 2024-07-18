@@ -1,6 +1,8 @@
-import React, { CSSProperties, FC } from 'react';
+import React, {CSSProperties, FC, useEffect} from 'react';
 import {useAuth} from "../../contexts/AuthContext";
-import { useParams } from 'react-router-dom';
+import {useNavigate, useParams} from 'react-router-dom';
+import axios from "axios";
+import {Feedback} from "../../models/Feedback";
 
 interface Styles {
     container: CSSProperties;
@@ -15,9 +17,16 @@ type MessageType = 'booking' | 'timeslotChange';
 const ConfirmationPage: FC = () => {
 
     const { requestId, type } = useParams<{ requestId: string; type?: MessageType }>();
-    const { account } = useAuth();
+    const { account, token } = useAuth();
+    const navigate = useNavigate();
 
 
+    useEffect(() => {
+        if (!token || !account){
+            navigate("/unauthorized")
+        }
+
+    }, [account, token]);
     const messages = {
         booking: {
             thankYou: "Thank you for your order!",

@@ -1,7 +1,7 @@
 import React, {useRef} from 'react';
 import {ButtonProps, StyledButton} from './blackbutton';
 
-interface LightBlueFileButtonProps {
+interface UploadFileButtonProps {
     text: string;
     className?: string;
     onFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -9,7 +9,7 @@ interface LightBlueFileButtonProps {
     icon?: React.ReactNode
 }
 
-function LightBlueFileButton({text, className = '', onFileChange, sx, icon}: Readonly<LightBlueFileButtonProps>) {
+function UploadFileButton({text, className = '', onFileChange, sx, icon}: Readonly<UploadFileButtonProps>) {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleClick = () => {
@@ -50,4 +50,4 @@ function LightBlueFileButton({text, className = '', onFileChange, sx, icon}: Rea
     );
 }
 
-export default LightBlueFileButton;
+export default UploadFileButton;

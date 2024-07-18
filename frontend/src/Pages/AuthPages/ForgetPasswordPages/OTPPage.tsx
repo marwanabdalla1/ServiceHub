@@ -30,6 +30,7 @@ export default function EmailVerification() {
     const [isTimerVisible, setIsTimerVisible] = React.useState(true);
 
 
+
     const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>, index: number) => {
         if (event.target.value.length === 1 && index < refs.length - 1) {
             refs[index + 1].current?.focus();

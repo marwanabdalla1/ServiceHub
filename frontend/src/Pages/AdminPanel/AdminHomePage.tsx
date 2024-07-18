@@ -1,10 +1,22 @@
-import React from 'react';
-import { Container, Typography, Grid, Paper, Button } from '@mui/material';
-import { Link } from 'react-router-dom';
+import React, {useEffect} from 'react';
+import {Container, Typography, Grid, Paper, Button} from '@mui/material';
+import {Link, useNavigate} from 'react-router-dom';
+import {useAuth} from "../../contexts/AuthContext";
 
 const AdminHomePage: React.FC = () => {
+
+    const {isAdmin, token, account} = useAuth();
+    const navigate = useNavigate();
+
+    // admin panel
+    useEffect(() => {
+        if (!token || !account || !isAdmin()) {
+            navigate('/unauthorized');
+        }
+    }, [token, account]);
+
     return (
-        <Container component="main" maxWidth="md" sx={{ mt: 4}}>
+        <Container component="main" maxWidth="md" sx={{mt: 4}}>
             <Typography variant="h6" gutterBottom sx={{fontWeight: 'bold', fontSize: '36px', color: '#007BFF'}}>
                 Welcome Admin
             </Typography>

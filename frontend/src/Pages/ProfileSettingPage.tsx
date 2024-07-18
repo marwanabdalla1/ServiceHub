@@ -20,7 +20,7 @@ import BlueButton from "../components/inputs/BlueButton";
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 
-import LightBlueFileButton from "../components/inputs/BlueUploadButton";
+import UploadFileButton from "../components/inputs/UploadFileButton";
 import {useNavigate} from 'react-router-dom';
 import {useAuth} from "../contexts/AuthContext";
 import axios from "axios";
@@ -57,7 +57,7 @@ type FieldType = {
 function UserProfile(): React.ReactElement {
 
     const [account, setAccount] = useState<any>(null);
-    const {token, logoutUser} = useAuth();
+    const {token, logoutUser, setIsFetched} = useAuth();
     const [services, setServices] = useState<any[]>([]);
     const [serviceToDelete, setServiceToDelete] = useState<string | null>(null);
     const [profileImage, setProfileImage] = useState<string | null>(null);
@@ -79,6 +79,9 @@ function UserProfile(): React.ReactElement {
     const {alert, triggerAlert, closeAlert} = useAlert(30000);
 
     useEffect(() => {
+        if(!token){
+            navigate("/unauthorized")
+        }
 
         const fetchData = async () => {
             let accountResponse, profileImage, servicesResponse, subscriptionResponse;
@@ -232,6 +235,8 @@ function UserProfile(): React.ReactElement {
         if (serviceToDelete && token) {
             try {
                 await deleteService(serviceToDelete, token, services, setServices);
+                // set isFetched to false so that the account will be refetched and updated
+                setIsFetched(false);
                 setServices(services.filter(service => service._id !== serviceToDelete));
                 if (services.length === 0) {
                     window.location.reload();
@@ -506,21 +511,10 @@ function UserProfile(): React.ReactElement {
                                 alignItems: 'flex-start',
                                 height: '100%',
                             }}>
-                                <LightBlueFileButton
+                                <UploadFileButton
                                     text={"Upload Picture"}
                                     onFileChange={handleProfileImageUpload(setProfileImage, token)}
                                     icon={<FileUploadIcon/>}
-                                    // sx={{
-                                    //     mb: 1,
-                                    //     color: 'black',
-                                    //     backgroundColor: 'white',
-                                    //     borderColor: 'black',
-                                    //     '&:hover': {
-                                    //         backgroundColor: 'black',
-                                    //         color: 'white',
-                                    //         borderColor: 'white'
-                                    //     },
-                                    // }}
                                 />
 
                                 {defaultProfileImage !== profileImage && (

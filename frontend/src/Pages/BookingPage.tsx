@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {useBooking} from '../contexts/BookingContext';
+import {BookingDetails, useBooking} from '../contexts/BookingContext';
 import StepOne from '../components/bookingSteps/CreateAccountOrSignIn';
 import StepTwo from '../components/bookingSteps/SelectTimeslotPage';
 import StepThree from '../components/bookingSteps/UpdateProfile';
@@ -7,10 +7,12 @@ import StepFour from '../components/bookingSteps/ReviewAndConfirm';
 import {useNavigate, useParams} from 'react-router-dom';
 import {Stepper, Step, StepLabel, Box, Container, Grid} from '@mui/material';
 import BookingSideCard from "../components/bookingSteps/BookingSideCard";
+import {useAuth} from "../contexts/AuthContext";
 
 const BookingPage = () => {
     const {offeringId, step: stepParam} = useParams<{ offeringId: string; step?: string }>();
     const navigate = useNavigate();
+    const {token} = useAuth();
     const {
         bookingDetails,
         fetchAccountDetails,
@@ -25,7 +27,18 @@ const BookingPage = () => {
     const [step, setStep] = useState(stepNumber);
     const steps = ['Sign In', 'Select Timeslot', 'Check Profile', 'Confirm Booking'];
 
+
+
+    const areBookingDetailsValid = (bookingDetails: BookingDetails) => {
+        const requiredFields = ['location', 'provider', 'price', 'serviceType', 'reqeustedBy', 'serviceOffering', 'timeSlot'];
+        return requiredFields.some(field => bookingDetails[field] !== undefined);
+    };
+
+
     useEffect(() => {
+        if(!token){
+            navigate("/unauthorized")
+        }
         const fetchProviderDetails = async () => {
             if (offeringId) {
                 try {
@@ -39,7 +52,11 @@ const BookingPage = () => {
             }
         };
         fetchProviderDetails();
-    }, [offeringId]);
+
+
+
+    }, [offeringId, token]);
+
 
     useEffect(() => {
         if (step !== stepNumber) {
@@ -49,7 +66,6 @@ const BookingPage = () => {
 
     // unmount resetting
     useEffect(() => {
-
         return () => {
             setStep(1);  // Reset step to the first step
             resetBookingDetails(); //reset booking details

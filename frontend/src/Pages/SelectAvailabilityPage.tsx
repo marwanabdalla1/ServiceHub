@@ -5,6 +5,7 @@ import {useAuth} from "../contexts/AuthContext";
 import {useNavigate, useLocation} from "react-router-dom";
 import CircularProgress from "@mui/material/CircularProgress";
 import InfoIcon from "@mui/icons-material/Info";
+import ErrorPage from "./ErrorPage";
 
 const SelectAvailabilityPage: React.FC = () => {
     const [serviceType, setServiceType] = useState("Babysitting"); // Placeholder for the service type [e.g. "Tutoring"]
@@ -18,13 +19,18 @@ const SelectAvailabilityPage: React.FC = () => {
 
 
     useEffect(() => {
-
         if (!isReady || (token && !isFetched)) {
             return;
+        }
+        if (!token || !account || (account && !isProvider)) {
+            // If not a provider, not authorized to set schedule
+            navigate('/unauthorized');
         }
 
 
     }, [token, isProvider, account, isReady, isFetched]);
+
+
 
     if (!isReady) {
         return (
@@ -34,10 +40,6 @@ const SelectAvailabilityPage: React.FC = () => {
         );
     }
 
-    if (!token || !account || (account && !isProvider)) {
-        // If not a provider, not authorized to set  schedule
-        navigate('/unauthorized');
-    }
 
     // color legend to be displayed
     const CalendarLegend = () => (
