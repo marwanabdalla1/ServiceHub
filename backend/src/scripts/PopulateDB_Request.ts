@@ -63,18 +63,27 @@ function calculateAppointmentTimes(requestStatus: RequestStatus, serviceOffering
     return {appointmentStartTime, appointmentEndTime};
 }
 
-async function findNonOverlappingTimeslot(requestStatus: RequestStatus, serviceOffering: any): Promise<{appointmentStartTime: Date, appointmentEndTime: Date} | null> {
+async function findNonOverlappingTimeslot(requestStatus: RequestStatus, serviceOffering: any): Promise<{
+    appointmentStartTime: Date;
+    appointmentEndTime: Date
+} | null> {
     let attempts = 0;
     const maxAttempts = 5; // Maximum number of attempts to find a non-overlapping timeslot
 
     while (attempts < maxAttempts) {
         const {appointmentStartTime, appointmentEndTime} = calculateAppointmentTimes(requestStatus, serviceOffering);
 
+        // Calculate transit times, extending the start and end times by the buffer period
+        const travelTime = serviceOffering.bufferTimeDuration; // Ensure this is in minutes
+        const transitStart = new Date(appointmentStartTime.getTime() - travelTime * 60000);
+        const transitEnd = new Date(appointmentEndTime.getTime() + travelTime * 60000);
+
         // Check for overlapping timeslots
         const overlappingTimeslot = await TimeSlot.findOne({
             $or: [
-                {appointmentStartTime: {$lt: appointmentEndTime, $gte: appointmentStartTime}},
-                {appointmentEndTime: {$gt: appointmentStartTime, $lte: appointmentEndTime}}
+                {transitStart: {$lt: transitEnd, $gte: transitStart}},
+                {transitEnd: {$gt: transitStart, $lte: transitEnd}},
+                {transitStart: {$lte: transitStart}, transitEnd: {$gte: transitEnd}}
             ]
         });
 
@@ -90,6 +99,7 @@ async function findNonOverlappingTimeslot(requestStatus: RequestStatus, serviceO
     // If a non-overlapping timeslot couldn't be found after the maximum number of attempts, return null or handle as needed
     return null;
 }
+
 
 async function generateAndSaveServiceRequest(accounts: any[]): Promise<any> {
     // Randomly select an account as ServiceProvider
@@ -387,7 +397,7 @@ async function generateTestData(numberOfEntries: number) {
         //     }
         // }).populate('serviceOfferings');
 
-        const emails = ["danjohnson@gmail.com", "arvillakuphal@gmail.com", "keelykutch@gmail.com", "nellafritsch@gmail.com", "freemanbernier@gmail.com"];
+        const emails = ["barbarawitting@gmail.com", "terenceschuppe@gmail.com", "dovieo'connell@gmail.com", "krisgreenholt@gmail.com", "tavareslind@gmail.com"];
 
         const accounts = await Account.find({ email: { $in: emails } });
 
@@ -397,7 +407,12 @@ async function generateTestData(numberOfEntries: number) {
         }
 
         for (let i = 0; i < numberOfEntries; i++) {
-            const {serviceOffering, savedRequest} = await generateAndSaveServiceRequest(accounts);
+            const result = await generateAndSaveServiceRequest(accounts);
+            if (!result) {
+                console.error('Failed to save service request or no result returned.');
+                continue;
+            }
+            const { serviceOffering, savedRequest } = result;
             if (!savedRequest) {
                 console.error('Failed to save service request.');
                 continue;
@@ -461,7 +476,7 @@ async function generateTestData(numberOfEntries: number) {
 }
 
 // Example usage
-generateTestData(100).then(() => {
+generateTestData(200).then(() => {
     console.log('Test data generation complete.');
     mongoose.disconnect();
 });
