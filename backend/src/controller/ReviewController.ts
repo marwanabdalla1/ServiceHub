@@ -1,4 +1,4 @@
-import { RequestHandler } from "express";
+import {RequestHandler} from "express";
 import Review from "../models/review";
 import Job from "../models/job";
 import ServiceOffering from "../models/serviceOffering";
@@ -9,13 +9,13 @@ export const submitReview: RequestHandler = async (req, res) => {
     try {
         const user = (req as any).user;
         if (!user) {
-            return res.status(403).json({ error: "User data not found, authorization failed." });
+            return res.status(403).json({error: "User data not found, authorization failed."});
         }
-        const { content, rating, recipient, serviceOffering, jobId } = req.body;
+        const {content, rating, recipient, serviceOffering, jobId} = req.body;
 
         const jobDetails = await Job.findById(jobId).select('provider receiver');
         if (!jobDetails) {
-            return res.status(404).json({ error: "Job not found." });
+            return res.status(404).json({error: "Job not found."});
         }
 
         // authorization check: Check if the user is the client or the provider of the job
@@ -23,19 +23,19 @@ export const submitReview: RequestHandler = async (req, res) => {
         const isProvider = jobDetails.provider._id.toString() === user.userId;
 
         if (!isClient && !isProvider) {
-            return res.status(403).json({ error: "You must be the provider or have used the service to review it." });
+            return res.status(403).json({error: "You must be the provider or have used the service to review it."});
         }
 
 
         // make sure you can't give review to yourself!
-        if (user.userId === recipient){
-            return res.status(403).json({ error: "You cannot give a review to yourself!." });
+        if (user.userId === recipient) {
+            return res.status(403).json({error: "You cannot give a review to yourself!."});
         }
 
         // Check if a review already exists for this job
-        const existingReview = await Review.findOne({ job: jobId, reviewer: user.userId });
+        const existingReview = await Review.findOne({job: jobId, reviewer: user.userId});
         if (existingReview) {
-            return res.status(400).json({ error: "A review for this job already exists." });
+            return res.status(400).json({error: "A review for this job already exists."});
         }
 
         const reviewData = {
@@ -54,7 +54,7 @@ export const submitReview: RequestHandler = async (req, res) => {
         if (isClient && savedReview) {
             // Update the service offering with new review info and recalculated rating
             await ServiceOffering.findByIdAndUpdate(savedReview.serviceOffering, {
-                $push: { reviews: savedReview._id },
+                $push: {reviews: savedReview._id},
             });
             await recalculateServiceOfferingRating(savedReview.serviceOffering);
         }
@@ -76,7 +76,7 @@ export const submitReview: RequestHandler = async (req, res) => {
         });
 
     } catch (error) {
-        res.status(500).json({ error: "Internal server error", message: "Could not submit review." });
+        res.status(500).json({error: "Internal server error", message: "Could not submit review."});
     }
 };
 
@@ -84,47 +84,47 @@ export const submitReview: RequestHandler = async (req, res) => {
 // find review based on jobId and reviewer
 export const findExistingReview: RequestHandler = async (req, res) => {
     const user = (req as any).user;
-    const { jobId } = req.params;
+    const {jobId} = req.params;
     const userId = user.userId; // Assuming you're using some authentication middleware
 
     try {
-        const review = await Review.findOne({ job: jobId, reviewer: userId });
+        const review = await Review.findOne({job: jobId, reviewer: userId});
         if (review) {
-            return res.json({ success: true, review: review });
+            return res.json({success: true, review: review});
         } else {
             // return res.json({ success: false, review: []});
-            return res.status(404).json({ message: 'No reviews found for this job ID' });
+            return res.status(404).json({message: 'No reviews found for this job ID'});
 
         }
     } catch (error) {
-        res.status(500).json({ success: false, message: "Server error", error });
+        res.status(500).json({success: false, message: "Server error", error});
     }
 }
 
 // find all reviews for a specific job
 export const findAllReviewsToJob: RequestHandler = async (req, res) => {
     const user = (req as any).user;
-    const { jobId } = req.params;
-    const userId = user.userId; // Assuming you're using some authentication middleware
+    const {jobId} = req.params;
+    const userId = user.userId;
 
     try {
         const reviews = await Review.find({
             job: jobId,
             $or:
                 [
-                    { reviewer: userId },
-                    { recipient: userId }
+                    {reviewer: userId},
+                    {recipient: userId}
                 ]
         });
-        if (reviews.length >0) {
-            return res.json({ success: true, reviews: reviews });
+        if (reviews.length > 0) {
+            return res.json({success: true, reviews: reviews});
         } else {
             // if no reviews are made yet, still return success
-            return res.status(200).json({ success: true, reviews: [], message: 'No reviews found for this job ID' });
+            return res.status(200).json({success: true, reviews: [], message: 'No reviews found for this job ID'});
 
         }
     } catch (error) {
-        res.status(500).json({ success: false, message: "Server error", error });
+        res.status(500).json({success: false, message: "Server error", error});
     }
 }
 
@@ -132,8 +132,8 @@ export const findAllReviewsToJob: RequestHandler = async (req, res) => {
 // edit review
 // --> it should show "last edited at"
 export const updateReview: RequestHandler = async (req, res) => {
-    const { serviceOfferingId, rating, content } = req.body;
-    const { reviewId } = req.params;
+    const {serviceOfferingId, rating, content} = req.body;
+    const {reviewId} = req.params;
 
     try {
         // Update the review
@@ -142,10 +142,10 @@ export const updateReview: RequestHandler = async (req, res) => {
             content: content || '',
             ...req.body
         }
-        const updatedReview = await Review.findByIdAndUpdate(reviewId, { $set: updates }, { new: true });
+        const updatedReview = await Review.findByIdAndUpdate(reviewId, {$set: updates}, {new: true});
 
         if (!updatedReview) {
-            return res.status(404).json({ message: "Review not found" });
+            return res.status(404).json({message: "Review not found"});
         }
 
         // logic to update a review
@@ -168,7 +168,7 @@ export const updateReview: RequestHandler = async (req, res) => {
             review: updatedReview, notification: newNotification
         });
     } catch (error) {
-        res.status(500).json({ message: "Failed to update review", error });
+        res.status(500).json({message: "Failed to update review", error});
     }
 };
 
@@ -178,38 +178,38 @@ export const deleteReview: RequestHandler = async (req, res) => {
     try {
         const user = (req as any).user;
         if (!user) {
-            return res.status(403).json({ error: "Authorization failed." });
+            return res.status(403).json({error: "Authorization failed."});
         }
 
-        const { reviewId } = req.params;
+        const {reviewId} = req.params;
 
         const review = await Review.findById(reviewId);
         if (!review) {
-            return res.status(404).json({ error: "Review not found." });
+            return res.status(404).json({error: "Review not found."});
         }
 
         // Ensure that the current user is the reviewer
         if (review.reviewer.toString() !== user.userId) {
-            return res.status(403).json({ error: "Unauthorized to delete this review." });
+            return res.status(403).json({error: "Unauthorized to delete this review."});
         }
 
         // Save serviceOfferingId before deleting the review
         const serviceOfferingId = review.serviceOffering;
 
-        await Review.deleteOne({ _id: reviewId });
+        await Review.deleteOne({_id: reviewId});
 
         // Also update the service offering to remove the review reference
         await ServiceOffering.updateMany(
-            { _id: serviceOfferingId },
-            { $pull: { reviews: review._id } }
+            {_id: serviceOfferingId},
+            {$pull: {reviews: review._id}}
         );
 
         await recalculateServiceOfferingRating(serviceOfferingId);
 
 
-        res.status(200).json({ message: "Review deleted successfully." });
+        res.status(200).json({message: "Review deleted successfully."});
     } catch (error) {
-        res.status(500).json({ error: "Internal server error", message: "Could not delete review." });
+        res.status(500).json({error: "Internal server error", message: "Could not delete review."});
     }
 };
 
@@ -225,7 +225,8 @@ async function recalculateServiceOfferingRating(serviceOfferingId: any) {
 
         const reviews = await Review.find({
             serviceOffering: serviceOfferingId,
-            recipient: serviceOffering.provider});
+            recipient: serviceOffering.provider
+        });
         const totalRating = reviews.reduce((acc, curr) => acc + curr.rating, 0);
         const reviewCount = reviews.length;
         const averageRating = reviewCount > 0 ? totalRating / reviewCount : 0;
@@ -242,12 +243,11 @@ async function recalculateServiceOfferingRating(serviceOfferingId: any) {
 }
 
 
-
 // get all reviews of an offering -> this is displayed in the provider's offering profile page
 // this does NOT require signing in!
 export const getAllReviewsByOffering: RequestHandler = async (req, res) => {
     // const user = (req as any).user;
-    const { offeringId } = req.params;
+    const {offeringId} = req.params;
 
     try {
         // Find the service offering to get its provider
@@ -258,14 +258,56 @@ export const getAllReviewsByOffering: RequestHandler = async (req, res) => {
 
         const reviews = await Review.find({
             serviceOffering: offeringId,
-            recipient: serviceOffering.provider}).populate([
-            { path: 'reviewer', select: 'firstName lastName email profileImageId' },
+            recipient: serviceOffering.provider
+        }).populate([
+            {path: 'reviewer', select: 'firstName lastName email profileImageId'},
         ]).exec();
         if (reviews) {
-            return res.json({ review: reviews });
+            return res.json({review: reviews});
         }
 
     } catch (error) {
-        res.status(500).json({ success: false, message: "Server error", error });
+        res.status(500).json({success: false, message: "Server error", error});
+    }
+}
+
+
+// get all reviews of an offering -> this is displayed in the request/job detail page
+// for provider to see the score of the consumer (the idea is that they can use the score to judge if they want to accept the consumer's request
+export const getScoreByUser: RequestHandler = async (req, res) => {
+    const user = (req as any).user;
+    console.log("get score", user)
+    const {accountId} = req.params;
+    const userId = user.userId;
+
+
+    try {
+
+        if (!userId) {
+            console.log('No token provided');
+            return res.status(401).send({ error: 'Please authenticate.' });
+        }
+
+        const reviews = await Review.find({
+            recipient: accountId
+        }).exec();
+        if (reviews) {
+            // Calculate the average score
+            const totalReviews = reviews.length;
+            const totalScore = reviews.reduce((sum, review) => sum + review.rating, 0);
+            const averageScore = totalReviews > 0 ? totalScore / totalReviews : 0;
+
+            // Return the reviews and the average score
+            return res.json({
+                averageScore: averageScore.toFixed(2), // Return average score rounded to 2 decimal places
+                count: totalReviews
+            });
+        } else {
+            return res.status(200).json({success: true, message: "No reviews found"});
+        }
+
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({success: false, message: "Server error", error});
     }
 }
