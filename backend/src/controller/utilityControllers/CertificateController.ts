@@ -1,7 +1,7 @@
 import {GridFsStorage} from "multer-gridfs-storage";
 import env from "../../util/validateEnv";
 import multer from "multer";
-import express, {RequestHandler} from "express";
+import {RequestHandler} from "express";
 import Account, {IAccount} from "../../models/account";
 import {MongoClient, GridFSBucket, ObjectId} from "mongodb";
 import ServiceOffering, {IServiceOffering} from "../../models/serviceOffering";
@@ -114,7 +114,6 @@ export const getCertificate: RequestHandler = async (req, res) => {
 
         // Check if the service exists
         if (!service) {
-            console.log("Service not found");
             return res.status(404).json({
                 error: "Not Found",
                 message: "Service not found."
@@ -147,7 +146,6 @@ export const getCertificate: RequestHandler = async (req, res) => {
             });
 
         } catch (error) {
-            console.error("Error with ObjectId conversion:", error);
             return res.status(400).json({error: 'Invalid File ID'});
         }
 
@@ -168,17 +166,14 @@ export const deleteCertificate: RequestHandler = async (req, res) => {
 
         // Check if the service exists
         if (!service) {
-            console.log("Service not found");
             return res.status(404).json({
                 error: "Not Found",
                 message: "Service not found."
             });
         }
-        console.log("Service found");
         // Check if the certificate exists
         // No matter iscertified is true or false, the certificate can be deleted
         if (service.get('certificateId') === "" || service.get('certificateId') === null || service.get('certificateId') === undefined) {
-            console.log("Certificate not found");
             return;
         }
         const _id = new ObjectId(service.get('certificateId'));
@@ -225,7 +220,6 @@ export const fetchUncheckedCertificates: RequestHandler = async (req, res) => {
         );
         res.status(200).json(results);
     } catch (error) {
-        console.error(error);
         res.status(500).send('Error fetching unverified certificates');
     }
 };
@@ -253,7 +247,6 @@ export const fetchCheckedCertificates: RequestHandler = async (req, res) => {
         );
         res.status(200).json(results);
     } catch (error) {
-        console.error(error);
         res.status(500).send('Error fetching verified certificates');
     }
 };

@@ -25,11 +25,9 @@ export const submitFeedback:RequestHandler = async (req, res) => {
         res.status(201).json({ message: "feedback submitted successfully!",
             review: savedFeedback});
 
-        console.log(savedFeedback)
 
 
     } catch (error) {
-        console.error("Failed to submit review:", error);
         res.status(500).json({error: "Internal server error", message: "Could not submit review."});
     }
 };
