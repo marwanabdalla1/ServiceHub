@@ -126,19 +126,6 @@ export const deleteProfileImage = async (token: string | null, setProfileImage: 
     setProfileImage(defaultProfileImage);
 }
 
-export const deleteProfileImageByAdmin = async (token: string | null, userId: string | null, setProfileImage: React.Dispatch<React.SetStateAction<string | null>>): Promise<void> => {
-    if (!token || !userId) {
-        console.error('No Auth token provided to delete profile image!');
-        return;
-    }
-    await axios.delete(`/api/file/profileImage/${userId}`, {
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
-    });
-    setProfileImage(defaultProfileImage);
-}
-
 export const handleProfileImageUpload = (setImage: React.Dispatch<React.SetStateAction<string | null>>, token: string | null) => (event: React.ChangeEvent<HTMLInputElement>) => {
     const image = event.target.files ? event.target.files[0] : null;
     if (!image) {
@@ -175,27 +162,4 @@ export const handleProfileImageUploadByToken = async (image: File | null, token:
     }
 };
 
-// delete the profile image by admin
-export const handleProfileImageUploadByAdmin = (setImage: React.Dispatch<React.SetStateAction<string | null>>, token: string | null, userId: string | null) => async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const image = event.target.files ? event.target.files[0] : null;
-    if (!image) {
-        console.error('No image selected');
-        return;
-    }
-    if (token && userId) {
-        setImage(URL.createObjectURL(image));
-        const formData = new FormData();
-        formData.append('file', image);
-        try {
-            await axios.post(`/api/file/upload/profileImage/${userId}`, formData, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-        } catch (error) {
-            console.error('Error uploading image:', error);
-        }
-    }
-    console.log("set file finished: ", image);
-}
 
