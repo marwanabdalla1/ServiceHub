@@ -6,7 +6,6 @@ import PlatformFeedback from "../models/platformFeedback";//
 export const submitFeedback:RequestHandler = async (req, res) => {
     try {
         const user = (req as any).user;
-        console.log("request to submit review by:", JSON.stringify(user))
         if (!user) {
             return res.status(403).json({error: "User data not found, authorization failed."});
         }
@@ -19,8 +18,6 @@ export const submitFeedback:RequestHandler = async (req, res) => {
             rating: req.body.rating,
             title: req.body.title || "",
         };
-
-        console.log("review Data: ", feedback)
 
         // Save feedback to the database
         const savedFeedback = await PlatformFeedback.create(feedback);
@@ -40,11 +37,11 @@ export const submitFeedback:RequestHandler = async (req, res) => {
 export const getPremiumUpgradeReviews: RequestHandler = async (req, res) => {
     try {
         const reviews = await PlatformFeedback.find({ category: 'Premium Upgrade' })
-            .populate('givenBy'); // populate the givenBy field with the entire Account object
-            console.log('reviewes' + reviews)
+            .populate('givenBy')// get the account details
+            .sort({ rating: -1 }) // sort by rating in descending order
+            .limit(20); // limit the results to 20
         res.status(200).json(reviews);
     } catch (error) {
-        console.error("Failed to fetch reviews:", error);
         res.status(500).json({ error: "Internal server error", message: "Could not fetch reviews." });
     }
 };

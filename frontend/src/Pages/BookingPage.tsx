@@ -95,6 +95,7 @@ const BookingPage = () => {
         <Container maxWidth="lg" sx={{mt: 4, display: 'flex'}}>
             <Grid container spacing={8}>
                 <Grid item xs={9}>
+                    {/*stepper on top to see which step we're in*/}
                     <Box display="flex" flexDirection="column" mt={2} width={"100%"} mb={4} mr={10}>
                         <Stepper activeStep={step - 1} alternativeLabel sx={{mb: 2}}>
                             {steps.map((label, index) => (

@@ -1,23 +1,25 @@
-import React, { useEffect } from 'react';
+import React, {useEffect} from 'react';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import BlackButton from '../components/inputs/blackbutton';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from "../contexts/AuthContext";
+import {Link, useNavigate} from 'react-router-dom';
+import {useAuth} from "../contexts/AuthContext";
 
 const HomePage = () => {
 
     const navigate = useNavigate();
-    const { isAdmin } = useAuth();
+    const {isAdmin, token, account} = useAuth();
 
+    // admin panel
     useEffect(() => {
-        console.log('isAdmin:', isAdmin);
-        if (isAdmin()) {
-            navigate('/admin');
+        if (token && account) {
+            if (isAdmin()) {
+                navigate('/admin');
+            }
         }
-    }, [navigate]);
+    }, [token, account]);
 
     const handleCategoryClick = (category: string) => {
-        navigate('/filter', { state: { searchTerm: category } });
+        navigate('/filter', {state: {searchTerm: category}});
     };
 
     return (
@@ -27,7 +29,7 @@ const HomePage = () => {
                     <h1 className="text-4xl font-bold mb-4">ServiceHub: Connecting You to the Best, for All Your
                         Needs!</h1>
                     <Link to="/filter"
-                        style={{ textDecoration: 'none' }} // Remove underline from Link
+                          style={{textDecoration: 'none'}} // Remove underline from Link
                     >
                         <BlackButton
                             text="Get Started"
@@ -40,7 +42,7 @@ const HomePage = () => {
                     </Link>
                 </div>
                 <div className="md:mt-0 mr-0">
-                    <img src="/images/handshake.png" alt="Handshake" className="w-full" />
+                    <img src="/images/handshake2.png" alt="Handshake" className="w-full"/>
                 </div>
             </div>
 
@@ -48,17 +50,17 @@ const HomePage = () => {
                 <h2 className="text-3xl font-bold mb-6">Service Categories</h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                     {[
-                        { icon: 'fas fa-bicycle', label: 'Bike Repair' },
-                        { icon: 'fas fa-truck-moving', label: 'Moving' },
-                        { icon: 'fas fa-baby', label: 'Babysitting' },
-                        { icon: 'fas fa-chalkboard-teacher', label: 'Tutoring' },
-                        { icon: 'fas fa-paw', label: 'Petsitting' },
-                        { icon: 'fas fa-seedling', label: 'Landscaping' },
-                        { icon: 'fas fa-tools', label: 'Remodeling' },
-                        { icon: 'fas fa-broom', label: 'Cleaning' }
+                        {icon: 'fas fa-bicycle', label: 'Bike Repair'},
+                        {icon: 'fas fa-truck-moving', label: 'Moving'},
+                        {icon: 'fas fa-baby', label: 'Babysitting'},
+                        {icon: 'fas fa-chalkboard-teacher', label: 'Tutoring'},
+                        {icon: 'fas fa-paw', label: 'Petsitting'},
+                        {icon: 'fas fa-seedling', label: 'Landscaping'},
+                        {icon: 'fas fa-tools', label: 'Remodeling'},
+                        {icon: 'fas fa-broom', label: 'Cleaning'}
                     ].map(service => (
                         <div key={service.label} className="flex flex-col items-center cursor-pointer"
-                            onClick={() => handleCategoryClick(service.label)}>
+                             onClick={() => handleCategoryClick(service.label)}>
                             <div className="bg-blue-200 p-4 rounded-full mb-2">
                                 <i className={`${service.icon} text-2xl`}></i>
                             </div>

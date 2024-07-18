@@ -23,12 +23,11 @@ const Footer: React.FC = () => {
 
 export default Footer;
 
-// TODO: the website should be changed after we have our own website
 export function Copyright(props: React.PropsWithChildren<{}>) {
   return (
       <Typography variant="body2" color="text.secondary" align="center" {...props}>
         {'Copyright © '}
-        <MuiLink color="inherit" href="https://mui.com/">
+        <MuiLink color="inherit" href="/">
           ServiceHub
         </MuiLink>{' '}
         {new Date().getFullYear()}

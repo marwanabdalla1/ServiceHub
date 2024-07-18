@@ -18,7 +18,6 @@ interface UserDetails {
 function UpdateSProfile() {
     const navigate = useNavigate();
     const { token, account } = useAuth();
-    console.log(account);
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -38,12 +37,10 @@ function UpdateSProfile() {
 
     const handleSaveProfile = async (values: UserDetails) => {
         const apiEndpoint = '/api/account';
-        console.log('values:', values);
         try {
             const response = await axios.put(apiEndpoint, values, {
                 headers: { 'Authorization': `Bearer ${token}` },
             });
-            console.log('User updated:', response.data);
             navigate('/addservice');
         } catch (error) {
             console.error('Error updating user:', error);

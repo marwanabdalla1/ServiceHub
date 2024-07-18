@@ -6,7 +6,7 @@ import {ServiceOffering} from "./ServiceOffering";
 
 export class Job {
     _id: string;
-    serviceType: ServiceType; //
+    serviceType: ServiceType;
     appointmentStartTime?: Date;
     appointmentEndTime?: Date | undefined;
 
@@ -19,7 +19,7 @@ export class Job {
     rating: number;
 
     //foreign keys
-    timeslot: Timeslot | undefined; //todo: edit this once calendar is done
+    timeslot: Timeslot | undefined;
     request: ServiceRequest | undefined;
     serviceOffering: ServiceOffering | undefined;
 
@@ -33,11 +33,8 @@ export class Job {
     ) {
         this._id = jobId;
         this.serviceType = serviceType;
-        // this.appointmentStartTime = new Date(dateOfService.getFullYear() + "-" + dateOfService.getMonth() + "-" + dateOfService.getDay()
-        //   + "T" + timeOfService.start.getHours() + ":" + timeOfService.start.getMinutes() + ":" + timeOfService.start.getSeconds);
         this.appointmentStartTime = appointmentStartTime;
-        this.appointmentEndTime = appointmentEndTime; //todo: update this to actual service time
-        // this.dateOfService = dateOfService;
+        this.appointmentEndTime = appointmentEndTime;
         this.serviceFee = serviceFee;
         this.status = status;
         this.comment = description;

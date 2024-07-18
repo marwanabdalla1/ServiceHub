@@ -26,10 +26,8 @@ const isTokenExpired = (token: string): boolean => {
     try {
         const decoded: DecodedToken = jwtDecode(token);
         const currentTime = Date.now() / 1000;
-        console.log('Token expiry:', decoded.exp, 'Current time:', currentTime);
         return decoded.exp < currentTime;
     } catch (error) {
-        console.error('Error decoding token:', error);
         return true;
     }
 };
@@ -81,10 +79,9 @@ export const AccountProvider = ({children}: Props) => {
                 }
             })
                 .then(response => {
-                    console.log("account:", response.data)
                     setAccount(response.data);
                     localStorage.setItem('account', response?.data);
-                    setIsReady(true); //todo: note this was in the other useEffect
+                    setIsReady(true);
                     setIsFetched(true);
                 })
                 .catch(error => {
@@ -112,17 +109,13 @@ export const AccountProvider = ({children}: Props) => {
                 handleResponse(response);
                 toast.success('User registered successfully');
 
-                console.log(`Status: ${response.status}`);
-                console.log(`Status Text: ${response.statusText}`);
 
-                console.log(response.data);
                 const from = location.state?.from || '/';  // Default path if no redirect was set
                 navigate(from);  // Redirect to the intended page or a default path
 
             }
         } catch
             (error) {
-            console.error('Error creating user:', error);
             toast('User registration failed. Please try again.');
         }
     };
@@ -140,9 +133,6 @@ export const AccountProvider = ({children}: Props) => {
             const response = await axios.post('/api/auth/login', user);
             if (response) {
                 handleResponse(response);
-                console.log(`Status: ${response.status}`);
-                console.log(`Status Text: ${response.statusText}`);
-                console.log(response.data.isAdmin);
                 if (response.data.isAdmin === true) {
                     toast.success('Admin logged in successfully');
                     navigate('/admin');
@@ -155,7 +145,6 @@ export const AccountProvider = ({children}: Props) => {
             }
         } catch (error) {
             toast.error('Login failed. Please check your credentials and try again.');
-            console.error('Error logging in:', error);
         }
     };
 
