@@ -292,7 +292,7 @@ export const DrawerFilter: React.FC<DrawerFilterProps> = ({
             onClick={() => {
               setLocalFilterState({
                 type: '',
-                priceRange: [15, 9999],
+                priceRange: [10, 9999],
                 locations: [],
                 isLicensed: undefined,
               });
