@@ -1,8 +1,16 @@
 import React, {useEffect, useState} from 'react';
 import axios from 'axios';
 import {
-    Box, Container, Table, TableBody, TableCell, TableContainer,
-    TableHead, TableRow, Paper, Button, Typography
+    Button,
+    Container,
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Typography
 } from '@mui/material';
 import {useAuth} from "../../contexts/AuthContext";
 import {useNavigate} from "react-router-dom";
@@ -20,7 +28,6 @@ interface User {
 
 
 export default function VerifyCertificates(): React.ReactElement {
-    const [certificate, setCertificate] = useState<File | null>(null);
     const [users, setUsers] = useState<User[]>([]);
     const [checkedUsers, setCheckedUsers] = useState<User[]>([]);
     const {isAdmin, token, account} = useAuth();
@@ -156,13 +163,15 @@ export default function VerifyCertificates(): React.ReactElement {
                 },
                 responseType: 'blob'
             });
-            setCertificate(certificateResponse.data);
 
-            if (certificate && certificate.size > 0) {
-                const url = window.URL.createObjectURL(certificate);
-                window.open(url);
-                window.URL.revokeObjectURL(url);
-            }
+            const url = window.URL.createObjectURL(certificateResponse.data);
+            console.log(
+                'Certificate fetched:',
+                certificateResponse.data,
+                'URL:', url
+            );
+            window.open(url);
+            window.URL.revokeObjectURL(url);
 
             console.log('Certificate fetched:', certificateResponse.data)
         } catch (error) {

@@ -44,7 +44,7 @@ export const signup: RequestHandler = async (req, res, next) => {
         const new_account = {
             firstName: req.body.firstName,
             lastName: req.body.lastName,
-            email: req.body.email,
+            email: req.body.email.toLowerCase(),
             password: hashedPassword,
             isAdmin: false,
             isProvider: false,
@@ -102,7 +102,7 @@ export const login: RequestHandler = async (req, res, next) => {
 
     try {
         // Retrieve the user from the database
-        const account = await Account.findOne({ email: req.body.email }).select('+authentication.password +authentication.salt');
+        const account = await Account.findOne({email: req.body.email.toLowerCase()}).select('+authentication.password +authentication.salt');
         if (!account) {
             return res.status(400).json({
                 error: "Bad Request",
@@ -121,7 +121,7 @@ export const login: RequestHandler = async (req, res, next) => {
         const isValidPassword = await bcrypt.compare(req.body.password, account.password);
         if (!isValidPassword) {
             // Handle invalid password
-            return res.status(401).json({ error: "Invalid password" });
+            return res.status(401).json({error: "Invalid password"});
         }
 
         // User is authenticated, generate a JWT token

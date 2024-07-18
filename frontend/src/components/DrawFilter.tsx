@@ -105,14 +105,6 @@ export const DrawerFilter: React.FC<DrawerFilterProps> = ({
         }));
     };
 
-    const handleClearCities = () => {
-        setLocalFilterState(prevState => ({
-            ...prevState,
-            locations: []
-        }));
-        setSelectOpen(false); // Optionally close the select menu
-    };
-
     return (
         <Drawer
             size="md"
@@ -313,9 +305,6 @@ export const DrawerFilter: React.FC<DrawerFilterProps> = ({
                             ))}
                         </Select>
                     </FormControl>
-                    <Box sx={{display: 'flex', justifyContent: 'flex-end', mb: 1}}>
-                        <Button variant="outlined" onClick={handleClearCities}>Clear All Cities</Button>
-                    </Box>
                 </DialogContent>
 
                 <Divider sx={{mt: 'auto'}}/>
