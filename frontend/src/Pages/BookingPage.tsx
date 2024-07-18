@@ -36,8 +36,8 @@ const BookingPage = () => {
 
 
     useEffect(() => {
-        if(!token){
-            navigate("/unauthorized")
+        if(!token && stepParam!== "step1"  && stepParam!== "step0"){
+            navigate("/login")
         }
         const fetchProviderDetails = async () => {
             if (offeringId) {

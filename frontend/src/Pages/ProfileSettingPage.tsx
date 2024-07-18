@@ -11,7 +11,7 @@ import {
     IconButton,
     Grid,
     Tooltip, Card, CardContent,
-    Link
+    Link, CircularProgress
 } from '@mui/material';
 
 import {Link as RouterLink} from 'react-router-dom';
@@ -84,7 +84,7 @@ function UserProfile(): React.ReactElement {
 
 
     useEffect(() => {
-        if(!token){
+        if (!token) {
             navigate("/unauthorized")
         }
 
@@ -98,12 +98,6 @@ function UserProfile(): React.ReactElement {
                     }
                 });
                 setAccount(accountResponse.data);
-            } catch (error) {
-            }
-
-            try {
-                profileImage = await fetchProfileImageByToken(token!);
-                setProfileImage(profileImage);
             } catch (error) {
             }
 
@@ -128,43 +122,60 @@ function UserProfile(): React.ReactElement {
             } catch (error) {
                 //     proceed
             }
+
+            try {
+                profileImage = await fetchProfileImageByToken(token!);
+                setProfileImage(profileImage);
+            } catch (error) {
+            }
+
         };
 
         if (token) {
             fetchData();
         }
 
-        // scroll listener
-        const handleScroll = () => {
-
-            if (!profileRef.current || !serviceProviderRef.current || !dangerZoneRef.current) {
-                return;
-            }
-
-            // set breakpoint to determine which section we are in
-            const breakpoint = window.innerHeight * 0.4;
-
-            const profileRect = profileRef.current.getBoundingClientRect();
-            const serviceProviderRect = serviceProviderRef.current.getBoundingClientRect();
-            const dangerZoneRect = dangerZoneRef.current.getBoundingClientRect();
-
-
-            if (dangerZoneRect.top < breakpoint) {
-                setActiveSection('dangerZone');
-            } else if (profileRect.top <= breakpoint && profileRect.bottom > breakpoint) {
-                setActiveSection('profile');
-            } else if (serviceProviderRect.top <= breakpoint && serviceProviderRect.bottom > breakpoint) {
-                setActiveSection('serviceProvider');
-            }
-        };
-
-        window.addEventListener('scroll', handleScroll);
-
-        return () => {
-            window.removeEventListener('scroll', handleScroll);
-        };
     }, [token, client_reference_id]);
 
+    // // scroll listener
+    // const handleScroll = () => {
+    //
+    //     if (!profileRef.current || !serviceProviderRef.current || !dangerZoneRef.current) {
+    //         return;
+    //     }
+    //
+    //     // set breakpoint to determine which section we are in
+    //     const breakpoint = window.innerHeight * 0.4;
+    //
+    //     const profileRect = profileRef.current.getBoundingClientRect();
+    //     const serviceProviderRect = serviceProviderRef.current.getBoundingClientRect();
+    //     const dangerZoneRect = dangerZoneRef.current.getBoundingClientRect();
+    //
+    //
+    //     if (dangerZoneRect.top < breakpoint) {
+    //         setActiveSection('dangerZone');
+    //     } else if (profileRect.top <= breakpoint && profileRect.bottom > breakpoint) {
+    //         setActiveSection('profile');
+    //     } else if (serviceProviderRect.top <= breakpoint && serviceProviderRect.bottom > breakpoint) {
+    //         setActiveSection('serviceProvider');
+    //     }
+    // };
+    //
+    // window.addEventListener('scroll', handleScroll);
+    //
+    // return () => {
+    //     window.removeEventListener('scroll', handleScroll);
+    // };
+
+    // if (loading) {
+    //     return (
+    //         <Container>
+    //             <Box sx={{display: 'flex', justifyContent: 'center', mt: 4}}>
+    //                 <CircularProgress/>
+    //             </Box>
+    //         </Container>
+    //     );
+    // }
 
     const [editMode, setEditMode] = useState<EditModeType>({
         firstName: false,
@@ -295,7 +306,6 @@ function UserProfile(): React.ReactElement {
     };
 
 
-
     const handleNavigation = (section: string) => {
         setActiveSection(section);
         switch (section) {
@@ -307,7 +317,7 @@ function UserProfile(): React.ReactElement {
                 serviceProviderRef.current?.scrollIntoView({behavior: 'smooth'});
                 break;
             case 'dangerZone':
-                dangerZoneRef.current?.scrollIntoView({ behavior: 'smooth' });
+                dangerZoneRef.current?.scrollIntoView({behavior: 'smooth'});
                 break;
             default:
                 window.scrollTo(0, 0);
@@ -598,13 +608,13 @@ function UserProfile(): React.ReactElement {
                                                         {/*reference to the actual offering*/}
                                                         <Link href={`/offerings/${service._id}`} underline="none"
                                                               sx={{
-                                                            color: 'inherit',
-                                                            '&:hover': {
-                                                                color: 'gray',
-                                                            },
-                                                        }}>
-                                                            <Typography sx={{ color: 'inherit' }}
-                                                                variant="body1">{service.serviceType}</Typography>
+                                                                  color: 'inherit',
+                                                                  '&:hover': {
+                                                                      color: 'gray',
+                                                                  },
+                                                              }}>
+                                                            <Typography sx={{color: 'inherit'}}
+                                                                        variant="body1">{service.serviceType}</Typography>
                                                         </Link>
                                                         {service.isCertified && (
                                                             <Typography variant="body2" sx={{

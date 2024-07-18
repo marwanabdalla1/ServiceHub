@@ -1,34 +1,53 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Container, Box, Typography, Card, CardContent, TextField, Button, Grid, CircularProgress, Stepper, Step, StepLabel, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
-import { useAuth } from '../contexts/AuthContext';
+import React, {useEffect, useState} from 'react';
+import {useNavigate} from 'react-router-dom';
+import {
+    Container,
+    Box,
+    Typography,
+    Card,
+    CardContent,
+    TextField,
+    Button,
+    Grid,
+    CircularProgress,
+    Stepper,
+    Step,
+    StepLabel,
+    MenuItem,
+    Select,
+    InputLabel,
+    FormControl
+} from '@mui/material';
+import {useAuth} from '../contexts/AuthContext';
 import axios from 'axios';
-import { Formik, Field, Form, ErrorMessage, FieldProps } from 'formik';
+import {Formik, Field, Form, ErrorMessage, FieldProps} from 'formik';
 import * as Yup from 'yup';
-import { GERMAN_CITIES_SUPPORT, GERMAN_POSTAL_REGEX, PHONE_NUMBER_REGEX } from "../shared/Constants";
+import {GERMAN_CITIES_SUPPORT, GERMAN_POSTAL_REGEX, PHONE_NUMBER_REGEX} from "../shared/Constants";
 
 interface UserDetails {
     address: string;
     postal: string;
     location: string;
     phoneNumber: string;
+
     [key: string]: string | number;
 }
 
 function UpdateSProfile() {
     const navigate = useNavigate();
-    const { token, account } = useAuth();
+    const {token, account} = useAuth();
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        if (!token) {
+            navigate("/unauthorized")
+        }
         if (account) {
             setLoading(false);
-        } else{
-            navigate('/unauthorized')
         }
-    }, [account]);
+    }, [token, account]);
 
     const validationSchema = Yup.object({
         address: Yup.string().required('Address is required'),
@@ -41,7 +60,7 @@ function UpdateSProfile() {
         const apiEndpoint = '/api/account';
         try {
             const response = await axios.put(apiEndpoint, values, {
-                headers: { 'Authorization': `Bearer ${token}` },
+                headers: {'Authorization': `Bearer ${token}`},
             });
             navigate('/addservice');
         } catch (error) {
@@ -56,8 +75,8 @@ function UpdateSProfile() {
     if (loading) {
         return (
             <Container>
-                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-                    <CircularProgress />
+                <Box sx={{display: 'flex', justifyContent: 'center', mt: 4}}>
+                    <CircularProgress/>
                 </Box>
             </Container>
         );
@@ -66,7 +85,7 @@ function UpdateSProfile() {
     if (error) {
         return (
             <Container>
-                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                <Box sx={{display: 'flex', justifyContent: 'center', mt: 4}}>
                     <Typography variant="h6" color="error">
                         Error loading user details. Please try again later.
                     </Typography>
@@ -77,13 +96,13 @@ function UpdateSProfile() {
 
     return (
         <Container>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-                <Box sx={{ width: '60%' }}>
+            <Box sx={{display: 'flex', justifyContent: 'space-between', mt: 4}}>
+                <Box sx={{width: '60%'}}>
                     <Typography variant="h4" gutterBottom>
                         Please confirm your contact data
                     </Typography>
 
-                    <Stepper activeStep={0} alternativeLabel sx={{ mb: 2 }}>
+                    <Stepper activeStep={0} alternativeLabel sx={{mb: 2}}>
                         <Step>
                             <StepLabel>Check Profile</StepLabel>
                         </Step>
@@ -111,7 +130,7 @@ function UpdateSProfile() {
                                     validationSchema={validationSchema}
                                     onSubmit={handleSaveProfile}
                                 >
-                                    {({ isSubmitting, isValid }) => (
+                                    {({isSubmitting, isValid}) => (
                                         <Form>
                                             <Grid container spacing={2}>
                                                 <Grid item xs={12}>
@@ -121,7 +140,7 @@ function UpdateSProfile() {
                                                         label="Address"
                                                         fullWidth
                                                         variant="outlined"
-                                                        helperText={<ErrorMessage name="address" />}
+                                                        helperText={<ErrorMessage name="address"/>}
                                                         error={Boolean(ErrorMessage.name === "address")}
                                                     />
                                                 </Grid>
@@ -132,13 +151,13 @@ function UpdateSProfile() {
                                                         label="Postal"
                                                         fullWidth
                                                         variant="outlined"
-                                                        helperText={<ErrorMessage name="postal" />}
+                                                        helperText={<ErrorMessage name="postal"/>}
                                                         error={Boolean(ErrorMessage.name === "postal")}
                                                     />
                                                 </Grid>
                                                 <Grid item xs={3}>
                                                     <Field name="location">
-                                                        {({ field }: FieldProps) => (
+                                                        {({field}: FieldProps) => (
                                                             <FormControl fullWidth variant="outlined">
                                                                 <InputLabel>City</InputLabel>
                                                                 <Select
@@ -146,13 +165,14 @@ function UpdateSProfile() {
                                                                     label="City"
                                                                 >
                                                                     {Object.values(GERMAN_CITIES_SUPPORT).map((city) => (
-                                                                        <MenuItem key={city} value={city}>{city}</MenuItem>
+                                                                        <MenuItem key={city}
+                                                                                  value={city}>{city}</MenuItem>
                                                                     ))}
                                                                 </Select>
                                                             </FormControl>
                                                         )}
                                                     </Field>
-                                                    <ErrorMessage name="location" component="div" />
+                                                    <ErrorMessage name="location" component="div"/>
                                                 </Grid>
                                                 <Grid item xs={12}>
                                                     <Field
@@ -161,15 +181,15 @@ function UpdateSProfile() {
                                                         label="Phone Number"
                                                         fullWidth
                                                         variant="outlined"
-                                                        helperText={<ErrorMessage name="phoneNumber" />}
+                                                        helperText={<ErrorMessage name="phoneNumber"/>}
                                                         error={Boolean(ErrorMessage.name === "phoneNumber")}
                                                     />
                                                 </Grid>
                                             </Grid>
-                                            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+                                            <Box sx={{display: 'flex', justifyContent: 'flex-end', mt: 2}}>
                                                 <Button
                                                     variant="contained"
-                                                    sx={{ mr: 2 }}
+                                                    sx={{mr: 2}}
                                                     type="submit"
                                                     disabled={!isValid || isSubmitting}
                                                 >
