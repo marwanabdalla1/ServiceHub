@@ -40,12 +40,10 @@ export const handleComplete = async ({
 
 
         //   sanity check: appointment time has to be in the past
-        //TODO: uncomment
-        // if (!selectedJob.timeslot?.end || moment(selectedJob.timeslot.end).isAfter(moment())) {
-        //     console.error('The job cannot be completed, since its appointment is in the future.');
-        //     triggerAlert("Job Cannot Be Completed", "The job cannot be completed, since the appointment ends in the future. Please try again after the end time.", "error", 10000000, "dialog", "center", 'none')
-        //     return;
-        // }
+        if (!selectedJob.timeslot?.end || moment(selectedJob.timeslot.end).isAfter(moment())) {
+            triggerAlert("Job Cannot Be Completed", "The job cannot be completed, since the appointment ends in the future. Please try again after the end time.", "error", 10000000, "dialog", "center", 'none')
+            return;
+        }
 
         try {
 
