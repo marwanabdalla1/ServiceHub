@@ -8,16 +8,14 @@
  */
 
 import * as React from 'react';
+import {useState} from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
 import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import {createTheme, ThemeProvider} from '@mui/material/styles';
@@ -32,7 +30,9 @@ import {isValidEmail, isValidName} from "../../../validators/AccountDataValidato
 import {IconButton, InputAdornment} from "@mui/material";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import Visibility from "@mui/icons-material/Visibility";
-import {useState} from "react";
+import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
+import {STRONG_PASSWORD_REGEX} from "../../../shared/Constants";
 
 interface UserData {
     firstName: string;
@@ -49,6 +49,34 @@ const defaultTheme = createTheme({
     },
 });
 
+function PasswordCriteria({password}: { password: string }) {
+    const criteria = [
+        {label: 'At least 6 characters long', regex: /.{6,}/},
+        {label: 'At least 1 number (0-9)', regex: /\d/},
+        {label: 'At least 1 lowercase letter (a-z)', regex: /[a-z]/},
+        {label: 'At least 1 uppercase letter (A-Z)', regex: /[A-Z]/},
+        {label: 'At least 1 special symbol (!@#$%^&*?)', regex: /[!@#$%^&*? ]/},
+    ];
+    return (
+        <Box>
+            <Typography>Password should be:</Typography>
+            <ul>
+                {criteria.map((criterion, index) => (
+                    <li key={index} style={{display: 'flex', alignItems: 'center'}}>
+                        {criterion.regex.test(password) ? (
+                            // eslint-disable-next-line react/jsx-no-undef
+                            <CheckIcon style={{color: 'green'}}/>
+                        ) : (
+                            <CloseIcon style={{color: 'red'}}/>
+                        )}
+                        <Typography style={{marginLeft: '8px'}}>{criterion.label}</Typography>
+                    </li>
+                ))}
+            </ul>
+        </Box>
+    );
+}
+
 export default function SignUp() {
     const {registerUser} = useAuth();
     const location = useLocation();
@@ -57,6 +85,9 @@ export default function SignUp() {
     const {createAccountEmail} = useRecovery();
 
     const [showPassword, setShowPassword] = useState(false);
+
+    const [password, setPassword] = useState('');
+    const [passwordError, setPasswordError] = useState('');
 
     const handleClickShowPassword = () => {
         setShowPassword((prev) => !prev);
@@ -94,6 +125,12 @@ export default function SignUp() {
             }
 
             // TODO: Add password validation
+            if (!STRONG_PASSWORD_REGEX.test(password)) {
+                setPasswordError('Password does not meet the criteria.');
+                return;
+            } else {
+                setPasswordError('');
+            }
 
             if (password !== repeatPassword) {
                 toast.error('Passwords do not match.');
@@ -105,8 +142,12 @@ export default function SignUp() {
                 email: email,
                 password: password
             };
-            await registerUser(data);
-            navigate('/');
+            await createAccountEmail(email, firstName);
+            navigate("/signup/otp", {
+                state: {
+                    firstName, lastName, email, password
+                }
+            });
 
         } catch (error: any) {
             if (axios.isAxiosError(error)) {
@@ -180,6 +221,10 @@ export default function SignUp() {
                                     type={showPassword ? "text" : "password"}
                                     id="password"
                                     autoComplete="new-password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    error={Boolean(passwordError)}
+                                    helperText={passwordError}
                                     InputProps={{
                                         endAdornment: (
                                             <InputAdornment position="end">
@@ -194,6 +239,7 @@ export default function SignUp() {
                                         ),
                                     }}
                                 />
+                                <PasswordCriteria password={password}/>
                             </Grid>
                             <Grid item xs={12}>
                                 <TextField
@@ -219,7 +265,6 @@ export default function SignUp() {
                                     }}
                                 />
                             </Grid>
-
                         </Grid>
                         <Button
                             type="submit"

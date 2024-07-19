@@ -30,7 +30,7 @@ const ConfirmDeleteDialog: React.FC<ConfirmDeleteDialogProps> = ({
 
     const handleConfirm = () => {
         if (isDeleteAccount) {
-            onConfirm(email);
+            onConfirm(email.toLowerCase());
         } else {
             onConfirm();
         }
