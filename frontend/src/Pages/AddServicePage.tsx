@@ -274,7 +274,8 @@ function AddServicePage() {
                                         variant="outlined"
                                         fullWidth
                                         error={errors.selectedService}
-                                        helperText={errors.selectedService ? 'Service is required' : ''}
+                                        helperText={errors.selectedService ? 'Service is required' : (isEditMode ? 'Service cannot be changed in edit mode' : '')}
+                                        disabled={isEditMode}
                                     />
                                 )}
                             />
