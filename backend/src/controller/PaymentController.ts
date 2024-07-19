@@ -9,7 +9,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || ''
 );
 
 /**
- * Create a checkout session for the client to pay for a subscription
+ * Create a new checkout session for the client
  * @param req
  * @param res
  */
@@ -30,18 +30,18 @@ export const pay: RequestHandler = async (req, res) => {
             await account.save();
         }
 
-    const session = await stripe.checkout.sessions.create({
-      customer: customer.id,
-      line_items: [
-        {
-          price: 'price_1PeB1CChuUsrK8kGDpmrWOhN',
-          quantity: 1,
-        },
-      ],
-      mode: 'subscription',
-      success_url: 'http://localhost:3000/setprofile', 
-      cancel_url: 'http://localhost:3000/failedpayment',
-    });
+        const session = await stripe.checkout.sessions.create({
+            customer: customer.id,
+            line_items: [
+                {
+                    price: 'price_1PeB1CChuUsrK8kGDpmrWOhN',
+                    quantity: 1,
+                },
+            ],
+            mode: 'subscription',
+            success_url: 'http://localhost:3000/setprofile',
+            cancel_url: 'http://localhost:3000/failedpayment',
+        });
 
         console.log('Checkout session created for customer email:', account.email);
         res.json({id: session.id, url: session.url});
@@ -135,7 +135,7 @@ export const cancelSubscription: RequestHandler = async (req, res) => {
 };
 
 /**
- * Handle the Stripe webhook
+ * Handle incoming stripe webhook events
  * @param req
  * @param res
  */
@@ -184,3 +184,4 @@ export const handleStripeWebhook: RequestHandler = async (req, res) => {
 
     res.json({received: true});
 };
+
