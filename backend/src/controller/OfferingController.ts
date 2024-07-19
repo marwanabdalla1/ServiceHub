@@ -1,15 +1,23 @@
-import { Request, Response, NextFunction } from 'express';
+import {NextFunction, Request, Response} from 'express';
 import ServiceOffering from "../models/serviceOffering";
 
+/**
+ * This is the controller for returning all the service offerings. It's not responsible for creating or editing the services.
+ * All the filtering and sorting is done here in the backend.
+ */
 
 
-//This is the controller for returning all the service offerings, it's not responsible for creating or editing the SERVICES
-// All the filtering and sorting is done here in the backend
+/**
+ * Get all service offerings
+ * @param req
+ * @param res
+ * @param next
+ */
 export const getOfferings = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userId = (req as any).user; // Assuming userId is available in the request (e.g., from authentication middleware)
 
-        const { type, priceRange, locations, isLicensed, searchTerm, page = 1, limit = 10, sortKey } = req.query;
+        const {type, priceRange, locations, isLicensed, searchTerm, page = 1, limit = 10, sortKey} = req.query;
         const filters = {
             type,
             priceRange: priceRange ? (priceRange as string).split(',').map(Number) : [],
@@ -22,10 +30,10 @@ export const getOfferings = async (req: Request, res: Response, next: NextFuncti
             // If the request is authenticated, get offerings for the specific user
             const userId = (req as any).user.userId;
 
-            const userOfferings = await ServiceOffering.find({ provider: userId }).populate('provider');
+            const userOfferings = await ServiceOffering.find({provider: userId}).populate('provider');
 
             if (!userOfferings || userOfferings.length === 0) {
-                return res.status(404).json({ message: 'No service offerings found for the authenticated user' });
+                return res.status(404).json({message: 'No service offerings found for the authenticated user'});
             }
 
             return res.json(userOfferings);
@@ -68,10 +76,14 @@ export const getOfferings = async (req: Request, res: Response, next: NextFuncti
     }
 };
 
-// Helper function to filter offerings
+/**
+ * Helper function to filter offerings
+ * @param offerings
+ * @param filters
+ */
 const filterOfferings = (offerings: any[], filters: any) => {
     return offerings.filter(offering => {
-        const { type, priceRange, locations, isLicensed, searchTerm } = filters;
+        const {type, priceRange, locations, isLicensed, searchTerm} = filters;
 
         let matchesType = true;
         let matchesPrice = true;
@@ -109,7 +121,11 @@ const filterOfferings = (offerings: any[], filters: any) => {
     });
 };
 
-// Helper function to sort offerings
+/**
+ * Helper function to sort offerings
+ * @param offerings
+ * @param sortKey
+ */
 const sortOfferings = (offerings: any[], sortKey: string) => {
     if (sortKey === "priceAsc") {
         offerings.sort((a, b) => a.hourlyRate - b.hourlyRate);
@@ -122,43 +138,58 @@ const sortOfferings = (offerings: any[], sortKey: string) => {
     }
 };
 
+/**
+ * Get a service offering by ID
+ * @param req
+ * @param res
+ */
 export const getServiceOfferingById = async (req: Request, res: Response) => {
-    const { offeringId } = req.params;
+    const {offeringId} = req.params;
     try {
         const offering = await ServiceOffering.findById(offeringId)//.populate('provider');
         if (!offering) {
-            return res.status(404).json({ message: 'Service offering not found' });
+            return res.status(404).json({message: 'Service offering not found'});
         }
         res.json(offering);
     } catch (err: any) {
-        res.status(500).json({ message: err.message });
+        res.status(500).json({message: err.message});
     }
 };
 
+/**
+ * Get all service offerings by a specific user
+ * @param req
+ * @param res
+ */
 export const getServiceOfferingsByUser = async (req: Request, res: Response) => { //The authenticated version of the getOfferings function (uses token)
     try {
         const userId = (req as any).user.userId;
-        const offerings = await ServiceOffering.find({ provider: userId }).populate('provider');
+        const offerings = await ServiceOffering.find({provider: userId}).populate('provider');
         if (!offerings) {
-            return res.status(404).json({ message: 'No service offerings found' });
+            return res.status(404).json({message: 'No service offerings found'});
         }
         res.json(offerings);
 
     } catch (err: any) {
-        res.status(500).json({ message: err.message });
+        res.status(500).json({message: err.message});
     }
 };
 
+/**
+ * Get all service offerings by a specific user id
+ * @param req
+ * @param res
+ */
 export const getServiceOfferingsByUserId = async (req: Request, res: Response) => { //The authenticated version of the getOfferings function (uses token)
     try {
         const userId = req.params.userId;
-        const offerings = await ServiceOffering.find({ provider: userId }).populate('provider');
+        const offerings = await ServiceOffering.find({provider: userId}).populate('provider');
         if (!offerings) {
-            return res.status(404).json({ message: 'No service offerings found' });
+            return res.status(404).json({message: 'No service offerings found'});
         }
         res.json(offerings);
 
     } catch (err: any) {
-        res.status(500).json({ message: err.message });
+        res.status(500).json({message: err.message});
     }
 };

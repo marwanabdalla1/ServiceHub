@@ -3,9 +3,12 @@ import {authenticate} from "../middleware/authenticate";
 import {
     declineCertificate,
     deleteCertificate,
-    fetchUncheckedCertificates, fetchCheckedCertificates,
-    getCertificate, revertVerifyCertificate,
-    uploadCertificate, verifyCertificate
+    fetchCheckedCertificates,
+    fetchUncheckedCertificates,
+    getCertificate,
+    revertVerifyCertificate,
+    uploadCertificate,
+    verifyCertificate
 } from "../controller/utilityControllers/CertificateController";
 
 

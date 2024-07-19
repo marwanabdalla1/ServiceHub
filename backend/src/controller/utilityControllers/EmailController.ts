@@ -1,7 +1,6 @@
 import {Request, RequestHandler, Response} from 'express';
 import nodemailer from 'nodemailer';
 import * as dotenv from "dotenv";
-import crypto from 'crypto';
 import Account from "../../models/account";
 import bcrypt from "bcrypt";
 import {format} from 'date-fns';
@@ -24,6 +23,13 @@ const transporter = nodemailer.createTransport({
     }
 });
 
+/**
+ * Generate an email template
+ * @param firstName
+ * @param otp
+ * @param subject
+ * @param bodyText
+ */
 const generateEmailTemplate = (firstName: string, otp: string, subject: string, bodyText: string) => {
     return `
     <div style="font-family: Arial, sans-serif; margin: 0; padding: 0;">
@@ -159,7 +165,12 @@ export const setNewPassword: RequestHandler = async (req, res) => {
     }
 };
 
-
+/**
+ * Generate cancellation email template
+ * @param firstName
+ * @param serviceType
+ * @param startTime
+ */
 const generateCancellationNotificationEmail = (firstName: string, serviceType: ServiceType, startTime: Date) => {
 
     const formattedStartTime = formatDateTime(new Date(startTime));
@@ -196,12 +207,11 @@ const generateCancellationNotificationEmail = (firstName: string, serviceType: S
 
 
 /**
- *
+ * Generate cancellation conformation email template
  * @param firstName
  * @param serviceType
  * @param startTime
  */
-
 const generateCancellationConfirmationEmail = (firstName: string, serviceType: ServiceType, startTime: Date) => {
 
     const formattedStartTime = format(new Date(startTime), 'PPpp');
@@ -273,6 +283,12 @@ export const sendCancellationEmails = (req: Request, res: Response): void => {
     });
 };
 
+/**
+ * Generate request confirmation email template
+ * @param firstName
+ * @param serviceType
+ * @param startTime
+ */
 const generateRequestConfirmationEmail = (firstName: string, serviceType: ServiceType, startTime: Date) => {
 
     const formattedStartTime = formatDateTime(new Date(startTime));

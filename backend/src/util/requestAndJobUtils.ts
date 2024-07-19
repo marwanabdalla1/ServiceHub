@@ -1,6 +1,9 @@
-import { isPast, isFuture, parseISO, compareAsc, compareDesc } from 'date-fns';
+import {compareAsc, compareDesc, isFuture, isPast} from 'date-fns';
 
-// helper function to sort
+/**
+ * helper function to sort
+ * @param itemWithTimeslots
+ */
 export function sortBookingItemsDirect(itemWithTimeslots: any[]) {
     const now = new Date();
     return itemWithTimeslots.sort((a, b) => {
@@ -43,7 +46,10 @@ export function sortBookingItemsDirect(itemWithTimeslots: any[]) {
 }
 
 
-// Helper function to sort booking items
+/**
+ * Helper function to sort booking items
+ * @param itemWithTimeslots
+ */
 export function sortBookingItems(itemWithTimeslots: any[]) {
     // Separate items with and without null fields
     const itemsWithNullFields = [];

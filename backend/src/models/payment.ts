@@ -1,4 +1,4 @@
-import mongoose, {Document, Schema, Types} from 'mongoose';
+import mongoose, {Document, Schema} from 'mongoose';
 
 export interface IPayment extends Document {
     paymentId: string;
@@ -16,6 +16,6 @@ const PaymentSchema: Schema = new Schema({
     isPaid: {type: Boolean, required: true},
     isCanceled: {type: Boolean, required: true},
     provider: {type: Schema.Types.ObjectId, ref: 'Account', required: true},
-}, {timestamps:true});
+}, {timestamps: true});
 
 export default mongoose.model<IPayment>('Payment', PaymentSchema);

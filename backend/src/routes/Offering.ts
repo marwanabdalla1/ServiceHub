@@ -12,6 +12,6 @@ const OfferingRouter = express.Router();
 OfferingRouter.get('/myoffering', authenticate, getServiceOfferingsByUser);
 OfferingRouter.get('/:offeringId', getServiceOfferingById);
 OfferingRouter.get("/", getOfferings);
-OfferingRouter.get("/admin/userServiceOfferings/:userId",authenticate, isAdmin, getServiceOfferingsByUserId);
+OfferingRouter.get("/admin/userServiceOfferings/:userId", authenticate, isAdmin, getServiceOfferingsByUserId);
 
 export default OfferingRouter;

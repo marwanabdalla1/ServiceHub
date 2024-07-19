@@ -1,36 +1,15 @@
-import {Request, Response, RequestHandler} from 'express';
+import {Request, RequestHandler, Response} from 'express';
 import Account from '../models/account';
 import ServiceRequest from "../models/serviceRequest";
 import Timeslot from "../models/timeslot";
 import {createNotificationDirect} from "./NotificationController";
 import {NotificationType, RequestStatus} from "../models/enums";
-import {
-    bookTimeslot,
-    bookTimeslotDirect,
-    cancelTimeslotWithRequestId, updateTimeslotWithRequestId
-} from "./TimeSlotController"; // Importing functions to handle timeslot operations
+import {bookTimeslotDirect, cancelTimeslotWithRequestId, updateTimeslotWithRequestId} from "./TimeSlotController"; // Importing functions to handle timeslot operations
 import mongoose from 'mongoose';
 import {sortBookingItems} from "../util/requestAndJobUtils";
 import {formatDateTime} from "../util/dateUtils";
-/**
- * Handles missing required properties in the request body.
- * @param req - Express request object
- * @param res - Express response object
- * @param requiredProperties - Array of required properties to check in the request body
- * @returns {boolean} - Returns true if any required property is missing, otherwise false
- */
-function errorHandler(req: Request, res: Response, requiredProperties: string[]) {
-    for (const property of requiredProperties) {
-        if (!req.body[property]) {
-            res.status(400).json({
-                error: "Bad Request",
-                message: `Missing required property: ${property}`
-            });
-            return true;
-        }
-    }
-    return false;
-}
+import {errorHandler} from "../helpers/validate";
+
 
 /**
  * Interface for query parameters to allow additional properties with any type.
@@ -42,7 +21,12 @@ interface Query {
     [key: string]: any;  // Allows additional properties with any type
 }
 
-// Create a new service request
+/**
+ * Create a new service request
+ * @param req
+ * @param res
+ * @param next
+ */
 export const createServiceRequest: RequestHandler = async (req: Request, res: Response, next) => {
     const user = (req as any).user;
 
@@ -135,6 +119,9 @@ async function updateUserRequestHistory(userId: string, requestId: string) {
 
 /**
  * Updates an existing service request.
+ * @param req
+ * @param res
+ * @param next
  */
 export const updateServiceRequest: RequestHandler = async (req: Request, res: Response, next) => {
     const userId = (req as any).user.userId;
@@ -178,6 +165,8 @@ export const updateServiceRequest: RequestHandler = async (req: Request, res: Re
 
 /**
  * Retrieves all service requests for a specific provider.
+ * @param req
+ * @param res
  */
 export const getServiceRequestsByProvider: RequestHandler = async (req, res) => {
     try {
@@ -251,6 +240,8 @@ export const getServiceRequestsByProvider: RequestHandler = async (req, res) => 
 
 /**
  * Retrieves all service requests for a specific requester.
+ * @param req
+ * @param res
  */
 export const getServiceRequestsByRequester: RequestHandler = async (req, res) => {
     try {
@@ -313,6 +304,9 @@ export const getServiceRequestsByRequester: RequestHandler = async (req, res) =>
 
 /**
  * Handles changing the timeslot for a service request.
+ * @param req
+ * @param res
+ * @param next
  */
 export const handleChangeTimeslot: RequestHandler = async (req, res, next) => {
     const {createdById, requestId, ...slotData} = req.body;
@@ -364,6 +358,8 @@ export const handleChangeTimeslot: RequestHandler = async (req, res, next) => {
 
 /**
  * Retrieves a service request by its ID.
+ * @param req
+ * @param res
  */
 export const getRequestById: RequestHandler = async (req, res) => {
     try {
@@ -409,6 +405,8 @@ export const getRequestById: RequestHandler = async (req, res) => {
 
 /**
  * Deletes a service request by its ID.
+ * @param req
+ * @param res
  */
 export const deleteRequest: RequestHandler = async (req, res) => {
     const {requestId} = req.params;

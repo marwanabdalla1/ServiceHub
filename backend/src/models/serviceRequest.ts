@@ -1,6 +1,5 @@
 import mongoose, {Document, Schema, Types} from 'mongoose';
 import {RequestStatus, ServiceType} from './enums';
-import timeslot from "./timeslot";
 
 interface IUpload {
     name: string;
@@ -17,9 +16,9 @@ export interface IServiceRequest extends Document {
     comment: string | undefined;
     serviceFee: number;
 
-    serviceOffering:Types.ObjectId;
+    serviceOffering: Types.ObjectId;
     job: Types.ObjectId;
-    provider:Types.ObjectId;
+    provider: Types.ObjectId;
     requestedBy: Types.ObjectId;
 
 }

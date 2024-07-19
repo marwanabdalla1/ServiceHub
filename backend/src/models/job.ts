@@ -28,6 +28,6 @@ const JobSchema: Schema = new Schema({
     request: {type: Schema.Types.ObjectId, ref: 'ServiceRequest', required: true},
     serviceOffering: {type: Schema.Types.ObjectId, ref: 'ServiceOffering', required: true},
 
-},{timestamps: true});
+}, {timestamps: true});
 
 export default mongoose.model<IJob>('Job', JobSchema);
