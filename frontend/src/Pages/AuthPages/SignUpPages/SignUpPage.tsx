@@ -8,16 +8,14 @@
  */
 
 import * as React from 'react';
+import {useState} from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
 import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import {createTheme, ThemeProvider} from '@mui/material/styles';
@@ -32,7 +30,8 @@ import {isValidEmail, isValidName} from "../../../validators/AccountDataValidato
 import {IconButton, InputAdornment} from "@mui/material";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import Visibility from "@mui/icons-material/Visibility";
-import {useState} from "react";
+import {STRONG_PASSWORD_REGEX} from "../../../shared/Constants";
+import PasswordCriteria from "../../../components/PasswordCriteria";
 
 interface UserData {
     firstName: string;
@@ -50,13 +49,14 @@ const defaultTheme = createTheme({
 });
 
 export default function SignUp() {
-    const {registerUser} = useAuth();
     const location = useLocation();
-    const {from} = location.state || {from: {pathname: "/"}};
     const navigate = useNavigate();
     const {createAccountEmail} = useRecovery();
 
     const [showPassword, setShowPassword] = useState(false);
+
+    const [password, setPassword] = useState('');
+    const [passwordError, setPasswordError] = useState('');
 
     const handleClickShowPassword = () => {
         setShowPassword((prev) => !prev);
@@ -93,20 +93,23 @@ export default function SignUp() {
                 return;
             }
 
-            // TODO: Add password validation
+            if (!STRONG_PASSWORD_REGEX.test(password)) {
+                setPasswordError('Password does not meet the criteria.');
+                return;
+            } else {
+                setPasswordError('');
+            }
 
             if (password !== repeatPassword) {
                 toast.error('Passwords do not match.');
                 return;
             }
-            const data: UserData = {
-                firstName: firstName,
-                lastName: lastName,
-                email: email,
-                password: password
-            };
-            await registerUser(data);
-            navigate('/');
+            await createAccountEmail(email, firstName);
+            navigate("/signup/otp", {
+                state: {
+                    firstName, lastName, email, password
+                }
+            });
 
         } catch (error: any) {
             if (axios.isAxiosError(error)) {
@@ -180,6 +183,10 @@ export default function SignUp() {
                                     type={showPassword ? "text" : "password"}
                                     id="password"
                                     autoComplete="new-password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    error={Boolean(passwordError)}
+                                    helperText={passwordError}
                                     InputProps={{
                                         endAdornment: (
                                             <InputAdornment position="end">
@@ -194,6 +201,7 @@ export default function SignUp() {
                                         ),
                                     }}
                                 />
+                                <PasswordCriteria password={password}/>
                             </Grid>
                             <Grid item xs={12}>
                                 <TextField
@@ -219,7 +227,6 @@ export default function SignUp() {
                                     }}
                                 />
                             </Grid>
-
                         </Grid>
                         <Button
                             type="submit"
