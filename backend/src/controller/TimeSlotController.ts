@@ -6,6 +6,7 @@ import mongoose, {ClientSession, Types} from "mongoose";
 // Custom error class for Timeslot-related errors
 class TimeslotError extends Error {
     statusCode: number;
+
     constructor(message: string, statusCode: number) {
         super(message);
         this.statusCode = statusCode;
@@ -42,7 +43,7 @@ async function generateWeeklyInstances(events: ITimeslot[], existingTimeslots: I
                 }).toDate();
 
                 // Check overlaps and handle them
-                let tempInstance = {
+                const tempInstance = {
                     title: event.title,
                     start: start,
                     end: end,
@@ -72,7 +73,7 @@ async function generateWeeklyInstances(events: ITimeslot[], existingTimeslots: I
 function adjustForOverlaps(newInstance: ITimeslot, existingTimeslots: ITimeslot[]): ITimeslot[] {
     let adjustedInstances = [newInstance];
 
-    for (let slot of existingTimeslots) {
+    for (const slot of existingTimeslots) {
         const existingStart = slot.transitStart || slot.start;
         const existingEnd = slot.transitEnd || slot.end;
 
@@ -82,10 +83,10 @@ function adjustForOverlaps(newInstance: ITimeslot, existingTimeslots: ITimeslot[
             } else {
                 // Adjust the current instance to remove the overlapping part
                 if (current.start < existingStart) {
-                    acc.push({ ...current, end: existingStart } as ITimeslot);
+                    acc.push({...current, end: existingStart} as ITimeslot);
                 }
                 if (current.end > existingEnd) {
-                    acc.push({ ...current, start: existingEnd } as ITimeslot);
+                    acc.push({...current, start: existingEnd} as ITimeslot);
                 }
             }
             return acc;
@@ -95,11 +96,16 @@ function adjustForOverlaps(newInstance: ITimeslot, existingTimeslots: ITimeslot[
     return adjustedInstances;
 }
 
-// Endpoint to extend fixed slots
+/**
+ * Endpoint to extend fixed slots for a user.
+ * @param req
+ * @param res
+ * @param next
+ */
 export const extendFixedSlots: RequestHandler = async (req, res, next) => {
     try {
         const userId = (req as any).user.userId; // Assuming userId is available in the request (e.g., from authentication middleware)
-        const { start, end } = req.body;
+        const {start, end} = req.body;
         const startDate = moment(start).subtract(1, 'week');
         const endDate = moment(end).subtract(1, 'week');
 
@@ -107,8 +113,8 @@ export const extendFixedSlots: RequestHandler = async (req, res, next) => {
         const fixedEvents = await Timeslot.find({
             createdById: userId,
             isFixed: true,
-            start: { $gte: new Date(start) },
-            end: { $lte: new Date(end) },
+            start: {$gte: new Date(start)},
+            end: {$lte: new Date(end)},
         });
 
         const eventsToExtend = [];
@@ -117,7 +123,7 @@ export const extendFixedSlots: RequestHandler = async (req, res, next) => {
         const potentialFutureEvents = await Timeslot.find({
             createdById: userId,
             isFixed: true,
-            start: { $gte: endDate.toDate() }
+            start: {$gte: endDate.toDate()}
         });
 
         // Filter future events to check exact time matches
@@ -165,7 +171,7 @@ export const extendFixedSlots: RequestHandler = async (req, res, next) => {
             })));
         }
 
-        res.status(201).json({ message: "Extended fixed slots successfully" });
+        res.status(201).json({message: "Extended fixed slots successfully"});
     } catch (err) {
         let message = '';
         if (err instanceof Error) {
@@ -178,17 +184,22 @@ export const extendFixedSlots: RequestHandler = async (req, res, next) => {
     }
 };
 
-// Delete Timeslot Endpoint
+/**
+ * Delete Timeslot Endpoint
+ * @param req
+ * @param res
+ * @param next
+ */
 export const deleteTimeslot: RequestHandler = async (req, res, next) => {
     try {
         const userId = (req as any).user.userId; // Assuming userId is available in the request (e.g., from authentication middleware)
-        const { event, deleteAllFuture } = req.body;
+        const {event, deleteAllFuture} = req.body;
         const startTime = new Date(event.start);
         const endTime = new Date(event.end);
-        const { title, isFixed } = event;
+        const {title, isFixed} = event;
 
         // Delete the specific event
-        await Timeslot.deleteOne({ start: startTime, end: endTime, createdById: userId });
+        await Timeslot.deleteOne({start: startTime, end: endTime, createdById: userId});
 
         // If the event is fixed and deleteAllFuture is set to true, delete its future instances
         if (isFixed && deleteAllFuture) {
@@ -198,23 +209,23 @@ export const deleteTimeslot: RequestHandler = async (req, res, next) => {
                 createdById: userId,
                 title,
                 isFixed: true,
-                start: { $gte: futureStartDate.toDate() },
+                start: {$gte: futureStartDate.toDate()},
                 $and: [
                     {
                         $or: [ // Start time is within the base event duration
-                            { start: { $gte: startTime } },
-                            { start: { $lt: endTime } }
+                            {start: {$gte: startTime}},
+                            {start: {$lt: endTime}}
                         ]
                     },
                     {
                         $or: [ // End time is within the base event duration
-                            { end: { $gt: startTime } },
-                            { end: { $lte: endTime } }
+                            {end: {$gt: startTime}},
+                            {end: {$lte: endTime}}
                         ]
                     }
                 ],
                 $expr: {
-                    $eq: [{ $dayOfWeek: "$start" }, weekday] // Ensure it's the same day of the week
+                    $eq: [{$dayOfWeek: "$start"}, weekday] // Ensure it's the same day of the week
                 }
             });
 
@@ -223,28 +234,28 @@ export const deleteTimeslot: RequestHandler = async (req, res, next) => {
                 createdById: userId,
                 title,
                 isFixed: true,
-                start: { $lt: startTime },
+                start: {$lt: startTime},
                 $and: [
                     {
                         $or: [ // Start time is within the base event duration
-                            { start: { $gte: startTime } },
-                            { start: { $lt: endTime } }
+                            {start: {$gte: startTime}},
+                            {start: {$lt: endTime}}
                         ]
                     },
                     {
                         $or: [ // End time is within the base event duration
-                            { end: { $gt: startTime } },
-                            { end: { $lte: endTime } }
+                            {end: {$gt: startTime}},
+                            {end: {$lte: endTime}}
                         ]
                     }
                 ],
                 $expr: {
-                    $eq: [{ $dayOfWeek: "$start" }, weekday] // Ensure it's the same day of the week
+                    $eq: [{$dayOfWeek: "$start"}, weekday] // Ensure it's the same day of the week
                 }
-            }, { $set: { isFixed: false } });
+            }, {$set: {isFixed: false}});
         }
 
-        res.status(200).json({ message: 'Timeslot deleted successfully' });
+        res.status(200).json({message: 'Timeslot deleted successfully'});
     } catch (err) {
         let message = '';
         if (err instanceof Error) {
@@ -257,17 +268,22 @@ export const deleteTimeslot: RequestHandler = async (req, res, next) => {
     }
 };
 
-// Existing Get Events Controller
+/**
+ * Existing Get Events Controller
+ * @param req
+ * @param res
+ * @param next
+ */
 export const getEvents: RequestHandler = async (req, res, next) => {
     const userId = (req as any).user.userId; // Assuming userId is available in the request (e.g., from authentication middleware)
-    const { start, end } = req.query; // Extracting start and end dates from the query parameters
+    const {start, end} = req.query; // Extracting start and end dates from the query parameters
 
     try {
         const timeslots = await getEventsDirect(userId, start as string, end as string);
         res.json(timeslots);
     } catch (error: unknown) {
         const err = error as Error;
-        res.status(500).json({ error: 'Internal Server Error', message: err.message });
+        res.status(500).json({error: 'Internal Server Error', message: err.message});
     }
 };
 
@@ -280,23 +296,23 @@ export const getEvents: RequestHandler = async (req, res, next) => {
  */
 async function getEventsDirect(userId: any, start?: string, end?: string) {
     try {
-        const query: any = { createdById: userId };
+        const query: any = {createdById: userId};
 
         if (start && end) {
             query.$and = [
-                { createdById: userId },
+                {createdById: userId},
                 {
                     $or: [
                         {
                             $and: [
-                                { start: { $gte: new Date(start) } },
-                                { end: { $lte: new Date(end) } }
+                                {start: {$gte: new Date(start)}},
+                                {end: {$lte: new Date(end)}}
                             ]
                         },
                         {
                             $and: [
-                                { transitStart: { $gte: new Date(start) } },
-                                { transitEnd: { $lte: new Date(end) } }
+                                {transitStart: {$gte: new Date(start)}},
+                                {transitEnd: {$lte: new Date(end)}}
                             ]
                         }
                     ]
@@ -323,7 +339,7 @@ const mergeTimeslots = (timeslots: ITimeslot[]) => {
 
     const merged = [timeslots[0]];
     for (let i = 1; i < timeslots.length; i++) {
-        let last = merged[merged.length - 1];
+        const last = merged[merged.length - 1];
         if (new Date(timeslots[i].start).getTime() <= new Date(last.end).getTime()) {
             // There is overlap, or they are contiguous
             last.end = new Date(Math.max(new Date(last.end).getTime(), new Date(timeslots[i].end).getTime()));
@@ -349,25 +365,30 @@ const adjustForTransit = (timeslots: ITimeslot[], transitTime: number) => {
     }));
 };
 
-// Get events by user ID for booking, adjusted for transit time
+/**
+ * Get events by user ID for booking, adjusted for transit time
+ * @param req
+ * @param res
+ * @param next
+ */
 export const getAvailabilityByProviderId: RequestHandler = async (req, res, next) => {
-    const { providerId } = req.params;
+    const {providerId} = req.params;
     const transitTime = parseInt(req.query.transitTime as string);
 
     if (isNaN(transitTime)) {
-        return res.status(400).json({ error: 'Invalid transit time provided' });
+        return res.status(400).json({error: 'Invalid transit time provided'});
     }
 
     try {
         // Handle both string and ObjectId
         const providerIdConditions = [
-            { createdById: providerId },
-            { createdById: new Types.ObjectId(providerId) }
+            {createdById: providerId},
+            {createdById: new Types.ObjectId(providerId)}
         ];
 
         // Fetch all future timeslots for the provider
         const timeslots: ITimeslot[] = await Timeslot.find({
-            end: { $gte: new Date() },
+            end: {$gte: new Date()},
             $or: providerIdConditions,
             isBooked: false,
         }).lean();
@@ -380,15 +401,20 @@ export const getAvailabilityByProviderId: RequestHandler = async (req, res, next
 
         res.json(adjustedTimeslots);
     } catch (error: any) {
-        res.status(500).json({ error: 'Internal Server Error', message: error.message });
+        res.status(500).json({error: 'Internal Server Error', message: error.message});
     }
 };
 
-// Save events to the database
+/**
+ * Save events to the database
+ * @param req
+ * @param res
+ * @param next
+ */
 export const saveEvents: RequestHandler = async (req, res, next) => {
     try {
         const userId = (req as any).user.userId; // Assuming userId is available in the request (e.g., from authentication middleware)
-        const { events } = req.body;
+        const {events} = req.body;
 
         // Generate future instances for new fixed events
         const fixedEvents = events.filter((event: ITimeslot) => event.isFixed);
@@ -415,9 +441,9 @@ export const saveEvents: RequestHandler = async (req, res, next) => {
             isBooked: event.isBooked,
             requestId: event.requestId,
             createdById: userId, // Use userId from the token
-        })), { ordered: false });
+        })), {ordered: false});
 
-        res.status(201).json({ insertedEvents });
+        res.status(201).json({insertedEvents});
     } catch (err) {
         let message = '';
         if (err instanceof Error) {
@@ -430,19 +456,29 @@ export const saveEvents: RequestHandler = async (req, res, next) => {
     }
 };
 
-// Get all events by provider
+/**
+ * Get all events by provider
+ * @param req
+ * @param res
+ * @param next
+ */
 export const getEventsByProvider: RequestHandler = async (req, res, next) => {
-    const { providerId } = req.params;
+    const {providerId} = req.params;
     try {
-        const timeslots = await Timeslot.find({ createdById: providerId });
+        const timeslots = await Timeslot.find({createdById: providerId});
         res.json(timeslots);
     } catch (error: unknown) {
         const err = error as Error;
-        res.status(500).json({ error: 'Internal Server Error', message: err.message });
+        res.status(500).json({error: 'Internal Server Error', message: err.message});
     }
 };
 
-// Turn an existing event into a fixed event and create future instances
+/**
+ * Turn an existing event into a fixed event and create future instances
+ * @param req
+ * @param res
+ * @param next
+ */
 export const turnExistingEventIntoFixed: RequestHandler = async (req, res, next) => {
     try {
         const userId = (req as any).user.userId; // Assuming userId is available in the request (e.g., from authentication middleware)
@@ -453,11 +489,11 @@ export const turnExistingEventIntoFixed: RequestHandler = async (req, res, next)
             _id: event._id,
             createdById: userId,
         }, {
-            $set: { isFixed: true }
-        }, { new: true });
+            $set: {isFixed: true}
+        }, {new: true});
 
         if (!eventToUpdate) {
-            return res.status(404).json({ message: "Event not found or user mismatch" });
+            return res.status(404).json({message: "Event not found or user mismatch"});
         }
 
         // Generate future instances based on the newly fixed event
@@ -482,7 +518,7 @@ export const turnExistingEventIntoFixed: RequestHandler = async (req, res, next)
             isBooked: instance.isBooked,
             requestId: instance.requestId,
             createdById: userId, // Use userId from the token
-        })), { ordered: false });
+        })), {ordered: false});
 
         res.status(201).json({
             message: "Event marked as fixed and future instances created successfully",
@@ -501,9 +537,13 @@ export const turnExistingEventIntoFixed: RequestHandler = async (req, res, next)
     }
 };
 
-// Check availability of a timeslot
+/**
+ * Check availability of a timeslot
+ * @param req
+ * @param res
+ */
 export const checkAvailability: RequestHandler = async (req, res) => {
-    const { start, end, createdById } = req.params;
+    const {start, end, createdById} = req.params;
 
     const startTime = new Date(start);
     const endTime = new Date(end);
@@ -513,8 +553,8 @@ export const checkAvailability: RequestHandler = async (req, res) => {
         const timeslots = await Timeslot.find({
             createdById: createdById,
             isBooked: false,
-            end: { $gt: start },
-            start: { $lt: end },
+            end: {$gt: start},
+            start: {$lt: end},
         });
 
         // Merge these timeslots to cover the entire requested period
@@ -522,13 +562,13 @@ export const checkAvailability: RequestHandler = async (req, res) => {
 
         for (const slot of merged) {
             if (slot.start <= startTime && slot.end >= endTime) {
-                res.status(200).json({ isAvailable: true });
+                res.status(200).json({isAvailable: true});
                 return;
             }
         }
-        res.status(200).json({ isAvailable: false });
+        res.status(200).json({isAvailable: false});
     } catch (error: any) {
-        res.status(500).json({ message: "Internal server error", error: error.message });
+        res.status(500).json({message: "Internal server error", error: error.message});
     }
 };
 
@@ -565,8 +605,8 @@ export const bookTimeslotDirect = async (timeslotData: any, sessionPassed?: Clie
         // Find overlapping timeslots (i.e. find available timeslots that covers this time)
         const overlappingSlots = await Timeslot.find({
             createdById: createdById,
-            end: { $gt: transitStart },
-            start: { $lt: transitEnd },
+            end: {$gt: transitStart},
+            start: {$lt: transitEnd},
             isBooked: false
         }).session(session);
 
@@ -611,13 +651,13 @@ export const bookTimeslotDirect = async (timeslotData: any, sessionPassed?: Clie
         });
 
         // Save the new timeslot
-        await newTimeslot.save({ session });
+        await newTimeslot.save({session});
 
         // Adjust exiting available timeslots based on the booked time
         for (const slot of overlappingSlots) {
             // if the booked slot entirely covers an existing availability, delete the existing available slot
             if (moment(new Date(slot.start)).isSameOrAfter(moment(new Date(transitStart))) && moment(new Date(slot.end)).isSameOrBefore(moment(new Date(transitEnd)))) {
-                const exactMatchResponse = await Timeslot.findByIdAndDelete(slot._id, { session });
+                const exactMatchResponse = await Timeslot.findByIdAndDelete(slot._id, {session});
 
             }
             // if the existing availability covers the entirety of the booking slot, cut the exiting one
@@ -638,8 +678,8 @@ export const bookTimeslotDirect = async (timeslotData: any, sessionPassed?: Clie
                     isFixed: false,
                     createdById: slot.createdById,
                     isBooked: false
-                }], { session });
-                const deletion = await Timeslot.findByIdAndDelete(slot._id, { session });
+                }], {session});
+                const deletion = await Timeslot.findByIdAndDelete(slot._id, {session});
 
             }
             // if the existing availability is partially covered by the booking slot, adjust its start and end
@@ -650,7 +690,7 @@ export const bookTimeslotDirect = async (timeslotData: any, sessionPassed?: Clie
                 } else if (moment(new Date(slot.start)).isBefore(moment(new Date(transitStart)))) {
                     slot.end = transitStart;
                 }
-                const finalCheck = await slot.save({ session });
+                const finalCheck = await slot.save({session});
             }
         }
 
@@ -671,7 +711,12 @@ export const bookTimeslotDirect = async (timeslotData: any, sessionPassed?: Clie
     }
 };
 
-// Book a timeslot via request
+/**
+ * Book a timeslot via request
+ * @param req
+ * @param res
+ * @param next
+ */
 export const bookTimeslot: RequestHandler = async (req, res, next) => {
     const session = await mongoose.startSession();
     try {
@@ -683,64 +728,82 @@ export const bookTimeslot: RequestHandler = async (req, res, next) => {
     } catch (error: any) {
         await session.abortTransaction();
         if (error instanceof TimeslotError) {
-            res.status(error.statusCode).json({ message: error.message });
+            res.status(error.statusCode).json({message: error.message});
         } else {
-            res.status(500).json({ message: "Failed to book timeslot", error: error.message });
+            res.status(500).json({message: "Failed to book timeslot", error: error.message});
         }
     } finally {
         session.endSession();
     }
 };
 
-// Cancel a booked timeslot by ID -> just set it back to available
+/**
+ * Cancel a booked timeslot by ID -> just set it back to available
+ * @param req
+ * @param res
+ */
 export const cancelTimeslot: RequestHandler = async (req, res) => {
-    const { timeslotId } = req.params;
+    const {timeslotId} = req.params;
 
     try {
         const updatedTimeslot = await cancelTimeslotDirect(timeslotId);
-        res.status(200).json({ message: "Timeslot cancelled successfully", updatedTimeslot });
+        res.status(200).json({message: "Timeslot cancelled successfully", updatedTimeslot});
     } catch (error: any) {
-        res.status(500).json({ message: "Failed to cancel timeslot", error: error.message });
+        res.status(500).json({message: "Failed to cancel timeslot", error: error.message});
     }
 };
 
-// Cancel a timeslot by request ID
+/**
+ * Cancel a timeslot by request ID
+ * @param requestId
+ */
 export async function cancelTimeslotWithRequestId(requestId: string): Promise<{ success: boolean, message: string }> {
     try {
         const foundTimeslot = await findTimeslotByRequestId(requestId);
         if (!foundTimeslot) {
-            return { success: true, message: "No timeslot to cancel, proceeding..." };
+            return {success: true, message: "No timeslot to cancel, proceeding..."};
         }
 
         // @ts-ignore
         await cancelTimeslotDirect(foundTimeslot._id);
-        return { success: true, message: "Timeslot cancelled successfully" };
+        return {success: true, message: "Timeslot cancelled successfully"};
     } catch (error) {
         throw new Error("Failed to cancel timeslot");
     }
 }
 
 
-// Update a timeslot with a job ID based on request ID
-export async function updateTimeslotWithRequestId(requestId: string, jobId: string): Promise<{ success: boolean, message: string, timeslot?: any }> {
+/**
+ * Update a timeslot with a job ID based on request ID
+ * @param requestId
+ * @param jobId
+ */
+export async function updateTimeslotWithRequestId(requestId: string, jobId: string): Promise<{
+    success: boolean,
+    message: string,
+    timeslot?: any
+}> {
     try {
 
         const foundTimeslot = await findTimeslotByRequestId(requestId);
         if (!foundTimeslot) {
-            return { success: false, message: "No timeslot to update, proceeding..." };
+            return {success: false, message: "No timeslot to update, proceeding..."};
         }
 
         foundTimeslot.jobId = new Types.ObjectId(jobId);
 
         const updatedTimeslot = await foundTimeslot.save();
-        return { success: true, timeslot: updatedTimeslot, message: "Timeslot updated successfully with the job" };
+        return {success: true, timeslot: updatedTimeslot, message: "Timeslot updated successfully with the job"};
     } catch (error) {
         throw new Error("Failed to update timeslot");
     }
 }
 
-// Cancel a booked timeslot directly by ID
-export async function cancelTimeslotDirect(timeslotId: String | Types.ObjectId) {
+/**
+ * Cancel a booked timeslot directly by ID
+ * @param timeslotId
+ */
+export async function cancelTimeslotDirect(timeslotId: string | Types.ObjectId) {
     try {
         const timeslot = await Timeslot.findById(timeslotId);
         if (!timeslot) {
@@ -768,10 +831,13 @@ export async function cancelTimeslotDirect(timeslotId: String | Types.ObjectId) 
 }
 
 
-// Find a timeslot by request ID
-export async function findTimeslotByRequestId(requestId: String | Types.ObjectId): Promise<ITimeslot | null> {
+/**
+ * Find a timeslot by request ID
+ * @param requestId
+ */
+export async function findTimeslotByRequestId(requestId: string | Types.ObjectId): Promise<ITimeslot | null> {
     try {
-        const timeslot = await Timeslot.findOne({ requestId: requestId });
+        const timeslot = await Timeslot.findOne({requestId: requestId});
         if (!timeslot) {
             return null;
         }
@@ -781,29 +847,38 @@ export async function findTimeslotByRequestId(requestId: String | Types.ObjectId
     }
 }
 
-// Helper function to calculate duration in minutes
+/**
+ * Helper function to calculate duration in minutes
+ * @param start
+ * @param end
+ */
 const getDurationInMinutes = (start: Date, end: Date): number => {
     return (new Date(end).getTime() - new Date(start).getTime()) / 60000;
 };
 
-// Get the next available timeslot to display at the provider's profile
+/**
+ * Get the next available timeslot to display at the provider's profile
+ * @param req
+ * @param res
+ * @param next
+ */
 export const getNextAvailability: RequestHandler = async (req, res, next) => {
-    const { providerId } = req.params;
+    const {providerId} = req.params;
     const transitTime = parseInt(req.query.transitTime as string) || 30;
     const defaultDuration = parseInt(req.query.defaultDuration as string) || 30;
 
     try {
         const providerIdConditions = [
-            { createdById: providerId },
-            { createdById: new Types.ObjectId(providerId) }
+            {createdById: providerId},
+            {createdById: new Types.ObjectId(providerId)}
         ];
 
         // the timeslot has to be in the future
         const timeslots: ITimeslot[] = await Timeslot.find({
             $or: providerIdConditions,
             isBooked: false,
-            start: { $gte: new Date() }
-        }).sort({ start: 1 }).lean();
+            start: {$gte: new Date()}
+        }).sort({start: 1}).lean();
 
         const merged = mergeTimeslots(timeslots);
         const adjustedTimeslots = adjustForTransit(merged, transitTime);
@@ -814,11 +889,11 @@ export const getNextAvailability: RequestHandler = async (req, res, next) => {
         });
 
         if (validTimeslots.length > 0) {
-            return res.json({ nextAvailability: validTimeslots[0] });
+            return res.json({nextAvailability: validTimeslots[0]});
         } else {
-            return res.status(404).json({ message: 'No available timeslots found' });
+            return res.status(404).json({message: 'No available timeslots found'});
         }
     } catch (error: any) {
-        res.status(500).json({ error: 'Internal Server Error', message: error.message });
+        res.status(500).json({error: 'Internal Server Error', message: error.message});
     }
 };

@@ -1,6 +1,6 @@
 import express from "express";
-import {signup, logout, login} from "../controller/utilityControllers/AuthController";
-import {sendCreateAccountEmail, sendResetPasswordEmail} from "../controller/utilityControllers/EmailController";
+import {login, logout, signup} from "../controller/utilityControllers/AuthController";
+import {sendCreateAccountEmail} from "../controller/utilityControllers/EmailController";
 
 
 const router = express.Router();

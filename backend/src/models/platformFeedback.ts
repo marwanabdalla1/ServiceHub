@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema, Types } from 'mongoose';
+import mongoose, {Document, Schema, Types} from 'mongoose';
 
 export enum ReviewCategory {
     Premium = 'Premium Upgrade',
@@ -17,11 +17,11 @@ export interface IPlatformFeedback extends Document {
 }
 
 const PlatformFeedbackSchema: Schema = new Schema({
-    title: { type: String, required: true },
-    rating: { type: Number, required: false },
-    content: { type: String, required: true },
-    category: { type: String, enum: Object.values(ReviewCategory), required: true },
-    givenBy: { type: Schema.Types.ObjectId, ref: 'Account', required: true },
-}, { timestamps: true });
+    title: {type: String, required: true},
+    rating: {type: Number, required: false},
+    content: {type: String, required: true},
+    category: {type: String, enum: Object.values(ReviewCategory), required: true},
+    givenBy: {type: Schema.Types.ObjectId, ref: 'Account', required: true},
+}, {timestamps: true});
 
 export default mongoose.model<IPlatformFeedback>('PlatformFeedback', PlatformFeedbackSchema);

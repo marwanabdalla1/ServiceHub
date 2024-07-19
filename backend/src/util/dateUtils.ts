@@ -1,5 +1,9 @@
 // util functino for converting/formatting dates
 
+/**
+ * Format date to string
+ * @param date
+ */
 export const formatDateTime = (date: any) => {
     if (!(date instanceof Date)) date = new Date(date);
     return date.toLocaleString('en-DE', {

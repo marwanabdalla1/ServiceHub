@@ -1,13 +1,17 @@
-import {Request, Response, NextFunction} from 'express';
+import {NextFunction, Request, Response} from 'express';
 import ServiceOffering from "../models/serviceOffering";
 import Account from '../models/account';
 import mongoose, {Types} from 'mongoose';
-import {JobStatus, RequestStatus, ServiceType} from '../models/enums'; 
+import {JobStatus, RequestStatus, ServiceType} from '../models/enums';
 import serviceRequest from '../models/serviceRequest';
 import review from '../models/review';
 import job from '../models/job';
 
-
+/**
+ * Add a new service offering
+ * @param req
+ * @param res
+ */
 export const addService = async (req: Request, res: Response) => {
     try {
         const userId = (req as any).user.userId;
@@ -81,7 +85,11 @@ export const addService = async (req: Request, res: Response) => {
     }
 }
 
-
+/**
+ * Edit an existing service offering
+ * @param req
+ * @param res
+ */
 export const editService = async (req: Request, res: Response) => {
     try {
         const userId = (req as any).user.userId;
@@ -131,6 +139,12 @@ export const editService = async (req: Request, res: Response) => {
     }
 }
 
+/**
+ * Delete a service offering
+ * @param req
+ * @param res
+ * @param next
+ */
 export const deleteService = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const authedUserId = (req as any).user.userId;

@@ -1,18 +1,18 @@
 import express from "express";
 import {
-    getEvents,
-    saveEvents,
-    extendFixedSlots,
-    deleteTimeslot,
-    getAvailabilityByProviderId,
     bookTimeslot,
-    turnExistingEventIntoFixed,
     cancelTimeslot,
     checkAvailability,
+    deleteTimeslot,
+    extendFixedSlots,
+    getAvailabilityByProviderId,
+    getEvents,
     getEventsByProvider,
-    getNextAvailability
+    getNextAvailability,
+    saveEvents,
+    turnExistingEventIntoFixed
 } from "../controller/TimeSlotController";
-import { authenticate } from "../middleware/authenticate";
+import {authenticate} from "../middleware/authenticate";
 
 const TimeSlotRouter = express.Router();
 
@@ -34,7 +34,6 @@ TimeSlotRouter.post("/book", bookTimeslot);
 TimeSlotRouter.patch('/', authenticate, turnExistingEventIntoFixed);
 TimeSlotRouter.patch('/:timeslotId', authenticate, cancelTimeslot);
 // TimeSlotRouter.patch('/cancel-with-request/:requestId', authenticate, cancelTimeslotWithRequestId);
-
 
 
 TimeSlotRouter.get('/check-availability', checkAvailability);

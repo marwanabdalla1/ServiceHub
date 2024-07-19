@@ -46,6 +46,12 @@ export const authenticate: RequestHandler = async (req, res, next) => {
     });
 };
 
+/**
+ * Middleware to check if a user is an admin
+ * @param req
+ * @param res
+ * @param next
+ */
 export const isAdmin: RequestHandler = async (req, res, next) => {
     const user = await Account.findById((req as any).user.userId);
     if (!user || !user.isAdmin) {

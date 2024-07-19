@@ -1,5 +1,4 @@
 import mongoose, {Document, Schema, Types} from 'mongoose';
-import {starCount} from './enums';
 
 export interface IReview extends Document {
     rating: number;

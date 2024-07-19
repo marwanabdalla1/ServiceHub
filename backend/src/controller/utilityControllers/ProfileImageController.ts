@@ -9,6 +9,7 @@ interface MulterFile extends Express.Multer.File {
     id: ObjectId;
 }
 
+// Set up GridFS storage engine
 const storage = new GridFsStorage({
     url: env.MONGO_CONNECTION_STRING!,
     options: {useNewUrlParser: true, useUnifiedTopology: true},
@@ -107,7 +108,11 @@ export const uploadProfileImage: RequestHandler = async (req, res) => {
     }
 }
 
-
+/**
+ * Gets the profile image for the user
+ * @param userId
+ * @param res
+ */
 async function getProfileImage(userId: string, res: express.Response) {
     const user = await Account.findById(userId);
 

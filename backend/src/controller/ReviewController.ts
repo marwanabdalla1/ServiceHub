@@ -4,7 +4,11 @@ import Job from "../models/job";
 import ServiceOffering from "../models/serviceOffering";
 import {createNotificationDirect} from "./NotificationController";
 
-// submitting a review
+/**
+ * submitting a review
+ * @param req
+ * @param res
+ */
 export const submitReview: RequestHandler = async (req, res) => {
     try {
         const user = (req as any).user;
@@ -60,7 +64,7 @@ export const submitReview: RequestHandler = async (req, res) => {
         }
 
         // push notification to receiver
-        let notificationContent = `A new review has been added to the job ${jobId}.`;
+        const notificationContent = `A new review has been added to the job ${jobId}.`;
 
         const newNotification = await createNotificationDirect({
             content: notificationContent,
@@ -81,7 +85,11 @@ export const submitReview: RequestHandler = async (req, res) => {
 };
 
 
-// find review based on jobId and reviewer
+/**
+ * find review based on jobId and reviewer
+ * @param req
+ * @param res
+ */
 export const findExistingReview: RequestHandler = async (req, res) => {
     const user = (req as any).user;
     const {jobId} = req.params;
@@ -129,8 +137,12 @@ export const findAllReviewsToJob: RequestHandler = async (req, res) => {
 }
 
 
-// edit review
-// --> it should show "last edited at"
+/**
+ * edit review
+ * it should show "last edited at"
+ * @param req
+ * @param res
+ */
 export const updateReview: RequestHandler = async (req, res) => {
     const {serviceOfferingId, rating, content} = req.body;
     const {reviewId} = req.params;
@@ -173,7 +185,11 @@ export const updateReview: RequestHandler = async (req, res) => {
 };
 
 
-// delete review
+/**
+ * Delete review
+ * @param req
+ * @param res
+ */
 export const deleteReview: RequestHandler = async (req, res) => {
     try {
         const user = (req as any).user;
@@ -213,7 +229,10 @@ export const deleteReview: RequestHandler = async (req, res) => {
     }
 };
 
-// Function to recalculate and update the rating and review count for a service offering after a review is updated/added
+/**
+ * Function to recalculate and update the rating and review count for a service offering after a review is updated/added
+ * @param serviceOfferingId
+ */
 async function recalculateServiceOfferingRating(serviceOfferingId: any) {
     try {
 
@@ -243,8 +262,12 @@ async function recalculateServiceOfferingRating(serviceOfferingId: any) {
 }
 
 
-// get all reviews of an offering -> this is displayed in the provider's offering profile page
-// this does NOT require signing in!
+/**
+ * Get all reviews of an offering -> this is displayed in the provider's offering profile page
+ * This does NOT require signing in!
+ * @param req
+ * @param res
+ */
 export const getAllReviewsByOffering: RequestHandler = async (req, res) => {
     // const user = (req as any).user;
     const {offeringId} = req.params;
@@ -272,20 +295,24 @@ export const getAllReviewsByOffering: RequestHandler = async (req, res) => {
 }
 
 
-// get all reviews of an offering -> this is displayed in the request/job detail page
-// for provider to see the score of the consumer (the idea is that they can use the score to judge if they want to accept the consumer's request
+/**
+ * Get all reviews of an offering -> this is displayed in the request/job detail page
+ * For provider to see the score of the consumer (the idea is that they can use the score to judge if they want to
+ * accept the consumer's request
+ * @param req
+ * @param res
+ */
 export const getScoreByUser: RequestHandler = async (req, res) => {
     const user = (req as any).user;
     console.log("get score", user)
     const {accountId} = req.params;
     const userId = user.userId;
 
-
     try {
 
         if (!userId) {
             console.log('No token provided');
-            return res.status(401).send({ error: 'Please authenticate.' });
+            return res.status(401).send({error: 'Please authenticate.'});
         }
 
         const reviews = await Review.find({

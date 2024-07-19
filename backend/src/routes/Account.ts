@@ -1,12 +1,13 @@
 import express from "express";
 import {
-    getProviderById,
-    updateAccountDetails,
-    deleteAccount,
-    getAccountDetails,
     adminUserData,
+    deleteAccount,
     getAccountById,
-    getRequesterById, updateAccountDetailsByAdmin
+    getAccountDetails,
+    getProviderById,
+    getRequesterById,
+    updateAccountDetails,
+    updateAccountDetailsByAdmin
 } from "../controller/utilityControllers/AccountController";
 import {authenticate, isAdmin} from "../middleware/authenticate";
 

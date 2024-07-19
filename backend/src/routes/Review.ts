@@ -1,12 +1,14 @@
 import express from 'express';
 import {
-    deleteReview, findAllReviewsToJob,
+    deleteReview,
+    findAllReviewsToJob,
     findExistingReview,
-    getAllReviewsByOffering, getScoreByUser,
+    getAllReviewsByOffering,
+    getScoreByUser,
     submitReview,
     updateReview
 } from "../controller/ReviewController";
-import { authenticate } from "../middleware/authenticate";
+import {authenticate} from "../middleware/authenticate";
 
 
 const router = express.Router();

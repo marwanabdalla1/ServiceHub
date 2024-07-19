@@ -1,6 +1,11 @@
 import express from "express";
-import { createNotification, getNotifications, updateNotification, markAllNotificationsAsRead } from "../controller/NotificationController";
-import { authenticate } from "../middleware/authenticate";
+import {
+    createNotification,
+    getNotifications,
+    markAllNotificationsAsRead,
+    updateNotification
+} from "../controller/NotificationController";
+import {authenticate} from "../middleware/authenticate";
 
 
 const NotificationRouter = express.Router();

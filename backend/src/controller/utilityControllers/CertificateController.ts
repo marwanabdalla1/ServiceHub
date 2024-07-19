@@ -2,14 +2,15 @@ import {GridFsStorage} from "multer-gridfs-storage";
 import env from "../../util/validateEnv";
 import multer from "multer";
 import {RequestHandler} from "express";
-import Account, {IAccount} from "../../models/account";
-import {MongoClient, GridFSBucket, ObjectId} from "mongodb";
-import ServiceOffering, {IServiceOffering} from "../../models/serviceOffering";
+import {IAccount} from "../../models/account";
+import {GridFSBucket, MongoClient, ObjectId} from "mongodb";
+import ServiceOffering from "../../models/serviceOffering";
 
 interface MulterFile extends Express.Multer.File {
     id: ObjectId;
 }
 
+// Create a new storage instance with the GridFS storage engine
 const storage = new GridFsStorage({
     url: env.MONGO_CONNECTION_STRING!,
     options: {useNewUrlParser: true, useUnifiedTopology: true},
@@ -264,7 +265,10 @@ export const verifyCertificate: RequestHandler = async (req, res) => {
             return res.status(404).json({message: 'Service not found'});
         }
 
-        const updatedService = await ServiceOffering.findOneAndUpdate({_id: serviceId}, {isCertified: true, isCertificateChecked: true}, {
+        const updatedService = await ServiceOffering.findOneAndUpdate({_id: serviceId}, {
+            isCertified: true,
+            isCertificateChecked: true
+        }, {
             new: true,
             upsert: true,
             strict: false
@@ -288,7 +292,10 @@ export const declineCertificate: RequestHandler = async (req, res) => {
             return res.status(404).json({message: 'Service not found'});
         }
 
-        const updatedService = await ServiceOffering.findOneAndUpdate({_id: serviceId}, {isCertified: false, isCertificateChecked: true}, {
+        const updatedService = await ServiceOffering.findOneAndUpdate({_id: serviceId}, {
+            isCertified: false,
+            isCertificateChecked: true
+        }, {
             new: true,
             upsert: true,
             strict: false
@@ -318,7 +325,10 @@ export const revertVerifyCertificate: RequestHandler = async (req, res) => {
             return res.status(404).json({message: 'Service not found'});
         }
 
-        const updatedService = await ServiceOffering.findOneAndUpdate({_id: serviceId}, {isCertified: false, isCertificateChecked: false}, {
+        const updatedService = await ServiceOffering.findOneAndUpdate({_id: serviceId}, {
+            isCertified: false,
+            isCertificateChecked: false
+        }, {
             new: true,
             upsert: true,
             strict: false

@@ -1,5 +1,5 @@
 import express from "express";
-import { sendCancellationEmails, sendRequestConfirmationEmail } from "../controller/utilityControllers/EmailController";
+import {sendCancellationEmails, sendRequestConfirmationEmail} from "../controller/utilityControllers/EmailController";
 
 const router = express.Router();
 router.post('/cancelNotification', sendCancellationEmails);

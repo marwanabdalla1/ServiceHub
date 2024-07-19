@@ -1,12 +1,16 @@
-import { Server, Socket } from "socket.io";
+import {Server, Socket} from "socket.io";
 import http from "http";
 import jwt from "jsonwebtoken";
-import { DefaultEventsMap } from "socket.io/dist/typed-events";
+import {DefaultEventsMap} from "socket.io/dist/typed-events";
 
 interface AuthenticatedSocket extends Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap> {
     userId?: string;
 }
 
+/**
+ * Initialize socket.io
+ * @param server
+ */
 const initializeSocket = (server: http.Server) => {
     const io = new Server(server, {
         cors: {
@@ -47,4 +51,4 @@ const initializeSocket = (server: http.Server) => {
     return io;
 };
 
-export { initializeSocket };
+export {initializeSocket};

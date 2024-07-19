@@ -1,10 +1,10 @@
 import jwt from 'jsonwebtoken';
 import Account from "../../models/account";
-import { RequestHandler } from "express";
+import {RequestHandler} from "express";
 import * as dotenv from 'dotenv'
-import { validateRequestBody } from "../../helpers/validate";
+import {validateRequestBody} from "../../helpers/validate";
 import bcrypt from "bcrypt";
-import { ERRORS } from "../../helpers/authHelper";
+import {ERRORS} from "../../helpers/authHelper";
 
 dotenv.config();
 
@@ -30,7 +30,7 @@ export const signup: RequestHandler = async (req, res, next) => {
         // Check if email already exists
         const emailExists = await Account.findOne({
             email: req.body.email,
-        }).collation({ locale: "en", strength: 2 });
+        }).collation({locale: "en", strength: 2});
         if (emailExists) {
             return res.status(400).json({
                 error: ERRORS.userAlreadyExists,
@@ -60,7 +60,7 @@ export const signup: RequestHandler = async (req, res, next) => {
                 message: "Access token secret not found."
             });
         }
-        const token = jwt.sign({ userId: account._id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '12h' });
+        const token = jwt.sign({userId: account._id}, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '12h'});
         // send the token to the user
         res.setHeader('Authorization', 'Bearer ' + token);
         res.status(201).json({
@@ -134,9 +134,9 @@ export const login: RequestHandler = async (req, res, next) => {
 
         let token;
         if (req.body.rememberMe) {
-            token = jwt.sign({ userId: account._id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '7d' });
+            token = jwt.sign({userId: account._id}, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '7d'});
         } else {
-            token = jwt.sign({ userId: account._id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '12h' });
+            token = jwt.sign({userId: account._id}, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '12h'});
         }
         // Send the token to the user
         res.setHeader('Authorization', 'Bearer ' + token);
@@ -165,5 +165,5 @@ export const login: RequestHandler = async (req, res, next) => {
  */
 export const logout: RequestHandler = (req, res) => {
     // Clear the JWT token from the client side
-    res.status(200).json({ message: "Logged out successfully" });
+    res.status(200).json({message: "Logged out successfully"});
 };

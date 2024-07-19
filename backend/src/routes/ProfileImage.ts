@@ -1,6 +1,11 @@
 import express from "express";
-import {authenticate, isAdmin} from "../middleware/authenticate";
-import {deleteProfileImage, getProfileImageByAuth, getProfileImageByUserId, uploadProfileImage} from "../controller/utilityControllers/ProfileImageController";
+import {authenticate} from "../middleware/authenticate";
+import {
+    deleteProfileImage,
+    getProfileImageByAuth,
+    getProfileImageByUserId,
+    uploadProfileImage
+} from "../controller/utilityControllers/ProfileImageController";
 
 const router = express.Router();
 router.post('/upload/profileImage', authenticate, uploadProfileImage);

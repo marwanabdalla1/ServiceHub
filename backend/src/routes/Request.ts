@@ -1,14 +1,14 @@
 import express from "express";
 import {
     createServiceRequest,
-    getServiceRequestsByProvider,
-    //
     deleteRequest,
+    getRequestById,
+    getServiceRequestsByProvider,
     getServiceRequestsByRequester,
-    updateServiceRequest, handleChangeTimeslot, getRequestById
-    // cleanUpServiceRequests
+    handleChangeTimeslot,
+    updateServiceRequest
 } from "../controller/RequestController";
-import { authenticate } from "../middleware/authenticate";
+import {authenticate} from "../middleware/authenticate";
 
 
 const router = express.Router();
@@ -23,8 +23,6 @@ router.get('/provider/:providerId', authenticate, getServiceRequestsByProvider);
 router.get('/requester/:requesterId', authenticate, getServiceRequestsByRequester);
 
 router.delete('/:requestId', authenticate, deleteRequest);
-
-
 
 
 export default router;

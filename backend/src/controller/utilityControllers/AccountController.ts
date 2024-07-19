@@ -97,7 +97,10 @@ export const deleteAccount: RequestHandler = async (req, res, next) => {
     }
 };
 
-// helper function to delete all linked timeslots to a consumer
+/**
+ * helper function to delete all linked timeslots to a consumer
+ * @param userId
+ */
 export async function cancelAllLinkedTimeslots(userId: string) {
     try {
 
@@ -115,15 +118,15 @@ export async function cancelAllLinkedTimeslots(userId: string) {
         const cancelledEntities = await Promise.all([
             serviceRequest.find({
                 $or: [
-                    { provider: null },
-                    { requestedBy: null }
+                    {provider: null},
+                    {requestedBy: null}
                 ],
                 requestStatus: RequestStatus.cancelled
             }, '_id'),
             job.find({
                 $or: [
-                    { provider: null },
-                    { receiver: null }
+                    {provider: null},
+                    {receiver: null}
                 ],
                 status: JobStatus.cancelled
             }, '_id')
@@ -153,8 +156,6 @@ export async function cancelAllLinkedTimeslots(userId: string) {
         console.error("Failed to process cancellation:", error);
     }
 }
-
-
 
 
 /**
@@ -231,9 +232,8 @@ export const updateAccountDetailsByAdmin: RequestHandler = async (req, res) => {
 
 /**
  * get user details with token
- */
-/**
- * Get user details with token
+ * @param req
+ * @param res
  */
 export const getAccountDetails: RequestHandler = async (req, res) => {
     try {
@@ -259,7 +259,7 @@ export const getAccountDetails: RequestHandler = async (req, res) => {
 }
 
 /**
- * get user by id
+ * Get user by id
  * @param req
  * @param res
  */
