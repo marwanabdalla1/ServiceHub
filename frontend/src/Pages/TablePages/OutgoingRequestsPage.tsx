@@ -94,7 +94,7 @@ export default function RequestHistoryTable() {
         }
     }, [account, token, page, rowsPerPage, statusFilter, serviceTypeFilter]);
 
-    if (isLoading && !setFirstFetchReady) {
+    if (isLoading && !firstFetchReady) {
         return (
             <Box mt={20} className="flex justify-center">
                 <CircularProgress/>

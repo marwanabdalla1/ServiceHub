@@ -11,7 +11,7 @@ import {
 
 } from '@mui/material';
 
-import {Link} from 'react-router-dom'
+import {Link, useLocation} from 'react-router-dom'
 import Typography from '@mui/material/Typography';
 import {ServiceRequest} from '../../models/ServiceRequest';
 import GenericProviderCard from '../../components/tableComponents/GenericProviderCard'
@@ -56,7 +56,6 @@ export default function IncomingRequestTable() {
     const [serviceTypeFilter, setServiceTypeFilter] = useState(["All Types"]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [firstFetchReady, setFirstFetchReady] = useState<boolean>(false);
-
 
     useEffect(() => {
         setIsLoading(true)
@@ -108,6 +107,7 @@ export default function IncomingRequestTable() {
     }, [token, account, page, rowsPerPage, statusFilter, serviceTypeFilter]);
 
 
+
     if (isLoading && !firstFetchReady) {
         return (
             <Box mt={20} className="flex justify-center">
@@ -115,6 +115,7 @@ export default function IncomingRequestTable() {
             </Box>
         )
     }
+
 
     const handleToggleMediaCard = (req: ServiceRequest | Item | null) => {
         if (req && (req as ServiceRequest).requestedBy === null) {
@@ -229,7 +230,6 @@ export default function IncomingRequestTable() {
 
                 </Box>
             </Box>
-            {/*</div>*/}
 
 
             <Dialog open={timeChangePopUp} onClose={() => setTimeChangePopUp(false)}>
