@@ -272,7 +272,7 @@ function ProviderProfilePage() {
                             <Box sx={{display: 'flex', alignItems: 'center'}}>
                                 <Typography variant="h6" >
                                     {offering.serviceType}
-                                </Typography>w
+                                </Typography>
                                 {offering.isCertified && (
                                     <Typography variant="body1" style={styles.label}>
                                         Licensed
