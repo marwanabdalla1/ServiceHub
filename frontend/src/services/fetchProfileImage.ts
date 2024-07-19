@@ -118,12 +118,16 @@ export const deleteProfileImage = async (token: string | null, setProfileImage: 
         console.error('No Auth token provided to delete profile image!');
         return;
     }
-    await axios.delete(`/api/file/profileImage/`, {
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
-    });
-    setProfileImage(defaultProfileImage);
+    try {
+        await axios.delete(`/api/file/profileImage/`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        setProfileImage(defaultProfileImage);
+    } catch(error){
+        return;
+    }
 }
 
 export const handleProfileImageUpload = (setImage: React.Dispatch<React.SetStateAction<string | null>>, token: string | null) => (event: React.ChangeEvent<HTMLInputElement>) => {
