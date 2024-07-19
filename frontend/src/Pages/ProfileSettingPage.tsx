@@ -135,47 +135,38 @@ function UserProfile(): React.ReactElement {
             fetchData();
         }
 
+        // scroll listener
+        const handleScroll = () => {
+
+            if (!profileRef.current || !serviceProviderRef.current || !dangerZoneRef.current) {
+                return;
+            }
+
+            // set breakpoint to determine which section we are in
+            const breakpoint = window.innerHeight * 0.4;
+
+            const profileRect = profileRef.current.getBoundingClientRect();
+            const serviceProviderRect = serviceProviderRef.current.getBoundingClientRect();
+            const dangerZoneRect = dangerZoneRef.current.getBoundingClientRect();
+
+
+            if (dangerZoneRect.top < breakpoint *1.2) {
+                setActiveSection('dangerZone');
+            } else if (profileRect.top <= breakpoint && profileRect.bottom > breakpoint) {
+                setActiveSection('profile');
+            } else if (serviceProviderRect.top <= breakpoint && serviceProviderRect.bottom > breakpoint) {
+                setActiveSection('serviceProvider');
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+        };
+
     }, [token, client_reference_id]);
 
-    // // scroll listener
-    // const handleScroll = () => {
-    //
-    //     if (!profileRef.current || !serviceProviderRef.current || !dangerZoneRef.current) {
-    //         return;
-    //     }
-    //
-    //     // set breakpoint to determine which section we are in
-    //     const breakpoint = window.innerHeight * 0.4;
-    //
-    //     const profileRect = profileRef.current.getBoundingClientRect();
-    //     const serviceProviderRect = serviceProviderRef.current.getBoundingClientRect();
-    //     const dangerZoneRect = dangerZoneRef.current.getBoundingClientRect();
-    //
-    //
-    //     if (dangerZoneRect.top < breakpoint) {
-    //         setActiveSection('dangerZone');
-    //     } else if (profileRect.top <= breakpoint && profileRect.bottom > breakpoint) {
-    //         setActiveSection('profile');
-    //     } else if (serviceProviderRect.top <= breakpoint && serviceProviderRect.bottom > breakpoint) {
-    //         setActiveSection('serviceProvider');
-    //     }
-    // };
-    //
-    // window.addEventListener('scroll', handleScroll);
-    //
-    // return () => {
-    //     window.removeEventListener('scroll', handleScroll);
-    // };
-
-    // if (loading) {
-    //     return (
-    //         <Container>
-    //             <Box sx={{display: 'flex', justifyContent: 'center', mt: 4}}>
-    //                 <CircularProgress/>
-    //             </Box>
-    //         </Container>
-    //     );
-    // }
 
     const [editMode, setEditMode] = useState<EditModeType>({
         firstName: false,
@@ -523,7 +514,7 @@ function UserProfile(): React.ReactElement {
                                     icon={<FileUploadIcon/>}
                                 />
 
-                                {defaultProfileImage !== profileImage && (
+                                {profileImage && defaultProfileImage !== profileImage && (
                                     <Button
                                         onClick={() => deleteProfileImage(token, setProfileImage)}
                                         variant="outlined"
