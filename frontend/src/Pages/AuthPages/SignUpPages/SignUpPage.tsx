@@ -49,9 +49,7 @@ const defaultTheme = createTheme({
 });
 
 export default function SignUp() {
-    const {registerUser} = useAuth();
     const location = useLocation();
-    const {from} = location.state || {from: {pathname: "/"}};
     const navigate = useNavigate();
     const {createAccountEmail} = useRecovery();
 
@@ -106,12 +104,6 @@ export default function SignUp() {
                 toast.error('Passwords do not match.');
                 return;
             }
-            const data: UserData = {
-                firstName: firstName,
-                lastName: lastName,
-                email: email,
-                password: password
-            };
             await createAccountEmail(email, firstName);
             navigate("/signup/otp", {
                 state: {

@@ -113,7 +113,7 @@ export default function EmailVerification() {
                         >
                             Verify Account
                         </Button>
-                        {isTimerVisible && timer > 0 && timer < 60 && (
+                        {isTimerVisible && timer > 0 && timer < 180 && (
                             <Typography component="p" variant="body2" align="center">
                                 Time left for OTP verification: {timer} seconds
                             </Typography>

@@ -30,16 +30,16 @@ interface RecoveryProviderProps {
 export const RecoveryProvider: React.FC<RecoveryProviderProps> = ({children}) => {
     const [email, setEmail] = useState<string>('');
     const [otp, setOtp] = useState<string>('');
-    const [timer, setTimer] = useState<number>(60);
+    const [timer, setTimer] = useState<number>(180);
 
     const startTimer = (onTimerEnd?: () => void) => {
-        setTimer(60);
+        setTimer(180);
         const interval = setInterval(() => {
             setTimer((prevTimer) => {
                 if (prevTimer <= 1) {
                     clearInterval(interval);
                     if (onTimerEnd) onTimerEnd(); // Execute the callback when the timer ends
-                    setTimer(60); // Optionally reset the timer to 60 seconds
+                    setTimer(180); // Optionally reset the timer to 180 seconds
                 }
                 return prevTimer - 1;
             });
@@ -47,7 +47,7 @@ export const RecoveryProvider: React.FC<RecoveryProviderProps> = ({children}) =>
     };
 
     const resetTimer = () => {
-        setTimer(60); // Reset timer to 60 seconds
+        setTimer(180); // Reset timer to 180 seconds
     };
 
     const generateOtp = () => {
