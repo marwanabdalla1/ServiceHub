@@ -124,7 +124,6 @@ export default function SignUp() {
                 return;
             }
 
-            // TODO: Add password validation
             if (!STRONG_PASSWORD_REGEX.test(password)) {
                 setPasswordError('Password does not meet the criteria.');
                 return;
