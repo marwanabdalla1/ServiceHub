@@ -22,7 +22,7 @@ const GenericRow: React.FC<GenericRowProps> = ({ item, isProvider, onViewDetails
     // if there is no corresponding timeslot to the request/job
         // (meaning it was either declined, canceled or the consumer needs to select new time),
         // we let the user know that the time is invalid
-    const displayedTime = item.timeslot ? formatDateTime(item.timeslot.end) : formatDateTime(item.appointmentEndTime) + " (invalid)"
+    const displayedTime = item.timeslot ? formatDateTime(item.timeslot.start) : formatDateTime(item.appointmentStartTime) + " (invalid)"
 
     const displayInfo = () => {
         if (isProvider) {
