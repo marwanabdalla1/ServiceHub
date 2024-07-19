@@ -264,6 +264,7 @@ function AddServicePage() {
                         <Box mb={4}>
                             <Autocomplete
                                 options={serviceTypes}
+                                disabled={isEditMode}
                                 getOptionLabel={(option) => option.title}
                                 value={formData.selectedService}
                                 onChange={(event, newValue) => handleChange('selectedService', newValue)}
