@@ -31,7 +31,7 @@ const ServiceRequestSchema: Schema = new Schema({
     appointmentEndTime: {type: Date, required: false},
 
     uploads: [{name: String, data: Buffer, contentType: String}],
-    comment: {type: String, required: true},
+    comment: {type: String, required: false},
     serviceFee: {type: Number, required: true},
     serviceOffering: {type: Schema.Types.ObjectId, ref: 'ServiceOffering', required: true},
     job: {type: Schema.Types.ObjectId, ref: 'Job', required: false},

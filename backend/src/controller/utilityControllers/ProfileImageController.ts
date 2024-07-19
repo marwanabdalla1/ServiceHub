@@ -3,7 +3,7 @@ import env from "../../util/validateEnv";
 import multer from "multer";
 import express, {RequestHandler} from "express";
 import Account from "../../models/account";
-import {MongoClient, GridFSBucket, ObjectId} from "mongodb";
+import {GridFSBucket, MongoClient, ObjectId} from "mongodb";
 
 interface MulterFile extends Express.Multer.File {
     id: ObjectId;
@@ -46,7 +46,14 @@ const upload = multer({storage});
  */
 export const uploadProfileImage: RequestHandler = async (req, res) => {
     try {
-        const userId = (req as any).user.userId;
+        let userId;
+
+        if (req.params.accountId) {
+            userId = req.params.accountId;
+        } else {
+            userId = (req as any).user.userId;
+        }
+
         const user = await Account.findById(userId);
 
         // Check if the user exists
@@ -66,7 +73,7 @@ export const uploadProfileImage: RequestHandler = async (req, res) => {
             }
 
             // Delete the previous profile image if it exists
-            if (user.get('profileImageId') != ""&& user.get('profileImageId') != null && user.get('profileImageId') != undefined) {
+            if (user.get('profileImageId') != "" && user.get('profileImageId') != null && user.get('profileImageId') != undefined) {
                 // console.log("Profile Image exists with ID: ", user.get('profileImageId'));
                 const _id = new ObjectId(user.get('profileImageId'));
                 bucket.delete(_id).then(() => {
@@ -111,7 +118,7 @@ async function getProfileImage(userId: string, res: express.Response) {
         });
     }
     try {
-        if (user.get('profileImageId') === ""|| user.get('profileImageId') === null || user.get('profileImageId') === undefined){
+        if (user.get('profileImageId') === "" || user.get('profileImageId') === null || user.get('profileImageId') === undefined) {
             // console.log("No profile image found for user: ", user.get('firstName'));
             return res.status(404).json({error: 'No profile image found for user'});
         }
@@ -170,7 +177,12 @@ export const getProfileImageByUserId: RequestHandler = async (req, res) => {
  */
 export const deleteProfileImage: RequestHandler = async (req, res) => {
     try {
-        const userId = (req as any).user.userId;
+        let userId;
+        if (req.params.accountId) {
+            userId = req.params.accountId;
+        } else {
+            userId = (req as any).user.userId;
+        }
         const user = await Account.findById(userId);
         if (!user) {
             return res.status(404).json({

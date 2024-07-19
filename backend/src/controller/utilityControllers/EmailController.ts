@@ -71,7 +71,7 @@ export const sendResetPasswordEmail = async (req: Request, res: Response): Promi
     const {otp, email} = req.body;
 
     try {
-        const account = await Account.findOne({email: email});
+        const account = await Account.findOne({email: email.toLowerCase()});
         if (!account) {
             res.status(400).json({
                 error: "User with this email does not exist"
@@ -106,7 +106,7 @@ export const sendCreateAccountEmail = async (req: Request, res: Response): Promi
     const {otp, email, firstName} = req.body;
 
     try {
-        const account = await Account.findOne({email: email});
+        const account = await Account.findOne({email: email.toLowerCase()});
         if (account) {
             res.status(400).json({
                 error: "User with this email already exists"
@@ -145,7 +145,7 @@ export const setNewPassword: RequestHandler = async (req, res) => {
         // Hash the user's password
         const hashedPassword = await bcrypt.hash(password, 10);
         const updates = {password: hashedPassword};
-        const updatedUser = await Account.findOneAndUpdate({email: email}, updates, {
+        const updatedUser = await Account.findOneAndUpdate({email: email.toLowerCase()}, updates, {
             new: true,
             upsert: true,
             strict: false

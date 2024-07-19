@@ -117,7 +117,6 @@ export const deleteProfileImage = async (token: string | null, setProfileImage: 
     if (!token) {
         console.error('No Auth token provided to delete profile image!');
         return;
-
     }
     await axios.delete(`/api/file/profileImage/`, {
         headers: {
@@ -162,3 +161,5 @@ export const handleProfileImageUploadByToken = async (image: File | null, token:
         console.error('Error uploading image:', error);
     }
 };
+
+

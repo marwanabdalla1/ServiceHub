@@ -11,7 +11,6 @@ export interface IAccount extends Document {
     description: string;
     location: string;
     postal: string;
-    country: string;
     isProvider: boolean;
     isPremium: boolean;
     isAdmin: boolean;
@@ -30,7 +29,6 @@ const accountSchema: Schema = new Schema({
     phoneNumber: { type: String, required: false },
     address: { type: String, required: false },
     postal: { type: String, required: false },
-    country: { type: String, required: false },
     stripeId: { type: String, required: false },
     profileImageId: String,
     description: String,

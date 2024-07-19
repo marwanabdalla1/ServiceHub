@@ -299,7 +299,7 @@ export const adminUserData: RequestHandler = async (req, res) => {
         }
         query.isAdmin = {$ne: true};
 
-        const accounts = await Account.find(query).select('email firstName lastName role createdOn');
+        const accounts = await Account.find(query).select('email firstName lastName role createdAt isProvider');
         res.status(200).json(accounts);
     } catch (error) {
         res.status(500).json({error: 'Failed to fetch users'});
