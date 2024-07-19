@@ -30,7 +30,7 @@ export const pay: RequestHandler = async (req, res) => {
       customer: customer.id,
       line_items: [
         {
-          price: 'price_1PWIQIChuUsrK8kGzhPiet6K', 
+          price: 'price_1PeB1CChuUsrK8kGDpmrWOhN', 
           quantity: 1,
         },
       ],
