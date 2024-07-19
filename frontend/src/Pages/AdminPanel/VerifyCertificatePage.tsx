@@ -34,7 +34,7 @@ export default function VerifyCertificates(): React.ReactElement {
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (!token || !account || !isAdmin()) {
+        if (!token || (account && !isAdmin())) {
             navigate('/unauthorized');
         }
     }, [token, account]);

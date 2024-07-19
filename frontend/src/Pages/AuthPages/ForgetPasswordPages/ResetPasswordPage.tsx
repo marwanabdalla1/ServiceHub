@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {PropsWithChildren} from 'react';
+import { useState } from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -9,11 +9,14 @@ import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
-import {createTheme, ThemeProvider} from '@mui/material/styles';
-import {blue} from "@mui/material/colors";
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { blue } from "@mui/material/colors";
 import axios from "axios";
-import {useNavigate} from "react-router-dom";
-import {useRecovery} from "../../../contexts/RecoveryContext";
+import { useNavigate } from "react-router-dom";
+import { useRecovery } from "../../../contexts/RecoveryContext";
+import {STRONG_PASSWORD_REGEX} from "../../../shared/Constants";
+import PasswordCriteria from "../../../components/PasswordCriteria";
+
 
 const defaultTheme = createTheme({
     palette: {
@@ -23,30 +26,29 @@ const defaultTheme = createTheme({
     },
 });
 
+
 export default function ResetPassword() {
     const navigate = useNavigate();
-    const {email} = useRecovery();
+    const { email } = useRecovery();
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [passwordError, setPasswordError] = useState('');
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        const data = new FormData(event.currentTarget);
-        const password = data.get('password');
-        const confirmPassword = data.get('confirmPassword');
-        const token = ""; // Get the token from the URL or state
 
         if (password !== confirmPassword) {
-            // Handle password mismatch
-            console.error("Passwords do not match");
+            setPasswordError('Passwords do not match');
             return;
         }
 
-        if (password === null || confirmPassword === null || password === "" || confirmPassword === "") {
-            console.error("Password is null");
+        if (!STRONG_PASSWORD_REGEX.test(password)) {
+            setPasswordError('Password does not meet the criteria');
             return;
         }
 
         try {
-            await axios.post('/api/forgetPassword/setNewPassword', {email: email, password: password}).then(
+            await axios.post('/api/forgetPassword/setNewPassword', { email, password }).then(
                 (res) => {
                     navigate('/forgetPassword/success');
                     console.log(res);
@@ -64,7 +66,7 @@ export default function ResetPassword() {
     return (
         <ThemeProvider theme={defaultTheme}>
             <Container component="main" maxWidth="xs">
-                <CssBaseline/>
+                <CssBaseline />
                 <Box
                     sx={{
                         marginTop: 8,
@@ -73,13 +75,13 @@ export default function ResetPassword() {
                         alignItems: 'center',
                     }}
                 >
-                    <Avatar sx={{bgcolor: 'primary.main'}}>
-                        <img src="/images/logo_short.png" alt="Logo" className="md:h-6"/>
+                    <Avatar sx={{ bgcolor: 'primary.main' }}>
+                        <img src="/images/logo_short.png" alt="Logo" className="md:h-6" />
                     </Avatar>
                     <Typography component="h1" variant="h5">
                         Reset Password
                     </Typography>
-                    <Box component="form" onSubmit={handleSubmit} noValidate sx={{mt: 1}}>
+                    <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
                         <TextField
                             margin="normal"
                             required
@@ -89,7 +91,12 @@ export default function ResetPassword() {
                             type="password"
                             id="password"
                             autoComplete="new-password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            error={Boolean(passwordError)}
+                            helperText={passwordError}
                         />
+                        <PasswordCriteria password={password} />
                         <TextField
                             margin="normal"
                             required
@@ -99,12 +106,16 @@ export default function ResetPassword() {
                             type="password"
                             id="confirmPassword"
                             autoComplete="new-password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            error={Boolean(passwordError)}
+                            helperText={passwordError}
                         />
                         <Button
                             type="submit"
                             fullWidth
                             variant="contained"
-                            sx={{mt: 3, mb: 2}}
+                            sx={{ mt: 3, mb: 2 }}
                         >
                             Reset Password
                         </Button>

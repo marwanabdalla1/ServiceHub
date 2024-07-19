@@ -53,7 +53,7 @@ const generateEmailTemplate = (firstName: string, otp: string, subject: string, 
               </span>
             </div>
             <br /><br />
-            Please note that this OTP will only be valid for 60 seconds.
+            Please note that this OTP will only be valid for 180 seconds.
             <br /><br />
             Please feel free to contact us in case of any issues. If you did not try to sign up this email, please reach out to our email 
             <a href="servicehub.seba22@gmail.com" style="color: #007bff;">servicehub.seba22@gmail.com</a>.
