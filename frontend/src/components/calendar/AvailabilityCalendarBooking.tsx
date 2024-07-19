@@ -145,13 +145,12 @@ function AvailabilityCalendarBooking({
 
 
     const handleNavigate = (date: Date) => {
-        // todo: uncomment!
-        // if (isBefore(date, new Date())) {
-        //     console.log('Cannot go back past today');
-        //     return; // Prevent navigation to past dates
-        // }
+        if (isBefore(date, new Date())) {
+            setClashDialogOpen({open: true, message: "Cannot go earlier than current week."})
+            return; // Prevent navigation to past dates
+        }
         if (isAfter(date, maxDate)) {
-            console.log('Cannot navigate beyond 3 months');
+            setClashDialogOpen({open: true, message: "Cannot go beyond 3 months in advance."})
             return; // Prevent navigation beyond 3 months
         }
         setCurrentDate(date);
@@ -169,12 +168,12 @@ function AvailabilityCalendarBooking({
             const startTime = new Date(start);
             let endTime = new Date(end);
 
-            // todo: uncomment!!
-            // if (startTime < now) {
-            //     setClashDialogOpen({open: true, message: "Cannot book a time in the past, please select another time."})
-            //     resetSelection()
-            //     return;
-            // }
+            if (startTime < now) {
+                setClashDialogOpen({open: true, message: "Cannot book a time in the past, please select another time."})
+                // reset the selected timeslot
+                setSelectedTimeSlot(null);
+                return;
+            }
 
             // Calculate the difference in minutes
             const durationInMinutes = (endTime.getTime() - startTime.getTime()) / (1000 * 60);

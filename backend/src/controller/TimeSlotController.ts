@@ -367,8 +367,7 @@ export const getAvailabilityByProviderId: RequestHandler = async (req, res, next
 
         // Fetch all future timeslots for the provider
         const timeslots: ITimeslot[] = await Timeslot.find({
-            // todo: uncomment
-            // end: { $gte: new Date() },
+            end: { $gte: new Date() },
             $or: providerIdConditions,
             isBooked: false,
         }).lean();

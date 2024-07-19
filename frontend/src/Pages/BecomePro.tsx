@@ -78,13 +78,7 @@ const BecomeProPage: React.FC = () => {
                     <h1 className="text-5xl font-bold mb-4">the next level</h1>
                     <div className="flex items-center mb-4">
                         <div className="flex flex-col items-center mr-4">
-                            <h3 className="text-2xl font-bold">400+</h3>
-                            <h3>Testimonials</h3>
-                        </div>
-                        <div className="border-l-2 border-gray-900 h-12 mx-4"></div>
-                        <div className="flex flex-col items-center">
-                            <h3 className="text-2xl font-bold">20+</h3>
-                            <h3>Pro Customers</h3>
+                            <h3 className="text-2xl font-bold">Only for €5/month!</h3>
                         </div>
                     </div>
                     <Typography style={{ marginRight: '10px' }}>
@@ -95,7 +89,7 @@ const BecomeProPage: React.FC = () => {
                     <BlackButton style={{ padding: '18px 18px', fontSize: '16px', marginTop: '16px', marginBottom: '16px' }} text="Join Now" onClick={handleJoinNow} />
                 </div>
                 <div className="md:mt-0 mr-0">
-                    <img src="/images/handshake.png" alt="Handshake" className="w-full h-full object-cover" />
+                    <img src="/images/handshake2.png" alt="Handshake" className="w-full h-full object-cover" />
                 </div>
             </div>
 

@@ -14,8 +14,9 @@ const FAQPage = () => {
             answer: "To become a service provider, you have two options: click the 'Provide a Service' button in the navigation bar if you haven't provided a service before, or go to your profile and click 'Add a Service' in the Service Provider Settings section."
         },
         {
-            question: "What does it mean to upgrate to Pro?",
-            answer: "By upgrading to Pro to make sure that your service offerings get more visibility, by appearing at the top of the search results."
+            question: "What does it mean to upgrate to Pro? What are the benefits?",
+            answer: "A provider can upgrade to Pro in order to gain more visibility for their service offerings. " + "\n" +
+                "Pro Members are prioritized in search results. No matter how users sort the results, the first few results on each page will be reserved for Pro members."
         },
         {
             question: "How do I book an appointment?",

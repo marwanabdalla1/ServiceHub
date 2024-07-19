@@ -139,8 +139,8 @@ const Navbar: React.FC<NavbarProps> = ({ toggleDrawer, onChange, onSearch, searc
                         )}
                         <div className='relative flex items-center' onClick={handleProfileMenuOpen}>
                             {isPremium && (
-                                <div className="absolute -top-4 right-0 transform translate-x-1/12">
-                                    <FontAwesomeIcon icon={faCrown} className="text-yellow-500" />
+                                <div className="absolute -top-4 right-1 transform ">
+                                    <FontAwesomeIcon icon={faCrown} className="text-yellow-500"/>
                                 </div>
                             )}
                             <CgProfile className="h-6 w-6" />
