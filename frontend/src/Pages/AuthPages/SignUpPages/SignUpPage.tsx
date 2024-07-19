@@ -30,9 +30,8 @@ import {isValidEmail, isValidName} from "../../../validators/AccountDataValidato
 import {IconButton, InputAdornment} from "@mui/material";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import Visibility from "@mui/icons-material/Visibility";
-import CheckIcon from '@mui/icons-material/Check';
-import CloseIcon from '@mui/icons-material/Close';
 import {STRONG_PASSWORD_REGEX} from "../../../shared/Constants";
+import PasswordCriteria from "../../../components/PasswordCriteria";
 
 interface UserData {
     firstName: string;
@@ -48,34 +47,6 @@ const defaultTheme = createTheme({
         },
     },
 });
-
-function PasswordCriteria({password}: { password: string }) {
-    const criteria = [
-        {label: 'At least 6 characters long', regex: /.{6,}/},
-        {label: 'At least 1 number (0-9)', regex: /\d/},
-        {label: 'At least 1 lowercase letter (a-z)', regex: /[a-z]/},
-        {label: 'At least 1 uppercase letter (A-Z)', regex: /[A-Z]/},
-        {label: 'At least 1 special symbol (!@#$%^&*?)', regex: /[!@#$%^&*? ]/},
-    ];
-    return (
-        <Box>
-            <Typography>Password should be:</Typography>
-            <ul>
-                {criteria.map((criterion, index) => (
-                    <li key={index} style={{display: 'flex', alignItems: 'center'}}>
-                        {criterion.regex.test(password) ? (
-                            // eslint-disable-next-line react/jsx-no-undef
-                            <CheckIcon style={{color: 'green'}}/>
-                        ) : (
-                            <CloseIcon style={{color: 'red'}}/>
-                        )}
-                        <Typography style={{marginLeft: '8px'}}>{criterion.label}</Typography>
-                    </li>
-                ))}
-            </ul>
-        </Box>
-    );
-}
 
 export default function SignUp() {
     const {registerUser} = useAuth();
